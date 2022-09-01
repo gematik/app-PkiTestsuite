@@ -1,0 +1,13 @@
+.idea/
+*.iml
+**/target
+*.log
+out/
+
+docs/configs/tuTestObjects/
+docs/dev/
+LICENSE_HEADER
+Pipeline.CI.Jenkinsfile
+Pipeline.DeployGitHub.Jenkinsfile
+Pipeline.InternalRelease.Jenkinsfile
+

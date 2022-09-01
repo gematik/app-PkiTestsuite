@@ -1,0 +1,23 @@
++	de.gematik.pki.pkits.testsuite.approval.ApprovalTestIT
+	checkInitialState                                  Check initial state
+	verifyConnectCertsInvalid                          Test use case with invalid certificates
+	verifyConnectCertsValid                            Test use case with valid certificates
+	verifyInvalidCerIdInOcspResponse                   Test invalid cert Id in OCSP Response
+	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP Response
+	verifyInvalidSignatureInOcspResponse               Test invalid signature in OCSP Response
+	verifyMissingCertHashInOcspResponse                Test missing CertHash in OCSP Response
+	verifyMissingOcspSignerInTsl                       Test missing OCSP signer in TSL
+	verifyOcspCertificateStatusRevokedAndUnknown       Test OCSP certificate status revoked and unknown
+	verifyOcspGracePeriod                              Test OCSP grace period
+	verifyOcspResponseNextUpdatePastOutOfTolerance     Test OCSP Response nextUpdate past out of tolerance
+	verifyOcspResponseNextUpdatePastWithinTolerance    Test OCSP Response NextUpdate past within tolerance
+	verifyOcspResponseProducedAtFutureOutOfTolerance   Test OCSP Response producedAt future out of tolerance
+	verifyOcspResponseProducedAtFutureWithinTolerance  Test OCSP Response producedAt future within tolerance
+	verifyOcspResponseProducedAtPastOutOfTolerance     Test OCSP Response producedAt past out of tolerance
+	verifyOcspResponseProducedAtPastWithinTolerance    Test OCSP Response producedAt past within tolerance
+	verifyOcspResponseResponderIdByName                Test OCSP Response with responder id byName
+	verifyOcspResponseThisUpdateFutureOutOfTolerance   Test OCSP Response thisUpdate future out of tolerance
+	verifyOcspResponseThisUpdateFutureWithinTolerance  Test OCSP Response thisUpdate future within tolerance
+	verifyOcspResponseTimeoutAndDelay                  Test OCSP Response with timeout and delay
+	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP response and response bytes being null or not null
+	verifyOcspResponseWithNullParameterInCertId        Test OCSP Response with Null Parameter in CertId

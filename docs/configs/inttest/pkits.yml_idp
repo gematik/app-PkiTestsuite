@@ -1,0 +1,36 @@
+client:
+  keystorePathValidCerts: "../testDataTemplates/certificates/rsa/valid"
+  keystorePathInvalidCerts: "../testDataTemplates/certificates/rsa/invalid"
+  keystorePassword: "00"
+testobject:
+  name: "Server 0815"
+  type: "IdpServer"
+  ipAddress: "127.0.0.1"
+  port: 8443
+  url: "http://gstopdh2.top.local:8571/discoveryDocument"
+  tslProcessingTimeSeconds: 3
+  ocspTimeoutSeconds: 10
+ocspresponder:
+  ipAddress: "127.0.0.1"
+  port: 8083
+  id: "OCSP Responder"
+  appPath: "../pkits-ocsp-responder/target/pkits-ocsp-responder-exec.jar"
+tslprovider:
+  ipAddress: "127.0.0.1"
+  port: 8084
+  id: "TSL Provider"
+  appPath: "../pkits-tsl-provider/target/pkits-tsl-provider-exec.jar"
+testsuiteParameter:
+  initialStateUseCase: true
+  ocspSettings:
+    requestsExpected: true
+    keystorePathOcsp: "../testDataTemplates/certificates/ecc/ocspKeystore"
+    signerPassword: "00"
+    gracePeriodSeconds: 5
+    timeoutDeltaMilliseconds: 1500
+  tslSettings:
+    initialStateTslImport: true
+    defaultTemplate: "../testDataTemplates/tsl/tslTemplateEcc.xml"
+    downloadIntervalSeconds: 5
+    signer: "../testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12"
+    signerPassword: "00"

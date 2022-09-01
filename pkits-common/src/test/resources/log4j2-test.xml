@@ -1,0 +1,40 @@
+<Configuration>
+
+  <Properties>
+    <Property name="l4j.dir">./logs</Property>
+    <Property name="l4j.level">trace</Property>
+    <Property name="l4j.append">false</Property>
+    <Property name="l4j.additivity">false</Property>
+    <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1}:%L - %msg%n</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="CONSOLE" target="SYSTEM_OUT">
+      <PatternLayout>
+        <Pattern>${LOG_PATTERN}</Pattern>
+      </PatternLayout>
+    </Console>
+
+    <File name="FILE" fileName="${l4j.dir}/pkits_common-test.log" append="${l4j.append}">
+      <PatternLayout>
+        <Pattern>${LOG_PATTERN}</Pattern>
+      </PatternLayout>
+    </File>
+  </Appenders>
+
+  <Loggers>
+    <Root level="error" additivity="{l4j.additivity}">
+      <AppenderRef ref="CONSOLE"/>
+    </Root>
+
+    <logger name="de.gematik.pki.gemlibpki" level="${l4j.level}" additivity="{l4j.additivity}">
+      <AppenderRef ref="CONSOLE"/>
+      <AppenderRef ref="FILE"/>
+    </logger>
+    <logger name="de.gematik.pki.pkits" level="${l4j.level}" additivity="{l4j.additivity}">
+      <AppenderRef ref="CONSOLE"/>
+      <AppenderRef ref="FILE"/>
+    </logger>
+  </Loggers>
+
+</Configuration>
