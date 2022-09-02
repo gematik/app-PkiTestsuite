@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
   </parent>
 
   <artifactId>pkits-coverage-reports</artifactId>

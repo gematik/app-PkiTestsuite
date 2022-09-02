@@ -28,15 +28,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class UseCase {
 
-  private static final TestobjectConfig TESTOBJECT_CONFIG =
+  private static final TestobjectConfig TEST_OBJECT_CONFIG =
       TestConfigManager.getTestsuiteConfig().getTestObject();
 
   public static int exec(final Path certPath) {
 
-    return switch (TESTOBJECT_CONFIG.getType()) {
+    return switch (TEST_OBJECT_CONFIG.getType()) {
       case "TlsServer" -> connectTls(
-          certPath, TestConfigManager.getTestsuiteConfig().getClient().getKeystorePassword());
-      case "IdpServer" -> connectIdp(
           certPath, TestConfigManager.getTestsuiteConfig().getClient().getKeystorePassword());
       case "Script" -> connectScript(
           certPath, TestConfigManager.getTestsuiteConfig().getClient().getKeystorePassword());
@@ -80,35 +78,23 @@ public final class UseCase {
             "java",
             "-jar",
             filename,
-            TESTOBJECT_CONFIG.getIpAddress(),
-            String.valueOf(TESTOBJECT_CONFIG.getPort()),
+            TEST_OBJECT_CONFIG.getIpAddress(),
+            String.valueOf(TEST_OBJECT_CONFIG.getPort()),
             certPath.toString(),
             password);
     log.info("Start tls connection with cert: {}", certPath);
     return runProcessBuild(processBuilder);
   }
 
-  private static int connectIdp(final Path certPath, final String password) {
-
-    final String filename = "../pkits-idp-client/target/idpClient.jar";
-    checkFile(filename);
-    final ProcessBuilder processBuilder =
-        new ProcessBuilder(
-            "java", "-jar", filename, TESTOBJECT_CONFIG.getUrl(), certPath.toString(), password);
-
-    log.info("Start idp connection with cert: {}", certPath);
-    return runProcessBuild(processBuilder);
-  }
-
   private static int connectScript(final Path certPath, final String password) {
 
-    final String filename = TESTOBJECT_CONFIG.getScriptPath();
+    final String filename = TEST_OBJECT_CONFIG.getScriptPath();
 
     checkFile(filename);
     final ProcessBuilder processBuilder =
         new ProcessBuilder(filename, certPath.toString(), password);
 
-    log.info("Run script {}", TESTOBJECT_CONFIG.getScriptPath());
+    log.info("Run script {}", TEST_OBJECT_CONFIG.getScriptPath());
     return runProcessBuild(processBuilder);
   }
 }

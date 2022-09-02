@@ -61,12 +61,6 @@ The TLS client module is started as an own process. It establishes a TLS handsha
 with a given certificate (see [test data section](./README.md#test-data)) and returns exit code "0"
 if the handshake was established or "1" if it was not.
 
-#### IDP Client
-
-The IDP client module is started as an own process. It queries an IDP server for a jwt access token
-using a given eGK certificate (see [test data section](./README.md#test-data)) and returns "0" if
-the token can be obtained correctly or "1" if it cannot. This module is still in development.
-
 #### Script
 
 A script (shell, batch or other executable program) is started as an own process. A script
@@ -148,5 +142,4 @@ and `Maven 3.6.3`. The test suite is developed with OpenJdk 17.
 
 - add tests of TUC_PKI_001
 - add PKI client tests
-- finish IDP client to enable PKI tests of an IDP server
 - add generation of test data on the fly

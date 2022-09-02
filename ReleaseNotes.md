@@ -2,6 +2,14 @@
 
 # Release notes PKI Test Suite
 
+## Release 0.2.1 (2022-09-02)
+
+### changed
+
+- remove IDP client (it will be separated from the test suite)
+- disable spotless:check during test suite execution (it will be used in development only)
+- repair broken images
+
 ## Release 0.2.0 (2022-09-01)
 
 ### added
