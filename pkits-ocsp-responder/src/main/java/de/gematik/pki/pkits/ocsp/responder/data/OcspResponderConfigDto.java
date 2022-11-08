@@ -29,6 +29,7 @@ import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.UnknownStatus;
@@ -55,7 +56,10 @@ public class OcspResponderConfigDto implements Serializable {
 
   @Builder.Default private final int thisUpdateDeltaMilliseconds = 0;
   @Builder.Default private final int producedAtDeltaMilliseconds = 0;
-  @Builder.Default private final int nextUpdateDeltaMilliseconds = 0;
+
+  /** if nextUpdateDeltaMilliseconds is null, then nextUpdate is set to null */
+  @Builder.Default private final Integer nextUpdateDeltaMilliseconds = 0;
+
   @Builder.Default private final boolean withNullParameterHashAlgoOfCertId = false;
 
   // CertificateStatus is not serializable: for this reason we have to use
@@ -75,7 +79,7 @@ public class OcspResponderConfigDto implements Serializable {
     return certificateStatus.getAsCertificateStatus();
   }
 
-  private enum CustomCertificateStatusType {
+  public enum CustomCertificateStatusType {
     GOOD,
     UNKNOWN,
     REVOKED
@@ -110,6 +114,22 @@ public class OcspResponderConfigDto implements Serializable {
     public static CustomCertificateStatusDto createRevoked(
         @NonNull final ZonedDateTime revokeDate, final int revokeReason) {
       return new CustomCertificateStatusDto(revokeDate, revokeReason);
+    }
+
+    public static CustomCertificateStatusDto create(
+        final CustomCertificateStatusType customCertificateStatusType) {
+
+      switch (customCertificateStatusType) {
+        case UNKNOWN -> {
+          return createUnknown();
+        }
+        case REVOKED -> {
+          return createRevoked(ZonedDateTime.now(), CRLReason.aACompromise);
+        }
+        default -> {
+          return createGood();
+        }
+      }
     }
 
     public boolean isGood() {

@@ -16,28 +16,19 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl;
 
-import static de.gematik.pki.pkits.testsuite.common.TestsuiteConstants.TSL_SEQNR_FILE_PATH;
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.TSL_SEQNR_FILE_PATH;
 
-import de.gematik.pki.pkits.testsuite.exceptions.TestsuiteException;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.io.IOException;
 import java.nio.file.Files;
 import lombok.Getter;
 
 public final class TslSequenceNr {
 
-  @Getter private int currentNrInTestobject = 1;
-  @Getter private int expectedNrInTestobject = 1;
+  @Getter private int currentNrInTestObject = 1;
+  @Getter private int expectedNrInTestObject = 1;
 
   private static TslSequenceNr instance;
-
-  private TslSequenceNr() {
-    assignCurrentNrInTestobject();
-  }
-
-  public void setExpectedNrInTestobject(final int offeredSeqNr) throws IOException {
-    expectedNrInTestobject = offeredSeqNr;
-    Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(offeredSeqNr));
-  }
 
   public static TslSequenceNr getInstance() {
     if (instance == null) {
@@ -46,33 +37,42 @@ public final class TslSequenceNr {
     return instance;
   }
 
-  public TslSequenceNr assignCurrentNrInTestobject() {
-    if (Files.exists(TSL_SEQNR_FILE_PATH)) {
-      readTslSeqNrFromFile();
-    } else {
-      writeTslSeqNrToFile(currentNrInTestobject);
-    }
-    return instance;
-  }
-
-  public void updateCurrentNrInTestobject(final int seqNr) {
-    writeTslSeqNrToFile(seqNr);
-  }
-
-  private void writeTslSeqNrToFile(final int seqNr) {
-    try {
-      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(seqNr));
-      this.currentNrInTestobject = seqNr;
-    } catch (final IOException e) {
-      throw new TestsuiteException("Could not write TslSeqNr to file.", e);
-    }
+  private TslSequenceNr() {
+    initializeCurrentTslSeqNr();
   }
 
   private void readTslSeqNrFromFile() {
     try {
-      this.currentNrInTestobject = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
+      this.currentNrInTestObject = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
     } catch (final IOException e) {
-      throw new TestsuiteException("Could not read TslSeqNr from file.", e);
+      throw new TestSuiteException("Could not read TslSeqNr from file.", e);
     }
+  }
+
+  public TslSequenceNr initializeCurrentTslSeqNr() {
+    if (Files.exists(TSL_SEQNR_FILE_PATH)) {
+      readTslSeqNrFromFile();
+    } else {
+      saveCurrentTestObjectSeqNr(currentNrInTestObject);
+    }
+    return instance;
+  }
+
+  public void setExpectedNrInTestObject(final int offeredSeqNr) throws IOException {
+    expectedNrInTestObject = offeredSeqNr;
+    Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(offeredSeqNr));
+  }
+
+  public void saveCurrentTestObjectSeqNr(final int seqNr) {
+    try {
+      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(seqNr));
+      this.currentNrInTestObject = seqNr;
+    } catch (final IOException e) {
+      throw new TestSuiteException("Could not write TslSeqNr to file.", e);
+    }
+  }
+
+  public int getNextTslSeqNr() {
+    return getCurrentNrInTestObject() + 1;
   }
 }

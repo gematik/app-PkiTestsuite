@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -41,14 +42,20 @@ public final class TslProviderManager {
     final TslInfoRequestDto tslInfoRequest =
         new TslInfoRequestDto(0, HistoryDeleteOption.DELETE_FULL_HISTORY);
     sendInfoRequest(tslProvUri, tslInfoRequest);
+    log.info("TslHistory cleared, at {}", tslProvUri);
   }
 
-  public static void configure(final String uri, final TslProviderConfigDto tslProviderConfigDto) {
+  public static void configure(
+      @NonNull final String uri, final TslProviderConfigDto tslProviderConfigDto) {
     final String configUri = uri + WEBSERVER_CONFIG_ENDPOINT;
     final TslConfigRequestDto configReq =
         new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfigDto);
     final String jsonContent = PkitsCommonUtils.createJsonContent(configReq);
     JsonTransceiver.sendJsonViaHttp(configUri, jsonContent);
+  }
+
+  public static void clear(@NonNull final String uri) {
+    configure(uri, null);
   }
 
   public static List<TslRequestHistoryEntryDto> getTslRequestHistoryPart(
@@ -61,8 +68,9 @@ public final class TslProviderManager {
   private static List<TslRequestHistoryEntryDto> sendInfoRequest(
       final String uri, final TslInfoRequestDto tslInfoRequestDto) {
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslInfoRequestDto);
-    final String responseBodyAsJson =
-        JsonTransceiver.txRxJsonViaHttp(uri + WEBSERVER_INFO_ENDPOINT, jsonContent);
+    final String url = uri + WEBSERVER_INFO_ENDPOINT;
+    log.info("sendInfoRequest at {}", url);
+    final String responseBodyAsJson = JsonTransceiver.txRxJsonViaHttp(url, jsonContent);
     log.debug("JsonTransceiver, responseBodyAsJson: {}", responseBodyAsJson);
     if (responseBodyAsJson.isEmpty()) {
       return Collections.emptyList();

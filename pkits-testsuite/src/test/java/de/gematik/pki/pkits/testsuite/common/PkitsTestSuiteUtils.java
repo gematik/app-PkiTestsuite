@@ -18,7 +18,7 @@ package de.gematik.pki.pkits.testsuite.common;
 
 import static org.awaitility.Awaitility.await;
 
-import de.gematik.pki.pkits.testsuite.exceptions.TestsuiteException;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.awaitility.core.ConditionTimeoutException;
 
 @Slf4j
-public class PkitsTestsuiteUtils {
+public class PkitsTestSuiteUtils {
 
   public static void waitForEvent(
       final String name, final long timeoutSecs, final Callable<Boolean> eventChecker) {
@@ -56,10 +56,12 @@ public class PkitsTestsuiteUtils {
           .pollInterval(Duration.ofSeconds(pollIntervalSecs))
           .until(eventChecker);
     } catch (final ConditionTimeoutException e) {
-      throw new TestsuiteException("Timeout for event \"" + name + "\"", e);
+      final String message = "Timeout for event \"%s\"".formatted(name);
+      log.error(message, e);
+      throw new TestSuiteException(message, e);
     }
     final ZonedDateTime zdtEnd = ZonedDateTime.now();
-    log.debug(
+    log.info(
         "Event \"{}\" occurred after: {} seconds",
         name,
         ChronoUnit.SECONDS.between(zdtStart, zdtEnd));
@@ -73,7 +75,7 @@ public class PkitsTestsuiteUtils {
     if (Files.isDirectory(p)) {
       return p;
     } else {
-      throw new TestsuiteException("Path: " + aPath + " is not valid");
+      throw new TestSuiteException("Path: " + aPath + " is not valid");
     }
   }
 }

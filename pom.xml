@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.3</version>
+    <version>2.7.5</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pkits-global</artifactId>
-  <version>0.2.1</version>
+  <version>0.3.0</version>
   <packaging>pom</packaging>
   <name>PkiTs</name>
   <description>Uebergreifende Java PKI Testsuite</description>
@@ -70,18 +70,20 @@
     <maven.compiler.encoding>${project.build.sourceEncoding}</maven.compiler.encoding>
 
     <!-- dependencies -->
-    <version.unirest-java>3.13.10</version.unirest-java>
+    <version.ardikars.pcap>1.4.2</version.ardikars.pcap>
     <version.assertj-core>3.23.1</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
-    <version.bouncycastle>1.71</version.bouncycastle>
-    <version.gemLibPki>0.9.2</version.gemLibPki>
-    <version.jackson>2.13.3</version.jackson>
+    <version.bouncycastle>1.72</version.bouncycastle>
+    <version.commons-compress>1.21</version.commons-compress>
+    <version.gemLibPki>0.9.4</version.gemLibPki>
+    <version.jackson>2.13.4</version.jackson>
     <version.junit-jupiter>5.9.0</version.junit-jupiter>
-    <version.log4j2>2.18.0</version.log4j2>
+    <version.log4j2>2.19.0</version.log4j2>
     <version.lombok>1.18.24</version.lombok>
+    <version.unirest-java>3.13.11</version.unirest-java>
 
     <!--  plugins -->
-    <version.dependency-check-maven>7.1.2</version.dependency-check-maven>
+    <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
     <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
     <version.maven-assembly-plugin>3.3.0</version.maven-assembly-plugin>
     <version.maven-clean-plugin>3.2.0</version.maven-clean-plugin>
@@ -135,7 +137,7 @@
         <version>${version.bouncycastle}</version>
       </dependency>
       <dependency>
-        <groupId>de.gematik.pki.gemlibpki</groupId>
+        <groupId>de.gematik.pki</groupId>
         <artifactId>gemLibPki</artifactId>
         <version>${version.gemLibPki}</version>
       </dependency>
@@ -153,6 +155,11 @@
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-yaml</artifactId>
         <version>${version.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>${version.commons-compress}</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -234,7 +241,16 @@
         <artifactId>unirest-java</artifactId>
         <version>${version.unirest-java}</version>
       </dependency>
+
+      <dependency>
+        <groupId>com.ardikars.pcap</groupId>
+        <artifactId>pcap</artifactId>
+        <version>${version.ardikars.pcap}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
+
   </dependencyManagement>
 
   <build>
@@ -253,10 +269,31 @@
             <skip>true</skip>
           </configuration>
         </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${version.maven-assembly-plugin}</version>
+          <configuration>
+            <descriptors>
+              <descriptor>../assembly.xml</descriptor>
+            </descriptors>
+            <appendAssemblyId>false</appendAssemblyId>
+          </configuration>
+          <executions>
+            <execution>
+              <id>make-assembly</id>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <phase>package</phase>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
 
+    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
@@ -415,6 +452,7 @@
             </sortPom>
           </pom>
           <java>
+            <toggleOffOn/>
             <googleJavaFormat>
               <version>${version.spotless.google-java-format}</version>
               <style>GOOGLE</style>

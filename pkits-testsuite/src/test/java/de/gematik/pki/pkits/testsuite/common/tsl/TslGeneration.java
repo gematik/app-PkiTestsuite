@@ -64,6 +64,7 @@ public abstract class TslGeneration {
     }
 
     tslT.setId(TslModifier.generateTslId(tslMod.getSequenceNr(), tslMod.getIssueDate()));
+    // TODO count number of modified entries and log.debug them
     TslModifier.modifySequenceNr(tslT, tslMod.getSequenceNr());
     TslModifier.modifySspForCAsOfTsp(tslT, tslMod.getTspName(), tslMod.getNewSsp());
     TslModifier.modifyTslDownloadUrlPrimary(tslT, tslMod.getTslDownloadUrlPrimary());

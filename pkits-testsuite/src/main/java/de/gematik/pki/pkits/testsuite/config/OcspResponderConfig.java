@@ -21,8 +21,25 @@ import lombok.Getter;
 @Getter
 public class OcspResponderConfig {
 
+  @ParameterDescription(
+      withDefault = false,
+      description =
+          "FQDN or IP address where the OCSP responder is running. This will be used as the"
+              + " ServiceSupplyPoint in the TSLs.")
+  String ipAddressOrFqdn;
+
+  @ParameterDescription(
+      withDefault = false,
+      description = "Port where the OCSP responder is listening.")
   int port;
-  String ipAddress;
-  String id;
-  String appPath;
+
+  @ParameterDescription(
+      withDefault = true,
+      description = "Name of the OCSP responder for better identification in log files.")
+  String id = "OCSP Responder";
+
+  @ParameterDescription(
+      withDefault = true,
+      description = "Path to the OCSP responder jar which should be started during tests.")
+  String appPath = "../pkits-ocsp-responder/target/pkits-ocsp-responder-exec.jar";
 }

@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.testsuite.exceptions;
+package de.gematik.pki.pkits.testsuite.config;
 
-import java.io.Serial;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-/** Exception thrown by the Testsuite */
-public class TestsuiteException extends RuntimeException {
+@Retention(RetentionPolicy.RUNTIME)
+@Repeatable(Afos.class)
+public @interface Afo {
+  String afoId();
 
-  @Serial private static final long serialVersionUID = -1982505986813389162L;
-
-  public TestsuiteException(final String message, final Exception e) {
-    super(message, e);
-  }
-
-  public TestsuiteException(final String message) {
-    super(message);
-  }
+  String description();
 }

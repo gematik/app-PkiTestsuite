@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.2.1</version>
+    <version>0.3.0</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
@@ -17,17 +17,23 @@
     <version.httpclient>4.5.13</version.httpclient>
     <version.jakarta.xml.bind-api>4.0.0</version.jakarta.xml.bind-api>
     <version.jaxb-runtime>4.0.0</version.jaxb-runtime>
-    <version.snakeyaml>1.30</version.snakeyaml>
+    <version.snakeyaml>1.31</version.snakeyaml>
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
     <version.maven-surefire-report-plugin>3.0.0-M7</version.maven-surefire-report-plugin>
+    <version.maven-pdf-plugin>1.6.1</version.maven-pdf-plugin>
   </properties>
 
   <dependencies>
 
     <dependency>
-      <groupId>de.gematik.pki.gemlibpki</groupId>
+      <groupId>de.gematik.pki</groupId>
       <artifactId>gemLibPki</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>de.gematik.pki.pkits</groupId>
+      <artifactId>pkits-tls-client</artifactId>
     </dependency>
 
     <dependency>
@@ -156,6 +162,16 @@
       <artifactId>unirest-java</artifactId>
       <version>${version.unirest-java}</version>
     </dependency>
+    <dependency>
+      <groupId>com.ardikars.pcap</groupId>
+      <artifactId>pcap-jdk7</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -259,10 +275,38 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pdf-plugin</artifactId>
+        <version>${version.maven-pdf-plugin}</version>
+        <executions>
+          <execution>
+            <id>pdf</id>
+            <goals>
+              <goal>pdf</goal>
+            </goals>
+            <phase>site</phase>
+            <configuration>
+              <outputDirectory>../out/testreport/</outputDirectory>
+              <includeReports>true</includeReports>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>${version.maven-surefire-report-plugin}</version>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <profiles>
     <profile>

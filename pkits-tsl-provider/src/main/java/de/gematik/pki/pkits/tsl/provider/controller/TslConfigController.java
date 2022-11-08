@@ -21,6 +21,7 @@ import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOI
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
+import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TslConfigController {
 
   private final TslConfigHolder tslConfigHolder;
+  private final TslRequestHistory tslRequestHistory;
 
   @PostMapping(value = WEBSERVER_CONFIG_ENDPOINT)
   public void tslConfig(final HttpServletRequest request) throws IOException {
@@ -41,12 +43,14 @@ public class TslConfigController {
     final TslConfigRequestDto tslConfigRequest =
         new ObjectMapper().readValue(request.getInputStream(), TslConfigRequestDto.class);
     processConfigurationRequest(tslConfigRequest);
+    log.info("TSL ConfigurationRequest processed (and history cleared).");
   }
 
   private void processConfigurationRequest(final TslConfigRequestDto configRequest) {
     log.info("TslProviderConfigDto: {}", configRequest);
     if (bearerTokenIsValid(configRequest.getBearerToken())) {
       tslConfigHolder.setTslProviderConfigDto(configRequest.getTslProviderConfigDto());
+      tslRequestHistory.deleteAll();
     } else {
       log.info(
           "Invalid bearer token received: {}, expected: {}",

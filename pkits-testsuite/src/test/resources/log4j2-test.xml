@@ -31,7 +31,7 @@
       <AppenderRef ref="CONSOLE"/>
       <AppenderRef ref="FILE"/>
     </logger>
-    <logger name="de.gematik.pki.pkits.testsuite" level="${l4j.level}" additivity="{l4j.additivity}">
+    <logger name="de.gematik.pki.pkits" level="${l4j.level}" additivity="{l4j.additivity}">
       <AppenderRef ref="CONSOLE"/>
       <AppenderRef ref="FILE"/>
     </logger>

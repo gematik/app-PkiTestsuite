@@ -16,20 +16,20 @@
 
 package de.gematik.pki.pkits.testsuite.unittests;
 
-import static de.gematik.pki.pkits.testsuite.common.PkitsTestsuiteUtils.waitForEvent;
+import static de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils.waitForEvent;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import de.gematik.pki.pkits.testsuite.exceptions.TestsuiteException;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class PkitsTestsuiteUtilsTest {
+class PkitsTestSuiteUtilsTest {
 
   static int eventCounter = 0;
 
@@ -56,7 +56,7 @@ class PkitsTestsuiteUtilsTest {
   @Test
   void waitForEventTimeout() {
     assertThatThrownBy(() -> waitForEvent("hit number", 2, hitNumber(13)))
-        .isInstanceOf(TestsuiteException.class);
+        .isInstanceOf(TestSuiteException.class);
   }
 
   @Test

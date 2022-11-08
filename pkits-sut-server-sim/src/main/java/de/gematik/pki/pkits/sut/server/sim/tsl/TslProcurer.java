@@ -19,6 +19,7 @@ package de.gematik.pki.pkits.sut.server.sim.tsl;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 
 import de.gematik.pki.gemlibpki.exception.GemPkiException;
+import de.gematik.pki.gemlibpki.exception.GemPkiRuntimeException;
 import de.gematik.pki.gemlibpki.ocsp.OcspRespCache;
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
 import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
@@ -35,33 +36,31 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class TslProcurer {
 
   private final TslProcurerConfig tslProcurerConfig;
   private ScheduledExecutorService scheduledExecutorServiceFetchTsl;
   private Tsl theTsl;
 
-  @Autowired private OcspConfig ocspConfig;
-  private OcspRespCache ocspRespCache;
+  private final OcspConfig ocspConfig;
+  private final OcspRespCache ocspRespCache;
 
-  @PostConstruct
-  public void init() {
-    ocspRespCache = new OcspRespCache(ocspConfig.getOcspGracePeriodSeconds());
+  public TslProcurer(final TslProcurerConfig tslProcurerConfig, final OcspConfig ocspConfig) {
+    this.tslProcurerConfig = tslProcurerConfig;
+    this.ocspConfig = ocspConfig;
+    this.ocspRespCache = new OcspRespCache(this.ocspConfig.getOcspGracePeriodSeconds());
+    startTslDownloadProcess();
   }
 
   private static class Tsl {
@@ -78,11 +77,6 @@ public class TslProcurer {
       trustStatusListType = TslConverter.bytesToTsl(tslBytes).orElseThrow();
       this.seqNr = TslReader.getSequenceNumber(trustStatusListType);
     }
-  }
-
-  @PostConstruct
-  private void postConstruct() {
-    startTslDownloadProcess();
   }
 
   public TslInformationProvider getTslInfoProv() {
@@ -107,28 +101,42 @@ public class TslProcurer {
   }
 
   private void processTslDownloadHttpResponse() {
-    final Optional<HttpResponse<byte[]>> responseDownload = downloadTslIfRequired();
-    if (responseDownload.isPresent() && responseDownload.get().getStatus() == HttpStatus.SC_OK) {
-      final byte[] tslBytesRx = responseDownload.get().getBody();
+
+    final Optional<HttpResponse<byte[]>> responseDownloadOpt = downloadTslIfRequired();
+
+    if (responseDownloadOpt.isPresent()
+        && (responseDownloadOpt.get().getStatus() == HttpStatus.SC_OK)) {
+
+      final byte[] tslBytesRx = responseDownloadOpt.get().getBody();
       log.info("TSL download successful. ({} bytes)", tslBytesRx.length);
+
       final Tsl rxTsl = new Tsl(calculateSha256Hex(tslBytesRx), tslBytesRx);
       initializeEmptyTrustStore(rxTsl);
       processReceivedTsl(rxTsl);
+
     } else {
-      log.info(
-          "No (new) TSL available. Retrying with next interval in {}s ",
-          tslProcurerConfig.getDownloadInterval());
+      log.info("Retry TSL download in {} seconds", tslProcurerConfig.getDownloadInterval());
     }
   }
 
   private Optional<HttpResponse<byte[]>> downloadTslIfRequired() {
     final String url = getUrl();
+
     try {
-      if (theTsl == null || isNewTslAvailable(theTsl.tslHash, makeHashUrl(url))) {
-        log.info("Downloading TSL at: {}", url);
+      if (theTsl == null) {
+        log.info("Downloading initial TSL at: {}", url);
+        return Optional.of(Unirest.get(url).asBytes());
+      }
+
+      final String hashUrl = makeHashUrl(url);
+      final boolean isNewTslAvailable = isNewTslAvailable(theTsl.tslHash, hashUrl);
+
+      if (isNewTslAvailable) {
+        log.info("Downloading new TSL at: {}", url);
         return Optional.of(Unirest.get(url).asBytes());
       } else {
-        log.info("No TSL download required due to same hash value: {}", theTsl.tslHash);
+        log.info(
+            "No TSL download required due to same hash value: {}, url {}", theTsl.tslHash, hashUrl);
       }
     } catch (final UnirestException e) {
       log.info("Downloading TSL failed. {}", e.getMessage());
@@ -175,6 +183,13 @@ public class TslProcurer {
             updateTruststore(rxTsl);
           } catch (final GemPkiException e) {
             log.info("TUC_PKI_001 failed. TSL rejected.", e);
+          } catch (final GemPkiRuntimeException e) {
+            // new GemPkiRuntimeException("Keine OCSP Response erhalten.") is thrown
+            // when withResponseBytes=false
+            log.info("TUC_PKI_001 failed. TSL rejected.");
+          } catch (final Exception e) {
+            log.info("WARNING: Unexpected exception happened!", e);
+            log.info("TUC_PKI_001 failed. TSL rejected.");
           }
         });
   }

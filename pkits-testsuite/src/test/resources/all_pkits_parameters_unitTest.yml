@@ -1,0 +1,46 @@
+client:
+  keystorePathValidCerts: "client.keystorePathValidCerts"
+  keystorePathAlternativeCerts: "client.keystorePathAlternativeCerts"
+  keystorePathInvalidCerts: "client.keystorePathInvalidCerts"
+  keystorePassword: "client.keystorePassword"
+
+testObject:
+  name: "testObject.name"
+  type: "testObject.type"
+  ipAddressOrFqdn: "testObject.ipAddressOrFqdn"
+  port: -99
+  scriptPath: "testObject.scriptPath"
+  tslDownloadIntervalSeconds: -100
+  tslProcessingTimeSeconds: -200
+  ocspGracePeriodSeconds: -300
+  ocspTimeoutSeconds: -400
+
+ocspResponder:
+  ipAddressOrFqdn: "ocspResponder.ipAddressOrFqdn"
+  port: -1000
+  id: "ocspResponder.id"
+  appPath: "ocspResponder.appPath"
+
+tslProvider:
+  ipAddressOrFqdn: "tslProvider.ipAddressOrFqdn"
+  port: -2000
+  id: "tslProvider.id"
+  appPath: "tslProvider.appPath"
+
+testSuiteParameter:
+  initialStateUseCase: false
+  captureNetworkTraffic: true
+  captureInterface: "testSuiteParameter.captureInterface"
+
+  ocspSettings:
+    requestsExpected: false
+    keystorePathOcsp: "testSuiteParameter.ocspSettings.keystorePathOcsp"
+    signerPassword: "testSuiteParameter.ocspSettings.signerPassword"
+    timeoutDeltaMilliseconds: -3000
+
+  tslSettings:
+    initialStateTslImport: false
+    defaultTemplate: "testSuiteParameter.tslSettings.defaultTemplate"
+    alternativeTemplate: "testSuiteParameter.tslSettings.alternativeTemplate"
+    signer: "testSuiteParameter.tslSettings.signer"
+    signerPassword: "testSuiteParameter.tslSettings.signerPassword"

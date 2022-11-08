@@ -30,6 +30,10 @@ public class OcspResponseConfigHolder {
   private String bearerToken;
   private OcspResponderConfigDto ocspResponderConfigDto;
 
+  public boolean isConfigured() {
+    return ocspResponderConfigDto != null;
+  }
+
   public boolean isCertSerialNrConfigured(final BigInteger certSerialNr) {
     log.debug("Requested  certSerialNr: {}", certSerialNr);
     log.debug("Configured certSerialNr: {}", ocspResponderConfigDto.getEeCert().getSerialNumber());

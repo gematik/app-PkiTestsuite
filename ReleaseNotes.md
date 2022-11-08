@@ -2,25 +2,29 @@
 
 # Release notes PKI Test Suite
 
+## Release 0.3.0 (2022-11-08)
+
+- add test cases in context of tsl signer certificate ocsp status verification
+- separate test cases in own classes by context (ocsp tests, tsl tests, tsl signer tests,
+  certificate tests)
+- add network sniffing to pcap files
+- add documentation of all testsuite parameters in one
+  file: [all parameters](./docs/all_pkits_parameters.yml)
+- annotate test cases with corresponding AFOs
+- code optimizations
+
 ## Release 0.2.1 (2022-09-02)
 
-### changed
-
-- remove IDP client (it will be separated from the test suite)
 - disable spotless:check during test suite execution (it will be used in development only)
 - repair broken images
+- IDP client (it will be separated from the test suite)
 
 ## Release 0.2.0 (2022-09-01)
-
-### added
 
 - tests for TUC_PKI_006 OCSP response validation
 - ./checkInitialState.sh to make a quick smoke test
 - selection of test cases to be executed
 - introduce use case api
-
-### changed
-
 - use bouncy castle provider for usage of ecc brainpool curves during tsl handshakes
 - use google java code format
 - raise line coverage

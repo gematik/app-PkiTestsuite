@@ -16,6 +16,8 @@
 
 package de.gematik.pki.pkits.tls.client;
 
+import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.utils.P12Reader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -27,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -47,7 +50,6 @@ public class TlsConnection {
   private final TlsSettings tlsSettings;
 
   static {
-    System.setProperty("jdk.tls.namedGroups", "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1");
     Security.setProperty("ssl.KeyManagerFactory.algorithm", "PKIX");
     Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     Security.insertProviderAt(new BouncyCastleProvider(), 1);
@@ -68,15 +70,40 @@ public class TlsConnection {
       final int serverPort)
       throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException,
           UnrecoverableKeyException, KeyManagementException, TlsClientException {
+
     final SSLContext sslContextClient =
         new SSLContextProvider().createSSLContext(clientKeystorePath, clientKeystorePassw);
-    final KeyManagerFactory kmf =
-        KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+    final P12Container p12Container =
+        P12Reader.getContentFromP12(clientKeystorePath, clientKeystorePassw);
+
+    final String algorithm = p12Container.getCertificate().getPublicKey().getAlgorithm();
+
+    final String kfAlgorithm;
+    final String[] ciphersSuites;
+    if ("EC".equalsIgnoreCase(algorithm)) {
+      System.setProperty(
+          "jdk.tls.namedGroups", "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1");
+      ciphersSuites = tlsSettings.getEcCiphersSuites();
+      kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
+
+    } else if ("RSA".equalsIgnoreCase(algorithm)) {
+      ciphersSuites = tlsSettings.getRsaCiphersSuites();
+      System.setProperty("jdk.tls.namedGroups", "ffdhe2048");
+      kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
+    } else {
+      throw new TlsClientException("Algorithm %s is not supported.".formatted(algorithm));
+    }
+
+    final KeyManagerFactory kmf = KeyManagerFactory.getInstance(kfAlgorithm);
+
     final KeyStore ks = KeyStore.getInstance("PKCS12");
     ks.load(Files.newInputStream(clientKeystorePath), clientKeystorePassw.toCharArray());
 
     kmf.init(ks, clientKeystorePassw.toCharArray());
     sslContextClient.init(kmf.getKeyManagers(), new TrustManager[] {new BlindTrustManager()}, null);
+
+    log.info("algorithm: {}, ciphersSuites: {}", algorithm, Arrays.asList(ciphersSuites));
 
     try (final SSLSocket clientSSLSocket =
         (SSLSocket) sslContextClient.getSocketFactory().createSocket(serverAddress, serverPort)) {
@@ -87,7 +114,8 @@ public class TlsConnection {
           serverPort);
 
       final SSLParameters sslParameters = clientSSLSocket.getSSLParameters();
-      sslParameters.setCipherSuites(tlsSettings.getCiphersSuites());
+      sslParameters.setCipherSuites(ciphersSuites);
+
       clientSSLSocket.setSSLParameters(sslParameters);
       clientSSLSocket.setEnabledProtocols(tlsSettings.getEnabledProtocols());
       clientSSLSocket.setSoTimeout(tlsSettings.getSocketTimeoutMsec());

@@ -16,28 +16,17 @@
 
 package de.gematik.pki.pkits.testsuite.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.gematik.pki.pkits.common.PkiCommonException;
-import de.gematik.pki.pkits.testsuite.common.TestsuiteConstants;
-import java.io.IOException;
+import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TestConfigManager {
 
-  private static TestsuiteConfig instance;
+  private static TestSuiteConfig instance;
 
-  public static TestsuiteConfig getTestsuiteConfig() {
+  public static TestSuiteConfig getTestSuiteConfig() {
     if (instance == null) {
-      final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-      try {
-        instance =
-            yamlMapper.readValue(
-                TestsuiteConstants.PKITS_CFG_FILE_PATH.toFile(), TestsuiteConfig.class);
-      } catch (final IOException e) {
-        throw new PkiCommonException("Cannot process yamlPath", e);
-      }
+      instance = TestSuiteConfig.fromYaml(TestSuiteConstants.PKITS_CFG_FILE_PATH);
     }
     return instance;
   }

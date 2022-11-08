@@ -26,4 +26,8 @@ public class TlsClientException extends Exception {
   public TlsClientException(final String message, final IOException e) {
     super(message, e);
   }
+
+  public TlsClientException(final String message) {
+    super(message);
+  }
 }

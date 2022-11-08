@@ -16,7 +16,7 @@
 
 package de.gematik.pki.pkits.testsuite.unittests;
 
-import static de.gematik.pki.pkits.testsuite.common.TestsuiteConstants.TSL_SEQNR_FILE_PATH;
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.TSL_SEQNR_FILE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.pkits.testsuite.common.tsl.TslSequenceNr;
@@ -35,7 +35,7 @@ class TslSequenceNrTest {
     }
     final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
     assertThat(tslSequenceNr).isNotNull();
-    assertThat(tslSequenceNr.getCurrentNrInTestobject()).isEqualTo(1);
+    assertThat(tslSequenceNr.getCurrentNrInTestObject()).isEqualTo(1);
   }
 
   @Test
@@ -43,7 +43,7 @@ class TslSequenceNrTest {
     final int seqNr = 42;
     Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(seqNr));
     final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
-    assertThat(tslSequenceNr.assignCurrentNrInTestobject().getCurrentNrInTestobject())
+    assertThat(tslSequenceNr.initializeCurrentTslSeqNr().getCurrentNrInTestObject())
         .isEqualTo(seqNr);
     final int seqNrfromFile = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
     assertThat(seqNr).isEqualTo(seqNrfromFile);

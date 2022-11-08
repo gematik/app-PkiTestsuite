@@ -16,9 +16,9 @@
 
 package de.gematik.pki.pkits.testsuite.unittests;
 
-import static de.gematik.pki.pkits.testsuite.common.TestsuiteConstants.PKITS_CERT.PKITS_CERT_INVALID;
-import static de.gematik.pki.pkits.testsuite.common.TestsuiteConstants.PKITS_CERT.PKITS_CERT_VALID;
-import static de.gematik.pki.pkits.testsuite.common.TestsuiteConstants.PKITS_CFG_FILE_PATH;
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT.PKITS_CERT_INVALID;
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT.PKITS_CERT_VALID;
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CFG_FILE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;

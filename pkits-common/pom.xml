@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.2.1</version>
+    <version>0.3.0</version>
   </parent>
 
   <artifactId>pkits-common</artifactId>
@@ -17,7 +17,7 @@
       <artifactId>assertj-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.gematik.pki.gemlibpki</groupId>
+      <groupId>de.gematik.pki</groupId>
       <artifactId>gemLibPki</artifactId>
     </dependency>
     <dependency>

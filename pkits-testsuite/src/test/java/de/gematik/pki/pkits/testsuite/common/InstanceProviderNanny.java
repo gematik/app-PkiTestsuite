@@ -17,7 +17,7 @@
 package de.gematik.pki.pkits.testsuite.common;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_HEALTH_ENDPOINT;
-import static de.gematik.pki.pkits.testsuite.common.PkitsTestsuiteUtils.waitForEvent;
+import static de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils.waitForEvent;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public abstract class InstanceProviderNanny {
   private int portConfig;
   private String portJvmParam;
 
-  private String ipAddress;
+  private String ipAddressOrFqdn;
   private String ipAddressConfig;
   private String ipAddressJvmParam;
 
@@ -102,7 +102,7 @@ public abstract class InstanceProviderNanny {
     process.destroy();
   }
 
-  /** Read ipAddress / port from environment or config file. */
+  /** Read ipAddressOrFqdn / port from environment or config file. */
   protected void setIpAddressAndPort() {
     final String portEnv = System.getProperty(portJvmParam);
     if ((portEnv != null) && (!portEnv.isEmpty())) {
@@ -113,20 +113,24 @@ public abstract class InstanceProviderNanny {
 
     final String ipAddressEnv = System.getProperty(ipAddressJvmParam);
     if ((ipAddressEnv != null) && (!ipAddressEnv.isEmpty())) {
-      ipAddress = ipAddressEnv;
+      ipAddressOrFqdn = ipAddressEnv;
     } else {
-      ipAddress = ipAddressConfig;
+      ipAddressOrFqdn = ipAddressConfig;
     }
   }
 
   protected void startServerProcess() {
     final ProcessBuilder processBuilder =
         new ProcessBuilder(
-            "java", "-jar", appPath, "--server.port=" + port, "--server.address=" + ipAddress);
+            "java",
+            "-jar",
+            appPath,
+            "--server.port=" + port,
+            "--server.address=" + ipAddressOrFqdn);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
     processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
     try {
-      log.info("Start web server process <{}> at {}:{}", serverId, ipAddress, port);
+      log.info("Start web server process <{}> at {}:{}", serverId, ipAddressOrFqdn, port);
       process = processBuilder.start();
       log.debug("Web server process <{}> started, PID:{}", serverId, process.pid());
     } catch (final IOException e) {
@@ -137,9 +141,9 @@ public abstract class InstanceProviderNanny {
   public String waitUntilWebServerIsUp(final int timeoutSecs) {
     if (isProcessRunning()) {
       final Callable<Boolean> webServerIsUp = new WebServerHealthOk();
-      waitForEvent("webServerIsUp", timeoutSecs, webServerIsUp);
+      waitForEvent(serverId, timeoutSecs, webServerIsUp);
       log.info("Web server <{}> should be up now", serverId);
-      return "http://" + ipAddress + ":" + port;
+      return "http://" + ipAddressOrFqdn + ":" + port;
     } else {
       isUp = false;
       throw new PkiCommonException("Web server <" + serverId + "> is down");
@@ -153,7 +157,7 @@ public abstract class InstanceProviderNanny {
   protected boolean webServerHealthOk() {
     final HttpResponse<String> response;
     try {
-      final String uri = "http://" + ipAddress + ":" + port + WEBSERVER_HEALTH_ENDPOINT;
+      final String uri = "http://" + ipAddressOrFqdn + ":" + port + WEBSERVER_HEALTH_ENDPOINT;
       log.info("Try to connect uri: {}", uri);
       response = Unirest.get(uri).asString();
       if (response.getStatus() == (HttpStatus.SC_OK)) {

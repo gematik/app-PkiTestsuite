@@ -16,9 +16,14 @@
 
 package de.gematik.pki.pkits.testsuite.common;
 
+import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.provider.Arguments;
 
-public class TestsuiteConstants {
+public class TestSuiteConstants {
 
   public static final String TSL_PROVIDER_JVM_PARAM_IP_ADDRESS_NAME = "TSL_PROVIDER_IP";
   public static final String TSL_PROVIDER_JVM_PARAM_PORT_NAME = "TSL_PROVIDER_PORT";
@@ -38,5 +43,27 @@ public class TestsuiteConstants {
   public enum PKITS_CERT {
     PKITS_CERT_VALID,
     PKITS_CERT_INVALID
+  }
+
+  public enum DtoDateConfigOption {
+    THIS_UPDATE,
+    PRODUCED_AT,
+    NEXT_UPDATE
+  }
+
+  public static Stream<Arguments> provideOcspResponseVariousStatusAndResponseBytes() {
+    final List<Arguments> argumentsList = new ArrayList<>();
+    for (final OCSPRespStatus ocspRespStatus :
+        List.of(
+            OCSPRespStatus.INTERNAL_ERROR,
+            OCSPRespStatus.MALFORMED_REQUEST,
+            OCSPRespStatus.SIG_REQUIRED,
+            OCSPRespStatus.TRY_LATER,
+            OCSPRespStatus.UNAUTHORIZED)) {
+      for (final boolean withResponseBytes : List.of(true, false)) {
+        argumentsList.add(Arguments.of(ocspRespStatus, withResponseBytes));
+      }
+    }
+    return argumentsList.stream();
   }
 }

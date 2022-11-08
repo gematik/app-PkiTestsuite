@@ -17,9 +17,9 @@
 package de.gematik.pki.pkits.testsuite.common.ocsp;
 
 import de.gematik.pki.pkits.testsuite.common.InstanceProviderNanny;
-import de.gematik.pki.pkits.testsuite.common.TestsuiteConstants;
+import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestsuiteConfig;
+import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 
 public class OcspResponderInstance extends InstanceProviderNanny {
 
@@ -34,13 +34,13 @@ public class OcspResponderInstance extends InstanceProviderNanny {
   }
 
   private void initialize() {
-    final TestsuiteConfig testsuiteConfig = TestConfigManager.getTestsuiteConfig();
-    setServerId(testsuiteConfig.getOcspResponder().getId());
-    setAppPath(testsuiteConfig.getOcspResponder().getAppPath());
-    setPortJvmParam(TestsuiteConstants.OCSP_RESPONDER_JVM_PARAM_PORT_NAME);
-    setIpAddressJvmParam(TestsuiteConstants.OCSP_RESPONDER_JVM_PARAM_IP_ADDRESS_NAME);
-    setIpAddressConfig(testsuiteConfig.getOcspResponder().getIpAddress());
-    setPortConfig(testsuiteConfig.getOcspResponder().getPort());
+    final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
+    setServerId(testSuiteConfig.getOcspResponder().getId());
+    setAppPath(testSuiteConfig.getOcspResponder().getAppPath());
+    setPortJvmParam(TestSuiteConstants.OCSP_RESPONDER_JVM_PARAM_PORT_NAME);
+    setIpAddressJvmParam(TestSuiteConstants.OCSP_RESPONDER_JVM_PARAM_IP_ADDRESS_NAME);
+    setIpAddressConfig(testSuiteConfig.getOcspResponder().getIpAddressOrFqdn());
+    setPortConfig(testSuiteConfig.getOcspResponder().getPort());
   }
 
   @Override

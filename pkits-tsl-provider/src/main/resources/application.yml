@@ -3,6 +3,7 @@ server:
     min-response-size: 1
     enabled: true
     mime-types:
-      - application/vnd.etsi.tsl+xml
-      - application/text
+      - "application/vnd.etsi.tsl+xml"
+      - "application/vnd.etsi.tsl+xml;charset=UTF-8"
+      - "application/text"
   port: 8081

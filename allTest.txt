@@ -1,23 +1,49 @@
-+	de.gematik.pki.pkits.testsuite.approval.ApprovalTestIT
-	checkInitialState                                  Check initial state
-	verifyConnectCertsInvalid                          Test use case with invalid certificates
-	verifyConnectCertsValid                            Test use case with valid certificates
-	verifyInvalidCerIdInOcspResponse                   Test invalid cert Id in OCSP Response
-	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP Response
-	verifyInvalidSignatureInOcspResponse               Test invalid signature in OCSP Response
-	verifyMissingCertHashInOcspResponse                Test missing CertHash in OCSP Response
++	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTestsIT
+	verifyConnectCertsInvalid   Test use case with invalid certificates
+	verifyConnectCertsValid     Test use case with valid certificates
+	verifyConnectCertsValidRsa  Test use case with valid RSA certificate
+
++	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTestsIT
+	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
+	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP response
+	verifyInvalidSignatureInOcspResponse               Test invalid signature in OCSP response
+	verifyMissingCertHashInOcspResponse                Test missing CertHash in OCSP response
 	verifyMissingOcspSignerInTsl                       Test missing OCSP signer in TSL
-	verifyOcspCertificateStatusRevokedAndUnknown       Test OCSP certificate status revoked and unknown
+	verifyOcspCertificateStatusRevokedAndUnknown       Test OCSP response with certificate status revoked and unknown
 	verifyOcspGracePeriod                              Test OCSP grace period
-	verifyOcspResponseNextUpdatePastOutOfTolerance     Test OCSP Response nextUpdate past out of tolerance
-	verifyOcspResponseNextUpdatePastWithinTolerance    Test OCSP Response NextUpdate past within tolerance
-	verifyOcspResponseProducedAtFutureOutOfTolerance   Test OCSP Response producedAt future out of tolerance
-	verifyOcspResponseProducedAtFutureWithinTolerance  Test OCSP Response producedAt future within tolerance
-	verifyOcspResponseProducedAtPastOutOfTolerance     Test OCSP Response producedAt past out of tolerance
-	verifyOcspResponseProducedAtPastWithinTolerance    Test OCSP Response producedAt past within tolerance
-	verifyOcspResponseResponderIdByName                Test OCSP Response with responder id byName
-	verifyOcspResponseThisUpdateFutureOutOfTolerance   Test OCSP Response thisUpdate future out of tolerance
-	verifyOcspResponseThisUpdateFutureWithinTolerance  Test OCSP Response thisUpdate future within tolerance
-	verifyOcspResponseTimeoutAndDelay                  Test OCSP Response with timeout and delay
-	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP response and response bytes being null or not null
-	verifyOcspResponseWithNullParameterInCertId        Test OCSP Response with Null Parameter in CertId
+	verifyOcspResponseMissingNextUpdate                Test OCSP response with missing nextUpdate
+	verifyOcspResponseNextUpdatePastOutOfTolerance     Test OCSP response with nextUpdate in past out of tolerance
+	verifyOcspResponseNextUpdatePastWithinTolerance    Test OCSP response with nextUpdate in past within tolerance
+	verifyOcspResponseProducedAtFutureOutOfTolerance   Test OCSP response with producedAt in future out of tolerance
+	verifyOcspResponseProducedAtFutureWithinTolerance  Test OCSP response with producedAt in future within tolerance
+	verifyOcspResponseProducedAtPastOutOfTolerance     Test OCSP response with producedAt in past out of tolerance
+	verifyOcspResponseProducedAtPastWithinTolerance    Test OCSP response with producedAt in past within tolerance
+	verifyOcspResponseResponderIdByName                Test OCSP response with responder id byName
+	verifyOcspResponseThisUpdateFutureOutOfTolerance   Test OCSP response with thisUpdate in future out of tolerance
+	verifyOcspResponseThisUpdateFutureWithinTolerance  Test OCSP response with thisUpdate in future within tolerance
+	verifyOcspResponseTimeoutAndDelay                  Test OCSP response with timeout and delay
+	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes
+	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
+
++	de.gematik.pki.pkits.testsuite.approval.TslApprovalTestsIT
+	verifyTslDownloadCompression  Test compression of TSL download
+
++	de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTestsIT
+	verifyMissingOcspSignerInTslForTslSignerCert                    Test missing OCSP signer in TSL for TSL signer certificate
+	verifyOcspResponseTslSignerCertInvalidCertHash                  Test OCSP response of TSL signer certificate with invalid CertHash
+	verifyOcspResponseTslSignerCertMissingCertHash                  Test OCSP response of TSL signer certificate with missing CertHash
+	verifyOcspResponseTslSignerCertMissingNextUpdate                Test OCSP response of TSL signer certificate with missing nextUpdate
+	verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance     Test OCSP response of TSL signer certificate with nextUpdate in past out of tolerance
+	verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance    Test OCSP response of TSL signer certificate with nextUpdate in past within tolerance
+	verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance   Test OCSP response of TSL signer certificate with producedAt in future out of tolerance
+	verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance  Test OCSP response of TSL signer certificate with producedAt in future within tolerance
+	verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     Test OCSP response of TSL signer certificate with producedAt in past out of tolerance
+	verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    Test OCSP response of TSL signer certificate with producedAt in past within tolerance
+	verifyOcspResponseTslSignerCertResponderIdByName                Test OCSP response of TSL signer certificate with responder id byName
+	verifyOcspResponseTslSignerCertStatusRevokedAndUnknown          Test OCSP response of TSL signer certificate with status revoked and unknown
+	verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance   Test OCSP response of TSL signer certificate with thisUpdate in future out of tolerance
+	verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance  Test OCSP response of TSL signer certificate with thisUpdate in future within tolerance
+	verifyOcspResponseTslSignerCertTimeoutAndDelay                  Test OCSP response TSL signer certificate with timeout and delay
+	verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes    Test various status of OCSP responses of TSL signer certificate with and without response bytes
+	verifyOcspResponseTslSignerCertWithNullParameterInCertId        Test OCSP response of TSL signer certificate with null parameter in CertId
+	verifyOcspResponseWithInvalidSignatureForTslSignerCert          Test invalid OCSP response signature for TSL signer certificate

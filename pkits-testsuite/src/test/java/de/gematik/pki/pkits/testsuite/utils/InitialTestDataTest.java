@@ -16,14 +16,18 @@
 
 package de.gematik.pki.pkits.testsuite.utils;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.*;
+import static de.gematik.pki.pkits.common.PkitsConstants.GEMATIK_TEST_TSP;
+import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslGeneration;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslModification;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestsuiteParameter.TslSettings;
+import de.gematik.pki.pkits.testsuite.config.TslSettings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,18 +44,18 @@ class InitialTestDataTest {
   @Test
   void buildInitialTslAndVa() throws DatatypeConfigurationException, IOException {
     final TslSettings tslCfg =
-        TestConfigManager.getTestsuiteConfig().getTestsuiteParameter().getTslSettings();
+        TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().getTslSettings();
     final int seqNr = 1;
     final String tslProvUri =
         "http://"
-            + TestConfigManager.getTestsuiteConfig().getTslProvider().getIpAddress()
+            + TestConfigManager.getTestSuiteConfig().getTslProvider().getIpAddressOrFqdn()
             + ":"
-            + TestConfigManager.getTestsuiteConfig().getTslProvider().getPort();
+            + TestConfigManager.getTestSuiteConfig().getTslProvider().getPort();
     final String ocspRespUri =
         "http://"
-            + TestConfigManager.getTestsuiteConfig().getOcspResponder().getIpAddress()
+            + TestConfigManager.getTestSuiteConfig().getOcspResponder().getIpAddressOrFqdn()
             + ":"
-            + TestConfigManager.getTestsuiteConfig().getOcspResponder().getPort();
+            + TestConfigManager.getTestSuiteConfig().getOcspResponder().getPort();
     final TslModification tslMod =
         TslModification.builder()
             .sequenceNr(seqNr)

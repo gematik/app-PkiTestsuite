@@ -14,27 +14,9 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.testsuite.config;
+package de.gematik.pki.pkits.testsuite.approval.support;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class TestsuiteConfig {
-
-  private ClientConfig client;
-
-  @JsonProperty("testobject")
-  private TestobjectConfig testObject;
-
-  @JsonProperty("ocspresponder")
-  private OcspResponderConfig ocspResponder;
-
-  @JsonProperty("tslprovider")
-  private TslProviderConfig tslProvider;
-
-  @JsonProperty("testsuiteParameter")
-  private TestsuiteParameter testsuiteParameter;
+public enum OcspResponderType {
+  OCSP_RESP_TYPE_DEFAULT_USECASE,
+  OCSP_RESP_TYPE_CUSTOM
 }

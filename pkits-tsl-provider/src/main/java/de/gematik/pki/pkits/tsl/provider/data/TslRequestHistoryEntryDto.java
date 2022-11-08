@@ -29,9 +29,12 @@ public class TslRequestHistoryEntryDto {
 
   private int sequenceNr;
   private String tslDownloadEndpoint;
+  private boolean isGzipCompressed;
+  private String protocol;
 
   @Override
   public String toString() {
-    return "TslDownloadEndpoint: " + tslDownloadEndpoint + ", seqNr: " + sequenceNr;
+    return "TslRequestHistoryEntryDto{sequenceNr=%d, tslDownloadEndpoint='%s', isGzipCompressed=%s, protocol='%s'}"
+        .formatted(sequenceNr, tslDownloadEndpoint, isGzipCompressed, protocol);
   }
 }

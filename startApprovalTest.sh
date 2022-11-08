@@ -28,7 +28,7 @@ do
       whole_current_class="+"
     fi
 
-  elif [ "${col0}" == "+" ] || [ "${whole_current_class}" == "+" ]
+  elif [ "${col0}" == "+" ] || ( [ "${whole_current_class}" == "+" ] &&  [ "${col0}" != "-" ] )
   then
     subcols=( $col1 )
     col_method=${subcols[0]}
@@ -58,4 +58,5 @@ set +x
 printf "mache den Report schön...\n"
 mvn site -DgenerateReports=false >/dev/null
 
+mvn pdf:pdf -pl pkits-testsuite
 printf "...fertig!"

@@ -16,6 +16,10 @@
 
 package de.gematik.pki.pkits.ocsp.responder.api;
 
+import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
+import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
+import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
+import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
@@ -25,7 +29,10 @@ import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.List;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,7 +79,7 @@ class OcspResponderManagerTest {
 
   @Test
   void t03_getOcspHistoryPart() {
-    final String ocspRespUri = "http://localhost:" + localServerPort;
+
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
     ocspRequestHistory.add(getEntry("10001"));
@@ -85,7 +92,7 @@ class OcspResponderManagerTest {
 
   @Test
   void t04_getAndClearOcspHistoryPart() {
-    final String ocspRespUri = "http://localhost:" + localServerPort;
+
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
     ocspRequestHistory.add(getEntry("20002"));
@@ -101,7 +108,7 @@ class OcspResponderManagerTest {
 
   @Test
   void t05_clearOcspHistory() {
-    final String ocspRespUri = "http://localhost:" + localServerPort;
+
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
     ocspRequestHistory.add(getEntry("20002"));
@@ -115,5 +122,20 @@ class OcspResponderManagerTest {
 
     entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("20002"));
     assertThat(entries).isEmpty();
+  }
+
+  @Test
+  void testClearAndNotConfigured() {
+
+    OcspResponderManager.clear(ocspRespUri);
+
+    final HttpResponse<byte[]> response =
+        Unirest.post(ocspRespUri + OCSP_SSP_ENDPOINT + "/31")
+            .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
+            .body("")
+            .asBytes();
+
+    assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    assertThat(new String(response.getBody())).isEqualTo(NOT_CONFIGURED);
   }
 }

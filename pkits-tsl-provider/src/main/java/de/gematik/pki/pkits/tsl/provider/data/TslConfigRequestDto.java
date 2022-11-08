@@ -16,13 +16,14 @@
 
 package de.gematik.pki.pkits.tsl.provider.data;
 
-import java.util.Objects;
-import lombok.AllArgsConstructor;
+import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -31,11 +32,15 @@ public class TslConfigRequestDto {
   private String bearerToken;
   private TslProviderConfigDto tslProviderConfigDto;
 
+  public TslConfigRequestDto(
+      @NonNull final String bearerToken, final TslProviderConfigDto tslProviderConfigDto) {
+    this.bearerToken = bearerToken;
+    this.tslProviderConfigDto = tslProviderConfigDto;
+  }
+
   @Override
   public String toString() {
-    Objects.requireNonNull(bearerToken, "bearerToken must not be null");
-    Objects.requireNonNull(tslProviderConfigDto, "tslProviderConfig must not be null");
-    return String.format(
-        "bearerToken: %s, tslProviderConfig: %s", bearerToken, tslProviderConfigDto);
+    final Object message = ObjectUtils.defaultIfNull(tslProviderConfigDto, NOT_CONFIGURED);
+    return String.format("bearerToken: %s, tslProviderConfig: %s", bearerToken, message);
   }
 }

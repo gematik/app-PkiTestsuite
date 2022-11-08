@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.sut.server.sim.tsl;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslProcurerConfig;
 import de.gematik.pki.pkits.sut.server.sim.exceptions.TosException;
 import org.junit.jupiter.api.Test;
@@ -30,13 +31,14 @@ import org.springframework.stereotype.Service;
 class TslProcurerTest {
 
   @Autowired private TslProcurerConfig tslProcurerConfig;
+  @Autowired private OcspConfig ocspConfig;
 
   /* NOTE: we do not test this extensively at the moment.
    To do so, for example, implement TSL Download Server Mock, change test to "not throwing", .hasSize(n)...
   */
   @Test
   void getTslInfoProv() {
-    final TslProcurer tslProcurer = new TslProcurer(tslProcurerConfig);
+    final TslProcurer tslProcurer = new TslProcurer(tslProcurerConfig, ocspConfig);
     assertThatThrownBy(tslProcurer::getTslInfoProv)
         .isInstanceOf(TosException.class)
         .hasMessageContaining("(yet)");

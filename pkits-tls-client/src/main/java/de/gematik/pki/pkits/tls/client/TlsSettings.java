@@ -23,6 +23,8 @@ public class TlsSettings {
 
   int socketTimeoutMsec;
 
-  String[] ciphersSuites;
+  String[] ecCiphersSuites;
+  String[] rsaCiphersSuites;
+
   String[] enabledProtocols;
 }

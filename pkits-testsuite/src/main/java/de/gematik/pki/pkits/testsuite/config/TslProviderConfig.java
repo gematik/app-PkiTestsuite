@@ -21,8 +21,25 @@ import lombok.Getter;
 @Getter
 public class TslProviderConfig {
 
+  @ParameterDescription(
+      withDefault = false,
+      description =
+          "FQDN or IP address where the tsl provider is running. This will be used as the"
+              + " PointersToOther field in the TSLs.")
+  String ipAddressOrFqdn;
+
+  @ParameterDescription(
+      withDefault = false,
+      description = "Port where the TSL provider is listening.")
   int port;
-  String ipAddress;
-  String id;
-  String appPath;
+
+  @ParameterDescription(
+      withDefault = true,
+      description = "Name of the TSL provider for better identification in log files.")
+  String id = "TSL Provider";
+
+  @ParameterDescription(
+      withDefault = true,
+      description = "Path to the TSL provider jar which should be started during tests.")
+  String appPath = "../pkits-tsl-provider/target/pkits-tsl-provider-exec.jar";
 }

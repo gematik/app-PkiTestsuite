@@ -24,7 +24,7 @@ import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestsuiteParameter.TslSettings;
+import de.gematik.pki.pkits.testsuite.config.TslSettings;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 class TslDownloadTest {
 
   private static final TslSettings tslSettings =
-      TestConfigManager.getTestsuiteConfig().getTestsuiteParameter().getTslSettings();
+      TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().getTslSettings();
   private static final Path tslSigner = tslSettings.getSigner();
   private static final String tslSignerPassword = tslSettings.getSignerPassword();
 

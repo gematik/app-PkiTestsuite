@@ -131,7 +131,7 @@ public final class HandshakeInterceptor implements X509TrustManager {
         log.info("TUC_PKI_018 endend with success, role(s): {}", admission.getProfessionItems());
       } catch (final GemPkiException e) {
         log.info(e.getMessage());
-        throw new CertificateException("Das AUT Zertifikat ist ungültig", e);
+        throw new CertificateException("TUC_PKI_018 check unsuccessful.", e);
       }
     }
   }

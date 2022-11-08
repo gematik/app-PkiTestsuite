@@ -17,8 +17,9 @@
 package de.gematik.pki.pkits.testsuite;
 
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestobjectConfig;
-import de.gematik.pki.pkits.testsuite.exceptions.TestsuiteException;
+import de.gematik.pki.pkits.testsuite.config.TestObjectConfig;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
+import de.gematik.pki.pkits.tls.client.TlsClientApplication;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,17 +29,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class UseCase {
 
-  private static final TestobjectConfig TEST_OBJECT_CONFIG =
-      TestConfigManager.getTestsuiteConfig().getTestObject();
+  private static final TestObjectConfig TEST_OBJECT_CONFIG =
+      TestConfigManager.getTestSuiteConfig().getTestObject();
 
   public static int exec(final Path certPath) {
 
     return switch (TEST_OBJECT_CONFIG.getType()) {
-      case "TlsServer" -> connectTls(
-          certPath, TestConfigManager.getTestsuiteConfig().getClient().getKeystorePassword());
+      case "TlsServer" -> TlsClientApplication.connectTls(
+          TEST_OBJECT_CONFIG.getIpAddressOrFqdn(),
+          TEST_OBJECT_CONFIG.getPort(),
+          certPath,
+          TestConfigManager.getTestSuiteConfig().getClient().getKeystorePassword());
       case "Script" -> connectScript(
-          certPath, TestConfigManager.getTestsuiteConfig().getClient().getKeystorePassword());
-      default -> throw new TestsuiteException("Unknown test object type.");
+          certPath, TestConfigManager.getTestSuiteConfig().getClient().getKeystorePassword());
+      default -> throw new TestSuiteException("Unknown test object type.");
     };
   }
 
@@ -54,9 +58,9 @@ public final class UseCase {
         return process.exitValue();
       }
       process.destroy();
-      throw new TestsuiteException("Process timeout of 30 seconds.");
+      throw new TestSuiteException("Process timeout of 30 seconds.");
     } catch (final IOException e) {
-      throw new TestsuiteException("Could not start process.", e);
+      throw new TestSuiteException("Could not start process.", e);
     } catch (final InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -64,26 +68,8 @@ public final class UseCase {
 
   private static void checkFile(final String filename) {
     if (filename == null || !Files.exists(Path.of(filename))) {
-      throw new TestsuiteException("Error! Cannot read file: %s .".formatted(filename));
+      throw new TestSuiteException("Error! Cannot read file: %s .".formatted(filename));
     }
-  }
-
-  private static int connectTls(final Path certPath, final String password) {
-
-    final String filename = "../pkits-tls-client/target/tlsClient.jar";
-    checkFile(filename);
-
-    final ProcessBuilder processBuilder =
-        new ProcessBuilder(
-            "java",
-            "-jar",
-            filename,
-            TEST_OBJECT_CONFIG.getIpAddress(),
-            String.valueOf(TEST_OBJECT_CONFIG.getPort()),
-            certPath.toString(),
-            password);
-    log.info("Start tls connection with cert: {}", certPath);
-    return runProcessBuild(processBuilder);
   }
 
   private static int connectScript(final Path certPath, final String password) {

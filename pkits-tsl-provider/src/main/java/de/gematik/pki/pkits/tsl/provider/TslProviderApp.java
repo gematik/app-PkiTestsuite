@@ -19,7 +19,6 @@ package de.gematik.pki.pkits.tsl.provider;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -33,7 +32,6 @@ public class TslProviderApp {
   private final TslConfigHolder tslConfigHolder;
   private final ApplicationContext appContext;
 
-  @Autowired
   public TslProviderApp(
       final TslConfigHolder tslConfigHolder, final ApplicationContext appContext) {
     this.tslConfigHolder = tslConfigHolder;

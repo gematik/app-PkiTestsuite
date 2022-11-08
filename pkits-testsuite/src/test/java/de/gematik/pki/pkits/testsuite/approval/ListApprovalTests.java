@@ -42,9 +42,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 
 @Slf4j
-public class ListApprovalTests {
+class ListApprovalTests {
 
-  public static final String TESTCASE_FILE = "../allTest.txt";
+  private static final String TESTCASE_FILE = "../allTest.txt";
 
   private List<Class> findTestClasses(final String dirname, final String[] postfixes)
       throws ClassNotFoundException, IOException {
@@ -88,7 +88,7 @@ public class ListApprovalTests {
     return classes;
   }
 
-  public static List<Method> getMethodsAnnotatedWith(
+  private static List<Method> getMethodsAnnotatedWith(
       final Class<?> type, final List<Class<? extends Annotation>> annotations) {
 
     final List<Method> methods = new ArrayList<>();
@@ -115,15 +115,15 @@ public class ListApprovalTests {
     return methods;
   }
 
-  public static String padRight(final String s, final int n) {
+  private static String padRight(final String s, final int n) {
     return String.format("%-" + n + "s", s);
   }
 
-  static void saveToFile(final Map<String, Set<TestInfo>> classTestMap) throws IOException {
+  static void saveToFile(final Map<String, Set<CustomTestInfo>> classTestMap) throws IOException {
 
     final List<String> lines = new ArrayList<>();
 
-    for (final Entry<String, Set<TestInfo>> entry : classTestMap.entrySet()) {
+    for (final Entry<String, Set<CustomTestInfo>> entry : classTestMap.entrySet()) {
       if (!lines.isEmpty()) {
         lines.add("");
       }
@@ -131,7 +131,7 @@ public class ListApprovalTests {
       lines.add("+\t" + entry.getKey());
       final Optional<Integer> maxMethodNameLengthOpt =
           entry.getValue().stream()
-              .map(testInfo -> testInfo.methodName.length())
+              .map(customTestInfo -> customTestInfo.methodName.length())
               .max(Comparator.naturalOrder());
 
       final int padN = maxMethodNameLengthOpt.orElseThrow() + 2;
@@ -139,10 +139,19 @@ public class ListApprovalTests {
       entry
           .getValue()
           .forEach(
-              testInfo -> {
-                final String padded = padRight(testInfo.methodName, padN);
+              customTestInfo -> {
+                if (customTestInfo.methodName.equals("checkInitialState")) {
+                  return;
+                }
+
+                final String sign = "";
+                final String methodNamePadded = padRight(customTestInfo.methodName, padN);
                 final String line =
-                    "\t%s%s".formatted(padded, StringUtils.defaultString(testInfo.displayName));
+                    "%s\t%s%s"
+                        .formatted(
+                            sign,
+                            methodNamePadded,
+                            StringUtils.defaultString(customTestInfo.displayName));
                 lines.add(line);
               });
     }
@@ -151,14 +160,15 @@ public class ListApprovalTests {
     Files.writeString(Path.of(TESTCASE_FILE), content);
   }
 
-  private static void verifyEmptyAndDuplicates(final Map<String, Set<TestInfo>> classTestsMap) {
+  private static void verifyEmptyAndDuplicates(
+      final Map<String, Set<CustomTestInfo>> classTestsMap) {
 
     if (classTestsMap.isEmpty()) {
       throw new IllegalArgumentException("No tests found");
     }
 
-    final Map<String, TestInfo> testMethodNamesMap = new HashMap<>();
-    final Map<String, TestInfo> testDisplayNamesMap = new HashMap<>();
+    final Map<String, CustomTestInfo> testMethodNamesMap = new HashMap<>();
+    final Map<String, CustomTestInfo> testDisplayNamesMap = new HashMap<>();
 
     final Set<String> duplicateMethodNameTests = new TreeSet<>();
     final Set<String> duplicateDisplayNameTests = new TreeSet<>();
@@ -166,20 +176,30 @@ public class ListApprovalTests {
     classTestsMap.values().stream()
         .flatMap(Collection::stream)
         .forEach(
-            testInfo -> {
-              if (testMethodNamesMap.containsKey(testInfo.methodName)) {
-                final TestInfo duplicateTestInfo = testMethodNamesMap.get(testInfo.methodName);
-                duplicateMethodNameTests.add("" + duplicateTestInfo + "  and  " + testInfo);
+            customTestInfo -> {
+              if (testMethodNamesMap.containsKey(customTestInfo.methodName)) {
+
+                if (customTestInfo.className.equals(customTestInfo.declaringClassName)) {
+                  final CustomTestInfo duplicateCustomTestInfo =
+                      testMethodNamesMap.get(customTestInfo.methodName);
+                  duplicateMethodNameTests.add(
+                      "" + duplicateCustomTestInfo + "  and  " + customTestInfo);
+                }
               } else {
-                testMethodNamesMap.put(testInfo.methodName, testInfo);
+                testMethodNamesMap.put(customTestInfo.methodName, customTestInfo);
               }
 
-              if (StringUtils.isNotBlank(testInfo.displayName)
-                  && testDisplayNamesMap.containsKey(testInfo.displayName)) {
-                final TestInfo duplicateTestInfo = testDisplayNamesMap.get(testInfo.displayName);
-                duplicateDisplayNameTests.add("" + duplicateTestInfo + "  and  " + testInfo);
+              if (StringUtils.isNotBlank(customTestInfo.displayName)
+                  && testDisplayNamesMap.containsKey(customTestInfo.displayName)) {
+
+                if (customTestInfo.className.equals(customTestInfo.declaringClassName)) {
+                  final CustomTestInfo duplicateCustomTestInfo =
+                      testDisplayNamesMap.get(customTestInfo.displayName);
+                  duplicateDisplayNameTests.add(
+                      "" + duplicateCustomTestInfo + "  and  " + customTestInfo);
+                }
               } else {
-                testDisplayNamesMap.put(testInfo.displayName, testInfo);
+                testDisplayNamesMap.put(customTestInfo.displayName, customTestInfo);
               }
             });
 
@@ -198,44 +218,53 @@ public class ListApprovalTests {
   }
 
   @AllArgsConstructor
-  public static class TestInfo implements Comparable<TestInfo> {
+  private static class CustomTestInfo implements Comparable<CustomTestInfo> {
     String className;
+    String declaringClassName;
     String methodName;
     String displayName;
 
     @Override
-    public int compareTo(final TestInfo o) {
+    public int compareTo(final CustomTestInfo o) {
       return methodName.compareTo(o.methodName);
     }
 
     @Override
     public String toString() {
-      return "TestInfo{className='%s', methodName='%s', displayName='%s'}"
-          .formatted(className, methodName, displayName);
+      return "TestInfo{className='%s', declaringClassName='%s', methodName='%s', displayName='%s'}"
+          .formatted(className, declaringClassName, methodName, displayName);
     }
   }
 
-  private Map<String, Set<TestInfo>> getClassTestMap(final List<Class> testClasses) {
+  private Map<String, Set<CustomTestInfo>> getClassTestMap(final List<Class> testClasses) {
 
     final List<Class<? extends Annotation>> testAnnotations =
         List.of(Test.class, ParameterizedTest.class);
 
-    final Map<String, Set<TestInfo>> classTestsMap = new TreeMap<>();
+    final Map<String, Set<CustomTestInfo>> classTestsMap = new TreeMap<>();
 
     for (final Class clazz : testClasses) {
       final List<Method> testMethods = getMethodsAnnotatedWith(clazz, testAnnotations);
       log.info("class: {}", clazz.getCanonicalName());
       log.info("testMethods: {}", testMethods.stream().map(Method::getName).toList());
 
-      final TreeSet<TestInfo> methodsSet =
+      final TreeSet<CustomTestInfo> methodsSet =
           testMethods.stream()
               .map(
                   method -> {
                     final DisplayName displayNameAnnotation =
                         method.getAnnotation(DisplayName.class);
+
                     final String displayName =
                         displayNameAnnotation == null ? "" : displayNameAnnotation.value();
-                    return new TestInfo(clazz.getCanonicalName(), method.getName(), displayName);
+
+                    final String declaringClassName = method.getDeclaringClass().getCanonicalName();
+
+                    return new CustomTestInfo(
+                        clazz.getCanonicalName(),
+                        declaringClassName,
+                        method.getName(),
+                        displayName);
                   })
               .collect(Collectors.toCollection(TreeSet::new));
 
@@ -248,7 +277,7 @@ public class ListApprovalTests {
   @Test
   void generate() throws ClassNotFoundException, IOException {
 
-    final String[] postfixes = {"TestIT"};
+    final String[] postfixes = {"TestsIT"};
     final List<Class> testClasses = findTestClasses("target/test-classes/", postfixes);
 
     final List<String> classesNames = testClasses.stream().map(Class::getCanonicalName).toList();
@@ -256,7 +285,7 @@ public class ListApprovalTests {
     log.info("classesNames.size(): {}", classesNames.size());
     log.info("classesNames: {}", String.join("\n", classesNames));
 
-    final Map<String, Set<TestInfo>> classTestsMap = getClassTestMap(testClasses);
+    final Map<String, Set<CustomTestInfo>> classTestsMap = getClassTestMap(testClasses);
 
     verifyEmptyAndDuplicates(classTestsMap);
     saveToFile(classTestsMap);

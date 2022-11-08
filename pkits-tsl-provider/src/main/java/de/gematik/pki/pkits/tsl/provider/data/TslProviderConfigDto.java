@@ -16,8 +16,9 @@
 
 package de.gematik.pki.pkits.tsl.provider.data;
 
+import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
+
 import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,8 +35,12 @@ public class TslProviderConfigDto {
 
   @Override
   public String toString() {
-    Objects.requireNonNull(activeTslDownloadPoint, "tslDownloadPoint must not be null");
-    return String.format(
-        "tslDownloadPoint: %s, tsl size: %d bytes", activeTslDownloadPoint.name(), tslBytes.length);
+    final Object message;
+    if (activeTslDownloadPoint != null) {
+      message = activeTslDownloadPoint.name();
+    } else {
+      message = NOT_CONFIGURED;
+    }
+    return String.format("tslDownloadPoint: %s, tsl size: %d bytes", message, tslBytes.length);
   }
 }

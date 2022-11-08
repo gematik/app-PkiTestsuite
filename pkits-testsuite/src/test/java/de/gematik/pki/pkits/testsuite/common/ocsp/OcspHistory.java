@@ -22,38 +22,50 @@ import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import java.math.BigInteger;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OcspHistory {
 
+  @Getter
+  @AllArgsConstructor
+  public enum OcspRequestExpectationBehaviour {
+    OCSP_REQUEST_EXPECT(1),
+    OCSP_REQUEST_DO_NOT_EXPECT(0),
+    OCSP_REQUEST_IGNORE(-1);
+
+    private final int expectedRequestAmount;
+  }
+
   /**
    * Check if certSerialNr matches all entries and amount
    *
    * @param certSerialNr certificate serial number
-   * @param expectedRequestAmount expected amount of history entries
    */
   public static void check(
-      final String ocspRespUri, final BigInteger certSerialNr, final int expectedRequestAmount) {
+      final String ocspRespUri,
+      final BigInteger certSerialNr,
+      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour) {
+
     final List<OcspRequestHistoryEntryDto> history =
         OcspResponderManager.getOcspHistoryPart(ocspRespUri, certSerialNr);
-    if (history.size() != expectedRequestAmount) {
-      log.error(
-          "Expected {} OCSP requests for certificate {}, but received {}",
-          expectedRequestAmount,
-          certSerialNr,
-          history.size());
+
+    if (ocspRequestExpectationBehaviour == OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE) {
+      return;
     }
+
     assertThat(history)
         .as(
-            "Expected "
-                + expectedRequestAmount
-                + " OCSP requests for certificate "
-                + certSerialNr
-                + ", but received "
-                + history.size())
-        .hasSize(expectedRequestAmount);
-    for (int i = 0; i < expectedRequestAmount; i++) {
+            "Expected %d OCSP requests for certificate %s, but received %d"
+                .formatted(
+                    ocspRequestExpectationBehaviour.getExpectedRequestAmount(),
+                    certSerialNr,
+                    history.size()))
+        .hasSize(ocspRequestExpectationBehaviour.getExpectedRequestAmount());
+
+    for (int i = 0; i < ocspRequestExpectationBehaviour.getExpectedRequestAmount(); i++) {
       // Double check. A fail indicates an implementation error in OcspResponder.
       assertThat(history.get(i).getCertSerialNr())
           .as("OCSP request history error. Expected CertSerialNr does not match.")

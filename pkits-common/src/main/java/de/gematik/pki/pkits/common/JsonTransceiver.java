@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.common;
 
+import kong.unirest.HttpRequestWithBody;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
@@ -26,15 +27,20 @@ import org.apache.http.HttpStatus;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JsonTransceiver {
 
-  public static void sendJsonViaHttp(final String uri, final String jsonContent) {
+  public static void sendJsonViaHttp(
+      final String uri, final String jsonContent, final boolean successOnly) {
     try {
       final HttpResponse<String> response = Unirest.post(uri).body(jsonContent).asString();
-      if (response.getStatus() != HttpStatus.SC_OK) {
+      if (successOnly && (response.getStatus() != HttpStatus.SC_OK)) {
         throw new PkiCommonException("Send failed with HttpStatus: " + response.getStatus());
       }
     } catch (final UnirestException e) {
       throw new PkiCommonException("Generation of request failed.", e);
     }
+  }
+
+  public static void sendJsonViaHttp(final String uri, final String jsonContent) {
+    sendJsonViaHttp(uri, jsonContent, true);
   }
 
   /**
@@ -46,7 +52,8 @@ public final class JsonTransceiver {
    */
   public static String txRxJsonViaHttp(final String uri, final String jsonContent) {
     try {
-      final HttpResponse<String> response = Unirest.post(uri).body(jsonContent).asString();
+      final HttpRequestWithBody request = Unirest.post(uri);
+      final HttpResponse<String> response = request.body(jsonContent).asString();
       if (response.getStatus() != HttpStatus.SC_OK) {
         throw new PkiCommonException("Send failed with HttpStatus: " + response.getStatus());
       }

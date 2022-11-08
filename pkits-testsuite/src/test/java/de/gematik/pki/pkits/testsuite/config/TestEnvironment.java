@@ -44,9 +44,24 @@ public class TestEnvironment {
     log.info("TslProvider configured with TSL ({} bytes).", tsl.length);
   }
 
+  public static void clearTslProviderConfig(final String tslProvUri) {
+    PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
+    TslProviderManager.clear(tslProvUri);
+    log.info("TslProvider configuration cleared.");
+  }
+
   public static void configureOcspResponder(
       final String ocspRespUri, final OcspResponderConfigDto ocspResponderConfig) {
     PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
     OcspResponderManager.configure(ocspRespUri, ocspResponderConfig);
+    log.info(
+        "OcspResponder configured with cert serialNr: {}).",
+        ocspResponderConfig.getEeCert().getSerialNumber());
+  }
+
+  public static void clearOcspResponderConfig(final String ocspRespUri) {
+    PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
+    OcspResponderManager.clear(ocspRespUri);
+    log.info("OcspResponder configuration cleared.");
   }
 }

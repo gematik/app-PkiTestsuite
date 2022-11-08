@@ -17,9 +17,9 @@
 package de.gematik.pki.pkits.testsuite.common;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
-import de.gematik.pki.pkits.testsuite.common.TestsuiteConstants.PKITS_CERT;
+import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestsuiteConfig;
+import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
@@ -68,13 +68,13 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
   @Override
   public void accept(final VariableSource variableSource) {
     final PKITS_CERT pkits_cert = variableSource.value();
-    final TestsuiteConfig testsuiteConfig = TestConfigManager.getTestsuiteConfig();
+    final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
     switch (pkits_cert) {
-      case PKITS_CERT_VALID -> certDir = testsuiteConfig.getClient().getKeystorePathValidCerts();
+      case PKITS_CERT_VALID -> certDir = testSuiteConfig.getClient().getKeystorePathValidCerts();
       case PKITS_CERT_INVALID -> certDir =
-          testsuiteConfig.getClient().getKeystorePathInvalidCerts();
+          testSuiteConfig.getClient().getKeystorePathInvalidCerts();
       default -> throw new PkiCommonException("Unknown PKITS_CERT");
     }
-    certDir = PkitsTestsuiteUtils.buildAbsolutePath(certDir).toString();
+    certDir = PkitsTestSuiteUtils.buildAbsolutePath(certDir).toString();
   }
 }

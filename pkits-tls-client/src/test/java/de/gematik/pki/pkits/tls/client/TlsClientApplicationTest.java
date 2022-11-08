@@ -16,45 +16,33 @@
 
 package de.gematik.pki.pkits.tls.client;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ginsberg.junit.exit.ExpectSystemExitWithStatus;
-import com.ginsberg.junit.exit.SystemExitPreventedException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class TlsClientApplicationTest {
 
-  private static String clientKeystorePath;
+  private static Path clientKeystorePath;
 
   @BeforeAll
   static void setUp() {
-    clientKeystorePath =
-        Path.of("../testDataTemplates/certificates/rsa/valid/ee_default.p12").toString();
+    clientKeystorePath = Path.of("../testDataTemplates/certificates/rsa/valid/ee_default.p12");
   }
 
   @Test
-  @ExpectSystemExitWithStatus(2)
   void verifyMainNoServerAvailable() {
 
-    assertThatThrownBy(
-            () ->
-                TlsClientApplication.main(
-                    new String[] {"unknown", "8443", clientKeystorePath, "00"}))
-        .isInstanceOf(SystemExitPreventedException.class)
-        .hasMessage(null);
+    final int exitCode = TlsClientApplication.connectTls("unknown", 8443, clientKeystorePath, "00");
+    assertThat(exitCode).isEqualTo(2);
   }
 
   @Test
-  @ExpectSystemExitWithStatus(1)
   void verifyMainWithoutOcsp() {
 
-    assertThatThrownBy(
-            () ->
-                TlsClientApplication.main(
-                    new String[] {"localhost", "8443", clientKeystorePath, "00"}))
-        .isInstanceOf(SystemExitPreventedException.class)
-        .hasMessage(null);
+    final int exitCode =
+        TlsClientApplication.connectTls("localhost", 8443, clientKeystorePath, "00");
+    assertThat(exitCode).isEqualTo(1);
   }
 }

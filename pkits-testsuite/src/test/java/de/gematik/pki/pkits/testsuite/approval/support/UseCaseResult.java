@@ -14,38 +14,17 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.testsuite.config;
+package de.gematik.pki.pkits.testsuite.approval.support;
 
-import java.nio.file.Path;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
-public class TestsuiteParameter {
+public enum UseCaseResult {
+  EXPECT_PASS(0, "Expecting a valid use case execution."),
+  EXPECT_FAILURE(1, "Expecting an invalid use case execution.");
 
-  boolean initialStateUseCase;
-  OcspSettings ocspSettings;
-  TslSettings tslSettings;
-
-  @Getter
-  @Setter
-  public static class OcspSettings {
-
-    boolean requestsExpected;
-    Path keystorePathOcsp;
-    String signerPassword;
-    int gracePeriodSeconds;
-    int timeoutDeltaMilliseconds;
-  }
-
-  @Getter
-  @Setter
-  public static class TslSettings {
-
-    boolean initialStateTslImport;
-    Path defaultTemplate;
-    int downloadIntervalSeconds;
-    Path signer;
-    String signerPassword;
-  }
+  private final int expectedReturnCode;
+  private final String message;
 }

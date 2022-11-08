@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.sut.server.sim.controllers;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,6 @@ class SSLTestControllerTest {
   void greetingFails() throws Exception {
     final MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/fail");
     assertThat(mockMvc.perform(requestBuilder).andReturn().getResponse().getStatus())
-        .isEqualTo(404);
+        .isEqualTo(HTTP_NOT_FOUND);
   }
 }

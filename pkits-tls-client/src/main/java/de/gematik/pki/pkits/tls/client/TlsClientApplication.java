@@ -30,52 +30,58 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class TlsClientApplication {
-  public static void main(final String[] args) {
 
-    log.info("TLS args: {}", StringUtils.joinWith(" | ", (Object[]) args));
-
-    final InetAddress serverAddress;
-    final int serverPort = Integer.parseUnsignedInt(args[1]);
-    final Path certPath = Path.of(args[2]);
-    final String clientKeystorePassw = args[3];
-
+  public static int connectTls(
+      final String ipAddressOrFqdn, final int port, final Path certPath, final String password) {
     try {
-      serverAddress = InetAddress.getByName(args[0]);
+
+      final InetAddress serverAddress = InetAddress.getByName(ipAddressOrFqdn);
+
       final TlsConnection connection =
           TlsConnection.builder()
-              .clientKeystorePassw(clientKeystorePassw)
               .serverAddress(serverAddress)
-              .sutServerPort(serverPort)
+              .sutServerPort(port)
+              .clientKeystorePassw(password)
               .tlsSettings(PluginConfig.getInstance().getTlsSettings())
               .build();
 
       log.info("TLS connection: start");
       connection.tlsConnectCerts(certPath);
+      log.info("TLS connected.");
 
     } catch (final TlsClientException e) {
       log.info("No ssl connection established.");
-      System.exit(1);
-      return;
+      return 1;
     } catch (final UnknownHostException e) {
-      log.info("Host unknown: {}", args[0]);
-      System.exit(2);
-      return;
+      log.info("Host unknown: {}", ipAddressOrFqdn);
+      return 2;
     } catch (final UnrecoverableKeyException e) {
       log.info("Error with certificate key: {}", certPath);
-      System.exit(2);
-      return;
+      return 2;
     } catch (final CertificateException e) {
       log.info("Error with certificate: {}", certPath);
-      System.exit(2);
-      return;
+      return 2;
     } catch (final NoSuchAlgorithmException e) {
-      log.info("Algorithm problem in cert: {}", certPath);
-      System.exit(2);
-      return;
+      log.error("Algorithm problem in cert:" + certPath, e);
+      return 2;
     } catch (final IOException | KeyStoreException | KeyManagementException e) {
-      System.exit(2);
-      return;
+      return 2;
     }
-    log.info("TLS connected.");
+
+    return 0;
+  }
+
+  public static void main(final String[] args) {
+
+    log.info("TLS args: {}", StringUtils.joinWith(" | ", (Object[]) args));
+
+    final String ipAddressOrFqdn = args[0];
+    final int serverPort = Integer.parseUnsignedInt(args[1]);
+    final Path certPath = Path.of(args[2]);
+    final String clientKeystorePassw = args[3];
+
+    final int returnCode = connectTls(ipAddressOrFqdn, serverPort, certPath, clientKeystorePassw);
+
+    System.exit(returnCode);
   }
 }

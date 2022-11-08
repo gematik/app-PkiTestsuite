@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspConfigRequestDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OcspConfigController {
 
   private final OcspResponseConfigHolder ocspResponseConfigHolder;
+  private final OcspRequestHistory ocspRequestHistory;
 
   @PostMapping(value = WEBSERVER_CONFIG_ENDPOINT)
   public void ocspConfig(final HttpServletRequest request) throws IOException {
@@ -43,12 +45,14 @@ public class OcspConfigController {
         new ObjectMapper().readValue(request.getInputStream(), byte[].class);
     final OcspConfigRequestDto ocspConfigRequest = bytesToDto(ocspConfigRequestByte);
     processConfigurationRequest(ocspConfigRequest);
+    log.info("Ocsp ConfigurationRequest processed (and history cleared).");
   }
 
   private void processConfigurationRequest(final OcspConfigRequestDto configRequest) {
     log.info("ConfigurationRequest: {}", configRequest);
     if (bearerTokenIsValid(configRequest.getBearerToken())) {
       ocspResponseConfigHolder.setOcspResponderConfigDto(configRequest.getOcspResponderConfigDto());
+      ocspRequestHistory.deleteAll();
     } else {
       log.info(
           "Invalid bearer token received: {}, expected: {}",

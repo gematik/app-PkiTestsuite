@@ -20,16 +20,24 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-public class TestobjectConfig {
+@Setter
+public class TestSuiteParameter {
 
-  String name;
-  String type;
-  String ipAddress;
-  String url;
-  @Setter int port;
+  @ParameterDescription(
+      withDefault = true,
+      description = "Execute smoke test (TSL and use case including OCSP) before each test.")
+  boolean initialStateUseCase = true;
 
-  String scriptPath;
-  Integer tslProcessingTimeSeconds;
+  @ParameterDescription(
+      withDefault = true,
+      description = "Capture network traffic in pcap file format.")
+  boolean captureNetworkTraffic = false;
 
-  int ocspTimeoutSeconds;
+  @ParameterDescription(
+      withDefault = false,
+      description = "IP address of an interface to sniff communication with the test object")
+  String captureInterface;
+
+  OcspSettings ocspSettings = new OcspSettings();
+  TslSettings tslSettings = new TslSettings();
 }

@@ -17,11 +17,35 @@
 package de.gematik.pki.pkits.testsuite.config;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ClientConfig {
 
+  @ParameterDescription(
+      withDefault = false,
+      description =
+          "Absolute or relative path to valid key store end-entity files in p12 format for the"
+              + " tests.")
   private String keystorePathValidCerts;
+
+  @ParameterDescription(
+      withDefault = false,
+      description =
+          "Absolute or relative path to valid key store end-entity files of an alternative CA in"
+              + " p12 format for the tests.")
+  private String keystorePathAlternativeCerts;
+
+  @ParameterDescription(
+      withDefault = false,
+      description =
+          "Absolute or relative path to invalid key store end-entity files in p12 format for the"
+              + " tests.")
   private String keystorePathInvalidCerts;
-  private String keystorePassword;
+
+  @ParameterDescription(
+      withDefault = true,
+      description = "Password used for all p12 key store files of the test certificates.")
+  private String keystorePassword = "00"; // NOSONAR
 }

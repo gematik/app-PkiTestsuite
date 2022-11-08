@@ -28,4 +28,8 @@ public class TslConfigHolder {
 
   private String bearerToken;
   private TslProviderConfigDto tslProviderConfigDto;
+
+  public boolean isConfigured() {
+    return tslProviderConfigDto != null;
+  }
 }

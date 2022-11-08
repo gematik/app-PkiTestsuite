@@ -34,7 +34,9 @@ public final class PkitsConstants {
   public static final String TSL_HASH_BACKUP_ENDPOINT = "/tsl-backup/tsl.sha2";
   public static final String TSL_SEQNR_PARAM_ENDPOINT = "activeTslSeqNr";
 
-  public static final String GEMATIK_TEST_TSP = "gematik GmbH - Test TSP";
+  public static final String GEMATIK_TEST_TSP = "gematik GmbH - PKI TEST TSP";
+
+  public static final String NOT_CONFIGURED = "not configured";
 
   public enum TslDownloadPoint {
     TSL_DOWNLOAD_POINT_PRIMARY,

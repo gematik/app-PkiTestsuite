@@ -93,17 +93,17 @@ class OcspRequestControllerTest {
         OcspRequestGenerator.generateSingleOcspRequest(VALID_X509_EE_CERT, VALID_X509_ISSUER_CERT);
   }
 
+  private String getLocalhostEndpoint(final String endpoint) {
+    return "http://localhost:" + localServerPort + endpoint;
+  }
+
   @BeforeEach
   public void init() {
-    ocspServiceUrl = "http://localhost:" + localServerPort + OCSP_SSP_ENDPOINT;
+    ocspServiceUrl = getLocalhostEndpoint(OCSP_SSP_ENDPOINT);
     ocspServiceUrlSeqNr31 = ocspServiceUrl + "/" + 31;
     delayMilliseconds = 0;
     OcspResponderTestUtils.configure(
-        "http://localhost:" + localServerPort,
-        VALID_X509_EE_CERT,
-        CERT_STATUS_GOOD,
-        signer,
-        delayMilliseconds);
+        getLocalhostEndpoint(""), VALID_X509_EE_CERT, CERT_STATUS_GOOD, signer, delayMilliseconds);
     log.info("OCSP Request TX: {}", ocspReq.getRequestList()[0].getCertID().getSerialNumber());
   }
 
@@ -215,7 +215,7 @@ class OcspRequestControllerTest {
   @Test
   void certSerialNrNotConfigured() throws IOException {
     OcspResponderTestUtils.configure(
-        "http://localhost:" + localServerPort,
+        getLocalhostEndpoint(""),
         VALID_X509_ISSUER_CERT,
         CERT_STATUS_GOOD,
         signer,
@@ -233,7 +233,7 @@ class OcspRequestControllerTest {
     final ZonedDateTime start = ZonedDateTime.now();
 
     OcspResponderTestUtils.configure(
-        "http://localhost:" + localServerPort,
+        getLocalhostEndpoint(""),
         VALID_X509_EE_CERT,
         CERT_STATUS_GOOD,
         signer,

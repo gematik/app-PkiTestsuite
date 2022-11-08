@@ -61,8 +61,14 @@ public class TslInfoController {
 
   private void deleteHistoryOnDemand(final TslInfoRequestDto tslInfoRequestDto) {
     switch (tslInfoRequestDto.getHistoryDeleteOption()) {
-      case DELETE_FULL_HISTORY -> tslRequestHistory.deleteAll();
-      case DELETE_SEQNR_ENTRY -> tslRequestHistory.deleteEntries(tslInfoRequestDto.getSequenceNr());
+      case DELETE_FULL_HISTORY -> {
+        tslRequestHistory.deleteAll();
+        log.debug("TSLProvider history: cleared");
+      }
+      case DELETE_SEQNR_ENTRY -> {
+        tslRequestHistory.deleteEntries(tslInfoRequestDto.getSequenceNr());
+        log.debug("TSLProvider history: cleared seqNr {}", tslInfoRequestDto.getSequenceNr());
+      }
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }
   }

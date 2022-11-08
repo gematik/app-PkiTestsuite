@@ -55,8 +55,4 @@ public class TslRequestHistory {
   public void deleteAll() {
     history.clear();
   }
-
-  public int size() {
-    return history.size();
-  }
 }

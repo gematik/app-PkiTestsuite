@@ -38,7 +38,7 @@ class TslGenerationTest {
   void createTslFromFile() throws DatatypeConfigurationException, IOException {
     final Path destFilePath = Path.of("target/unittest_createTslFromFile.xml");
     final String newSsp = "http://my.new-cool-service-supply-point:5544/ocsp";
-    final int modifiedSspAmountExpected = 140;
+    final int modifiedSspAmountExpected = 130;
     final ZonedDateTime zdtUtcNow = ZonedDateTime.now(ZoneOffset.UTC);
     final int COMPARE_LEN = "yyyy-mm-ddThh:mm".length();
 
@@ -58,7 +58,7 @@ class TslGenerationTest {
             "../testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
     final byte[] tslBytes =
         TslGeneration.createTslFromFile(
-            Path.of("../testDataTemplates/tsl/tslTemplateEcc.xml"), tslMod, tslSignerPath, "00");
+            Path.of("../testDataTemplates/tsl/TSL_default.xml"), tslMod, tslSignerPath, "00");
     Files.write(destFilePath, tslBytes);
 
     assertThat(countStringInFile(destFilePath, newSsp)).isEqualTo(modifiedSspAmountExpected);

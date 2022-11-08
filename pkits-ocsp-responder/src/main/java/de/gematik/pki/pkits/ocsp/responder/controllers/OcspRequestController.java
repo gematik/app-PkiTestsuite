@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
+import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 
 import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
@@ -38,6 +39,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,8 +56,25 @@ public class OcspRequestController {
   @PostMapping(
       value = OCSP_SSP_ENDPOINT + "/{seqNr}",
       produces = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
-  public byte[] ocspService(
+  public ResponseEntity<Object> ocspService(
       @PathVariable("seqNr") final int seqNr, final HttpServletRequest request) {
+
+    if (!ocspResponseConfigHolder.isConfigured()) {
+      return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
+    }
+
+    final int delayMilliseconds =
+        ocspResponseConfigHolder.getOcspResponderConfigDto().getDelayMilliseconds();
+
+    if (delayMilliseconds < 0) {
+      throw new PkiCommonException("delayMilliseconds is < 0");
+    }
+
+    if (delayMilliseconds > 0) {
+      log.info("Delay sending OCSP Response for {} milliseconds", delayMilliseconds);
+      PkitsCommonUtils.waitMilliseconds(delayMilliseconds);
+    }
+
     final OCSPReq ocspReq = createOcspReqFromServletRequest(request);
     final BigInteger certSerialNr = getCertSerialNrFromRequest(ocspReq);
     if (!ocspResponseConfigHolder.isCertSerialNrConfigured(certSerialNr)) {
@@ -72,24 +92,18 @@ public class OcspRequestController {
         request.getRemoteHost(),
         request.getRemotePort());
 
-    final int delayMilliseconds =
-        ocspResponseConfigHolder.getOcspResponderConfigDto().getDelayMilliseconds();
-
-    if (delayMilliseconds < 0) {
-      throw new PkiCommonException("delayMilliseconds is < 0");
-    }
-
-    if (delayMilliseconds > 0) {
-      log.info("Delay building OCSP Response for {} milliseconds", delayMilliseconds);
-      PkitsCommonUtils.waitMilliseconds(delayMilliseconds);
-    }
-
-    return buildOcspResponseBytes(ocspReq);
+    final byte[] ocspResponseBytes = buildOcspResponseBytes(ocspReq);
+    return new ResponseEntity<>(ocspResponseBytes, HttpStatus.OK);
   }
 
   private byte[] buildOcspResponseBytes(final OCSPReq ocspReq) {
     final OcspResponderConfigDto dto = ocspResponseConfigHolder.getOcspResponderConfigDto();
     final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+
+    ZonedDateTime nextUpdate = null;
+    if (dto.getNextUpdateDeltaMilliseconds() != null) {
+      nextUpdate = now.plus(dto.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
+    }
 
     final OcspResponseGenerator ocspResponseGenerator =
         OcspResponseGenerator.builder()
@@ -103,7 +117,7 @@ public class OcspRequestController {
             .withResponseBytes(dto.isWithResponseBytes())
             .thisUpdate(now.plus(dto.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
             .producedAt(now.plus(dto.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
-            .nextUpdate(now.plus(dto.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .nextUpdate(nextUpdate)
             .withNullParameterHashAlgoOfCertId(dto.isWithNullParameterHashAlgoOfCertId())
             .build();
     try {

@@ -16,29 +16,34 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
+import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
+
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
+import org.apache.commons.lang3.ObjectUtils;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 public class OcspConfigRequestDto implements Serializable {
 
   @Serial private static final long serialVersionUID = 1281849381050153864L;
   private String bearerToken;
   private OcspResponderConfigDto ocspResponderConfigDto;
 
+  public OcspConfigRequestDto(
+      @NonNull final String bearerToken, final OcspResponderConfigDto ocspResponderConfigDto) {
+    this.bearerToken = bearerToken;
+    this.ocspResponderConfigDto = ocspResponderConfigDto;
+  }
+
   @Override
   public String toString() {
-    Objects.requireNonNull(bearerToken, "bearerToken must not be null");
-    Objects.requireNonNull(ocspResponderConfigDto, "ocspRespConfiguration must not be null");
-    return String.format(
-        "bearerToken: %s, ocspRespConfiguration: %s", bearerToken, ocspResponderConfigDto);
+    final Object message = ObjectUtils.defaultIfNull(ocspResponderConfigDto, NOT_CONFIGURED);
+    return String.format("bearerToken: %s, ocspRespConfiguration: %s", bearerToken, message);
   }
 }

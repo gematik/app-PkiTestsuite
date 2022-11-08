@@ -17,9 +17,9 @@
 package de.gematik.pki.pkits.testsuite.common.tsl;
 
 import de.gematik.pki.pkits.testsuite.common.InstanceProviderNanny;
-import de.gematik.pki.pkits.testsuite.common.TestsuiteConstants;
+import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestsuiteConfig;
+import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 
 public class TslProviderInstance extends InstanceProviderNanny {
 
@@ -34,12 +34,12 @@ public class TslProviderInstance extends InstanceProviderNanny {
   }
 
   private void initialize() {
-    final TestsuiteConfig testsuiteConfig = TestConfigManager.getTestsuiteConfig();
-    setServerId(testsuiteConfig.getTslProvider().getId());
-    setAppPath(testsuiteConfig.getTslProvider().getAppPath());
-    setPortJvmParam(TestsuiteConstants.TSL_PROVIDER_JVM_PARAM_PORT_NAME);
-    setIpAddressJvmParam(TestsuiteConstants.TSL_PROVIDER_JVM_PARAM_IP_ADDRESS_NAME);
-    setIpAddressConfig(testsuiteConfig.getTslProvider().getIpAddress());
-    setPortConfig(testsuiteConfig.getTslProvider().getPort());
+    final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
+    setServerId(testSuiteConfig.getTslProvider().getId());
+    setAppPath(testSuiteConfig.getTslProvider().getAppPath());
+    setPortJvmParam(TestSuiteConstants.TSL_PROVIDER_JVM_PARAM_PORT_NAME);
+    setIpAddressJvmParam(TestSuiteConstants.TSL_PROVIDER_JVM_PARAM_IP_ADDRESS_NAME);
+    setIpAddressConfig(testSuiteConfig.getTslProvider().getIpAddressOrFqdn());
+    setPortConfig(testSuiteConfig.getTslProvider().getPort());
   }
 }

@@ -43,8 +43,16 @@ public final class OcspResponderManager {
         new OcspConfigRequestDto(WEBSERVER_BEARER_TOKEN, ocspResponderConfig);
     final String jsonContent =
         PkitsCommonUtils.createJsonContent(PkitsCommonUtils.objectToBytes(configReq));
-    // received by {@link class OcspConfigController}
+
+    /**
+     * received by {@link
+     * de.gematik.pki.pkits.ocsp.responder.controllers.OcspConfigController#ocspConfig}
+     */
     JsonTransceiver.sendJsonViaHttp(configUri, jsonContent);
+  }
+
+  public static void clear(final String uri) {
+    configure(uri, null);
   }
 
   /**
@@ -82,11 +90,13 @@ public final class OcspResponderManager {
    * @param uri OcspResponder URI
    */
   public static void clearOcspHistory(final String uri) {
+
     final BigInteger invalidCertSerialNr = BigInteger.valueOf(-1);
     final OcspInfoRequestDto ocspInfoRequest =
         new OcspInfoRequestDto(
             invalidCertSerialNr, OcspInfoRequestDto.HistoryDeleteOption.DELETE_FULL_HISTORY);
     sendInfoRequest(uri, ocspInfoRequest);
+    log.info("OcspHistory cleared, at {} for certSerialNr {}", uri, invalidCertSerialNr);
   }
 
   private static List<OcspRequestHistoryEntryDto> sendInfoRequest(

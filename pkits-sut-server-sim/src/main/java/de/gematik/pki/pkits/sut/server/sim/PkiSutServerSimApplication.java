@@ -22,14 +22,12 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.web.SecurityFilterChain;
@@ -39,7 +37,9 @@ import org.springframework.security.web.SecurityFilterChain;
 public class PkiSutServerSimApplication implements SecurityFilterChain {
 
   static {
-    System.setProperty("jdk.tls.namedGroups", "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1");
+    System.setProperty(
+        "jdk.tls.namedGroups", "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, ffdhe2048");
+
     Security.setProperty("ssl.KeyManagerFactory.algorithm", "PKIX");
     Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     Security.insertProviderAt(new BouncyCastleProvider(), 1);
@@ -47,11 +47,9 @@ public class PkiSutServerSimApplication implements SecurityFilterChain {
     Security.insertProviderAt(new BouncyCastleJsseProvider(), 2);
   }
 
-  @Autowired private OcspConfig ocspConfig;
   @Getter private static OcspRespCache ocspRespCache;
 
-  @PostConstruct
-  public void init() {
+  public PkiSutServerSimApplication(final OcspConfig ocspConfig) {
     ocspRespCache = new OcspRespCache(ocspConfig.getOcspGracePeriodSeconds()); // NOSONAR
   }
 
