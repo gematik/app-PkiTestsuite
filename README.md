@@ -9,6 +9,17 @@ TUC_PKI_018 (certificate validation) and TUC_PKI_006 (OCSP response validation).
 approval tests of every PKI related aspect. It is a re-development of our test suite from 2016. The
 development is still ongoing [see Todo section](./README.md#todo)
 
+## tl;dr
+
+```console 
+$ git clone https://github.com/gematik/app-PkiTestsuite
+$ cp <UserDefinedConfigfile>.yml pkits/config/pkits.yml (examples see: /docs/config/inttest/)
+$ ./initialTslAndVa.sh (generates VA and TSL in ./out for import in test object)
+$ ./checkInitalState.sh (acquires TSL sequence number from test object and does smoke test)
+$ ./startApprovalTest.sh (chose tests that shall be executed from allTests.txt)
+$ # Testreport can be found in ./out directory.
+```
+
 ## Technical Functionality
 
 The test suite consists of four parts necessary for validating a PKI test object. These are

@@ -9,7 +9,7 @@
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pkits-global</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <packaging>pom</packaging>
   <name>PkiTs</name>
   <description>Uebergreifende Java PKI Testsuite</description>
