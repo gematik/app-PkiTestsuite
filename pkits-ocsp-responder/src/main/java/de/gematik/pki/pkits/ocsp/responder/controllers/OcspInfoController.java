@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_INFO_ENDPOINT;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspInfoRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +42,7 @@ public class OcspInfoController {
    * @return An excerpt of the history of requests
    * @throws IOException in case of ServletInputStream problem
    */
-  @PostMapping(value = WEBSERVER_INFO_ENDPOINT)
+  @PostMapping(value = PkitsConstants.OCSP_WEBSERVER_INFO_ENDPOINT)
   public List<OcspRequestHistoryEntryDto> info(final HttpServletRequest request)
       throws IOException {
 
@@ -61,7 +60,7 @@ public class OcspInfoController {
       final OcspInfoRequestDto ocspInfoRequest) {
     final List<OcspRequestHistoryEntryDto> retList;
     if (ocspInfoRequest.getCertSerialNr().signum() == 1) {
-      log.info("InfoRequest for certSerialNr : {} received.", ocspInfoRequest.getCertSerialNr());
+      log.info("InfoRequest received for certSerialNr {}.", ocspInfoRequest.getCertSerialNr());
       retList = ocspRequestHistory.getExcerpt(ocspInfoRequest.getCertSerialNr());
       log.info("Found history with {} entries.", retList.size());
     } else {

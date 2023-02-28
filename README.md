@@ -13,9 +13,10 @@ development is still ongoing [see Todo section](./README.md#todo)
 
 ```console 
 $ git clone https://github.com/gematik/app-PkiTestsuite
-$ cp <UserDefinedConfigfile>.yml pkits/config/pkits.yml (examples see: /docs/config/inttest/)
-$ ./initialTslAndVa.sh (generates VA and TSL in ./out for import in test object)
-$ ./checkInitalState.sh (acquires TSL sequence number from test object and does smoke test)
+$ cp <UserDefinedConfigfile>.yml ./config/pkits.yml (examples see: /docs/config/inttest/)
+$ ./initialTslAndTa.sh (generates VA and TSL in ./out for import in test object)
+$ # The test object has to be started and accessible from now on.
+$ ./checkInitialState.sh (acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case)
 $ ./startApprovalTest.sh (chose tests that shall be executed from allTests.txt)
 $ # Testreport can be found in ./out directory.
 ```
@@ -91,30 +92,35 @@ the fly. If you use your own test data make sure that issuing certificates are a
 ### Initial TSL and Trust Anchor
 
 For the configuration of the test object it is necessary to initialize it with a trust space
-compatible to the test suite. For this, a convenient script ist provided by the test suite:
-By executing `initialTslAndVa.sh` an initial TSL and the corresponding trust anchor are written to
-the `./out` directory for import into the test object.
+compatible to the test suite. For this, a convenient script is provided by the test suite:
+By executing `initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
+the `./out` directory for import into the test object. This TSL contains the TU trust store as well,
+this means, that the test object can be used during the pki tests by other services as well.
 
 ## Test Execution
 
-Tests are executed via the script `./startApprovalTest.sh`. It will compile all modules and run the
-approval test classes via maven-failsafe-plugin. Furthermore,
+The test suite expects a test object that is running and accessible over the configured IP address
+and port (see [Configuration](./README.md#configuration)). Tests are executed via the
+script `./startApprovalTest.sh`. It will compile all modules
+and run the approval test classes via maven-failsafe-plugin. Furthermore,
 the [OCSP responder](./README.md#3-ocsp-responder)
-and [TSL provider](./README.md#2-tsl-provider) are started at the configured sockets. Logs are
-written to the `./out/logs` directory. Afterwards a test report is generated in
-the `./out/testreport` directory.
+and [TSL provider](./README.md#2-tsl-provider) are started at the configured sockets (if they are
+not deactivated). Logs are written to the `./out/logs` directory. Afterwards a test report is
+generated in the `./out/testreport` directory.
 
 ### Smoke Test
 
-In oder to make a quick check if everything is set up correctly, and to initialize the test suite
-with the tsl sequence number set in the test object, we implemented a script that runs
-an initial test: `./checkInitialState.sh`. Within a TSL download is checked and afterwards a use
-case is triggered with a valid certificate. OCSP requests are expected and answered correctly.
+In oder to make a quick check if everything is set up correctly, the test object can be reach by the
+test suite, and to initialize the test suite with the tsl sequence number set in the test object, we
+implemented a script that runs an initial test: `./checkInitialState.sh`. Within a TSL download by
+the test object is exacted and afterwards a use case is triggered with a valid certificate. OCSP
+requests are expected and answered correctly as well. Therefor a configured test object has to be up
+and running and accessible by the testsuite and its components.
 
 ### Selecting Specific Tests
 
 Besides executing all tests, it is possible to select or exclude specific tests for execution.
-This is done via the file `allTest.txt`.
+This is done via the file `allTests.txt`.
 The file lists test classes `CertificateApprovalTestsIT`, `OcspApprovalTestsIT`
 , `TslApprovalTestsIT`, `TslITSignerApprovalTestIT` and all tests defined in the test classes.
 Test classes as well as separate tests can be marked with `+` or `-`.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,42 @@ package de.gematik.pki.pkits.tsl.provider.data;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 
+import de.gematik.pki.gemlibpki.tsl.TslConverter;
 import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
+import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Slf4j
 public class TslProviderConfigDto {
 
   private byte[] tslBytes;
   private TslDownloadPoint activeTslDownloadPoint;
+  private TslProviderEndpointsConfig tslProviderEndpointsConfig =
+      TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200;
+
+  @Getter
+  public enum TslProviderEndpointsConfig {
+    PRIMARY_200_BACKUP_200(200, 200),
+    PRIMARY_200_BACKUP_404(200, 404),
+    PRIMARY_404_BACKUP_200(404, 200),
+    PRIMARY_404_BACKUP_404(404, 404);
+
+    int primaryStatusCode;
+    int backupStatusCode;
+
+    TslProviderEndpointsConfig(final int primaryStatusCode, final int backupStatusCode) {
+      this.primaryStatusCode = primaryStatusCode;
+      this.backupStatusCode = backupStatusCode;
+    }
+  }
 
   @Override
   public String toString() {
@@ -41,6 +63,18 @@ public class TslProviderConfigDto {
     } else {
       message = NOT_CONFIGURED;
     }
-    return String.format("tslDownloadPoint: %s, tsl size: %d bytes", message, tslBytes.length);
+
+    String tslInfo = "ignore: tslId and seqNr: tsl - cannot be parsed";
+    try {
+      final TrustStatusListType tsl = TslConverter.bytesToTsl(tslBytes);
+      tslInfo =
+          "tslId: " + tsl.getId() + " seqNr: " + tsl.getSchemeInformation().getTSLSequenceNumber();
+    } catch (final Exception e) {
+      log.debug(tslInfo, e);
+    }
+
+    return String.format(
+        "tslDownloadPoint: %s, tsl size: %d bytes, %s, tslProviderEndpointsConfig: %s",
+        message, tslBytes.length, tslInfo, tslProviderEndpointsConfig);
   }
 }

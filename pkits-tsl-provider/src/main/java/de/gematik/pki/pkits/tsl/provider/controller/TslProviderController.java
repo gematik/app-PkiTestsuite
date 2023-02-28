@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,19 @@ package de.gematik.pki.pkits.tsl.provider.controller;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_BACKUP_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_PRIMARY_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
 
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
-import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistoryEntryDto;
+import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
@@ -60,47 +61,70 @@ public class TslProviderController {
     return headerValues.stream().anyMatch(v -> v.contains("gzip"));
   }
 
-  @GetMapping(value = TSL_XML_ENDPOINT, produces = MEDIA_TYPE_APPLICATION_VND_ETSI_TSL_XML)
+  @GetMapping(value = TSL_XML_PRIMARY_ENDPOINT, produces = MEDIA_TYPE_APPLICATION_VND_ETSI_TSL_XML)
   public ResponseEntity<byte[]> getTslXmlPrimary(
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
 
-    final String protocol = request.getProtocol();
-
-    final ResponseEntity<byte[]> responseEntity = getResponseEntityWithTsl();
-    addHistoryEntry(activeTslSeqNr, isGzipCompressed(request), protocol);
-    return responseEntity;
+    log.info("Starting tsl xml endpoint at {}", TSL_XML_PRIMARY_ENDPOINT);
+    addHistoryEntry(activeTslSeqNr, TSL_XML_PRIMARY_ENDPOINT, request);
+    return getResponseEntityWithTsl(true);
   }
 
-  @GetMapping(value = TSL_HASH_ENDPOINT)
+  @GetMapping(value = TSL_HASH_PRIMARY_ENDPOINT)
   public ResponseEntity<String> getTslHashPrimary(
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
-    addHistoryEntry(activeTslSeqNr, isGzipCompressed(request), request.getProtocol());
+    log.info("Starting tsl hash endpoint at {}", TSL_HASH_PRIMARY_ENDPOINT);
+    addHistoryEntry(activeTslSeqNr, TSL_HASH_PRIMARY_ENDPOINT, request);
     return getResponseEntityWithHash();
   }
 
   @GetMapping(value = TSL_XML_BACKUP_ENDPOINT, produces = MEDIA_TYPE_APPLICATION_VND_ETSI_TSL_XML)
   public ResponseEntity<byte[]> getTslXmlBackup(
+      final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
-    return getResponseEntityWithTsl();
+    log.info("Starting tsl backup xml endpoint at {}", TSL_XML_BACKUP_ENDPOINT);
+    addHistoryEntry(activeTslSeqNr, TSL_XML_BACKUP_ENDPOINT, request);
+    return getResponseEntityWithTsl(false);
   }
 
   @GetMapping(value = TSL_HASH_BACKUP_ENDPOINT)
   public ResponseEntity<String> getTslHashBackup(
+      final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
+
+    log.info("Starting tsl backup hash endpoint at {}", TSL_HASH_BACKUP_ENDPOINT);
+    addHistoryEntry(activeTslSeqNr, TSL_HASH_BACKUP_ENDPOINT, request);
     return getResponseEntityWithHash();
   }
 
-  private ResponseEntity<byte[]> getResponseEntityWithTsl() {
+  private ResponseEntity<byte[]> getResponseEntityWithTsl(final boolean isPrimaryEndpoint) {
 
     if (!tslConfigHolder.isConfigured()) {
-      return ResponseEntity.internalServerError().body(NOT_CONFIGURED.getBytes());
+      return ResponseEntity.internalServerError()
+          .body(NOT_CONFIGURED.getBytes(StandardCharsets.UTF_8));
+    }
+
+    final TslProviderEndpointsConfig tslProviderEndpointsConfig =
+        tslConfigHolder.getTslProviderConfigDto().getTslProviderEndpointsConfig();
+
+    final int statusCode;
+    if (isPrimaryEndpoint) {
+      statusCode = tslProviderEndpointsConfig.getPrimaryStatusCode();
+    } else {
+      statusCode = tslProviderEndpointsConfig.getBackupStatusCode();
+    }
+
+    if (statusCode == HttpStatus.NOT_FOUND.value()) {
+      log.info("statusCode=404 -> response with http status {}", HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     final byte[] tsl = getTsl();
 
     if (tsl.length == 0) {
+      log.info("tsl.length == 0 -> response with status code {}", HttpStatus.INTERNAL_SERVER_ERROR);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     } else {
       return ResponseEntity.ok(tsl);
@@ -127,10 +151,8 @@ public class TslProviderController {
   }
 
   private void addHistoryEntry(
-      final int sequenceNr, final boolean isGzipCompressed, final String protocol) {
-
-    final TslRequestHistoryEntryDto entry =
-        new TslRequestHistoryEntryDto(sequenceNr, TSL_XML_ENDPOINT, isGzipCompressed, protocol);
-    tslRequestHistory.add(entry);
+      final int activeTslSeqNr, final String endpoint, final HttpServletRequest request) {
+    final String protocol = request.getProtocol();
+    tslRequestHistory.add(activeTslSeqNr, endpoint, isGzipCompressed(request), protocol);
   }
 }

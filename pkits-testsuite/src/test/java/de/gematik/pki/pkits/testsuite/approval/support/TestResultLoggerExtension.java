@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ public class TestResultLoggerExtension implements TestWatcher, AfterAllCallback 
 
   private static class TestResultInfo {
 
-    TestResultStatus testResultStatus;
-    String className;
-    String methodName;
-    String displayName;
+    final TestResultStatus testResultStatus;
+    final String className;
+    final String methodName;
+    final String displayName;
 
     public TestResultInfo(
         final TestResultStatus testResultStatus,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package de.gematik.pki.pkits.common;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
+import static de.gematik.pki.pkits.common.PkitsCommonUtils.getFirstSubStringByPattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import org.assertj.core.api.AssertionsForClassTypes;
@@ -28,7 +30,7 @@ class PkitsCommonUtilsTest {
 
   @Test
   void verifyCalculateSha256HexValid() {
-    assertThat(calculateSha256Hex("Das ist ein Teststring!".getBytes()))
+    assertThat(calculateSha256Hex("Das ist ein Teststring!".getBytes(StandardCharsets.UTF_8)))
         .isEqualTo("66057df8c7aa189868be072ba859ed629f627b341afc5611982c316376011869");
   }
 
@@ -53,5 +55,14 @@ class PkitsCommonUtilsTest {
             zdtNow.plus(milliSecondsToWait, ChronoUnit.MILLIS).isBefore(zdtLater))
         .as("Before wait:\n" + zdtNow + ", after wait:\n" + zdtLater)
         .isTrue();
+  }
+
+  @Test
+  void findFirstSubStringByPattern() {
+    final String src =
+        "PostalAddresses><ElectronicAddress><URI>mailto:pki@gematik.de</URI></ElectronicAddress></SchemeOperat";
+    final String searchPattern = "<URI>(\\S+)</URI>";
+    final String result = getFirstSubStringByPattern(src, searchPattern);
+    assertThat(result).isEqualTo("mailto:pki@gematik.de");
   }
 }

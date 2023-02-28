@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package de.gematik.pki.pkits.testsuite.common;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_HEALTH_ENDPOINT;
-import static de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils.waitForEvent;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
+import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -33,7 +33,7 @@ import org.apache.http.HttpStatus;
 public abstract class InstanceProviderNanny {
 
   private Process process;
-  private boolean isUp = false;
+  private boolean processIsAlreadyUp = false;
 
   private int port;
   private int portConfig;
@@ -79,26 +79,36 @@ public abstract class InstanceProviderNanny {
   }
 
   public void startServer() {
-    if (!isUp) {
+    if (PkitsCommonUtils.isExternalStartup(appPath)) {
+      setIpAddressAndPort();
+      return;
+    }
+
+    if (!processIsAlreadyUp) {
       setIpAddressAndPort();
       startServerProcess();
-      isUp = true;
+      processIsAlreadyUp = true;
     } else {
       log.info("Instance of {} is still up", serverId);
     }
   }
 
   public void stopServer() {
+    if (PkitsCommonUtils.isExternalStartup(appPath)) {
+      return;
+    }
+
     final Optional<Integer> processExitValue = getProcessExitValue(process);
-    log.debug(
-        "Web server process <%s> exit value: %s"
-            .formatted(
-                serverId,
-                processExitValue.isPresent()
-                    ? String.valueOf(processExitValue.get())
-                    : "no exit, still running ..."));
+
+    final String exitValue =
+        processExitValue.isPresent()
+            ? String.valueOf(processExitValue.get())
+            : "no exit, still running ...";
+
+    log.debug("Web server process <{}> exit value: {}", serverId, exitValue);
     log.debug("Destroy web server process <{}> now...", serverId);
-    isUp = false;
+
+    processIsAlreadyUp = false;
     process.destroy();
   }
 
@@ -139,15 +149,22 @@ public abstract class InstanceProviderNanny {
   }
 
   public String waitUntilWebServerIsUp(final int timeoutSecs) {
+
+    final String uri = "http://" + ipAddressOrFqdn + ":" + port;
+    if (PkitsCommonUtils.isExternalStartup(appPath)) {
+      log.info("Web server <{}> is started externally and should be up", serverId);
+      return uri;
+    }
+
     if (isProcessRunning()) {
       final Callable<Boolean> webServerIsUp = new WebServerHealthOk();
-      waitForEvent(serverId, timeoutSecs, webServerIsUp);
+      PkitsTestSuiteUtils.waitForEvent(serverId, timeoutSecs, webServerIsUp);
       log.info("Web server <{}> should be up now", serverId);
-      return "http://" + ipAddressOrFqdn + ":" + port;
-    } else {
-      isUp = false;
-      throw new PkiCommonException("Web server <" + serverId + "> is down");
+      return uri;
     }
+
+    processIsAlreadyUp = false;
+    throw new PkiCommonException("Web server <" + serverId + "> is down");
   }
 
   protected boolean isProcessRunning() {

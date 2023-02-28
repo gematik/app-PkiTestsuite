@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package de.gematik.pki.pkits.tsl.provider.api;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_INFO_ENDPOINT;
 
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto.HistoryDeleteOption;
@@ -46,11 +46,12 @@ public final class TslProviderManager {
   }
 
   public static void configure(
-      @NonNull final String uri, final TslProviderConfigDto tslProviderConfigDto) {
-    final String configUri = uri + WEBSERVER_CONFIG_ENDPOINT;
+      @NonNull final String tslProvUri, final TslProviderConfigDto tslProviderConfigDto) {
+    final String configUri = tslProvUri + WEBSERVER_CONFIG_ENDPOINT;
     final TslConfigRequestDto configReq =
         new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfigDto);
     final String jsonContent = PkitsCommonUtils.createJsonContent(configReq);
+    PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
     JsonTransceiver.sendJsonViaHttp(configUri, jsonContent);
   }
 
@@ -68,8 +69,8 @@ public final class TslProviderManager {
   private static List<TslRequestHistoryEntryDto> sendInfoRequest(
       final String uri, final TslInfoRequestDto tslInfoRequestDto) {
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslInfoRequestDto);
-    final String url = uri + WEBSERVER_INFO_ENDPOINT;
-    log.info("sendInfoRequest at {}", url);
+    final String url = uri + PkitsConstants.TSL_WEBSERVER_INFO_ENDPOINT;
+    log.debug("sendInfoRequest at {}", url);
     final String responseBodyAsJson = JsonTransceiver.txRxJsonViaHttp(url, jsonContent);
     log.debug("JsonTransceiver, responseBodyAsJson: {}", responseBodyAsJson);
     if (responseBodyAsJson.isEmpty()) {

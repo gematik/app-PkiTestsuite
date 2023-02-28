@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package de.gematik.pki.pkits.testsuite.unittests;
 
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
+import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.SIGNER_VALIDITY_CHECK_ENABLED;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.gemlibpki.tsl.TslReader;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslGeneration;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslModification;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
@@ -56,22 +59,26 @@ class TslGenerationTest {
     final Path tslSignerPath =
         Path.of(
             "../testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
+
     final byte[] tslBytes =
         TslGeneration.createTslFromFile(
-            Path.of("../testDataTemplates/tsl/TSL_default.xml"), tslMod, tslSignerPath, "00");
+            Path.of("../testDataTemplates/tsl/TSL_default.xml"),
+            tslMod,
+            tslSignerPath,
+            "00",
+            SIGNER_KEY_USAGE_CHECK_ENABLED,
+            SIGNER_VALIDITY_CHECK_ENABLED);
     Files.write(destFilePath, tslBytes);
 
     assertThat(countStringInFile(destFilePath, newSsp)).isEqualTo(modifiedSspAmountExpected);
     final String dateTimeWithoutSeconds =
-        TslReader.getIssueDate(TslReader.getTsl(destFilePath).orElseThrow())
-            .toString()
-            .substring(0, COMPARE_LEN);
+        TslReader.getIssueDate(TslReader.getTsl(destFilePath)).toString().substring(0, COMPARE_LEN);
     assertThat(zdtUtcNow.toString()).contains(dateTimeWithoutSeconds);
   }
 
   private static int countStringInFile(@NonNull final Path filePath, @NonNull final String expected)
       throws IOException {
-    final Scanner scanner = new Scanner(Files.newInputStream(filePath));
+    final Scanner scanner = new Scanner(Files.newInputStream(filePath), StandardCharsets.UTF_8);
     int cnt = 0;
     while (scanner.hasNextLine()) {
       final String line = scanner.nextLine();

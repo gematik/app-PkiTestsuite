@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class OcspRequestControllerTest {
   private static X509Certificate VALID_X509_ISSUER_CERT;
   private static OCSPReq ocspReq;
   @LocalServerPort private int localServerPort;
-  private static int delayMilliseconds = 0;
+  private int delayMilliseconds = 0;
 
   @Autowired private OcspRequestHistory ocspRequestHistory;
   private String ocspServiceUrl;
@@ -239,11 +239,10 @@ class OcspRequestControllerTest {
         signer,
         customDelayMilliseconds);
 
-    final HttpResponse<byte[]> response =
-        Unirest.post(ocspServiceUrlSeqNr31)
-            .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
-            .body(ocspReq.getEncoded())
-            .asBytes();
+    Unirest.post(ocspServiceUrlSeqNr31)
+        .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
+        .body(ocspReq.getEncoded())
+        .asBytes();
 
     final ZonedDateTime end = ZonedDateTime.now();
     return Duration.between(start, end).toMillis();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package de.gematik.pki.pkits.tsl.provider.controller;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_INFO_ENDPOINT;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistoryEntryDto;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 public class TslInfoController {
-
   private final TslRequestHistory tslRequestHistory;
 
   /**
@@ -43,7 +41,7 @@ public class TslInfoController {
    * @return An excerpt of the history of requests
    * @throws IOException in case of ServletInputStream problem
    */
-  @PostMapping(value = WEBSERVER_INFO_ENDPOINT)
+  @PostMapping(value = PkitsConstants.TSL_WEBSERVER_INFO_ENDPOINT)
   public List<TslRequestHistoryEntryDto> info(final HttpServletRequest request) throws IOException {
 
     final TslInfoRequestDto tslInfoRequest =

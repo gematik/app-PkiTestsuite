@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

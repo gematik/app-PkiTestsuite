@@ -3,6 +3,7 @@
 **/target
 *.log
 out/
+pkits-testsuite/src/site/markdown/
 
 docs/configs/tuTestObjects/
 docs/dev/
@@ -10,4 +11,5 @@ LICENSE_PLACEHOLDER
 Pipeline.CI.Jenkinsfile
 Pipeline.DeployGitHub.Jenkinsfile
 Pipeline.InternalRelease.Jenkinsfile
+Pipeline.CodeCheck.Jenkinsfile
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,18 @@ package de.gematik.pki.pkits.tsl.provider.controller;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_BACKUP_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_PRIMARY_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
+import java.nio.charset.StandardCharsets;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.apache.http.HttpStatus;
@@ -58,7 +60,7 @@ class TslProviderControllerTest {
   void verifyTslXmlEndpoint() {
     initTslProviderConfiguration();
     final byte[] responseDownload =
-        Unirest.get(getLocalhostEndpoint(TSL_XML_ENDPOINT))
+        Unirest.get(getLocalhostEndpoint(TSL_XML_PRIMARY_ENDPOINT))
             .queryString(TSL_SEQNR_PARAM_ENDPOINT, 1)
             .asBytes()
             .getBody();
@@ -69,7 +71,7 @@ class TslProviderControllerTest {
   void verifyTslHashEndpoint() {
     initTslProviderConfiguration();
     final HttpResponse<String> responseDownload =
-        Unirest.get(getLocalhostEndpoint(TSL_HASH_ENDPOINT))
+        Unirest.get(getLocalhostEndpoint(TSL_HASH_PRIMARY_ENDPOINT))
             .queryString(TSL_SEQNR_PARAM_ENDPOINT, "42")
             .asString();
     assertThat(responseDownload.getStatus()).isEqualTo(HttpStatus.SC_OK);
@@ -102,7 +104,7 @@ class TslProviderControllerTest {
   void tslXmlEndpointWithoutTslHttp500() {
     clearTslProviderConfiguration();
     final HttpResponse<byte[]> httpResponse =
-        Unirest.get(getLocalhostEndpoint(TSL_XML_ENDPOINT))
+        Unirest.get(getLocalhostEndpoint(TSL_XML_PRIMARY_ENDPOINT))
             .queryString(TSL_SEQNR_PARAM_ENDPOINT, "42")
             .asBytes();
     assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -112,7 +114,7 @@ class TslProviderControllerTest {
   void tslHashEndpointWithoutHashHttp500() {
     clearTslProviderConfiguration();
     final HttpResponse<byte[]> httpResponse =
-        Unirest.get(getLocalhostEndpoint(TSL_HASH_ENDPOINT))
+        Unirest.get(getLocalhostEndpoint(TSL_HASH_PRIMARY_ENDPOINT))
             .queryString(TSL_SEQNR_PARAM_ENDPOINT, "42")
             .asBytes();
     assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -123,12 +125,13 @@ class TslProviderControllerTest {
     TslProviderManager.clear(getLocalhostEndpoint(""));
 
     final HttpResponse<byte[]> httpResponse =
-        Unirest.get(getLocalhostEndpoint(TSL_XML_ENDPOINT))
+        Unirest.get(getLocalhostEndpoint(TSL_XML_PRIMARY_ENDPOINT))
             .queryString(TSL_SEQNR_PARAM_ENDPOINT, "42")
             .asBytes();
 
     assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    assertThat(new String(httpResponse.getBody())).isEqualTo(NOT_CONFIGURED);
+    assertThat(new String(httpResponse.getBody(), StandardCharsets.UTF_8))
+        .isEqualTo(NOT_CONFIGURED);
   }
 
   @Test
@@ -136,17 +139,21 @@ class TslProviderControllerTest {
     TslProviderManager.clear(getLocalhostEndpoint(""));
 
     final HttpResponse<byte[]> httpResponse =
-        Unirest.get(getLocalhostEndpoint(TSL_HASH_ENDPOINT))
+        Unirest.get(getLocalhostEndpoint(TSL_HASH_PRIMARY_ENDPOINT))
             .queryString(TSL_SEQNR_PARAM_ENDPOINT, "42")
             .asBytes();
 
     assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    assertThat(new String(httpResponse.getBody())).isEqualTo(NOT_CONFIGURED);
+    assertThat(new String(httpResponse.getBody(), StandardCharsets.UTF_8))
+        .isEqualTo(NOT_CONFIGURED);
   }
 
   private void initTslProviderConfiguration() {
     tslConfigHolder.setTslProviderConfigDto(
-        new TslProviderConfigDto(TSL_DUMMY.getBytes(), TSL_DOWNLOAD_POINT_PRIMARY));
+        new TslProviderConfigDto(
+            TSL_DUMMY.getBytes(StandardCharsets.UTF_8),
+            TSL_DOWNLOAD_POINT_PRIMARY,
+            TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200));
   }
 
   private void clearTslProviderConfiguration() {

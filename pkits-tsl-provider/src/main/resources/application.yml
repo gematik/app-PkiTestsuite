@@ -6,4 +6,4 @@ server:
       - "application/vnd.etsi.tsl+xml"
       - "application/vnd.etsi.tsl+xml;charset=UTF-8"
       - "application/text"
-  port: 8081
+  port: 8084

@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.5</version>
+    <version>3.0.2</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pkits-global</artifactId>
-  <version>0.3.1</version>
+  <version>0.4.1</version>
   <packaging>pom</packaging>
   <name>PkiTs</name>
   <description>Uebergreifende Java PKI Testsuite</description>
@@ -70,32 +70,39 @@
     <maven.compiler.encoding>${project.build.sourceEncoding}</maven.compiler.encoding>
 
     <!-- dependencies -->
-    <version.ardikars.pcap>1.4.2</version.ardikars.pcap>
-    <version.assertj-core>3.23.1</version.assertj-core>
+    <version.ardikars.pcap>1.5.0</version.ardikars.pcap>
+    <version.assertj-core>3.24.2</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
     <version.bouncycastle>1.72</version.bouncycastle>
-    <version.commons-compress>1.21</version.commons-compress>
-    <version.gemLibPki>0.9.4</version.gemLibPki>
-    <version.jackson>2.13.4</version.jackson>
-    <version.junit-jupiter>5.9.0</version.junit-jupiter>
+    <version.commons-compress>1.22</version.commons-compress>
+    <version.gemLibPki>0.11.0</version.gemLibPki>
+    <version.jackson>2.14.2</version.jackson>
+    <version.jakarta.activation-api>2.1.1</version.jakarta.activation-api>
+    <version.jakarta.validation-api>3.0.2</version.jakarta.validation-api>
+    <version.jakarta.xml.bind-api>4.0.0</version.jakarta.xml.bind-api>
+    <version.jaxb-api>2.4.0-b180830.0359</version.jaxb-api>
+    <version.jaxb-impl>2.3.6</version.jaxb-impl>
+    <version.junit-jupiter>5.9.2</version.junit-jupiter>
     <version.log4j2>2.19.0</version.log4j2>
-    <version.lombok>1.18.24</version.lombok>
-    <version.unirest-java>3.13.11</version.unirest-java>
+    <version.lombok>1.18.26</version.lombok>
+    <version.unirest-java>3.14.1</version.unirest-java>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
     <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
-    <version.maven-assembly-plugin>3.3.0</version.maven-assembly-plugin>
+    <version.maven-assembly-plugin>3.4.2</version.maven-assembly-plugin>
     <version.maven-clean-plugin>3.2.0</version.maven-clean-plugin>
     <version.maven-compiler-plugin>3.10.1</version.maven-compiler-plugin>
-    <version.maven-enforcer-plugin>3.1.0</version.maven-enforcer-plugin>
-    <version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
-    <version.maven-javadoc-plugin>3.4.0</version.maven-javadoc-plugin>
-    <version.maven-resources-plugin>3.2.0</version.maven-resources-plugin>
+    <version.maven-enforcer-plugin>3.2.1</version.maven-enforcer-plugin>
+    <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
+    <version.maven-javadoc-plugin>3.5.0</version.maven-javadoc-plugin>
+    <version.maven-project-info-reports-plugin>3.4.2</version.maven-project-info-reports-plugin>
+    <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
+    <version.maven-site-plugin>3.12.1</version.maven-site-plugin>
     <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
-    <version.maven-surefire-plugin>3.0.0-M6</version.maven-surefire-plugin>
+    <version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
     <version.sonar-maven-plugin>3.9.1.2184</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>2.22.8</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>2.33.0</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.15.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
@@ -136,6 +143,7 @@
         <artifactId>bctls-jdk18on</artifactId>
         <version>${version.bouncycastle}</version>
       </dependency>
+
       <dependency>
         <groupId>de.gematik.pki</groupId>
         <artifactId>gemLibPki</artifactId>
@@ -155,6 +163,22 @@
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-yaml</artifactId>
         <version>${version.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${version.jakarta.validation-api}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${version.jaxb-api}</version>
+      </dependency>
+      <!-- old JAXB implementation for non jakarta binding -->
+      <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+        <version>${version.jaxb-impl}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -197,7 +221,7 @@
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-slf4j-impl</artifactId>
+        <artifactId>log4j-slf4j2-impl</artifactId>
         <version>${version.log4j2}</version>
       </dependency>
       <dependency>
@@ -249,8 +273,19 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-    </dependencies>
 
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${version.jakarta.xml.bind-api}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.activation</groupId>
+        <artifactId>jakarta.activation-api</artifactId>
+        <version>${version.jakarta.activation-api}</version>
+      </dependency>
+
+    </dependencies>
   </dependencyManagement>
 
   <build>
@@ -259,12 +294,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.12.1</version>
+          <version>${version.maven-site-plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.4.1</version>
+          <version>${version.maven-project-info-reports-plugin}</version>
           <configuration>
             <skip>true</skip>
           </configuration>
@@ -366,14 +401,6 @@
                 <requireJavaVersion>
                   <version>${version.java}</version>
                 </requireJavaVersion>
-                <bannedDependencies>
-                  <excludes>
-                    <exclude>com.sun.xml.bind:jaxb-impl</exclude>
-                  </excludes>
-                  <includes>
-                    <include>com.sun.xml.bind:jaxb-impl:[2.3.6]</include>
-                  </includes>
-                </bannedDependencies>
               </rules>
             </configuration>
           </execution>
@@ -474,6 +501,7 @@
             </includes>
             <excludes>
               <exclude>**/target/**/*</exclude>
+              <exclude>**/src/site/markdown/*</exclude>
             </excludes>
           </markdown>
         </configuration>

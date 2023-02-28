@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 package de.gematik.pki.pkits.testsuite.approval;
 
 import static de.gematik.pki.pkits.testsuite.approval.support.OcspResponderType.OCSP_RESP_TYPE_CUSTOM;
-import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.EXPECT_FAILURE;
-import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.EXPECT_PASS;
+import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.USECASE_INVALID;
+import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.USECASE_VALID;
 import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
 import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
 
 import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
+import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.P12Container;
@@ -41,10 +42,9 @@ import java.nio.file.Path;
 import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -52,9 +52,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @Slf4j
 @DisplayName("PKI OCSP approval tests.")
-@TestMethodOrder(OrderAnnotation.class)
+@Order(1)
 class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
 
+  /** gematikId: UE_PKI_TS_0302_024 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 1")
   @DisplayName("Test OCSP grace period")
@@ -80,12 +81,13 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dtoUnknown);
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dtoGood);
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_017 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 4c")
   @DisplayName("Test OCSP response with timeout and delay")
@@ -108,7 +110,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dtoShort);
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
 
     final int longDelayMilliseconds =
         timeoutAndDelayFuncMap.get("longDelay").apply(testSuiteConfig);
@@ -121,9 +123,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dtoLongDelay);
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_DO_NOT_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_DO_NOT_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_014 */
   @ParameterizedTest
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5a")
   @DisplayName("Test missing OCSP signer in TSL")
@@ -151,9 +154,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .signer(signer)
             .build());
 
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_015 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5a1")
   @DisplayName("Test invalid signature in OCSP response")
@@ -172,7 +176,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .validSignature(false)
             .build());
 
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
   private void verifyOcspResponseDate(
@@ -197,6 +201,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
     useCaseWithCert(certPath, useCaseResult, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in past within tolerance")
@@ -211,9 +216,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, EXPECT_PASS);
+        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, USECASE_VALID);
   }
 
+  /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in past out of tolerance")
@@ -228,9 +234,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, EXPECT_FAILURE);
+        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, USECASE_INVALID);
   }
 
+  /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in future within tolerance")
@@ -244,7 +251,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, EXPECT_PASS);
+        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, USECASE_VALID);
 
     // WARNING: if this test case fails, we do not wait -- all the following test cases can be
     // influenced
@@ -258,6 +265,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             + producedAtDeltaMilliseconds / 1000);
   }
 
+  /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in future out of tolerance")
@@ -271,7 +279,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, EXPECT_FAILURE);
+        DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds, USECASE_INVALID);
     // WARNING: if this test case fails, we do not wait -- all the following test cases can be
     // influenced
     //   verifyOcspResponseProducedAtFutureOutOfTolerance
@@ -284,6 +292,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             + producedAtDeltaMilliseconds / 1000);
   }
 
+  /** gematikId: UE_PKI_TS_0302_022 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with thisUpdate in future within tolerance")
@@ -297,7 +306,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds, EXPECT_PASS);
+        DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds, USECASE_VALID);
 
     // WARNING: if this test case fails, we do not wait -- all the following test cases can be
     // influenced
@@ -311,6 +320,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             + thisUpdateDeltaMilliseconds / 1000);
   }
 
+  /** gematikId: UE_PKI_TS_0302_022 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with thisUpdate in future out of tolerance")
@@ -324,7 +334,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds, EXPECT_FAILURE);
+        DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds, USECASE_INVALID);
 
     // WARNING: if this test case fails, we do not wait -- all the following test cases can be
     // influenced
@@ -338,6 +348,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             + thisUpdateDeltaMilliseconds / 1000);
   }
 
+  /** gematikId: UE_PKI_TS_0302_032 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with nextUpdate in past within tolerance")
@@ -352,9 +363,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds, EXPECT_PASS);
+        DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds, USECASE_VALID);
   }
 
+  /** gematikId: UE_PKI_TS_0302_032 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with nextUpdate in past out of tolerance")
@@ -369,11 +381,12 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
     verifyOcspResponseDate(
-        DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds, EXPECT_FAILURE);
+        DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds, USECASE_INVALID);
   }
 
+  /** gematikId: UE_PKI_TS_0302_031 */
   @Test
-  // TODO @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6a")
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with missing nextUpdate")
   void verifyOcspResponseMissingNextUpdate(final TestInfo testInfo)
       throws DatatypeConfigurationException, IOException {
@@ -391,9 +404,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dto);
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_020 */
   @ParameterizedTest
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6a")
   @MethodSource(
@@ -416,14 +430,19 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .withResponseBytes(withResponseBytes)
             .build();
     TestEnvironment.configureOcspResponder(ocspRespUri, dto);
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
-  @Test
+  /** gematikId: UE_PKI_TS_0302_012 */
+  @ParameterizedTest
+  @EnumSource(
+      value = CertificateIdGeneration.class,
+      names = {"VALID_CERTID"},
+      mode = EnumSource.Mode.EXCLUDE)
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6b")
-  @Afo(afoId = "", description = "")
   @DisplayName("Test invalid cert id in OCSP response")
-  void verifyInvalidCerIdInOcspResponse(final TestInfo testInfo)
+  void verifyInvalidCerIdInOcspResponse(
+      final CertificateIdGeneration certificateIdGeneration, final TestInfo testInfo)
       throws DatatypeConfigurationException, IOException {
 
     testCaseMessage(testInfo);
@@ -435,12 +454,13 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
         OcspResponderConfigDto.builder()
             .eeCert(CertReader.getX509FromP12(certPath, clientKeystorePassw))
             .signer(ocspSigner)
-            .validCertId(false)
+            .certificateIdGeneration(certificateIdGeneration)
             .build());
 
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_046 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 7b")
   @DisplayName("Test missing CertHash in OCSP response")
@@ -459,9 +479,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .withCertHash(false)
             .build());
 
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_046 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 7c")
   @DisplayName("Test invalid CertHash in OCSP response")
@@ -480,14 +501,15 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .validCertHash(false)
             .build());
 
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_027 */
   @ParameterizedTest
   @EnumSource(
       value = CustomCertificateStatusType.class,
       names = {"UNKNOWN", "REVOKED"})
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 8b and 8c")
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 8b und 8c")
   @DisplayName("Test OCSP response with certificate status revoked and unknown")
   void verifyOcspCertificateStatusRevokedAndUnknown(
       final CustomCertificateStatusType customCertificateStatusType, final TestInfo testInfo)
@@ -506,9 +528,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dto);
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_018 */
   @Test
   @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
   @DisplayName("Test OCSP response with responder id byName")
@@ -528,9 +551,10 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dto);
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_045 */
   @ParameterizedTest
   @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
   @Afo(afoId = "RFC 5280", description = "4.1.1.2. signatureAlgorithm")
@@ -553,6 +577,6 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
             .build();
 
     TestEnvironment.configureOcspResponder(ocspRespUri, dto);
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum UseCaseResult {
-  EXPECT_PASS(0, "Expecting a valid use case execution."),
-  EXPECT_FAILURE(1, "Expecting an invalid use case execution.");
+  USECASE_VALID(0, "Expecting a valid use case execution."),
+  USECASE_INVALID(1, "Expecting an invalid use case execution.");
 
   private final int expectedReturnCode;
   private final String message;

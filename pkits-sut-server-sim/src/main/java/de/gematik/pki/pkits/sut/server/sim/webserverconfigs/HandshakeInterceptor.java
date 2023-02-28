@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package de.gematik.pki.pkits.sut.server.sim.webserverconfigs;
+
+import static de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication.PRODUCT_TYPE;
 
 import de.gematik.pki.gemlibpki.certificate.Admission;
 import de.gematik.pki.gemlibpki.certificate.CertificateProfile;
@@ -102,16 +104,12 @@ public final class HandshakeInterceptor implements X509TrustManager {
       try {
         tucPki18Verifier =
             TucPki018Verifier.builder()
-                .productType("Test")
+                .productType(PRODUCT_TYPE)
                 .tspServiceList(tslProcurer.getTslInfoProv().getTspServices())
                 .certificateProfiles(
                     List.of(
-                        CertificateProfile.CERT_PROFILE_C_CH_AUT_RSA,
-                        CertificateProfile.CERT_PROFILE_C_CH_AUT_ECC,
                         CertificateProfile.CERT_PROFILE_C_HCI_AUT_RSA,
-                        CertificateProfile.CERT_PROFILE_C_HCI_AUT_ECC,
-                        CertificateProfile.CERT_PROFILE_C_HP_AUT_RSA,
-                        CertificateProfile.CERT_PROFILE_C_HP_AUT_ECC))
+                        CertificateProfile.CERT_PROFILE_C_HCI_AUT_ECC))
                 .ocspRespCache(PkiSutServerSimApplication.getOcspRespCache())
                 .withOcspCheck(OCSP_ENABLED)
                 .ocspTimeoutSeconds(ocspConfig.getOcspTimeoutSeconds())

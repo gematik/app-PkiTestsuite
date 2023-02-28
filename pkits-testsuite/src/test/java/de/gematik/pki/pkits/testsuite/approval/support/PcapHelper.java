@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.testsuite.approval.support;
 
+import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.testsuite.approval.support.PcapManager.DeviceCommonInfo;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import java.util.ArrayList;
@@ -55,12 +56,16 @@ public class PcapHelper {
         DeviceCommonInfo.createForIpAddress(
             testSuiteConfig.getTestSuiteParameter().getCaptureInterface()));
 
-    allDeviceCommonInfos.add(
-        DeviceCommonInfo.createForIpAddressOrFqdn(
-            testSuiteConfig.getOcspResponder().getIpAddressOrFqdn()));
-    allDeviceCommonInfos.add(
-        DeviceCommonInfo.createForIpAddressOrFqdn(
-            testSuiteConfig.getTslProvider().getIpAddressOrFqdn()));
+    if (!PkitsCommonUtils.isExternalStartup(testSuiteConfig.getOcspResponder().getAppPath())) {
+      allDeviceCommonInfos.add(
+          DeviceCommonInfo.createForIpAddressOrFqdn(
+              testSuiteConfig.getOcspResponder().getIpAddressOrFqdn()));
+    }
+    if (!PkitsCommonUtils.isExternalStartup(testSuiteConfig.getTslProvider().getAppPath())) {
+      allDeviceCommonInfos.add(
+          DeviceCommonInfo.createForIpAddressOrFqdn(
+              testSuiteConfig.getTslProvider().getIpAddressOrFqdn()));
+    }
 
     final List<String> message =
         allDeviceCommonInfos.stream()

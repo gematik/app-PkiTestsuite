@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ public class TslProviderInstance extends InstanceProviderNanny {
 
   private static TslProviderInstance instance;
 
-  public static InstanceProviderNanny getInstance() {
+  public static synchronized InstanceProviderNanny getInstance() {
     if (instance == null) {
       instance = new TslProviderInstance();
       instance.initialize();

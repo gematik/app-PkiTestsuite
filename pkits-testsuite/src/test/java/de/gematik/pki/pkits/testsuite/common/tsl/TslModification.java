@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,14 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl;
 
+import de.gematik.pki.gemlibpki.tsl.TslModifier;
+import de.gematik.pki.pkits.common.PkiCommonException;
+import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.time.ZonedDateTime;
+import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
 @Builder
@@ -32,4 +37,26 @@ public class TslModification {
   private final ZonedDateTime issueDate;
   private final ZonedDateTime nextUpdate;
   private final int daysUntilNextUpdate;
+
+  public void modify(@NonNull final TrustStatusListType tsl) throws DatatypeConfigurationException {
+
+    if (nextUpdate == null) {
+      if (daysUntilNextUpdate <= 0) {
+        throw new PkiCommonException(
+            "TslModification must contain nextUpdate or daysUntilNextUpdate.");
+      } else {
+        TslModifier.modifyIssueDateAndRelatedNextUpdate(tsl, issueDate, daysUntilNextUpdate);
+      }
+    } else {
+      TslModifier.modifyIssueDate(tsl, issueDate);
+      TslModifier.modifyNextUpdate(tsl, nextUpdate);
+    }
+
+    tsl.setId(TslModifier.generateTslId(sequenceNr, issueDate));
+    // TODO count number of modified entries and log.debug them
+    TslModifier.modifySequenceNr(tsl, sequenceNr);
+    TslModifier.modifySspForCAsOfTsp(tsl, tspName, newSsp);
+    TslModifier.modifyTslDownloadUrlPrimary(tsl, tslDownloadUrlPrimary);
+    TslModifier.modifyTslDownloadUrlBackup(tsl, tslDownloadUrlBackup);
+  }
 }

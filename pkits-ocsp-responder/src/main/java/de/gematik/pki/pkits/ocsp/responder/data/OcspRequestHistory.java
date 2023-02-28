@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OcspRequestHistory {
@@ -29,6 +31,10 @@ public class OcspRequestHistory {
   private final List<OcspRequestHistoryEntryDto> history = new ArrayList<>();
 
   public void add(final OcspRequestHistoryEntryDto newItem) {
+    log.info(
+        "Add new entry with serial number: {} and tsl seq nr. {} in OCSP responder history",
+        newItem.getCertSerialNr(),
+        newItem.getTslSeqNr());
     history.add(newItem);
   }
 

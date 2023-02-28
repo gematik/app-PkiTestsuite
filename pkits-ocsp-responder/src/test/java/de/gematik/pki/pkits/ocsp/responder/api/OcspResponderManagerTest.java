@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.List;
 import kong.unirest.HttpResponse;
@@ -58,9 +59,9 @@ class OcspResponderManagerTest {
     ocspRespUri = "http://localhost:" + localServerPort;
   }
 
-  private OcspRequestHistoryEntryDto getEntry(final String certCerialNr) {
+  private OcspRequestHistoryEntryDto getEntry(final String certSerialNr, final int sequenceNr) {
     return new OcspRequestHistoryEntryDto(
-        new BigInteger(certCerialNr), ZonedDateTime.now().toString(), 3);
+        new BigInteger(certSerialNr), ZonedDateTime.now().toString(), sequenceNr);
   }
 
   @Test
@@ -82,7 +83,7 @@ class OcspResponderManagerTest {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    ocspRequestHistory.add(getEntry("10001"));
+    ocspRequestHistory.add(getEntry("10001", 1));
 
     final List<OcspRequestHistoryEntryDto> entries =
         OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("10001"));
@@ -95,7 +96,7 @@ class OcspResponderManagerTest {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    ocspRequestHistory.add(getEntry("20002"));
+    ocspRequestHistory.add(getEntry("20002", 2));
 
     List<OcspRequestHistoryEntryDto> entries;
 
@@ -111,7 +112,7 @@ class OcspResponderManagerTest {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    ocspRequestHistory.add(getEntry("20002"));
+    ocspRequestHistory.add(getEntry("20002", 2));
 
     List<OcspRequestHistoryEntryDto> entries =
         OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("20002"));
@@ -136,6 +137,6 @@ class OcspResponderManagerTest {
             .asBytes();
 
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    assertThat(new String(response.getBody())).isEqualTo(NOT_CONFIGURED);
+    assertThat(new String(response.getBody(), StandardCharsets.UTF_8)).isEqualTo(NOT_CONFIGURED);
   }
 }

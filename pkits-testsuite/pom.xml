@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.1</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
@@ -14,13 +14,12 @@
   <properties>
     <testReportDirectory>${basedir}/../out/testreport</testReportDirectory>
     <!-- dependencies -->
-    <version.httpclient>4.5.13</version.httpclient>
-    <version.jakarta.xml.bind-api>4.0.0</version.jakarta.xml.bind-api>
-    <version.jaxb-runtime>4.0.0</version.jaxb-runtime>
-    <version.snakeyaml>1.31</version.snakeyaml>
+    <version.httpclient>4.5.14</version.httpclient>
+    <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
+    <version.snakeyaml>1.33</version.snakeyaml>
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
-    <version.maven-surefire-report-plugin>3.0.0-M7</version.maven-surefire-report-plugin>
+    <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
     <version.maven-pdf-plugin>1.6.1</version.maven-pdf-plugin>
   </properties>
 
@@ -37,27 +36,14 @@
     </dependency>
 
     <dependency>
-      <groupId>jakarta.xml.bind</groupId>
-      <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>${version.jakarta.xml.bind-api}</version>
-    </dependency>
-
-    <dependency>
       <groupId>jakarta.activation</groupId>
       <artifactId>jakarta.activation-api</artifactId>
-      <version>2.1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
-      <version>${version.jaxb-runtime}</version>
     </dependency>
 
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.23.1</version>
+      <version>3.24.1</version>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>
@@ -112,7 +98,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -285,7 +271,7 @@
             </goals>
             <phase>site</phase>
             <configuration>
-              <outputDirectory>../out/testreport/</outputDirectory>
+              <outputDirectory>${testReportDirectory}/</outputDirectory>
               <includeReports>true</includeReports>
             </configuration>
           </execution>

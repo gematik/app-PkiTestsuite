@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,36 @@
 package de.gematik.pki.pkits.sut.server.sim.tsl;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
+import static de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication.PRODUCT_TYPE;
 
 import de.gematik.pki.gemlibpki.exception.GemPkiException;
 import de.gematik.pki.gemlibpki.exception.GemPkiRuntimeException;
 import de.gematik.pki.gemlibpki.ocsp.OcspRespCache;
+import de.gematik.pki.gemlibpki.tsl.TslConstants;
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
 import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
 import de.gematik.pki.gemlibpki.tsl.TslReader;
+import de.gematik.pki.gemlibpki.tsl.TslUtils;
+import de.gematik.pki.gemlibpki.tsl.TspInformationProvider;
 import de.gematik.pki.gemlibpki.tsl.TspService;
 import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier;
+import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier.TrustAnchorUpdate;
+import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslProcurerConfig;
 import de.gematik.pki.pkits.sut.server.sim.exceptions.TosException;
+import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
+import jakarta.annotation.PreDestroy;
+import java.math.BigInteger;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PreDestroy;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
@@ -49,10 +59,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TslProcurer {
 
+  private static final String TUC_PKI_001_FAILED = "TUC_PKI_001 failed. TSL rejected.";
   private final TslProcurerConfig tslProcurerConfig;
   private ScheduledExecutorService scheduledExecutorServiceFetchTsl;
-  private Tsl theTsl;
 
+  private Tsl currentTsl;
+  private TspService tspServiceTrustAnchor = null;
+
+  private final StatefulTrustAnchorUpdate statefulTrustAnchorUpdate =
+      new StatefulTrustAnchorUpdate();
   private final OcspConfig ocspConfig;
   private final OcspRespCache ocspRespCache;
 
@@ -69,23 +84,98 @@ public class TslProcurer {
     final byte[] tslBytes;
     final TrustStatusListType trustStatusListType;
 
-    private final int seqNr;
+    private final BigInteger sequenceNr;
 
     public Tsl(final String tslHash, final byte[] tslBytes) {
       this.tslHash = tslHash;
       this.tslBytes = tslBytes;
-      trustStatusListType = TslConverter.bytesToTsl(tslBytes).orElseThrow();
-      this.seqNr = TslReader.getSequenceNumber(trustStatusListType);
+      this.trustStatusListType = TslConverter.bytesToTsl(tslBytes);
+      this.sequenceNr = TslReader.getSequenceNumber(trustStatusListType);
+    }
+  }
+
+  private enum TrustAnchorUpdateStatus {
+    NONE,
+    SAVED,
+    ACTIVATED,
+  }
+
+  private static class StatefulTrustAnchorUpdate {
+
+    private TrustAnchorUpdateStatus status = TrustAnchorUpdateStatus.NONE;
+    private TrustAnchorUpdate trustAnchorUpdate = null;
+    private TspService tspServiceFutureTrustAnchor = null;
+
+    void makeSaved(
+        final TrustAnchorUpdate trustAnchorUpdate, final TspService tspServiceWithTslSignerCa) {
+      this.trustAnchorUpdate = trustAnchorUpdate;
+      tspServiceFutureTrustAnchor = tspServiceWithTslSignerCa;
+      status = TrustAnchorUpdateStatus.SAVED;
+
+      log.info(
+          "saved new trustAnchorUpdate: cert serialNumber {}, statusStartingTime {}",
+          trustAnchorUpdate.getFutureTrustAnchor().getSerialNumber(),
+          trustAnchorUpdate.getStatusStartingTime());
+      log.info("TrustAnchorUpdateStatus.{} - changed right now", status);
+    }
+
+    TspService getFutureTspServiceTrustAnchorOrCurrent(final TspService currentTspService) {
+
+      if ((status == TrustAnchorUpdateStatus.SAVED) && trustAnchorUpdate.isToActivateNow()) {
+        log.info(
+            "activated trustAnchorUpdate: cert serialNumber {}, statusStartingTime {}",
+            trustAnchorUpdate.getFutureTrustAnchor().getSerialNumber(),
+            trustAnchorUpdate.getStatusStartingTime());
+
+        trustAnchorUpdate = null;
+        status = TrustAnchorUpdateStatus.ACTIVATED;
+        log.info("trustAnchorUpdateStatus.{} - changed right now", status);
+
+        return tspServiceFutureTrustAnchor;
+      }
+      log.info("trustAnchorUpdateStatus.{} - not changed", status);
+      return currentTspService;
+    }
+
+    void reset() {
+      if (status == TrustAnchorUpdateStatus.ACTIVATED) {
+        trustAnchorUpdate = null;
+        tspServiceFutureTrustAnchor = null;
+        status = TrustAnchorUpdateStatus.NONE;
+        log.info("TrustAnchorUpdateStatus.NONE changed right now");
+      }
+    }
+
+    void updateTrustAnchorIfNecessary(
+        final Tsl rxTsl, final Optional<TrustAnchorUpdate> newTrustAnchorUpdateOpt) {
+
+      if (newTrustAnchorUpdateOpt.isPresent()) {
+        final TSPServiceType tspServiceType =
+            getTspServiceTSLServiceCertChange(rxTsl.trustStatusListType);
+        final TspService tspServiceNewTrustAnchor = new TspService(tspServiceType);
+        makeSaved(newTrustAnchorUpdateOpt.get(), tspServiceNewTrustAnchor);
+      }
+    }
+
+    private static List<TSPServiceType> getChangeCertTspServices(final TrustStatusListType tsl) {
+      return new TslInformationProvider(tsl)
+          .getFilteredTspServices(List.of(TslConstants.STI_SRV_CERT_CHANGE)).stream()
+              .map(TspService::getTspServiceType)
+              .toList();
+    }
+
+    private static TSPServiceType getTspServiceTSLServiceCertChange(final TrustStatusListType tsl) {
+      return getChangeCertTspServices(tsl).get(0);
     }
   }
 
   public TslInformationProvider getTslInfoProv() {
-    if (theTsl != null) {
+    if (currentTsl != null) {
       log.info(
           "Current TSL ID: {}, ({} bytes)",
-          theTsl.trustStatusListType.getId(),
-          theTsl.tslBytes.length);
-      return new TslInformationProvider(TslConverter.bytesToTsl(theTsl.tslBytes).orElseThrow());
+          currentTsl.trustStatusListType.getId(),
+          currentTsl.tslBytes.length);
+      return new TslInformationProvider(TslConverter.bytesToTsl(currentTsl.tslBytes));
     } else {
       throw new TosException("No tsl data available (yet).");
     }
@@ -102,110 +192,269 @@ public class TslProcurer {
 
   private void processTslDownloadHttpResponse() {
 
-    final Optional<HttpResponse<byte[]>> responseDownloadOpt = downloadTslIfRequired();
+    log.info("Starting new TSL download interval!");
+    final Optional<TslDownloadResults> tslDownloadResultsOpt = downloadTslIfHashIsDifferent();
 
-    if (responseDownloadOpt.isPresent()
-        && (responseDownloadOpt.get().getStatus() == HttpStatus.SC_OK)) {
+    if (tslDownloadResultsOpt.isPresent() && !tslDownloadResultsOpt.get().failed) {
 
-      final byte[] tslBytesRx = responseDownloadOpt.get().getBody();
+      final byte[] tslBytesRx = tslDownloadResultsOpt.get().tslBytes;
       log.info("TSL download successful. ({} bytes)", tslBytesRx.length);
 
       final Tsl rxTsl = new Tsl(calculateSha256Hex(tslBytesRx), tslBytesRx);
       initializeEmptyTrustStore(rxTsl);
       processReceivedTsl(rxTsl);
 
+      log.info("TSL download interval finished!");
     } else {
       log.info("Retry TSL download in {} seconds", tslProcurerConfig.getDownloadInterval());
     }
   }
 
-  private Optional<HttpResponse<byte[]>> downloadTslIfRequired() {
-    final String url = getUrl();
+  private static final class TslDownloadResults {
 
-    try {
-      if (theTsl == null) {
-        log.info("Downloading initial TSL at: {}", url);
-        return Optional.of(Unirest.get(url).asBytes());
-      }
+    boolean failed;
+    String hashValue = null;
+    byte[] tslBytes = null;
 
-      final String hashUrl = makeHashUrl(url);
-      final boolean isNewTslAvailable = isNewTslAvailable(theTsl.tslHash, hashUrl);
+    private TslDownloadResults(final boolean failed) {
+      this.failed = failed;
+    }
 
-      if (isNewTslAvailable) {
-        log.info("Downloading new TSL at: {}", url);
-        return Optional.of(Unirest.get(url).asBytes());
+    static TslDownloadResults fail() {
+      return new TslDownloadResults(true);
+    }
+
+    static TslDownloadResults forHash(final HttpResponse<String> httpResponse) {
+
+      log.debug("forHash httpResponse.getStatus() {}", httpResponse.getStatus());
+      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
+        final TslDownloadResults tslDownloadResults = new TslDownloadResults(false);
+        tslDownloadResults.hashValue = httpResponse.getBody();
+        return tslDownloadResults;
       } else {
-        log.info(
-            "No TSL download required due to same hash value: {}, url {}", theTsl.tslHash, hashUrl);
+        if (httpResponse.getBody() != null) {
+          log.info("{}", httpResponse.getBody());
+        }
       }
+      return TslDownloadResults.fail();
+    }
+
+    static TslDownloadResults forTslBytes(final HttpResponse<byte[]> httpResponse) {
+
+      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
+        final TslDownloadResults tslDownloadResults = new TslDownloadResults(false);
+        tslDownloadResults.tslBytes = httpResponse.getBody();
+
+        if (!((tslDownloadResults.tslBytes == null) || (tslDownloadResults.tslBytes.length == 0))) {
+          return tslDownloadResults;
+        }
+      }
+
+      return TslDownloadResults.fail();
+    }
+
+    @Override
+    public String toString() {
+
+      final String tslBytesInfo = (tslBytes == null) ? "=null" : (".length=" + tslBytes.length);
+      return "TslDownloadResults{failed=%s, hashValue='%s', tslBytes%s}"
+          .formatted(failed, hashValue, tslBytesInfo);
+    }
+  }
+
+  private TslDownloadResults downloadTsl(final String tslUrl) {
+    log.info("Downloading new TSL at: {}", tslUrl);
+    try {
+      final HttpResponse<byte[]> bytesResponse = Unirest.get(tslUrl).asBytes();
+      return TslDownloadResults.forTslBytes(bytesResponse);
     } catch (final UnirestException e) {
       log.info("Downloading TSL failed. {}", e.getMessage());
     }
+
+    return TslDownloadResults.fail();
+  }
+
+  private Optional<TslDownloadResults> downloadTslIfHashIsDifferent() {
+
+    if (currentTsl == null) {
+      final String tslInitialUrl = getInitialTslUrl();
+      log.info("Downloading initial TSL at: {}", tslInitialUrl);
+      final TslDownloadResults tslDownloadResults = downloadTsl(tslInitialUrl);
+      return Optional.of(tslDownloadResults);
+    }
+
+    final String tslPrimaryUrl = getPrimaryTslUrl();
+
+    final String tslBackupUrl = getTslBackupUrl();
+
+    final String hashPrimaryUrl = makeHashUrl(tslPrimaryUrl);
+    final String hashBackupUrl = makeHashUrl(tslBackupUrl);
+
+    TslDownloadResults hashTslDownloadResults = downloadTslHash(hashPrimaryUrl);
+
+    if (hashTslDownloadResults.failed) {
+      hashTslDownloadResults = downloadTslHash(hashBackupUrl);
+    }
+
+    final boolean isTslHashDifferent;
+    if (hashTslDownloadResults.failed) {
+      isTslHashDifferent = true;
+    } else {
+      isTslHashDifferent = isTslHashDifferent(currentTsl.tslHash, hashTslDownloadResults.hashValue);
+    }
+
+    if (!isTslHashDifferent) {
+      log.info(
+          "No TSL download required due to same hash value: {}, url {}",
+          currentTsl.tslHash,
+          hashPrimaryUrl);
+      return Optional.empty();
+    }
+
+    for (int i = 0; i < 8; ++i) {
+
+      final TslDownloadResults tslDownloadResults;
+      if (i < 4) {
+        tslDownloadResults = downloadTsl(tslPrimaryUrl);
+      } else {
+        tslDownloadResults = downloadTsl(tslBackupUrl);
+      }
+
+      if (!tslDownloadResults.failed) {
+        log.info("Successful TSL download after {} attempts", i + 1);
+        return Optional.of(tslDownloadResults);
+      }
+    }
+
+    log.error("TSL_DOWNLOAD_ERROR");
     return Optional.empty();
   }
 
-  private String getUrl() {
-    if (theTsl == null) {
-      return TslConfig.buildTslDownloadUrl(tslProcurerConfig.getInitialTslPrimaryDownloadUrl());
-    } else {
-      return TslReader.getTslDownloadUrlPrimary(theTsl.trustStatusListType);
-    }
+  private String getInitialTslUrl() {
+    return TslConfig.buildTslDownloadUrl(tslProcurerConfig.getInitialTslPrimaryDownloadUrl());
+  }
+
+  private String getPrimaryTslUrl() {
+    return TslReader.getTslDownloadUrlPrimary(currentTsl.trustStatusListType);
+  }
+
+  private String getTslBackupUrl() {
+    return TslReader.getTslDownloadUrlBackup(currentTsl.trustStatusListType);
   }
 
   private String makeHashUrl(final String tslDownloadUrl) {
     return tslDownloadUrl.replace(".xml", ".sha2");
   }
 
-  private boolean isNewTslAvailable(
-      @NonNull final String hashValueLocal, @NonNull final String hashUrl) throws UnirestException {
-    final HttpResponse<String> stringHttpResponse = Unirest.get(hashUrl).asString();
-    if (stringHttpResponse.getStatus() == HttpStatus.SC_OK) {
-      final String hashValueOnline = stringHttpResponse.getBody();
-      log.info(
-          "Comparing TSL hash: local ({}) vs. online ({}) at: {}",
-          hashValueLocal,
-          hashValueOnline,
-          hashUrl);
-      return !hashValueOnline.equals(hashValueLocal);
-    } else {
-      return false;
+  private TslDownloadResults downloadTslHash(@NonNull final String hashUrl) {
+
+    try {
+      final HttpResponse<String> stringHttpResponse = Unirest.get(hashUrl).asString();
+      return TslDownloadResults.forHash(stringHttpResponse);
+    } catch (final UnirestException e) {
+      log.info("Downloading TSL HASH failed. {}", e.getMessage());
     }
+
+    return TslDownloadResults.fail();
+  }
+
+  private boolean isTslHashDifferent(
+      @NonNull final String hashValueLocal, @NonNull final String hashValueOnline)
+      throws UnirestException {
+    log.info("Comparing TSL hash: local ({}) vs. online ({})", hashValueLocal, hashValueOnline);
+    return !hashValueOnline.equals(hashValueLocal);
   }
 
   private void processReceivedTsl(@NonNull final Tsl rxTsl) {
 
-    log.info("Downloaded TSL has sequence nr {} and hash {}", rxTsl.seqNr, rxTsl.tslHash);
-    final Optional<TucPki001Verifier> tucPki001Verifier = initTucPki001Verifier(rxTsl);
-    tucPki001Verifier.ifPresent(
-        verifier -> {
-          try {
-            verifier.performTucPki001Checks();
-            updateTruststore(rxTsl);
-          } catch (final GemPkiException e) {
-            log.info("TUC_PKI_001 failed. TSL rejected.", e);
-          } catch (final GemPkiRuntimeException e) {
-            // new GemPkiRuntimeException("Keine OCSP Response erhalten.") is thrown
-            // when withResponseBytes=false
-            log.info("TUC_PKI_001 failed. TSL rejected.");
-          } catch (final Exception e) {
-            log.info("WARNING: Unexpected exception happened!", e);
-            log.info("TUC_PKI_001 failed. TSL rejected.");
-          }
-        });
+    log.info("Downloaded TSL has seqNr {} and hash {}", rxTsl.sequenceNr, rxTsl.tslHash);
+
+    tspServiceTrustAnchor =
+        statefulTrustAnchorUpdate.getFutureTspServiceTrustAnchorOrCurrent(tspServiceTrustAnchor);
+
+    final Optional<TucPki001Verifier> tucPki001VerifierOpt =
+        initTucPki001Verifier(rxTsl, tspServiceTrustAnchor);
+
+    if (tucPki001VerifierOpt.isEmpty()) {
+      log.info("tucPki001VerifierOpt.isEmpty()");
+      return;
+    }
+
+    try {
+      final byte[] certBytes =
+          tspServiceTrustAnchor
+              .getTspServiceType()
+              .getServiceInformation()
+              .getServiceDigitalIdentity()
+              .getDigitalId()
+              .get(0)
+              .getX509Certificate();
+
+      final X509Certificate cert = CertReader.readX509(certBytes);
+
+      log.info(
+          "current trust anchor: serialNumber {}, subjectName {}",
+          cert.getSerialNumber(),
+          cert.getSubjectX500Principal().getName());
+
+      log.info("tucPki001VerifierOpt.get().performTucPki001Checks()");
+      final Optional<TrustAnchorUpdate> newTrustAnchorUpdateOpt =
+          tucPki001VerifierOpt.get().performTucPki001Checks();
+
+      log.info("statefulTrustAnchorUpdate.updateTrustAnchorIfNecessary(rxTsl) - start");
+      statefulTrustAnchorUpdate.updateTrustAnchorIfNecessary(rxTsl, newTrustAnchorUpdateOpt);
+      log.info(
+          "statefulTrustAnchorUpdate.checkForNewAnnouncedTrustAnchorAndSave(rxTsl) - finished");
+      updateTruststore(rxTsl);
+    } catch (final GemPkiException e) {
+      log.info(TUC_PKI_001_FAILED, e);
+    } catch (final GemPkiRuntimeException e) {
+      // new GemPkiRuntimeException("Keine OCSP Response erhalten.") is thrown
+      // when withResponseBytes=false
+      log.info(TUC_PKI_001_FAILED, e);
+    } catch (final Exception e) {
+      log.info("WARNING: Unexpected exception happened!", e);
+      log.info(TUC_PKI_001_FAILED);
+    }
+
+    statefulTrustAnchorUpdate.reset();
+
+    if (currentTsl != null) {
+      log.info(
+          "current tsl TSL ID: {}, ({} bytes)",
+          currentTsl.trustStatusListType.getId(),
+          currentTsl.tslBytes.length);
+    }
   }
 
-  private Optional<TucPki001Verifier> initTucPki001Verifier(@NonNull final Tsl rxTsl) {
-    final TrustStatusListType newTslType = rxTsl.trustStatusListType;
-    final List<TspService> trustedServices =
-        new TslInformationProvider(theTsl.trustStatusListType).getTspServices();
+  private Optional<TucPki001Verifier> initTucPki001Verifier(
+      @NonNull final Tsl rxTsl, final TspService tspServiceTrustAnchor) {
+
+    final String currentTslId = currentTsl.trustStatusListType.getId();
+    final BigInteger currentTslSeqNr =
+        currentTsl.trustStatusListType.getSchemeInformation().getTSLSequenceNumber();
+
+    final List<TspService> tspServices = new ArrayList<>();
+    tspServices.add(tspServiceTrustAnchor);
+
+    final TslInformationProvider tslInformationProvider =
+        new TslInformationProvider(currentTsl.trustStatusListType);
+    final List<TspService> tspServicesFiltered =
+        tslInformationProvider.getFilteredTspServices(List.of(TslConstants.STI_OCSP));
+
+    tspServices.addAll(tspServicesFiltered);
+
     try {
+      log.info("build TucPki001Verifier");
       return Optional.of(
           TucPki001Verifier.builder()
               .ocspRespCache(ocspRespCache)
-              .productType("Test")
+              .productType(PRODUCT_TYPE)
               .withOcspCheck(true)
-              .tslToCheck(newTslType)
-              .currentTrustedServices(trustedServices)
+              .tslToCheck(rxTsl.tslBytes)
+              .currentTrustedServices(tspServices)
+              .currentTslId(currentTslId)
+              .currentSeqNr(currentTslSeqNr)
               .ocspTimeoutSeconds(ocspConfig.getOcspTimeoutSeconds())
               .tolerateOcspFailure(ocspConfig.isTolerateOcspFailure())
               .build());
@@ -215,24 +464,42 @@ public class TslProcurer {
     }
   }
 
+  static TspService getIssuerTspServiceForTslSigner(final TrustStatusListType tsl)
+      throws GemPkiException {
+    final TslInformationProvider tslIp = new TslInformationProvider(tsl);
+
+    final TspInformationProvider tspIp =
+        new TspInformationProvider(tslIp.getTspServices(), PRODUCT_TYPE);
+
+    return tspIp.getIssuerTspService(TslUtils.getFirstTslSignerCertificate(tsl));
+  }
+
   /**
    * On startup the truststore is empty. This method sets any TSL as initial truststore.
    *
    * @param initialTsl The initial TSL.
    */
   private void initializeEmptyTrustStore(final Tsl initialTsl) {
-    if (theTsl == null) {
-      theTsl = initialTsl;
+    if (currentTsl == null) {
+      currentTsl = initialTsl;
+
+      try {
+        tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
+      } catch (final GemPkiException e) {
+        final String message = "Something is wrong, the initial TSL should be rejected!";
+        throw new TosException(message);
+      }
       log.info(
           "Initial TSL with sequence nr {} and hash {} assigned.",
-          initialTsl.seqNr,
+          initialTsl.sequenceNr,
           initialTsl.tslHash);
     }
   }
 
   private synchronized void updateTruststore(final Tsl newTsl) {
-    theTsl = newTsl;
-    log.info("New TSL with sequence nr {} and hash {} assigned.", newTsl.seqNr, newTsl.tslHash);
+    currentTsl = newTsl;
+    log.info(
+        "New TSL with sequence nr {} and hash {} assigned.", newTsl.sequenceNr, newTsl.tslHash);
   }
 
   @PreDestroy

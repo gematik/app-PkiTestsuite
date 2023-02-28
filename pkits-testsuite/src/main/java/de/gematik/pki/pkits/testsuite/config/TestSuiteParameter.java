@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,18 @@ public class TestSuiteParameter {
   @ParameterDescription(
       withDefault = true,
       description = "Execute smoke test (TSL and use case including OCSP) before each test.")
-  boolean initialStateUseCase = true;
+  boolean performInitialState = true;
 
   @ParameterDescription(
       withDefault = true,
-      description = "Capture network traffic in pcap file format.")
+      description =
+          "Capture network traffic in pcap file format. Configuration of interface to sniff on is"
+              + " done by parameter \"captureInterface\" If OCSP responder and TSL provider are not"
+              + " started externally, sniffing on there interfaces is activated as well.")
   boolean captureNetworkTraffic = false;
 
   @ParameterDescription(
-      withDefault = false,
-      description = "IP address of an interface to sniff communication with the test object")
+      description = "IP address of an interface to sniff communication with the test object from.")
   String captureInterface;
 
   OcspSettings ocspSettings = new OcspSettings();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,6 @@ public class OcspSettings {
 
   @ParameterDescription(
       withDefault = true,
-      description = "Whether the OCSP mechanism is enabled during the tests.")
-  boolean requestsExpected = true;
-
-  @ParameterDescription(
-      withDefault = true,
       description =
           "Absolute or relative path to key store files in p12 format to sign OCSP requests."
               + " with.")
@@ -47,4 +42,9 @@ public class OcspSettings {
           "Amount of milliseconds to add/subtract from OCSP timeout during the test to get a"
               + " result inside/outside the timeout.")
   int timeoutDeltaMilliseconds = 1500;
+
+  @ParameterDescription(
+      withDefault = true,
+      description = "Amount of seconds to add to the OCSP grace period as a buffer.")
+  int gracePeriodExtraDelay = 5;
 }

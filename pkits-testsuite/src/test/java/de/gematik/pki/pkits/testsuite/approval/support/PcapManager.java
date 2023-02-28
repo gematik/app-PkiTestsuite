@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,11 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.TestInfo;
 import pcap.spi.Address;
 import pcap.spi.Dumper;
@@ -82,9 +80,9 @@ public class PcapManager implements Closeable {
   private AsyncObjects asyncObjects;
   private final boolean writeIntoOneFile;
 
-  public static class DeviceCommonInfo {
-    String ipAddressOrFqdn;
-    String ipAddress;
+  public static final class DeviceCommonInfo {
+    final String ipAddressOrFqdn;
+    final String ipAddress;
     Interface device;
 
     public static DeviceCommonInfo createForIpAddress(final String ipAddress) {
@@ -135,7 +133,6 @@ public class PcapManager implements Closeable {
   }
 
   static class AsyncObjects implements Closeable {
-    Future<Object> future;
     ExecutorService executor;
     Selector selector;
     Map<Pcap, Dumper> pcapDumpersMap;
@@ -328,7 +325,7 @@ public class PcapManager implements Closeable {
     };
   }
 
-  static Pair<ExecutorService, Future<Object>> startCallable(
+  static ExecutorService startCallable(
       final Selector selector, final Map<Pcap, Dumper> pcapDumperMap) {
 
     final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -341,15 +338,15 @@ public class PcapManager implements Closeable {
           final Consumer<Selection> consumer = getConsumer(pcapDumperMap);
           while (true) {
             try {
-              final int returnCode = selector.select(consumer, timeout);
+              selector.select(consumer, timeout);
             } catch (final TimeoutException e) {
               throw new TestSuiteException("problems processing pcap", e);
             }
           }
         };
 
-    final Future<Object> future = executor.submit(callableTask);
-    return Pair.of(executor, future);
+    executor.submit(callableTask);
+    return executor;
   }
 
   static AsyncObjects startPcap(
@@ -380,11 +377,7 @@ public class PcapManager implements Closeable {
         asyncObjects.pcapDumpersMap.put(pcap, dumper);
       }
 
-      final Pair<ExecutorService, Future<Object>> pair =
-          startCallable(asyncObjects.selector, asyncObjects.pcapDumpersMap);
-
-      asyncObjects.executor = pair.getLeft();
-      asyncObjects.future = pair.getRight();
+      asyncObjects.executor = startCallable(asyncObjects.selector, asyncObjects.pcapDumpersMap);
 
       return asyncObjects;
     } catch (final ErrorException

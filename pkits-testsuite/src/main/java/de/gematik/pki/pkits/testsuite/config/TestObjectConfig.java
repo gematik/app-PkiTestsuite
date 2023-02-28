@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,17 @@ import lombok.Setter;
 public class TestObjectConfig {
 
   @ParameterDescription(
-      withDefault = false,
       description =
           "Name of the test object, for better identification in logs and configuration files.")
   String name;
 
-  @ParameterDescription(withDefault = false, description = "Test object type (TlsServer|Script).")
+  @ParameterDescription(description = "Test object type (TlsServer|Script).")
   String type;
 
-  @ParameterDescription(
-      withDefault = false,
-      description = "FQDN or IP address to connect to the test object.")
+  @ParameterDescription(description = "FQDN or IP address to connect to the test object.")
   String ipAddressOrFqdn;
 
-  @ParameterDescription(withDefault = false, description = "Port where the test object listens on.")
+  @ParameterDescription(description = "Port where the test object listens on.")
   @Setter
   int port;
 
@@ -54,7 +51,6 @@ public class TestObjectConfig {
   int ocspGracePeriodSeconds = 30;
 
   @ParameterDescription(
-      withDefault = false,
       description = "TSL download interval in seconds configured in the test object.")
   int tslDownloadIntervalSeconds;
 
@@ -62,7 +58,7 @@ public class TestObjectConfig {
       withDefault = true,
       description =
           "Amount of seconds to wait after a TSL update for processing inside the test object.")
-  int tslProcessingTimeSeconds = 10;
+  int tslProcessingTimeSeconds = 3;
 
   @ParameterDescription(
       withDefault = true,

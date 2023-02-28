@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package de.gematik.pki.pkits.testsuite.approval;
 
 import static de.gematik.pki.pkits.testsuite.approval.support.OcspResponderType.OCSP_RESP_TYPE_CUSTOM;
 import static de.gematik.pki.pkits.testsuite.approval.support.OcspResponderType.OCSP_RESP_TYPE_DEFAULT_USECASE;
-import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.EXPECT_FAILURE;
-import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.EXPECT_PASS;
+import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.USECASE_INVALID;
+import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.USECASE_VALID;
 import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT.PKITS_CERT_INVALID;
 import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT.PKITS_CERT_VALID;
 import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
@@ -39,25 +39,25 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 @Slf4j
 @DisplayName("PKI certificate approval tests.")
-@TestMethodOrder(OrderAnnotation.class)
+@Order(1)
 class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
 
+  /** gematikId: UE_PKI_TS_0302_009, UE_PKI_TS_0302_041 */
   @ParameterizedTest
   @Afo(
       afoId = "GS-A_4652",
-      description = "TUC_PKI_018: Zertifikatsprüfung in der TI - positive case")
+      description = "TUC_PKI_018: Zertifikatsprüfung in der TI - positive cases")
   @Afo(
       afoId = "GS-A_4663",
-      description = "Zertifikats-Prüfparameter für den TLS-Handshake - positive case")
+      description = "Zertifikats-Prüfparameter für den TLS-Handshake - positive cases")
   @Afo(afoId = "GS-A_4357", description = "ECDSA algorithms - Tab_KRYPT_002a")
   @Afo(afoId = "A_17124", description = "ECDSA cipher suites for TLS")
   @ArgumentsSource(CertificateProvider.class)
@@ -67,9 +67,10 @@ class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
       throws DatatypeConfigurationException, IOException {
     testCaseMessage(testInfo);
     initialState();
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0305_001 */
   @Test
   @Afo(afoId = "GS-A_4357", description = "RSA algorithms - Tab_KRYPT_002")
   @Afo(afoId = "GS-A_4384", description = "RSA cipher suites for TLS")
@@ -96,9 +97,12 @@ class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
             .signer(signer)
             .build());
 
-    useCaseWithCert(certPath, EXPECT_PASS, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_CUSTOM, OCSP_REQUEST_EXPECT);
   }
 
+  // TODO DV ee_missing-policyId.p12 is missing for UE_PKI_TS_0302_040
+  // TODO: ee_invalid-extension-crit.p12 does not throw...?
+  /** gematikId: UE_PKI_TS_0302_003, UE_PKI_TS_0302_005, UE_PKI_TS_0302_006, UE_PKI_TS_0302_040 */
   @ParameterizedTest
   @Afo(
       afoId = "GS-A_4652",
@@ -113,12 +117,8 @@ class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
       throws DatatypeConfigurationException, IOException {
 
     testCaseMessage(testInfo);
-    log.info("\nCertificate path: {}\n", certPath);
 
     initialState();
-    useCaseWithCert(certPath, EXPECT_FAILURE, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_IGNORE);
-
-    // TODO: ee_invalid-extension-crit.p12 does not throw...?
-
+    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_IGNORE);
   }
 }

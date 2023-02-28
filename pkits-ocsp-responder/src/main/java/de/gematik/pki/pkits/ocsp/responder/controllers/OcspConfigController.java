@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspConfigRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

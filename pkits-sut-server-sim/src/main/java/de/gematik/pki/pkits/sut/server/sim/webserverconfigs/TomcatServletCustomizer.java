@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package de.gematik.pki.pkits.sut.server.sim.webserverconfigs;
 
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.tomcat.util.net.SSLHostConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -45,10 +46,11 @@ public class TomcatServletCustomizer
 
       factory.addConnectorCustomizers(
           connector -> {
-            final Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
-            protocol.setTrustManagerClassName(HandshakeInterceptor.class.getCanonicalName());
-            protocol.setSslProtocol(sslprotocol);
-            protocol.setCiphers(sslciphers);
+            final SSLHostConfig sslHostConfig =
+                Arrays.stream(connector.getProtocolHandler().findSslHostConfigs()).findAny().get();
+            sslHostConfig.setTrustManagerClassName(HandshakeInterceptor.class.getCanonicalName());
+            sslHostConfig.setSslProtocol(sslprotocol);
+            sslHostConfig.setCiphers(sslciphers);
           });
     }
   }

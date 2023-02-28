@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package de.gematik.pki.pkits.tls.client;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,7 +99,10 @@ public class TlsConnection {
     final KeyManagerFactory kmf = KeyManagerFactory.getInstance(kfAlgorithm);
 
     final KeyStore ks = KeyStore.getInstance("PKCS12");
-    ks.load(Files.newInputStream(clientKeystorePath), clientKeystorePassw.toCharArray());
+
+    final InputStream keystoreIs = Files.newInputStream(clientKeystorePath);
+    ks.load(keystoreIs, clientKeystorePassw.toCharArray());
+    keystoreIs.close();
 
     kmf.init(ks, clientKeystorePassw.toCharArray());
     sslContextClient.init(kmf.getKeyManagers(), new TrustManager[] {new BlindTrustManager()}, null);

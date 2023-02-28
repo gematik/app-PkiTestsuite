@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_HEALTH_ENDPOI
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,6 +37,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
@@ -48,6 +51,10 @@ import org.slf4j.Logger;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PkitsCommonUtils {
 
+  public static boolean isExternalStartup(final String appPath) {
+    return PkitsConstants.EXTERNAL_STARTUP.equals(appPath);
+  }
+
   public static String calculateSha256Hex(final byte[] byteArray) {
     try {
       final MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -59,7 +66,7 @@ public final class PkitsCommonUtils {
   }
 
   public static byte[] readContent(final String path) {
-    return de.gematik.pki.gemlibpki.utils.GemlibPkiUtils.readContent(Path.of(path));
+    return GemLibPkiUtils.readContent(Path.of(path));
   }
 
   public static void waitSeconds(final long seconds) {
@@ -131,6 +138,17 @@ public final class PkitsCommonUtils {
     } catch (final UnirestException e) {
       throw new PkiCommonException("%s has health problem".formatted(serviceNameForMessage), e);
     }
-    log.info("{} health ok", serviceNameForMessage);
+    log.debug("{} health ok", serviceNameForMessage);
+  }
+
+  public static String getFirstSubStringByPattern(final String src, final String searchPattern) {
+    String ret = "";
+    final Pattern pattern = Pattern.compile(searchPattern);
+    final Matcher matcher = pattern.matcher(src);
+
+    if (matcher.find()) {
+      ret = matcher.group(1);
+    }
+    return ret;
   }
 }

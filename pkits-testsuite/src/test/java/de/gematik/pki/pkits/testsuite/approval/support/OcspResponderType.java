@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package de.gematik.pki.pkits.testsuite.approval.support;
 
 public enum OcspResponderType {
+
+  // TODO rename to OCSP_RESP_TYPE_DEFAULT_WITH_GIVEN_CERT_USECASE or so
   OCSP_RESP_TYPE_DEFAULT_USECASE,
   OCSP_RESP_TYPE_CUSTOM
 }

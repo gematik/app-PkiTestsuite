@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,7 @@ class TestSuiteConfigTest {
   @Test
   void readBooleanFromConfig() {
     assertThat(
-            TestConfigManager.getTestSuiteConfig()
-                .getTestSuiteParameter()
-                .getOcspSettings()
-                .isRequestsExpected())
+            TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().isPerformInitialState())
         .isInstanceOf(Boolean.class);
   }
 
@@ -209,9 +206,9 @@ class TestSuiteConfigTest {
     final String client_KeystorePassword = "00";
 
     final String testObject_ScriptPath = "unused by default";
-    final Integer testObject_OcspGracePeriodSeconds = 30;
-    final Integer testObject_TslProcessingTimeSeconds = 10;
-    final Integer testObject_OcspTimeoutSeconds = 10;
+    final int testObject_OcspGracePeriodSeconds = 30;
+    final int testObject_TslProcessingTimeSeconds = 3;
+    final int testObject_OcspTimeoutSeconds = 10;
 
     final String ocspResponder_Id = "OCSP Responder";
     final String ocspResponder_AppPath =
@@ -220,19 +217,31 @@ class TestSuiteConfigTest {
     final String tslProvider_id = "TSL Provider";
     final String tslProvider_appPath = "../pkits-tsl-provider/target/pkits-tsl-provider-exec.jar";
 
-    final Boolean testSuiteParameter_InitialStateUseCase = true;
-    final Boolean testSuiteParameter_CaptureNetworkTraffic = false;
-    final Boolean testSuiteParameter_OcspSettings_RequestsExpected = true;
+    final boolean testSuiteParameter_performInitialState = true;
+    final boolean testSuiteParameter_CaptureNetworkTraffic = false;
     final Path testSuiteParameter_OcspSettings_KeystorePathOcsp =
         Path.of("../testDataTemplates/certificates/ecc/ocspKeystore");
     final String testSuiteParameter_OcspSettings_SignerPassword = "00";
-    final Integer testSuiteParameter_OcspSettings_TimeoutDeltaMilliseconds = 1500;
+    final int testSuiteParameter_OcspSettings_TimeoutDeltaMilliseconds = 1500;
+    final int testSuiteParameter_OcspSettings_GracePeriodeExtraDelay = 5;
 
-    final Boolean testSuiteParameter_TslSettings_InitialStateTslImport = true;
+    final boolean testSuiteParameter_TslSettings_InitialStateTslImport = true;
     final Path testSuiteParameter_TslSettings_DefaultTemplate =
         Path.of("../testDataTemplates/tsl/TSL_default.xml");
     final Path testSuiteParameter_TslSettings_AlternativeTemplate =
         Path.of("../testDataTemplates/tsl/TSL_altCA.xml");
+    final Path testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
+    final Path testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
+    final Path testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
+    final Path testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
+    final Path testSuiteParameter_TslSettings_AlternativeRevokedTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_altCA_revoked.xml");
+    final Path testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_altCA_noLineBreak.xml");
     final Path testSuiteParameter_TslSettings_Signer =
         Path.of(
             "../testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
@@ -257,15 +266,12 @@ class TestSuiteConfigTest {
     ca.assertEquals(tslProvider_appPath, testSuiteConfig.getTslProvider().getAppPath());
 
     ca.assertEquals(
-        testSuiteParameter_InitialStateUseCase,
-        testSuiteConfig.getTestSuiteParameter().isInitialStateUseCase());
+        testSuiteParameter_performInitialState,
+        testSuiteConfig.getTestSuiteParameter().isPerformInitialState());
     ca.assertEquals(
         testSuiteParameter_CaptureNetworkTraffic,
         testSuiteConfig.getTestSuiteParameter().isCaptureNetworkTraffic());
 
-    ca.assertEquals(
-        testSuiteParameter_OcspSettings_RequestsExpected,
-        testSuiteConfig.getTestSuiteParameter().getOcspSettings().isRequestsExpected());
     ca.assertEquals(
         testSuiteParameter_OcspSettings_KeystorePathOcsp,
         testSuiteConfig.getTestSuiteParameter().getOcspSettings().getKeystorePathOcsp());
@@ -275,6 +281,9 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_OcspSettings_TimeoutDeltaMilliseconds,
         testSuiteConfig.getTestSuiteParameter().getOcspSettings().getTimeoutDeltaMilliseconds());
+    ca.assertEquals(
+        testSuiteParameter_OcspSettings_GracePeriodeExtraDelay,
+        testSuiteConfig.getTestSuiteParameter().getOcspSettings().getGracePeriodExtraDelay());
 
     ca.assertEquals(
         testSuiteParameter_TslSettings_InitialStateTslImport,
@@ -285,6 +294,39 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_TslSettings_AlternativeTemplate,
         testSuiteConfig.getTestSuiteParameter().getTslSettings().getAlternativeTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate,
+        testSuiteConfig
+            .getTestSuiteParameter()
+            .getTslSettings()
+            .getDefectAlternativeCaBrokenTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate,
+        testSuiteConfig
+            .getTestSuiteParameter()
+            .getTslSettings()
+            .getDefectAlternativeCaUnspecifiedTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate,
+        testSuiteConfig
+            .getTestSuiteParameter()
+            .getTslSettings()
+            .getDefectAlternativeCaWrongSrvInfoExtTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate,
+        testSuiteConfig
+            .getTestSuiteParameter()
+            .getTslSettings()
+            .getAlternativeCaUnspecifiedStiTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_AlternativeRevokedTemplate,
+        testSuiteConfig.getTestSuiteParameter().getTslSettings().getAlternativeRevokedTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate,
+        testSuiteConfig
+            .getTestSuiteParameter()
+            .getTslSettings()
+            .getAlternativeNoLineBreakTemplate());
 
     ca.assertEquals(
         testSuiteParameter_TslSettings_Signer,
@@ -303,23 +345,25 @@ class TestSuiteConfigTest {
     // captureNetworkTraffic is optional, and set manually in tscMinimal
     final String testSuiteParameter_CaptureNetworkTraffic = "9.9.9.9";
 
-    final String client_KeystorePathValidCerts = "../testDataTemplates/certificates/ecc/valid";
+    final String client_KeystorePathValidCerts =
+        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid";
     final String client_KeystorePathAlternativeCerts =
-        "../testDataTemplates/certificates/ecc/valid-alternative";
-    final String client_KeystorePathInvalidCerts = "../testDataTemplates/certificates/ecc/invalid";
+        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid-alternative";
+    final String client_KeystorePathInvalidCerts =
+        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/invalid";
 
     final String testObject_Name = "Server 0815";
     final String testObject_Type = "TlsServer";
     final String testObject_IpAddressOrFqdn = "127.0.0.1";
-    final Integer testObject_Port = 8443;
+    final int testObject_Port = 8443;
 
-    final Integer testObject_TslDownloadIntervalSeconds = 2;
+    final int testObject_TslDownloadIntervalSeconds = 2;
 
     final String ocspResponder_IpAddressOrFqdn = "127.0.0.1";
-    final Integer ocspResponder_Port = 8083;
+    final int ocspResponder_Port = 8083;
 
     final String tslProvider_IpAddressOrFqdn = "127.0.0.1";
-    final Integer tslProvider_Port = 8084;
+    final int tslProvider_Port = 8084;
 
     final Path yamlMinimal = Path.of("../docs/configs/inttest/pkits.yml");
 
@@ -403,22 +447,34 @@ class TestSuiteConfigTest {
     final String tslProvider_Id = "tslProvider.id";
     final String tslProvider_AppPath = "tslProvider.appPath";
 
-    final boolean testSuiteParameter_initialStateUseCase = false;
-    final Boolean testSuiteParameter_captureNetworkTraffic = true;
+    final boolean testSuiteParameter_performInitialState = false;
+    final boolean testSuiteParameter_captureNetworkTraffic = true;
     final String testSuiteParameter_captureInterface = "testSuiteParameter.captureInterface";
 
-    final boolean testSuiteParameter_ocspSettings_RequestsExpected = false;
     final Path testSuiteParameter_ocspSettings_KeystorePathOcsp =
         Path.of("testSuiteParameter.ocspSettings.keystorePathOcsp");
     final String testSuiteParameter_ocspSettings_SignerPassword =
         "testSuiteParameter.ocspSettings.signerPassword";
     final int testSuiteParameter_ocspSettings_TimeoutDeltaMilliseconds = -3000;
+    final int testSuiteParameter_ocspSettings_GracePeriodExtraDelay = -1000;
 
     final boolean testSuiteParameter_TslSettings_InitialStateTslImport = false;
     final Path testSuiteParameter_TslSettings_DefaultTemplate =
         Path.of("testSuiteParameter.tslSettings.defaultTemplate");
     final Path testSuiteParameter_TslSettings_AlternativeTemplate =
         Path.of("testSuiteParameter.tslSettings.alternativeTemplate");
+    final Path testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
+    final Path testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
+    final Path testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
+    final Path testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate =
+        Path.of("../testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
+    final Path testSuiteParameter_TslSettings_AlternativeRevokedTemplate =
+        Path.of("testSuiteParameter.tslSettings.alternativeRevokedTemplate");
+    final Path testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate =
+        Path.of("testSuiteParameter.tslSettings.alternativeNoLineBreakTemplate");
     final Path testSuiteParameter_TslSettings_Signer =
         Path.of("testSuiteParameter.tslSettings.signer");
     final String testSuiteParameter_TslSettings_SignerPassword =
@@ -455,17 +511,14 @@ class TestSuiteConfigTest {
     ca.assertEquals(tslProvider_AppPath, tsc.getTslProvider().getAppPath());
 
     ca.assertEquals(
-        testSuiteParameter_initialStateUseCase,
-        tsc.getTestSuiteParameter().isInitialStateUseCase());
+        testSuiteParameter_performInitialState,
+        tsc.getTestSuiteParameter().isPerformInitialState());
     ca.assertEquals(
         testSuiteParameter_captureNetworkTraffic,
         tsc.getTestSuiteParameter().isCaptureNetworkTraffic());
     ca.assertEquals(
         testSuiteParameter_captureInterface, tsc.getTestSuiteParameter().getCaptureInterface());
 
-    ca.assertEquals(
-        testSuiteParameter_ocspSettings_RequestsExpected,
-        tsc.getTestSuiteParameter().getOcspSettings().isRequestsExpected());
     ca.assertEquals(
         testSuiteParameter_ocspSettings_KeystorePathOcsp,
         tsc.getTestSuiteParameter().getOcspSettings().getKeystorePathOcsp());
@@ -475,6 +528,9 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_ocspSettings_TimeoutDeltaMilliseconds,
         tsc.getTestSuiteParameter().getOcspSettings().getTimeoutDeltaMilliseconds());
+    ca.assertEquals(
+        testSuiteParameter_ocspSettings_GracePeriodExtraDelay,
+        tsc.getTestSuiteParameter().getOcspSettings().getGracePeriodExtraDelay());
 
     ca.assertEquals(
         testSuiteParameter_TslSettings_InitialStateTslImport,
@@ -485,6 +541,26 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_TslSettings_AlternativeTemplate,
         tsc.getTestSuiteParameter().getTslSettings().getAlternativeTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate,
+        tsc.getTestSuiteParameter().getTslSettings().getDefectAlternativeCaBrokenTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate,
+        tsc.getTestSuiteParameter().getTslSettings().getDefectAlternativeCaUnspecifiedTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate,
+        tsc.getTestSuiteParameter()
+            .getTslSettings()
+            .getDefectAlternativeCaWrongSrvInfoExtTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate,
+        tsc.getTestSuiteParameter().getTslSettings().getAlternativeCaUnspecifiedStiTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_AlternativeRevokedTemplate,
+        tsc.getTestSuiteParameter().getTslSettings().getAlternativeRevokedTemplate());
+    ca.assertEquals(
+        testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate,
+        tsc.getTestSuiteParameter().getTslSettings().getAlternativeNoLineBreakTemplate());
     ca.assertEquals(
         testSuiteParameter_TslSettings_Signer,
         tsc.getTestSuiteParameter().getTslSettings().getSigner());

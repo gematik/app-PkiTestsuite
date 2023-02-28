@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -31,37 +32,46 @@ public class TestEnvironment {
     OcspResponderManager.clearOcspHistory(ocspRespUri);
   }
 
-  public static void clearTslProviderHistory(final String tslProvUri) {
-    TslProviderManager.clearTslHistory(tslProvUri);
-  }
-
   public static void configureTslProvider(
-      final String tslProvUri, final byte[] tsl, final TslDownloadPoint tslDownloadPoint) {
+      final String tslProvUri,
+      final byte[] tsl,
+      final TslDownloadPoint tslDownloadPoint,
+      final TslProviderEndpointsConfig tslProviderEndpointsConfig) {
+
     final TslProviderConfigDto tslProviderConfigDto =
-        new TslProviderConfigDto(tsl, tslDownloadPoint);
-    PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
+        new TslProviderConfigDto(tsl, tslDownloadPoint, tslProviderEndpointsConfig);
+
     TslProviderManager.configure(tslProvUri, tslProviderConfigDto);
-    log.info("TslProvider configured with TSL ({} bytes).", tsl.length);
+
+    log.info(
+        "TslProvider configured with TSL ({} bytes) and tslProviderEndpointsConfig = {}.",
+        tsl.length,
+        tslProviderEndpointsConfig);
   }
 
   public static void clearTslProviderConfig(final String tslProvUri) {
+
     PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
     TslProviderManager.clear(tslProvUri);
+
     log.info("TslProvider configuration cleared.");
   }
 
   public static void configureOcspResponder(
       final String ocspRespUri, final OcspResponderConfigDto ocspResponderConfig) {
-    PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
+
     OcspResponderManager.configure(ocspRespUri, ocspResponderConfig);
+
     log.info(
         "OcspResponder configured with cert serialNr: {}).",
         ocspResponderConfig.getEeCert().getSerialNumber());
   }
 
   public static void clearOcspResponderConfig(final String ocspRespUri) {
+
     PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
     OcspResponderManager.clear(ocspRespUri);
+
     log.info("OcspResponder configuration cleared.");
   }
 }

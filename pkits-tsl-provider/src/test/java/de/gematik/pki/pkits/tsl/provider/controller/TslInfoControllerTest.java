@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,19 @@ package de.gematik.pki.pkits.tsl.provider.controller;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_INFO_ENDPOINT;
 import static de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory.IGNORE_SEQUENCE_NUMBER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.common.TslConfigurator;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto.HistoryDeleteOption;
+import java.nio.charset.StandardCharsets;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
@@ -63,8 +64,8 @@ class TslInfoControllerTest {
   /** TslProvider has already started. */
   @BeforeAll
   void init() {
-    tslInfoUrl = "http://localhost:" + localServerPort + WEBSERVER_INFO_ENDPOINT;
-    tslServiceUrlPrimary = "http://localhost:" + localServerPort + TSL_XML_ENDPOINT;
+    tslInfoUrl = "http://localhost:" + localServerPort + PkitsConstants.TSL_WEBSERVER_INFO_ENDPOINT;
+    tslServiceUrlPrimary = "http://localhost:" + localServerPort + TSL_XML_PRIMARY_ENDPOINT;
     tslServiceUrlBackup = "http://localhost:" + localServerPort + TSL_XML_BACKUP_ENDPOINT;
   }
 
@@ -80,7 +81,9 @@ class TslInfoControllerTest {
   @Test
   void getFullTslRequestHistoryAsJson() throws JSONException {
     TslConfigurator.configureTsl(
-        localServerPort, "dummy tsl content".getBytes(), TSL_DOWNLOAD_POINT_PRIMARY);
+        localServerPort,
+        "dummy tsl content".getBytes(StandardCharsets.UTF_8),
+        TSL_DOWNLOAD_POINT_PRIMARY);
     final int REQUEST_AMOUNT = 4;
     for (int i = 0; i < REQUEST_AMOUNT; i++) {
       sendTslDownloadRequest(i);
@@ -99,7 +102,9 @@ class TslInfoControllerTest {
   @Test
   void getTslRequestHistoryAsJsonForSequenceNr() throws JSONException {
     TslConfigurator.configureTsl(
-        localServerPort, "dummy tsl content".getBytes(), TSL_DOWNLOAD_POINT_PRIMARY);
+        localServerPort,
+        "dummy tsl content".getBytes(StandardCharsets.UTF_8),
+        TSL_DOWNLOAD_POINT_PRIMARY);
     final int SEQ_NR = 2;
     final int REQUEST_AMOUNT = 4;
     for (int i = 0; i < REQUEST_AMOUNT; i++) {
@@ -138,7 +143,9 @@ class TslInfoControllerTest {
   @Test
   void deleteCompleteTslRequestHistory() throws JSONException {
     TslConfigurator.configureTsl(
-        localServerPort, "dummy tsl content".getBytes(), TSL_DOWNLOAD_POINT_PRIMARY);
+        localServerPort,
+        "dummy tsl content".getBytes(StandardCharsets.UTF_8),
+        TSL_DOWNLOAD_POINT_PRIMARY);
     final int REQUEST_AMOUNT = 25;
     for (int i = 0; i < REQUEST_AMOUNT; i++) {
       sendTslDownloadRequest(i);

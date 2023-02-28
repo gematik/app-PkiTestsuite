@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,18 @@ package de.gematik.pki.pkits.sut.server.sim;
 
 import de.gematik.pki.gemlibpki.ocsp.OcspRespCache;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
-import java.security.Provider;
+import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Security;
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.Filter;
-import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Slf4j
 @SpringBootApplication
 public class PkiSutServerSimApplication implements SecurityFilterChain {
 
@@ -48,6 +45,7 @@ public class PkiSutServerSimApplication implements SecurityFilterChain {
   }
 
   @Getter private static OcspRespCache ocspRespCache;
+  public static final String PRODUCT_TYPE = "Test";
 
   public PkiSutServerSimApplication(final OcspConfig ocspConfig) {
     ocspRespCache = new OcspRespCache(ocspConfig.getOcspGracePeriodSeconds()); // NOSONAR
@@ -55,24 +53,16 @@ public class PkiSutServerSimApplication implements SecurityFilterChain {
 
   @Override
   public boolean matches(final HttpServletRequest request) {
-    log.debug("in matches");
     return true;
   }
 
   @Override
   public List<Filter> getFilters() {
-    log.debug("in getFilters");
     return Collections.emptyList();
   }
 
-  // https://rules.sonarsource.com/java/RSPEC-4823 "This rule is deprecated, and will eventually
-  // be removed."
-  @SuppressWarnings("java:S4823")
   public static void main(final String[] args) {
-    System.setProperty("javax.net.debug", "ssl:handshake");
-    for (final Provider p : Security.getProviders()) {
-      log.debug("P: {}", p);
-    }
+
     SpringApplication.run(PkiSutServerSimApplication.class, args);
   }
 }

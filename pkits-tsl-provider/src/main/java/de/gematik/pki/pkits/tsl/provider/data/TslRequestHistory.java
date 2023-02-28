@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,18 @@ public class TslRequestHistory {
   private final List<TslRequestHistoryEntryDto> history = new ArrayList<>();
 
   public void add(final TslRequestHistoryEntryDto newItem) {
-    log.info("Add new entry with sequence number: {}", newItem.getSequenceNr());
+    log.info("Add new entry with seqNr: {} - {}", newItem.getSequenceNr(), newItem);
     history.add(newItem);
+  }
+
+  public void add(
+      final int sequenceNr,
+      final String endpoint,
+      final boolean isGzipCompressed,
+      final String protocol) {
+    final TslRequestHistoryEntryDto newItem =
+        new TslRequestHistoryEntryDto(sequenceNr, endpoint, isGzipCompressed, protocol);
+    add(newItem);
   }
 
   public List<TslRequestHistoryEntryDto> getExcerpt(final int sequenceNr) {

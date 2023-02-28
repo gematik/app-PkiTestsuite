@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
@@ -57,7 +57,7 @@ public class OcspRequestController {
       value = OCSP_SSP_ENDPOINT + "/{seqNr}",
       produces = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
   public ResponseEntity<Object> ocspService(
-      @PathVariable("seqNr") final int seqNr, final HttpServletRequest request) {
+      @PathVariable("seqNr") final int sequenceNr, final HttpServletRequest request) {
 
     if (!ocspResponseConfigHolder.isConfigured()) {
       return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
@@ -85,7 +85,7 @@ public class OcspRequestController {
       throw new OcspResponderException("CertSerialNr is not configured");
     }
     ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), seqNr));
+        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), sequenceNr));
     log.info(
         "Build OCSP Response for certSerialNr {} and send to {}:{}",
         certSerialNr,
@@ -111,7 +111,7 @@ public class OcspRequestController {
             .withCertHash(dto.isWithCertHash())
             .validCertHash(dto.isValidCertHash())
             .validSignature(dto.isValidSignature())
-            .validCertId(dto.isValidCertId())
+            .certificateIdGeneration(dto.getCertificateIdGeneration())
             .responderIdType(dto.getResponderIdType())
             .respStatus(dto.getRespStatus())
             .withResponseBytes(dto.isWithResponseBytes())

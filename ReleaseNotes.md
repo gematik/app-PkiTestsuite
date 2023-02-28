@@ -2,6 +2,21 @@
 
 # Release notes PKI Test Suite
 
+## Release 0.4.1
+
+- add test cases checking number of retries for primary and backend endpoints for TSL download
+- add test cases in the context of Trust Anchor Change verification - the tests are set to run as the last
+- add test cases in the context of TSL signer certificate verification
+- add test cases in the context of TSL approval verification
+- force trust anchor change tests to run as last
+- add documentation of all AFOs and correspondings test cases
+  files: [AFOs description](./docs/afoCoverage_afoDescriptions.txt),
+  [AFOs to tests mapping](./docs/afoCoverage_afoToTests.txt),
+  [tests to AFOs mapping](./docs/afoCoverage_testToAfos.txt)
+- introduce `externalStartup` for the case when OcspResponder and TslProvider are started externally (not by the test
+  suite)
+- integrate logs and configuration into PDF report
+
 ## Release 0.3.1
 
 - add kim client module certificates

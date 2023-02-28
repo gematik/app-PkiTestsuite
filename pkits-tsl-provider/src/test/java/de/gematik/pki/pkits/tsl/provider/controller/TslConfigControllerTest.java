@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -70,7 +72,8 @@ class TslConfigControllerTest {
 
     final byte[] tslBytes = getTslFromResources();
     final TslProviderConfigDto tslProviderConfig =
-        new TslProviderConfigDto(tslBytes, TSL_DOWNLOAD_POINT_BACKUP);
+        new TslProviderConfigDto(
+            tslBytes, TSL_DOWNLOAD_POINT_BACKUP, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
     final TslConfigRequestDto configReq =
         new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfig);
 
@@ -96,7 +99,11 @@ class TslConfigControllerTest {
   }
 
   private void invalidateTslProviderConfiguration() {
+    final byte[] tslBytes = "this is not a TSL :-)".getBytes(StandardCharsets.UTF_8);
     tslConfigHolder.setTslProviderConfigDto(
-        new TslProviderConfigDto("this is not a TSL :-)".getBytes(), TSL_DOWNLOAD_POINT_PRIMARY));
+        new TslProviderConfigDto(
+            tslBytes,
+            TSL_DOWNLOAD_POINT_PRIMARY,
+            TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200));
   }
 }

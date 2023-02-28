@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -33,27 +33,27 @@ import org.awaitility.core.ConditionTimeoutException;
 @Slf4j
 public class PkitsTestSuiteUtils {
 
-  public static void waitForEvent(
+  public static long waitForEvent(
       final String name, final long timeoutSecs, final Callable<Boolean> eventChecker) {
-    final int POLL_INTERVAL_SECS = 1;
-    waitForEvent(name, timeoutSecs, POLL_INTERVAL_SECS, eventChecker);
+    final int POLL_INTERVAL_MILLIS = 1000;
+    return waitForEventMillis(name, timeoutSecs, POLL_INTERVAL_MILLIS, eventChecker);
   }
 
-  public static void waitForEvent(
+  public static long waitForEventMillis(
       final String name,
       final long timeoutSecs,
-      final long pollIntervalSecs,
+      final long pollIntervalMillis,
       final Callable<Boolean> eventChecker) {
     log.debug(
-        "Waiting for event \"{}\" with timeout: {} seconds, poll interval: {} seconds",
+        "Waiting for event \"{}\" with timeout: {} milliseconds, poll interval: {} seconds",
         name,
         timeoutSecs,
-        pollIntervalSecs);
+        pollIntervalMillis);
     final ZonedDateTime zdtStart = ZonedDateTime.now();
     try {
       await()
           .atMost(Duration.ofSeconds(timeoutSecs))
-          .pollInterval(Duration.ofSeconds(pollIntervalSecs))
+          .pollInterval(Duration.ofMillis(pollIntervalMillis))
           .until(eventChecker);
     } catch (final ConditionTimeoutException e) {
       final String message = "Timeout for event \"%s\"".formatted(name);
@@ -61,10 +61,9 @@ public class PkitsTestSuiteUtils {
       throw new TestSuiteException(message, e);
     }
     final ZonedDateTime zdtEnd = ZonedDateTime.now();
-    log.info(
-        "Event \"{}\" occurred after: {} seconds",
-        name,
-        ChronoUnit.SECONDS.between(zdtStart, zdtEnd));
+    final long waitingTime = ChronoUnit.SECONDS.between(zdtStart, zdtEnd);
+    log.info("Event \"{}\" occurred after: {} seconds", name, waitingTime);
+    return waitingTime;
   }
 
   public static Path buildAbsolutePath(@NonNull final String aPath) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_INFO_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.gemlibpki.ocsp.OcspRequestGenerator;
@@ -26,6 +25,7 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspInfoRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
@@ -73,9 +73,10 @@ class OcspInfoControllerTest {
   @BeforeAll
   void init() {
 
-    ocspInfoUrl = "http://localhost:" + localServerPort + WEBSERVER_INFO_ENDPOINT;
+    ocspInfoUrl =
+        "http://localhost:" + localServerPort + PkitsConstants.OCSP_WEBSERVER_INFO_ENDPOINT;
     ocspServiceUrl = "http://localhost:" + localServerPort + OCSP_SSP_ENDPOINT;
-    ocspServiceUrlSeqNr42 = ocspServiceUrl + "/" + 42;
+    ocspServiceUrlSeqNr42 = ocspServiceUrl + "/42";
   }
 
   /**

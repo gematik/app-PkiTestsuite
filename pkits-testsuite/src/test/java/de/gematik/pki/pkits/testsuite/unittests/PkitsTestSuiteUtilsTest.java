@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package de.gematik.pki.pkits.testsuite.unittests;
 
-import static de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils.waitForEvent;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 class PkitsTestSuiteUtilsTest {
 
-  static int eventCounter = 0;
+  int eventCounter = 0;
 
   @BeforeEach
   void init() {
@@ -50,12 +50,12 @@ class PkitsTestSuiteUtilsTest {
 
   @Test
   void waitForEventSuccess() {
-    assertDoesNotThrow(() -> waitForEvent("hit number", 16, hitNumber(13)));
+    assertDoesNotThrow(() -> PkitsTestSuiteUtils.waitForEvent("hit number", 16, hitNumber(13)));
   }
 
   @Test
   void waitForEventTimeout() {
-    assertThatThrownBy(() -> waitForEvent("hit number", 2, hitNumber(13)))
+    assertThatThrownBy(() -> PkitsTestSuiteUtils.waitForEvent("hit number", 2, hitNumber(13)))
         .isInstanceOf(TestSuiteException.class);
   }
 
@@ -70,7 +70,7 @@ class PkitsTestSuiteUtilsTest {
     assertThat(ret).as("Callable is expected to return true.").isTrue();
   }
 
-  private static Callable<Boolean> hitNumber(final int number) {
+  private Callable<Boolean> hitNumber(final int number) {
     return () -> {
       eventCounter++;
       return eventCounter > number;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.junit.jupiter.params.support.AnnotationConsumer;
 
 public class CertificateProvider implements ArgumentsProvider, AnnotationConsumer<VariableSource> {
 
-  private static String certDir;
+  private String certDir;
 
   public static Stream<Path> getFilesFromDir(final String directory) {
     final List<Path> fileList = new ArrayList<>();

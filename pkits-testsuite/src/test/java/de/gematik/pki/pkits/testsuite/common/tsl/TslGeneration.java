@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,10 @@
 package de.gematik.pki.pkits.testsuite.common.tsl;
 
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
 import de.gematik.pki.gemlibpki.tsl.TslReader;
 import de.gematik.pki.gemlibpki.tsl.TslSigner;
-import de.gematik.pki.gemlibpki.utils.GemlibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.pkits.common.PkiCommonException;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.nio.file.Path;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -32,42 +29,42 @@ import org.w3c.dom.Document;
 
 public abstract class TslGeneration {
 
-  public static byte[] createTslFromFile(
-      @NonNull final Path tslPath,
-      @NonNull final TslModification tslMod,
+  public static byte[] signTslDoc(
+      final Document tslDoc,
       @NonNull final Path tslSignerPath,
-      @NonNull final String tslSignerPassword)
-      throws DatatypeConfigurationException {
-    final TrustStatusListType tslT = TslReader.getTsl(tslPath).orElseThrow();
-    modifyTsl(tslT, tslMod);
-    final Document tslDoc = TslConverter.tslToDoc(tslT).orElseThrow();
-    final P12Container signer =
-        P12Reader.getContentFromP12(GemlibPkiUtils.readContent(tslSignerPath), tslSignerPassword);
-    TslSigner.sign(tslDoc, signer);
-    return TslConverter.docToBytes(tslDoc).orElseThrow();
+      @NonNull final String tslSignerPassword,
+      final boolean signerKeyUsageCheck,
+      final boolean signerValidityCheck) {
+
+    final P12Container p12Container = P12Reader.getContentFromP12(tslSignerPath, tslSignerPassword);
+
+    TslSigner.builder()
+        .tslToSign(tslDoc)
+        .tslSignerP12(p12Container)
+        .checkSignerKeyUsage(signerKeyUsageCheck)
+        .checkSignerValidity(signerValidityCheck)
+        .build()
+        .sign();
+
+    return TslConverter.docToBytes(tslDoc);
   }
 
-  private static void modifyTsl(
-      @NonNull final TrustStatusListType tslT, @NonNull final TslModification tslMod)
+  public static byte[] createTslFromFile(
+      @NonNull final Path tslTemplate,
+      @NonNull final TslModification tslModification,
+      @NonNull final Path tslSignerPath,
+      @NonNull final String tslSignerPassword,
+      final boolean signerKeyUsageCheck,
+      final boolean signerValidityCheck)
       throws DatatypeConfigurationException {
-    if (tslMod.getNextUpdate() == null) {
-      if (tslMod.getDaysUntilNextUpdate() <= 0) {
-        throw new PkiCommonException(
-            "TslModification must contain nextUpdate or daysUntilNextUpdate.");
-      } else {
-        TslModifier.modifyIssueDateAndRelatedNextUpdate(
-            tslT, tslMod.getIssueDate(), tslMod.getDaysUntilNextUpdate());
-      }
-    } else {
-      TslModifier.modifyIssueDate(tslT, tslMod.getIssueDate());
-      TslModifier.modifyNextUpdate(tslT, tslMod.getNextUpdate());
-    }
 
-    tslT.setId(TslModifier.generateTslId(tslMod.getSequenceNr(), tslMod.getIssueDate()));
-    // TODO count number of modified entries and log.debug them
-    TslModifier.modifySequenceNr(tslT, tslMod.getSequenceNr());
-    TslModifier.modifySspForCAsOfTsp(tslT, tslMod.getTspName(), tslMod.getNewSsp());
-    TslModifier.modifyTslDownloadUrlPrimary(tslT, tslMod.getTslDownloadUrlPrimary());
-    TslModifier.modifyTslDownloadUrlBackup(tslT, tslMod.getTslDownloadUrlBackup());
+    final TrustStatusListType tsl = TslReader.getTsl(tslTemplate);
+
+    tslModification.modify(tsl);
+
+    final Document tslDoc = TslConverter.tslToDoc(tsl);
+
+    return signTslDoc(
+        tslDoc, tslSignerPath, tslSignerPassword, signerKeyUsageCheck, signerValidityCheck);
   }
 }

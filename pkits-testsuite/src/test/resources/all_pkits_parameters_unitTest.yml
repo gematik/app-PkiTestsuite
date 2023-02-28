@@ -28,19 +28,21 @@ tslProvider:
   appPath: "tslProvider.appPath"
 
 testSuiteParameter:
-  initialStateUseCase: false
+  performInitialState: false
   captureNetworkTraffic: true
   captureInterface: "testSuiteParameter.captureInterface"
 
   ocspSettings:
-    requestsExpected: false
     keystorePathOcsp: "testSuiteParameter.ocspSettings.keystorePathOcsp"
     signerPassword: "testSuiteParameter.ocspSettings.signerPassword"
     timeoutDeltaMilliseconds: -3000
+    gracePeriodExtraDelay: -1000
 
   tslSettings:
     initialStateTslImport: false
     defaultTemplate: "testSuiteParameter.tslSettings.defaultTemplate"
     alternativeTemplate: "testSuiteParameter.tslSettings.alternativeTemplate"
+    alternativeRevokedTemplate: "testSuiteParameter.tslSettings.alternativeRevokedTemplate"
+    alternativeNoLineBreakTemplate: "testSuiteParameter.tslSettings.alternativeNoLineBreakTemplate"
     signer: "testSuiteParameter.tslSettings.signer"
     signerPassword: "testSuiteParameter.tslSettings.signerPassword"

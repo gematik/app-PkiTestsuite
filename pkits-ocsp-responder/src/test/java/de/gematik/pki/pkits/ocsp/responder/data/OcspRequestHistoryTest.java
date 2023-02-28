@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -42,19 +42,25 @@ class OcspRequestHistoryTest {
    */
   @Test
   void getExcerptExpectOne() {
+
     final BigInteger certSerialNr = new BigInteger("20000");
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
+
     assertThat(ocspRequestHistory.size()).isZero();
+
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(new BigInteger("10000"), ZonedDateTime.now().toString(), 3));
+
     ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 9));
+        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 7));
+
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(new BigInteger("30000"), ZonedDateTime.now().toString(), 7));
 
     final List<OcspRequestHistoryEntryDto> excerpt = ocspRequestHistory.getExcerpt(certSerialNr);
     assertThat(excerpt).hasSize(1);
     assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
+    assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(7);
   }
 
   /**
@@ -65,23 +71,32 @@ class OcspRequestHistoryTest {
   void getExcerptExpectSeveral() {
     final BigInteger certSerialNr = new BigInteger("4711");
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
+
     assertThat(ocspRequestHistory.size()).isZero();
+
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(
             new BigInteger("10000"), ZonedDateTime.now().toString(), 100));
+
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 66));
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 66));
+
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(
             new BigInteger("30000"), ZonedDateTime.now().toString(), 24));
+
     ocspRequestHistory.add(
         new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 6));
 
     final List<OcspRequestHistoryEntryDto> excerpt = ocspRequestHistory.getExcerpt(certSerialNr);
     assertThat(excerpt).hasSize(3);
     assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
+
+    assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(66);
+    assertThat(excerpt.get(1).getTslSeqNr()).isEqualTo(66);
+    assertThat(excerpt.get(2).getTslSeqNr()).isEqualTo(6);
   }
 
   /**

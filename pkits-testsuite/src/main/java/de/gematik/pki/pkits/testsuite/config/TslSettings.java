@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,50 @@ public class TslSettings {
       withDefault = true,
       description = "Alternative template to generate a TSL with additional CAs during tests.")
   Path alternativeTemplate = Path.of("../testDataTemplates/tsl/TSL_altCA.xml");
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "Alternative template to generate a TSL with an additional broken CA during tests.")
+  Path defectAlternativeCaBrokenTemplate =
+      Path.of("../testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "Alternative template to generate a TSL with an additional unspecified CA during tests.")
+  Path defectAlternativeCaUnspecifiedTemplate =
+      Path.of("../testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "Alternative template to generate a TSL with an additional wrong (service info extension)"
+              + " CA during tests.")
+  Path defectAlternativeCaWrongSrvInfoExtTemplate =
+      Path.of("../testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "Alternative template to generate a TSL with an unspecified ServiceTypeIdentifier in TSP"
+              + " service during tests.")
+  Path alternativeCaUnspecifiedStiTemplate =
+      Path.of("../testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "Alternative template to generate a TSL with additional revoked CAs during tests.")
+  Path alternativeRevokedTemplate = Path.of("../testDataTemplates/tsl/TSL_altCA_revoked.xml");
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "Alternative template to generate a TSL with additional CAs without line breaks during"
+              + " tests.")
+  Path alternativeNoLineBreakTemplate =
+      Path.of("../testDataTemplates/tsl/TSL_altCA_noLineBreak.xml");
 
   @ParameterDescription(
       withDefault = true,

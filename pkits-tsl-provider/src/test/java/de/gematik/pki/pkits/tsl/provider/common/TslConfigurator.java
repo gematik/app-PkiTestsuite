@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
 import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
@@ -35,7 +36,8 @@ public class TslConfigurator {
       final int tslPort, final byte[] tsl, final TslDownloadPoint activeTslDownloadPoint)
       throws UnirestException {
     final TslProviderConfigDto tslProviderConfig =
-        new TslProviderConfigDto(tsl, activeTslDownloadPoint);
+        new TslProviderConfigDto(
+            tsl, activeTslDownloadPoint, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
     final TslConfigRequestDto configReq =
         new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfig);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,18 @@ import lombok.Setter;
 public class ClientConfig {
 
   @ParameterDescription(
-      withDefault = false,
       description =
           "Absolute or relative path to valid key store end-entity files in p12 format for the"
               + " tests.")
   private String keystorePathValidCerts;
 
   @ParameterDescription(
-      withDefault = false,
       description =
           "Absolute or relative path to valid key store end-entity files of an alternative CA in"
               + " p12 format for the tests.")
   private String keystorePathAlternativeCerts;
 
   @ParameterDescription(
-      withDefault = false,
       description =
           "Absolute or relative path to invalid key store end-entity files in p12 format for the"
               + " tests.")

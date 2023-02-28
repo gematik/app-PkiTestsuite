@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator;
+import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
@@ -46,13 +46,15 @@ public class OcspResponderConfigDto implements Serializable {
   @Builder.Default private final boolean withCertHash = true;
   @Builder.Default private final boolean validSignature = true;
 
-  @Builder.Default private final boolean validCertId = true;
+  @Builder.Default
+  private final CertificateIdGeneration certificateIdGeneration =
+      CertificateIdGeneration.VALID_CERTID;
+
   @Builder.Default private final int delayMilliseconds = 0;
   @Builder.Default private final OCSPRespStatus respStatus = OCSPRespStatus.SUCCESSFUL;
   @Builder.Default private final boolean withResponseBytes = true;
 
-  @Builder.Default
-  private final OcspResponseGenerator.ResponderIdType responderIdType = ResponderIdType.BY_KEY;
+  @Builder.Default private final ResponderIdType responderIdType = ResponderIdType.BY_KEY;
 
   @Builder.Default private final int thisUpdateDeltaMilliseconds = 0;
   @Builder.Default private final int producedAtDeltaMilliseconds = 0;
@@ -167,17 +169,17 @@ public class OcspResponderConfigDto implements Serializable {
   @Override
   public String toString() {
     return ("OcspResponderConfigDto{certSerialNr=%s, signerCN=%s, validCertHash=%s,"
-            + " withCertHash=%s, validSignature=%s, validCertId=%s, certificateStatus=%s,"
-            + " respStatus=%s, withResponseBytes=%s, thisUpdateDeltaMilliseconds=%s,"
-            + " producedAtDeltaMilliseconds=%s, nextUpdateDeltaMilliseconds=%s,"
-            + " withNullParameterHashAlgoOfCertId=%s}")
+            + " withCertHash=%s, validSignature=%s, certificateIdGeneration=%s,"
+            + " certificateStatus=%s, respStatus=%s, withResponseBytes=%s,"
+            + " thisUpdateDeltaMilliseconds=%s, producedAtDeltaMilliseconds=%s,"
+            + " nextUpdateDeltaMilliseconds=%s, withNullParameterHashAlgoOfCertId=%s}")
         .formatted(
             eeCert.getSerialNumber(),
             signer.getCertificate().getSubjectX500Principal().getName(),
             validCertHash,
             withCertHash,
             validSignature,
-            validCertId,
+            certificateIdGeneration,
             certificateStatus,
             respStatus,
             withResponseBytes,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,11 @@ public class TestSuiteConstants {
   public static final String OCSP_SIGNER_FILENAME = "ee_default.p12";
   public static final String OCSP_SIGNER_NOT_IN_TSL_FILENAME = "ee_not-in-tsl.p12";
   public static final String OCSP_SIGNER_DIFFERENT_KEY = "ee_different-key.p12";
+
+  public static final boolean SIGNER_KEY_USAGE_CHECK_ENABLED = true;
+  public static final boolean SIGNER_KEY_USAGE_CHECK_DISABLED = false;
+  public static final boolean SIGNER_VALIDITY_CHECK_ENABLED = true;
+  public static final boolean SIGNER_VALIDITY_CHECK_DISABLED = false;
 
   public enum PKITS_CERT {
     PKITS_CERT_VALID,

@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.3.1</version>
+    <version>0.4.1</version>
   </parent>
 
   <artifactId>pkits-ocsp-responder</artifactId>
@@ -18,7 +18,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -68,6 +68,10 @@
       <groupId>com.konghq</groupId>
       <artifactId>unirest-java</artifactId>
       <version>${version.unirest-java}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
     </dependency>
   </dependencies>
 

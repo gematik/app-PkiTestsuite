@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package de.gematik.pki.pkits.ocsp.responder.api;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_INFO_ENDPOINT;
 
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspConfigRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspInfoRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
@@ -37,14 +37,16 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OcspResponderManager {
 
-  public static void configure(final String uri, final OcspResponderConfigDto ocspResponderConfig) {
-    final String configUri = uri + WEBSERVER_CONFIG_ENDPOINT;
+  public static void configure(
+      final String ocspRespUri, final OcspResponderConfigDto ocspResponderConfig) {
+    final String configUri = ocspRespUri + WEBSERVER_CONFIG_ENDPOINT;
     final OcspConfigRequestDto configReq =
         new OcspConfigRequestDto(WEBSERVER_BEARER_TOKEN, ocspResponderConfig);
     final String jsonContent =
         PkitsCommonUtils.createJsonContent(PkitsCommonUtils.objectToBytes(configReq));
 
-    /**
+    PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
+    /*
      * received by {@link
      * de.gematik.pki.pkits.ocsp.responder.controllers.OcspConfigController#ocspConfig}
      */
@@ -103,7 +105,8 @@ public final class OcspResponderManager {
       final String uri, final OcspInfoRequestDto ocspInfoRequestDto) {
     final String jsonContent = PkitsCommonUtils.createJsonContent(ocspInfoRequestDto);
     final String responseBodyAsJson =
-        JsonTransceiver.txRxJsonViaHttp(uri + WEBSERVER_INFO_ENDPOINT, jsonContent);
+        JsonTransceiver.txRxJsonViaHttp(
+            uri + PkitsConstants.OCSP_WEBSERVER_INFO_ENDPOINT, jsonContent);
     log.debug("JsonTransceiver, responseBodyAsJson: {}", responseBodyAsJson);
     if (responseBodyAsJson.isEmpty()) {
       return Collections.emptyList();

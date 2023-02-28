@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ class SSLContextProviderTest {
   @Disabled("Development only")
   @Test
   void connectEcc() throws URISyntaxException, UnknownHostException {
-    final String certResourcePath = "../testDataTemplates/certificates/ecc/valid/ee_default.p12";
+    final String certResourcePath =
+        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid/ee_default.p12";
     final Path clientKeystorePath =
         Path.of(
             Objects.requireNonNull(

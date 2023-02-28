@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,12 @@ import lombok.Getter;
 public class TslProviderConfig {
 
   @ParameterDescription(
-      withDefault = false,
       description =
           "FQDN or IP address where the tsl provider is running. This will be used as the"
               + " PointersToOther field in the TSLs.")
   String ipAddressOrFqdn;
 
-  @ParameterDescription(
-      withDefault = false,
-      description = "Port where the TSL provider is listening.")
+  @ParameterDescription(description = "Port where the TSL provider is listening.")
   int port;
 
   @ParameterDescription(
@@ -40,6 +37,8 @@ public class TslProviderConfig {
 
   @ParameterDescription(
       withDefault = true,
-      description = "Path to the TSL provider jar which should be started during tests.")
+      description =
+          "Path to the TSL provider jar which should be started during tests. This can be skipped"
+              + " with the keyword \"externalStartup\".")
   String appPath = "../pkits-tsl-provider/target/pkits-tsl-provider-exec.jar";
 }
