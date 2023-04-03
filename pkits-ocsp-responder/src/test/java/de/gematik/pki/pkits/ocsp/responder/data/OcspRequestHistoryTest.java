@@ -16,11 +16,13 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
+import static de.gematik.pki.pkits.ocsp.responder.controllers.OcspResponderTestUtils.getEntry;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import java.math.BigInteger;
-import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 class OcspRequestHistoryTest {
@@ -30,9 +32,16 @@ class OcspRequestHistoryTest {
   void add() {
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
     assertThat(ocspRequestHistory.size()).isZero();
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(
-            new BigInteger("10000"), ZonedDateTime.now().toString(), 42));
+    ocspRequestHistory.add(getEntry(42, "10000"));
+    assertThat(ocspRequestHistory.size()).isEqualTo(1);
+  }
+
+  /** Store one element, check size, TSL seqNr does not matter */
+  @Test
+  void add2() {
+    final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
+    assertThat(ocspRequestHistory.size()).isZero();
+    ocspRequestHistory.add(getEntry(42, "10000"));
     assertThat(ocspRequestHistory.size()).isEqualTo(1);
   }
 
@@ -43,21 +52,20 @@ class OcspRequestHistoryTest {
   @Test
   void getExcerptExpectOne() {
 
-    final BigInteger certSerialNr = new BigInteger("20000");
+    final String certSerialNrStr = "20000";
+    final BigInteger certSerialNr = new BigInteger(certSerialNrStr);
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
 
     assertThat(ocspRequestHistory.size()).isZero();
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10000"), ZonedDateTime.now().toString(), 3));
+    ocspRequestHistory.add(getEntry(3, "10000"));
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 7));
+    ocspRequestHistory.add(getEntry(7, certSerialNrStr));
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("30000"), ZonedDateTime.now().toString(), 7));
+    ocspRequestHistory.add(getEntry(7, "30000"));
+    ocspRequestHistory.add(getEntry(8, certSerialNrStr));
 
-    final List<OcspRequestHistoryEntryDto> excerpt = ocspRequestHistory.getExcerpt(certSerialNr);
+    final List<OcspRequestHistoryEntryDto> excerpt = ocspRequestHistory.getExcerpt(7, certSerialNr);
     assertThat(excerpt).hasSize(1);
     assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
     assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(7);
@@ -69,34 +77,53 @@ class OcspRequestHistoryTest {
    */
   @Test
   void getExcerptExpectSeveral() {
-    final BigInteger certSerialNr = new BigInteger("4711");
+    final String certSerialNrStr = "4711";
+    final BigInteger certSerialNr = new BigInteger(certSerialNrStr);
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
 
     assertThat(ocspRequestHistory.size()).isZero();
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(
-            new BigInteger("10000"), ZonedDateTime.now().toString(), 100));
+    ocspRequestHistory.add(getEntry(100, "10000"));
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 66));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 66));
+    ocspRequestHistory.add(getEntry(55, certSerialNrStr));
+    ocspRequestHistory.add(getEntry(55, certSerialNrStr));
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(
-            new BigInteger("30000"), ZonedDateTime.now().toString(), 24));
+    ocspRequestHistory.add(getEntry(77, "30000"));
+    ocspRequestHistory.add(getEntry(77, certSerialNrStr));
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), 6));
+    ocspRequestHistory.add(getEntry(55, "30000"));
 
-    final List<OcspRequestHistoryEntryDto> excerpt = ocspRequestHistory.getExcerpt(certSerialNr);
-    assertThat(excerpt).hasSize(3);
-    assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
+    {
+      final List<OcspRequestHistoryEntryDto> excerpt =
+          ocspRequestHistory.getExcerpt(55, certSerialNr);
+      assertThat(excerpt).hasSize(2);
+      assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
 
-    assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(66);
-    assertThat(excerpt.get(1).getTslSeqNr()).isEqualTo(66);
-    assertThat(excerpt.get(2).getTslSeqNr()).isEqualTo(6);
+      assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(55);
+      assertThat(excerpt.get(1).getTslSeqNr()).isEqualTo(55);
+    }
+
+    {
+      final List<OcspRequestHistoryEntryDto> excerpt =
+          ocspRequestHistory.getExcerpt(OcspResponderManager.IGNORE_SEQUENCE_NUMBER, certSerialNr);
+      assertThat(excerpt).hasSize(3);
+      assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
+
+      assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(55);
+      assertThat(excerpt.get(1).getTslSeqNr()).isEqualTo(55);
+      assertThat(excerpt.get(2).getTslSeqNr()).isEqualTo(77);
+    }
+
+    {
+      final List<OcspRequestHistoryEntryDto> excerpt =
+          ocspRequestHistory.getExcerpt(55, OcspResponderManager.IGNORE_CERT_SERIAL_NUMBER);
+      assertThat(excerpt).hasSize(3);
+      assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(55);
+
+      assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
+      assertThat(excerpt.get(1).getCertSerialNr()).isEqualTo(certSerialNr);
+      assertThat(excerpt.get(2).getCertSerialNr()).isEqualTo(new BigInteger("30000"));
+    }
   }
 
   /**
@@ -104,17 +131,43 @@ class OcspRequestHistoryTest {
    * matter
    */
   @Test
-  void deleteUniqueEntry() {
+  void deleteUniqueEntryForCertSerialNr() {
     final int elementsPut = 100;
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
+
     assertThat(ocspRequestHistory.size()).isZero();
+
     for (int i = 0; i < elementsPut; i++) {
-      ocspRequestHistory.add(
-          new OcspRequestHistoryEntryDto(
-              new BigInteger("10" + i), ZonedDateTime.now().toString(), 45));
+      ocspRequestHistory.add(getEntry(45, "10" + i));
     }
+
     assertThat(ocspRequestHistory.size()).isEqualTo(elementsPut);
-    ocspRequestHistory.deleteEntries(new BigInteger("10" + 5));
+
+    ocspRequestHistory.deleteEntries(
+        OcspResponderManager.IGNORE_SEQUENCE_NUMBER, new BigInteger("10" + 5));
+
+    assertThat(ocspRequestHistory.size()).isEqualTo(elementsPut - 1);
+  }
+
+  /**
+   * Store some elements with different tslSeqNr, delete one and check size, TSL seqNr does not
+   * matter
+   */
+  @Test
+  void deleteUniqueEntryForTslSeqNr() {
+    final int elementsPut = 100;
+    final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
+
+    assertThat(ocspRequestHistory.size()).isZero();
+
+    for (int i = 0; i < elementsPut; i++) {
+      ocspRequestHistory.add(getEntry(10 + i, "45"));
+    }
+
+    assertThat(ocspRequestHistory.size()).isEqualTo(elementsPut);
+
+    ocspRequestHistory.deleteEntries(15, OcspResponderManager.IGNORE_CERT_SERIAL_NUMBER);
+
     assertThat(ocspRequestHistory.size()).isEqualTo(elementsPut - 1);
   }
 
@@ -124,21 +177,48 @@ class OcspRequestHistoryTest {
    */
   @Test
   void deleteSameEntries() {
-    final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10"), ZonedDateTime.now().toString(), 87));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("15"), ZonedDateTime.now().toString(), 44));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10"), ZonedDateTime.now().toString(), 102));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10"), ZonedDateTime.now().toString(), 1));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("42"), ZonedDateTime.now().toString(), 17));
+    final Supplier<OcspRequestHistory> historySupplier =
+        () -> {
+          final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
 
-    ocspRequestHistory.deleteEntries(new BigInteger("10"));
-    assertThat(ocspRequestHistory.size()).isEqualTo(2);
+          ocspRequestHistory.add(getEntry(11, "10"));
+          ocspRequestHistory.add(getEntry(55, "15"));
+          ocspRequestHistory.add(getEntry(11, "10"));
+          ocspRequestHistory.add(getEntry(55, "10"));
+          ocspRequestHistory.add(getEntry(44, "42"));
+          ocspRequestHistory.add(getEntry(11, "42"));
+          return ocspRequestHistory;
+        };
+
+    final int origHistorySize = historySupplier.get().size();
+    OcspRequestHistory ocspRequestHistory;
+
+    ocspRequestHistory = historySupplier.get();
+    ocspRequestHistory.deleteEntries(11, new BigInteger("10"));
+    assertThat(ocspRequestHistory.size()).isEqualTo(origHistorySize - 2);
+
+    ocspRequestHistory.deleteEntries(
+        OcspResponderManager.IGNORE_SEQUENCE_NUMBER, new BigInteger("10"));
+    assertThat(ocspRequestHistory.size()).isEqualTo(origHistorySize - 3);
+
+    ocspRequestHistory = historySupplier.get();
+    ocspRequestHistory.deleteEntries(null, new BigInteger("10"));
+    assertThat(ocspRequestHistory.size()).isEqualTo(origHistorySize - 3);
+
+    ocspRequestHistory = historySupplier.get();
+    ocspRequestHistory.deleteEntries(55, OcspResponderManager.IGNORE_CERT_SERIAL_NUMBER);
+    assertThat(ocspRequestHistory.size()).isEqualTo(origHistorySize - 2);
+
+    ocspRequestHistory = historySupplier.get();
+    ocspRequestHistory.deleteEntries(11, null);
+    assertThat(ocspRequestHistory.size()).isEqualTo(origHistorySize - 3);
+
+    ocspRequestHistory = historySupplier.get();
+    ocspRequestHistory.deleteEntries(
+        OcspResponderManager.IGNORE_SEQUENCE_NUMBER,
+        OcspResponderManager.IGNORE_CERT_SERIAL_NUMBER);
+    assertThat(ocspRequestHistory.size()).isZero();
   }
 
   /** Store some elements, delete all and check size, TSL seqNr does not matter */
@@ -146,16 +226,11 @@ class OcspRequestHistoryTest {
   void deleteAll() {
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
 
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10"), ZonedDateTime.now().toString(), 4));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("15"), ZonedDateTime.now().toString(), 4));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10"), ZonedDateTime.now().toString(), 14));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("10"), ZonedDateTime.now().toString(), 4));
-    ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(new BigInteger("42"), ZonedDateTime.now().toString(), 36));
+    ocspRequestHistory.add(getEntry(4, "10"));
+    ocspRequestHistory.add(getEntry(4, "15"));
+    ocspRequestHistory.add(getEntry(14, "10"));
+    ocspRequestHistory.add(getEntry(4, "10"));
+    ocspRequestHistory.add(getEntry(36, "42"));
 
     ocspRequestHistory.deleteAll();
     assertThat(ocspRequestHistory.size()).isZero();
@@ -168,9 +243,7 @@ class OcspRequestHistoryTest {
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
     assertThat(ocspRequestHistory.size()).isZero();
     for (int i = 0; i < elementsPut; i++) {
-      ocspRequestHistory.add(
-          new OcspRequestHistoryEntryDto(
-              new BigInteger("10000" + i), ZonedDateTime.now().toString(), 18));
+      ocspRequestHistory.add(getEntry(18, "10000" + i));
     }
     assertThat(ocspRequestHistory.size()).isEqualTo(elementsPut);
   }

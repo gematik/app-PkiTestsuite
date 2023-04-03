@@ -29,7 +29,7 @@ public class OcspSettings {
       description =
           "Absolute or relative path to key store files in p12 format to sign OCSP requests."
               + " with.")
-  Path keystorePathOcsp = Path.of("../testDataTemplates/certificates/ecc/ocspKeystore");
+  Path keystorePathOcsp = Path.of("./testDataTemplates/certificates/ecc/ocspKeystore");
 
   @ParameterDescription(
       withDefault = true,

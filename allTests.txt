@@ -64,9 +64,9 @@
 	verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage           Test TSL signer certificates with invalid key usage and extended key usage
 	verifyTslSignerCertNotYetValid                                  Test TSL signer certificate that is not yet valid - notBefore is in the future
 
-+	de.gematik.pki.pkits.testsuite.approval.TslVaApprovalTestsIT
-	verifyHandlingOfStatusStartingTimeAndOverwriteOfAnnouncedTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors
-	verifyMultipleAnnouncedTrustAnchorsInTsl                               Test multiple announced trust anchors in single TSL
-	verifyNewTrustAnchorInvalidTime                                        Test updating trust anchor with certificates that have invalid times
-	verifyNewTrustAnchorsIsBroken                                          Test for an announced broken trust anchor and cannot be extracted
-	verifyUpdateTrustAnchor                                                Test updating trust anchor
+-	de.gematik.pki.pkits.testsuite.approval.TslVaApprovalTestsIT
+-	verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors
+-	verifyMultipleAnnouncedTrustAnchorsInTsl                                     Test multiple announced trust anchors in single TSL
+-	verifyNewTrustAnchorInvalidTime                                              Test updating trust anchor with certificates that have invalid times
+-	verifyNewTrustAnchorsIsBroken                                                Test for an announced broken trust anchor and cannot be extracted
+-	verifyUpdateTrustAnchor                                                      Test updating trust anchor

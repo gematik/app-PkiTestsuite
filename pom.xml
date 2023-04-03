@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.5</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pkits-global</artifactId>
-  <version>0.4.1</version>
+  <version>1.0.1</version>
   <packaging>pom</packaging>
   <name>PkiTs</name>
   <description>Uebergreifende Java PKI Testsuite</description>
@@ -44,6 +44,7 @@
     <module>pkits-tls-client</module>
     <module>pkits-testsuite</module>
     <module>pkits-coverage-reports</module>
+    <module>pki-testsuite</module>
   </modules>
 
   <scm>
@@ -60,11 +61,21 @@
   <properties>
     <!-- header-->
     <skipUTs>false</skipUTs>
+    <skipITs>false</skipITs>
+
+    <skip.dockerbuild>true</skip.dockerbuild>
+
+    <version.docker-maven-plugin>0.41.0</version.docker-maven-plugin>
+    <docker.registry.gematik>eu.gcr.io/gematik-all-infra-prod</docker.registry.gematik>
+    <docker.image.name.pkits-ocsp-responder>${docker.registry.gematik}/pkits/pkits-ocsp-responder</docker.image.name.pkits-ocsp-responder>
+    <docker.image.name.pkits-tsl-provider>${docker.registry.gematik}/pkits/pkits-tsl-provider</docker.image.name.pkits-tsl-provider>
+
     <version.java>17</version.java>
     <version.maven>3.6.3</version.maven>
     <!-- for Spring boot -->
     <java.version>${version.java}</java.version>
 
+    <project.build.releaseJarsDir>${project.basedir}/../bin/</project.build.releaseJarsDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
     <maven.compiler.encoding>${project.build.sourceEncoding}</maven.compiler.encoding>
@@ -74,7 +85,7 @@
     <version.assertj-core>3.24.2</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
     <version.bouncycastle>1.72</version.bouncycastle>
-    <version.commons-compress>1.22</version.commons-compress>
+    <version.commons-compress>1.23.0</version.commons-compress>
     <version.gemLibPki>0.11.0</version.gemLibPki>
     <version.jackson>2.14.2</version.jackson>
     <version.jakarta.activation-api>2.1.1</version.jakarta.activation-api>
@@ -83,7 +94,7 @@
     <version.jaxb-api>2.4.0-b180830.0359</version.jaxb-api>
     <version.jaxb-impl>2.3.6</version.jaxb-impl>
     <version.junit-jupiter>5.9.2</version.junit-jupiter>
-    <version.log4j2>2.19.0</version.log4j2>
+    <version.log4j2>2.20.0</version.log4j2>
     <version.lombok>1.18.26</version.lombok>
     <version.unirest-java>3.14.1</version.unirest-java>
 
@@ -98,6 +109,7 @@
     <version.maven-javadoc-plugin>3.5.0</version.maven-javadoc-plugin>
     <version.maven-project-info-reports-plugin>3.4.2</version.maven-project-info-reports-plugin>
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
+    <version.maven-antrun-plugin>3.1.0</version.maven-antrun-plugin>
     <version.maven-site-plugin>3.12.1</version.maven-site-plugin>
     <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
@@ -107,7 +119,7 @@
 
     <!-- settings for upload to sonar server -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../pkits-coverage-reports/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-    <sonar.dependencyCheck.htmlReportPath>${project.basedir}/target/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
+    <sonar.dependencyCheck.htmlReportPath>${project.build.directory}/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
@@ -120,13 +132,11 @@
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>${version.assertj-core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>
         <artifactId>awaitility</artifactId>
         <version>${version.awaitility}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
@@ -189,25 +199,21 @@
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
         <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-engine</artifactId>
         <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
         <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
@@ -539,39 +545,7 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>dev</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>${version.maven-resources-plugin}</version>
-            <executions>
-              <execution>
-                <id>copy-testsuite-config</id>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <phase>generate-test-resources</phase>
-                <configuration>
-                  <encoding>UTF-8</encoding>
-                  <outputDirectory>config</outputDirectory>
-                  <overwrite>true</overwrite>
-                  <resources>
-                    <resource>
-                      <directory>${basedir}/docs/configs/inttest</directory>
-                      <includes>
-                        <include>pkits.yml</include>
-                      </includes>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
+
   </profiles>
 
 </project>

@@ -1,6 +1,6 @@
 client:
-  keystorePathValidCerts: "../testDataTemplates/certificates/ecc/valid"
-  keystorePathInvalidCerts: "../testDataTemplates/certificates/ecc/invalid"
+  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/valid"
+  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/invalid"
 
 testObject:
   name: "Server 0815"

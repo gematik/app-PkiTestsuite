@@ -16,13 +16,11 @@
 
 package de.gematik.pki.pkits.tsl.provider.common;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
-import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import kong.unirest.HttpResponse;
@@ -35,13 +33,11 @@ public class TslConfigurator {
   public static void configureTsl(
       final int tslPort, final byte[] tsl, final TslDownloadPoint activeTslDownloadPoint)
       throws UnirestException {
-    final TslProviderConfigDto tslProviderConfig =
+    final TslProviderConfigDto tslProviderConfigDto =
         new TslProviderConfigDto(
             tsl, activeTslDownloadPoint, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
-    final TslConfigRequestDto configReq =
-        new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfig);
 
-    final String jsonContent = PkitsCommonUtils.createJsonContent(configReq);
+    final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfigDto);
 
     final HttpResponse<String> response =
         Unirest.post("http://localhost:" + tslPort + WEBSERVER_CONFIG_ENDPOINT)

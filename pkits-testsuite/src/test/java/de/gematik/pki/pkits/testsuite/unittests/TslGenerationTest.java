@@ -39,7 +39,7 @@ class TslGenerationTest {
 
   @Test
   void createTslFromFile() throws DatatypeConfigurationException, IOException {
-    final Path destFilePath = Path.of("target/unittest_createTslFromFile.xml");
+    final Path destFilePath = Path.of("pkits-testsuite/target/unittest_createTslFromFile.xml");
     final String newSsp = "http://my.new-cool-service-supply-point:5544/ocsp";
     final int modifiedSspAmountExpected = 130;
     final ZonedDateTime zdtUtcNow = ZonedDateTime.now(ZoneOffset.UTC);
@@ -58,11 +58,11 @@ class TslGenerationTest {
             .build();
     final Path tslSignerPath =
         Path.of(
-            "../testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
+            "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
 
     final byte[] tslBytes =
         TslGeneration.createTslFromFile(
-            Path.of("../testDataTemplates/tsl/TSL_default.xml"),
+            Path.of("./testDataTemplates/tsl/TSL_default.xml"),
             tslMod,
             tslSignerPath,
             "00",

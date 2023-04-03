@@ -20,7 +20,7 @@ import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOI
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
-import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -40,26 +40,16 @@ public class TslConfigController {
   @PostMapping(value = WEBSERVER_CONFIG_ENDPOINT)
   public void tslConfig(final HttpServletRequest request) throws IOException {
     log.info("Tsl ConfigurationRequest received");
-    final TslConfigRequestDto tslConfigRequest =
-        new ObjectMapper().readValue(request.getInputStream(), TslConfigRequestDto.class);
-    processConfigurationRequest(tslConfigRequest);
+    final TslProviderConfigDto tslProviderConfigDto =
+        new ObjectMapper().readValue(request.getInputStream(), TslProviderConfigDto.class);
+    processConfigurationRequest(tslProviderConfigDto);
     log.info("TSL ConfigurationRequest processed (and history cleared).");
   }
 
-  private void processConfigurationRequest(final TslConfigRequestDto configRequest) {
-    log.info("TslProviderConfigDto: {}", configRequest);
-    if (bearerTokenIsValid(configRequest.getBearerToken())) {
-      tslConfigHolder.setTslProviderConfigDto(configRequest.getTslProviderConfigDto());
-      tslRequestHistory.deleteAll();
-    } else {
-      log.info(
-          "Invalid bearer token received: {}, expected: {}",
-          configRequest.getBearerToken(),
-          tslConfigHolder.getBearerToken());
-    }
-  }
+  private void processConfigurationRequest(final TslProviderConfigDto tslProviderConfigDto) {
+    log.info("TslProviderConfigDto: {}", tslProviderConfigDto);
 
-  private boolean bearerTokenIsValid(final String receivedToken) {
-    return (tslConfigHolder.getBearerToken().compareTo(receivedToken)) == 0;
+    tslConfigHolder.setTslProviderConfigDto(tslProviderConfigDto);
+    tslRequestHistory.deleteAll();
   }
 }

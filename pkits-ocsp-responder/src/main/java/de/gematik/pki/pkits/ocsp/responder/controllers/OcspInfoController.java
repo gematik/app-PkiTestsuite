@@ -48,24 +48,30 @@ public class OcspInfoController {
 
     final OcspInfoRequestDto ocspInfoRequest =
         new ObjectMapper().readValue(request.getInputStream(), OcspInfoRequestDto.class);
+
+    log.info("received ocspInfoRequest: {}", ocspInfoRequest);
+
     final List<OcspRequestHistoryEntryDto> retList =
-        getHistoryEntriesForPositiveCertSerialNumber(ocspInfoRequest);
+        getHistoryEntriesForPositiveTslSeqNrAndCertSerialNumber(ocspInfoRequest);
 
     deleteHistoryOnDemand(ocspInfoRequest);
 
     return Collections.unmodifiableList(retList);
   }
 
-  private List<OcspRequestHistoryEntryDto> getHistoryEntriesForPositiveCertSerialNumber(
+  private List<OcspRequestHistoryEntryDto> getHistoryEntriesForPositiveTslSeqNrAndCertSerialNumber(
       final OcspInfoRequestDto ocspInfoRequest) {
-    final List<OcspRequestHistoryEntryDto> retList;
-    if (ocspInfoRequest.getCertSerialNr().signum() == 1) {
-      log.info("InfoRequest received for certSerialNr {}.", ocspInfoRequest.getCertSerialNr());
-      retList = ocspRequestHistory.getExcerpt(ocspInfoRequest.getCertSerialNr());
-      log.info("Found history with {} entries.", retList.size());
-    } else {
-      retList = Collections.emptyList();
-    }
+
+    log.info(
+        "InfoRequest received for tslSeqNr {}, certSerialNr {}.",
+        ocspInfoRequest.getTslSeqNr(),
+        ocspInfoRequest.getCertSerialNr());
+
+    final List<OcspRequestHistoryEntryDto> retList =
+        ocspRequestHistory.getExcerpt(
+            ocspInfoRequest.getTslSeqNr(), ocspInfoRequest.getCertSerialNr());
+
+    log.info("Found history with {} entries.", retList.size());
     return retList;
   }
 
@@ -73,12 +79,18 @@ public class OcspInfoController {
     switch (ocspInfoRequestDto.getHistoryDeleteOption()) {
       case DELETE_FULL_HISTORY -> {
         ocspRequestHistory.deleteAll();
-        log.debug("OCSP request history: cleared");
-      }
-      case DELETE_CERT_HISTORY -> {
-        ocspRequestHistory.deleteEntries(ocspInfoRequestDto.getCertSerialNr());
         log.debug(
-            "OCSP request history: cleared certSerialNr {}", ocspInfoRequestDto.getCertSerialNr());
+            "OCSP request FULL history: cleared (tslSeqNr {} and certSerialNr {})",
+            ocspInfoRequestDto.getTslSeqNr(),
+            ocspInfoRequestDto.getCertSerialNr());
+      }
+      case DELETE_QUERIED_HISTORY -> {
+        ocspRequestHistory.deleteEntries(
+            ocspInfoRequestDto.getTslSeqNr(), ocspInfoRequestDto.getCertSerialNr());
+        log.debug(
+            "OCSP request history: cleared tslSeqNr {} and certSerialNr {}",
+            ocspInfoRequestDto.getTslSeqNr(),
+            ocspInfoRequestDto.getCertSerialNr());
       }
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }

@@ -100,7 +100,7 @@ class OcspRequestControllerTest {
   @BeforeEach
   public void init() {
     ocspServiceUrl = getLocalhostEndpoint(OCSP_SSP_ENDPOINT);
-    ocspServiceUrlSeqNr31 = ocspServiceUrl + "/" + 31;
+    ocspServiceUrlSeqNr31 = ocspServiceUrl + "/310000";
     delayMilliseconds = 0;
     OcspResponderTestUtils.configure(
         getLocalhostEndpoint(""), VALID_X509_EE_CERT, CERT_STATUS_GOOD, signer, delayMilliseconds);

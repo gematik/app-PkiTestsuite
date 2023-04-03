@@ -16,9 +16,12 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
+import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.BiPredicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,27 +31,51 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OcspRequestHistory {
 
-  private final List<OcspRequestHistoryEntryDto> history = new ArrayList<>();
+  private final List<OcspRequestHistoryEntryDto> history =
+      Collections.synchronizedList(new ArrayList<>());
+
+  private static final BiPredicate<OcspRequestHistoryEntryDto, Integer> predicateTslSeqNr =
+      (historyEntry, tslSeqNr) ->
+          (tslSeqNr == null)
+              || (tslSeqNr == OcspResponderManager.IGNORE_SEQUENCE_NUMBER)
+              || (historyEntry.getTslSeqNr() == tslSeqNr);
+
+  private static final BiPredicate<OcspRequestHistoryEntryDto, BigInteger> predicateCertSerialNr =
+      (historyEntry, certSerialNr) ->
+          (certSerialNr == null)
+              || certSerialNr.equals(OcspResponderManager.IGNORE_CERT_SERIAL_NUMBER)
+              || historyEntry.getCertSerialNr().equals(certSerialNr);
 
   public void add(final OcspRequestHistoryEntryDto newItem) {
-    log.info(
-        "Add new entry with serial number: {} and tsl seq nr. {} in OCSP responder history",
-        newItem.getCertSerialNr(),
-        newItem.getTslSeqNr());
+    log.info("Add new entry in OCSP responder history: {}", newItem);
     history.add(newItem);
   }
 
   /**
+   * @param tslSeqNr The requested TSL sequence number
    * @param certSerialNr The requested certificate serial number
    * @return A List with all OCSP-Requests for requested certificate serial number
    */
-  public List<OcspRequestHistoryEntryDto> getExcerpt(final BigInteger certSerialNr) {
-    return history.stream().filter(entry -> entry.getCertSerialNr().equals(certSerialNr)).toList();
+  public List<OcspRequestHistoryEntryDto> getExcerpt(
+      final Integer tslSeqNr, final BigInteger certSerialNr) {
+
+    return history.stream()
+        .filter(
+            historyEntry ->
+                predicateTslSeqNr.test(historyEntry, tslSeqNr)
+                    && predicateCertSerialNr.test(historyEntry, certSerialNr))
+        .toList();
   }
 
-  public void deleteEntries(final BigInteger certSerialNr) {
+  /**
+   * @param tslSeqNr The requested TSL sequence number
+   * @param certSerialNr The requested certificate serial number
+   */
+  public void deleteEntries(final Integer tslSeqNr, final BigInteger certSerialNr) {
     history.removeIf(
-        requestHistoryEntry -> requestHistoryEntry.getCertSerialNr().equals(certSerialNr));
+        historyEntry ->
+            predicateTslSeqNr.test(historyEntry, tslSeqNr)
+                && predicateCertSerialNr.test(historyEntry, certSerialNr));
   }
 
   public void deleteAll() {

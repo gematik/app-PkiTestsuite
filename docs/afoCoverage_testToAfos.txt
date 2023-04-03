@@ -65,8 +65,8 @@ de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTestsIT
   verifyTslSignerCertNotYetValid                                  GS-A_4642, GS-A_4648, GS-A_4650, GS-A_4653
 
 de.gematik.pki.pkits.testsuite.approval.TslVaApprovalTestsIT
-  verifyHandlingOfStatusStartingTimeAndOverwriteOfAnnouncedTrustAnchors  GS-A_4642, GS-A_4643
-  verifyMultipleAnnouncedTrustAnchorsInTsl                               GS-A_4642, GS-A_4643
-  verifyNewTrustAnchorInvalidTime                                        GS-A_4642, GS-A_4643
-  verifyNewTrustAnchorsIsBroken                                          GS-A_4642, GS-A_4643
-  verifyUpdateTrustAnchor                                                GS-A_4642, GS-A_4643
+  verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  GS-A_4642, GS-A_4643
+  verifyMultipleAnnouncedTrustAnchorsInTsl                                     GS-A_4642, GS-A_4643
+  verifyNewTrustAnchorInvalidTime                                              GS-A_4642, GS-A_4643
+  verifyNewTrustAnchorsIsBroken                                                GS-A_4642, GS-A_4643
+  verifyUpdateTrustAnchor                                                      GS-A_4642, GS-A_4643

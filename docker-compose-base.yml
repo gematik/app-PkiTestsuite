@@ -1,0 +1,60 @@
+version: '3.7'
+
+# Common Health Check Properties
+x-healthcheck-config: &healthcheck-ref
+  # Expects that the Spring Actuator port is 8180
+  #test: "curl --fail --silent http://localhost:8180/actuator/health | grep UP"
+  interval: 15s
+  timeout: 10s
+  retries: 40
+  start_period: 30s
+
+# Common Environment Timezone Entry
+x-environment-timezone: &environment-timezone-ref
+  TZ: Europe/Berlin
+
+# Common Environment Server ports
+x-environment-server-ports: &environment-server-ports-ref
+  MANAGEMENT_PORT: 8180 # Spring Actuator Port
+
+# Common Service Properties
+x-service-setup: &service-setup-ref
+  restart: always
+
+# Common Network
+x-service-network: &service-network-ref
+  networks:
+    pkits-federation:
+
+services:
+  # OCSP responder
+  pkitsocspresponder:
+    image: eu.gcr.io/gematik-all-infra-prod/pkits/pkits-ocsp-responder:${appVersion}
+    user: 10000:10000
+    container_name: pkits-ocsp-responder
+    <<: *service-network-ref
+    <<: *service-setup-ref
+    environment:
+      <<: *environment-timezone-ref
+      <<: *environment-server-ports-ref
+    healthcheck:
+      <<: *healthcheck-ref
+      test: "curl --fail --silent http://localhost:8083/actuator/health | grep UP"
+
+  # TSL provider
+  pkitstslprovider:
+    image: eu.gcr.io/gematik-all-infra-prod/pkits/pkits-tsl-provider:${appVersion}
+    user: 10000:10000
+    container_name: pkits-tsl-provider
+    <<: *service-network-ref
+    <<: *service-setup-ref
+    environment:
+      <<: *environment-timezone-ref
+      <<: *environment-server-ports-ref
+    healthcheck:
+      <<: *healthcheck-ref
+      test: "curl --fail --silent http://localhost:8084/actuator/health | grep UP"
+
+networks:
+  pkits-federation:
+    name: pkits-federation

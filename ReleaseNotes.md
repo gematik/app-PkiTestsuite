@@ -2,6 +2,12 @@
 
 # Release notes PKI Test Suite
 
+## Release 1.0.1
+
+- migrate from maven based execution of approval tests to binary (jar) based
+- enable building docker images for OCSP Responder and TSL Provider
+- add verification of expected sequence number in OCSP responses
+
 ## Release 0.4.1
 
 - add test cases checking number of retries for primary and backend endpoints for TSL download
@@ -9,7 +15,7 @@
 - add test cases in the context of TSL signer certificate verification
 - add test cases in the context of TSL approval verification
 - force trust anchor change tests to run as last
-- add documentation of all AFOs and correspondings test cases
+- add documentation of all AFOs and corresponding test cases
   files: [AFOs description](./docs/afoCoverage_afoDescriptions.txt),
   [AFOs to tests mapping](./docs/afoCoverage_afoToTests.txt),
   [tests to AFOs mapping](./docs/afoCoverage_testToAfos.txt)

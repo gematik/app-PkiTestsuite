@@ -16,8 +16,6 @@
 
 package de.gematik.pki.pkits.tsl.provider;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -47,7 +45,6 @@ public class TslProviderApp {
 
   @EventListener(ApplicationReadyEvent.class)
   public void init() {
-    tslConfigHolder.setBearerToken(WEBSERVER_BEARER_TOKEN);
     log.info(
         "TslProvider started at port: {}",
         appContext.getEnvironment().getProperty("local.server.port"));

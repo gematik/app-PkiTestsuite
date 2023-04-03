@@ -18,12 +18,20 @@ package de.gematik.pki.pkits.ocsp.responder.controllers;
 
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
+import java.math.BigInteger;
 import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
 import lombok.NonNull;
 
 public class OcspResponderTestUtils {
+
+  public static OcspRequestHistoryEntryDto getEntry(final int seqNr, final String certSerialNr) {
+    return new OcspRequestHistoryEntryDto(
+        seqNr, new BigInteger(certSerialNr), ZonedDateTime.now().toString());
+  }
 
   public static void configure(
       final String uri,

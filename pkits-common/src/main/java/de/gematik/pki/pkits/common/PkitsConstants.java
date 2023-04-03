@@ -16,9 +16,6 @@
 
 package de.gematik.pki.pkits.common;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import java.nio.file.Path;
-import java.security.cert.X509Certificate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -31,7 +28,6 @@ public final class PkitsConstants {
   public static final String TSL_WEBSERVER_INFO_ENDPOINT = OCSP_WEBSERVER_INFO_ENDPOINT;
 
   public static final String WEBSERVER_HEALTH_ENDPOINT = "/actuator/health";
-  public static final String WEBSERVER_BEARER_TOKEN = "CAFEBABE";
 
   public static final String OCSP_SSP_ENDPOINT = "/ocsp";
   public static final String TSL_XML_PRIMARY_ENDPOINT = "/tsl/tsl.xml";
@@ -49,8 +45,4 @@ public final class PkitsConstants {
     TSL_DOWNLOAD_POINT_PRIMARY,
     TSL_DOWNLOAD_POINT_BACKUP,
   }
-
-  public static final X509Certificate VALID_ISSUER_CERT_TSL_CA8 =
-      CertReader.readX509(
-          Path.of("../testDataTemplates/certificates/ecc/trustAnchor/GEM.TSL-CA8-TEST-ONLY.pem"));
 }

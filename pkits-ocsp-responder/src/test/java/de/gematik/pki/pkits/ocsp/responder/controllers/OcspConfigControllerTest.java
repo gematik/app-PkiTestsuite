@@ -17,9 +17,7 @@
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.objectToBytes;
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
-import static de.gematik.pki.pkits.ocsp.responder.controllers.OcspConfigController.bytesToDto;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,18 +26,15 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspConfigRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
-import org.bouncycastle.cert.ocsp.UnknownStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,13 +72,13 @@ class OcspConfigControllerTest {
   void ocspConfigNew() {
     final String WEBSERVER_CONFIG_URL =
         "http://localhost:" + localServerPort + WEBSERVER_CONFIG_ENDPOINT;
-    assertThat(ocspResponseConfigHolder.getBearerToken()).isEqualTo(WEBSERVER_BEARER_TOKEN);
+
     final CertificateStatus certificateStatus = CertificateStatus.GOOD;
     final OcspResponderConfigDto ocspResponderConfig =
         OcspResponderConfigDto.builder().eeCert(eeCert).signer(signer).build();
-    final OcspConfigRequestDto configReq =
-        new OcspConfigRequestDto(WEBSERVER_BEARER_TOKEN, ocspResponderConfig);
-    final String jsonContent = PkitsCommonUtils.createJsonContent(objectToBytes(configReq));
+
+    final String jsonContent =
+        PkitsCommonUtils.createJsonContent(objectToBytes(ocspResponderConfig));
     final HttpResponse<String> response =
         Unirest.post(WEBSERVER_CONFIG_URL).body(jsonContent).asString();
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
@@ -93,39 +88,20 @@ class OcspConfigControllerTest {
         .isEqualTo(certificateStatus);
   }
 
-  @Test
-  void bearerTokenInvalid() {
-    final String WEBSERVER_CONFIG_URL =
-        "http://localhost:" + localServerPort + WEBSERVER_CONFIG_ENDPOINT;
-    final String invalidBearerToken = "INVALID-08/15";
-    assertThat(ocspResponseConfigHolder.getBearerToken()).isNotEqualTo(invalidBearerToken);
-    final CertificateStatus certificateStatus = new UnknownStatus();
-    final OcspResponderConfigDto ocspResponderConfig =
-        OcspResponderConfigDto.builder().eeCert(eeCert).signer(signer).build();
-    final OcspConfigRequestDto configReq =
-        new OcspConfigRequestDto(invalidBearerToken, ocspResponderConfig);
-    final String jsonContent = PkitsCommonUtils.createJsonContent(objectToBytes(configReq));
-    final HttpResponse<String> response =
-        Unirest.post(WEBSERVER_CONFIG_URL).body(jsonContent).asString();
-    assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
-    assertThat(ocspResponseConfigHolder.getOcspResponderConfigDto().getEeCert().getSerialNumber())
-        .isNotEqualTo(BigInteger.valueOf(43));
-    assertThat(ocspResponseConfigHolder.getOcspResponderConfigDto().getCertificateStatus())
-        .isNotEqualTo(certificateStatus);
-  }
-
   private void invalidateOcspRespConfiguration() {
 
     signer =
         P12Reader.getContentFromP12(
             PkitsCommonUtils.readContent("src/test/resources/certificates/eccOcspSigner.p12"),
             "00");
-    ocspResponseConfigHolder.setOcspResponderConfigDto(
+    final OcspResponderConfigDto ocspResponderConfigDto =
         OcspResponderConfigDto.builder()
             .eeCert(issuerCert)
             .certificateStatus(CustomCertificateStatusDto.createUnknown())
             .signer(signer)
-            .build());
+            .build();
+
+    ocspResponseConfigHolder.setOcspResponderConfigDto(ocspResponderConfigDto);
   }
 
   @Test
@@ -141,16 +117,14 @@ class OcspConfigControllerTest {
             .certificateStatus(CustomCertificateStatusDto.createUnknown())
             .signer(signer)
             .build();
-    final OcspConfigRequestDto configReq =
-        new OcspConfigRequestDto(WEBSERVER_BEARER_TOKEN, ocspResponderConfig);
+
     // serialize
 
-    final byte[] ba = objectToBytes(configReq);
+    final byte[] ba = objectToBytes(ocspResponderConfig);
     final String jsonContent = PkitsCommonUtils.createJsonContent(ba);
     // deserialize
     final byte[] dtoBytes = new ObjectMapper().readValue(jsonContent, byte[].class);
     assertThat(dtoBytes).isNotEmpty();
     assertThat(dtoBytes).isEqualTo(ba);
-    assertThat(bytesToDto(dtoBytes).getBearerToken()).isEqualTo(WEBSERVER_BEARER_TOKEN);
   }
 }

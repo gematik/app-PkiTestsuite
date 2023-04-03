@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 @Data
 public class OcspResponseConfigHolder {
 
-  private String bearerToken;
   private OcspResponderConfigDto ocspResponderConfigDto;
 
   public boolean isConfigured() {

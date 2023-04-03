@@ -19,6 +19,7 @@ package de.gematik.pki.pkits.ocsp.responder.api;
 import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
 import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
+import static de.gematik.pki.pkits.ocsp.responder.controllers.OcspResponderTestUtils.getEntry;
 import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +29,6 @@ import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
 import java.util.List;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -59,18 +59,13 @@ class OcspResponderManagerTest {
     ocspRespUri = "http://localhost:" + localServerPort;
   }
 
-  private OcspRequestHistoryEntryDto getEntry(final String certSerialNr, final int sequenceNr) {
-    return new OcspRequestHistoryEntryDto(
-        new BigInteger(certSerialNr), ZonedDateTime.now().toString(), sequenceNr);
-  }
-
   @Test
-  void t01_checkHealthOk() {
+  void testCheckHealthOk() {
     PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
   }
 
   @Test
-  void t02_checkHealthException() {
+  void testCheckHealthException() {
     final String badOcspRespUri = "http://localhostX:" + localServerPort;
     Assertions.assertThatThrownBy(
             () -> PkitsCommonUtils.checkHealth(log, "OcspResponder", badOcspRespUri))
@@ -78,51 +73,208 @@ class OcspResponderManagerTest {
         .hasMessageContaining("OcspResponder has health problem");
   }
 
-  @Test
-  void t03_getOcspHistoryPart() {
+  private void assertGetOcspHistoryPart(
+      final Integer seqNr, final String certSerialNrStr, final int expectedAmount) {
 
-    OcspResponderManager.clearOcspHistory(ocspRespUri);
+    BigInteger certSerialNr = null;
 
-    ocspRequestHistory.add(getEntry("10001", 1));
+    if (certSerialNrStr != null) {
+      certSerialNr = new BigInteger(certSerialNrStr);
+    }
 
     final List<OcspRequestHistoryEntryDto> entries =
-        OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("10001"));
+        OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
 
-    assertThat(entries).hasSize(1);
+    assertThat(entries).hasSize(expectedAmount);
   }
 
   @Test
-  void t04_getAndClearOcspHistoryPart() {
+  void testGetOcspHistoryPart() {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    ocspRequestHistory.add(getEntry("20002", 2));
+    ocspRequestHistory.add(getEntry(1, "10001"));
+
+    ocspRequestHistory.add(getEntry(2, "10001"));
+    ocspRequestHistory.add(getEntry(2, "10001"));
+
+    ocspRequestHistory.add(getEntry(3, "10001"));
+    ocspRequestHistory.add(getEntry(3, "10001"));
+    ocspRequestHistory.add(getEntry(3, "99999"));
+
+    assertGetOcspHistoryPart(1, "10001", 1);
+    assertGetOcspHistoryPart(1, null, 1);
+    assertGetOcspHistoryPart(1, "-1", 1);
+    assertGetOcspHistoryPart(1, "0", 0);
+
+    assertGetOcspHistoryPart(2, "10001", 2);
+    assertGetOcspHistoryPart(2, null, 2);
+    assertGetOcspHistoryPart(2, "-1", 2);
+    assertGetOcspHistoryPart(2, "0", 0);
+
+    assertGetOcspHistoryPart(3, "10001", 2);
+    assertGetOcspHistoryPart(3, null, 3);
+    assertGetOcspHistoryPart(3, "-1", 3);
+    assertGetOcspHistoryPart(3, "0", 0);
+
+    assertGetOcspHistoryPart(null, "10001", 5);
+    assertGetOcspHistoryPart(-1, "10001", 5);
+    assertGetOcspHistoryPart(0, "10001", 0);
+
+    assertGetOcspHistoryPart(null, "99999", 1);
+    assertGetOcspHistoryPart(-1, "99999", 1);
+    assertGetOcspHistoryPart(0, "99999", 0);
+
+    assertGetOcspHistoryPart(null, null, 6);
+    assertGetOcspHistoryPart(-1, null, 6);
+    assertGetOcspHistoryPart(null, "-1", 6);
+
+    assertGetOcspHistoryPart(0, null, 0);
+    assertGetOcspHistoryPart(0, "-1", 0);
+
+    assertGetOcspHistoryPart(null, "0", 0);
+    assertGetOcspHistoryPart(-1, "0", 0);
+  }
+
+  private void assertGetAndClearOcspHistoryPart(
+      final Integer seqNr, final String certSerialNrStr, final int expectedAmount) {
+
+    OcspResponderManager.clearOcspHistory(ocspRespUri);
+
+    ocspRequestHistory.add(getEntry(1, "10001"));
+
+    ocspRequestHistory.add(getEntry(2, "10001"));
+    ocspRequestHistory.add(getEntry(2, "10001"));
+
+    ocspRequestHistory.add(getEntry(3, "10001"));
+    ocspRequestHistory.add(getEntry(3, "10001"));
+    ocspRequestHistory.add(getEntry(3, "99999"));
+
+    BigInteger certSerialNr = null;
+
+    if (certSerialNrStr != null) {
+      certSerialNr = new BigInteger(certSerialNrStr);
+    }
 
     List<OcspRequestHistoryEntryDto> entries;
 
-    entries = OcspResponderManager.getAndClearOcspHistoryPart(ocspRespUri, new BigInteger("20002"));
-    assertThat(entries).hasSize(1);
+    entries = OcspResponderManager.getAndClearOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+    assertThat(entries).hasSize(expectedAmount);
 
-    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("20002"));
+    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
     assertThat(entries).isEmpty();
   }
 
   @Test
-  void t05_clearOcspHistory() {
+  void testGetAndClearOcspHistoryPart() {
+
+    assertGetAndClearOcspHistoryPart(1, "10001", 1);
+    assertGetAndClearOcspHistoryPart(1, null, 1);
+    assertGetAndClearOcspHistoryPart(1, "-1", 1);
+    assertGetAndClearOcspHistoryPart(1, "0", 0);
+
+    assertGetAndClearOcspHistoryPart(2, "10001", 2);
+    assertGetAndClearOcspHistoryPart(2, null, 2);
+    assertGetAndClearOcspHistoryPart(2, "-1", 2);
+    assertGetAndClearOcspHistoryPart(2, "0", 0);
+
+    assertGetAndClearOcspHistoryPart(3, "10001", 2);
+    assertGetAndClearOcspHistoryPart(3, null, 3);
+    assertGetAndClearOcspHistoryPart(3, "-1", 3);
+    assertGetAndClearOcspHistoryPart(3, "0", 0);
+
+    assertGetAndClearOcspHistoryPart(null, "10001", 5);
+    assertGetAndClearOcspHistoryPart(-1, "10001", 5);
+    assertGetAndClearOcspHistoryPart(0, "10001", 0);
+
+    assertGetAndClearOcspHistoryPart(null, "99999", 1);
+    assertGetAndClearOcspHistoryPart(-1, "99999", 1);
+    assertGetAndClearOcspHistoryPart(0, "99999", 0);
+
+    assertGetAndClearOcspHistoryPart(null, null, 6);
+    assertGetAndClearOcspHistoryPart(-1, null, 6);
+    assertGetAndClearOcspHistoryPart(null, "-1", 6);
+
+    assertGetAndClearOcspHistoryPart(0, null, 0);
+    assertGetAndClearOcspHistoryPart(0, "-1", 0);
+
+    assertGetAndClearOcspHistoryPart(null, "0", 0);
+    assertGetAndClearOcspHistoryPart(-1, "0", 0);
+  }
+
+  private void assertClearOcspHistory(
+      final Integer seqNr, final String certSerialNrStr, final int expectedAmount) {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    ocspRequestHistory.add(getEntry("20002", 2));
+    ocspRequestHistory.add(getEntry(1, "10001"));
 
-    List<OcspRequestHistoryEntryDto> entries =
-        OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("20002"));
+    ocspRequestHistory.add(getEntry(2, "10001"));
+    ocspRequestHistory.add(getEntry(2, "10001"));
 
-    assertThat(entries.size()).isNotZero();
+    ocspRequestHistory.add(getEntry(3, "10001"));
+    ocspRequestHistory.add(getEntry(3, "10001"));
+    ocspRequestHistory.add(getEntry(3, "99999"));
+
+    BigInteger certSerialNr = null;
+
+    if (certSerialNrStr != null) {
+      certSerialNr = new BigInteger(certSerialNrStr);
+    }
+
+    List<OcspRequestHistoryEntryDto> entries;
+
+    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+    assertThat(entries).hasSize(expectedAmount);
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, new BigInteger("20002"));
+    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
     assertThat(entries).isEmpty();
+
+    entries =
+        OcspResponderManager.getOcspHistoryPart(
+            ocspRespUri,
+            OcspResponderManager.IGNORE_SEQUENCE_NUMBER,
+            OcspResponderManager.IGNORE_CERT_SERIAL_NUMBER);
+    assertThat(entries).isEmpty();
+  }
+
+  @Test
+  void testClearOcspHistory() {
+
+    assertClearOcspHistory(1, "10001", 1);
+    assertClearOcspHistory(1, null, 1);
+    assertClearOcspHistory(1, "-1", 1);
+    assertClearOcspHistory(1, "0", 0);
+
+    assertClearOcspHistory(2, "10001", 2);
+    assertClearOcspHistory(2, null, 2);
+    assertClearOcspHistory(2, "-1", 2);
+    assertClearOcspHistory(2, "0", 0);
+
+    assertClearOcspHistory(3, "10001", 2);
+    assertClearOcspHistory(3, null, 3);
+    assertClearOcspHistory(3, "-1", 3);
+    assertClearOcspHistory(3, "0", 0);
+
+    assertClearOcspHistory(null, "10001", 5);
+    assertClearOcspHistory(-1, "10001", 5);
+    assertClearOcspHistory(0, "10001", 0);
+
+    assertClearOcspHistory(null, "99999", 1);
+    assertClearOcspHistory(-1, "99999", 1);
+    assertClearOcspHistory(0, "99999", 0);
+
+    assertClearOcspHistory(null, null, 6);
+    assertClearOcspHistory(-1, null, 6);
+    assertClearOcspHistory(null, "-1", 6);
+
+    assertClearOcspHistory(0, null, 0);
+    assertClearOcspHistory(0, "-1", 0);
+
+    assertClearOcspHistory(null, "0", 0);
+    assertClearOcspHistory(-1, "0", 0);
   }
 
   @Test
@@ -131,7 +283,7 @@ class OcspResponderManagerTest {
     OcspResponderManager.clear(ocspRespUri);
 
     final HttpResponse<byte[]> response =
-        Unirest.post(ocspRespUri + OCSP_SSP_ENDPOINT + "/31")
+        Unirest.post(ocspRespUri + OCSP_SSP_ENDPOINT + "/310000")
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body("")
             .asBytes();

@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  pkitsocspresponder:
+    ports:
+      - "8083:8083"
+
+  pkitstslprovider:
+    ports:
+      - "8084:8084"

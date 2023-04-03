@@ -16,8 +16,6 @@
 
 package de.gematik.pki.pkits.ocsp.responder;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -48,7 +46,6 @@ public class PkiOcspResponderApplication {
 
   @EventListener(ApplicationReadyEvent.class)
   public void init() {
-    ocspResponseConfigHolder.setBearerToken(WEBSERVER_BEARER_TOKEN);
     log.info(
         "OcspResponder started at port: {}",
         appContext.getEnvironment().getProperty("local.server.port"));

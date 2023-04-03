@@ -40,5 +40,5 @@ public class OcspResponderConfig {
       description =
           "Path to the OCSP responder jar which should be started during tests. This can be skipped"
               + " with the keyword \"externalStartup\".")
-  String appPath = "../pkits-ocsp-responder/target/pkits-ocsp-responder-exec.jar";
+  String appPath = "./bin/pkits-ocsp-responder-exec.jar";
 }

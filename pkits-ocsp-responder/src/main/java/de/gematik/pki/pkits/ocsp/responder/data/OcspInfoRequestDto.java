@@ -28,12 +28,19 @@ import lombok.Setter;
 @Setter
 public class OcspInfoRequestDto {
 
+  private Integer tslSeqNr;
   private BigInteger certSerialNr;
   private HistoryDeleteOption historyDeleteOption;
 
   public enum HistoryDeleteOption {
     DELETE_NOTHING,
-    DELETE_CERT_HISTORY,
+    DELETE_QUERIED_HISTORY,
     DELETE_FULL_HISTORY
+  }
+
+  @Override
+  public String toString() {
+    return "OcspInfoRequestDto{tslSeqNr=%d, certSerialNr=%s, historyDeleteOption=%s}"
+        .formatted(tslSeqNr, certSerialNr, historyDeleteOption);
   }
 }

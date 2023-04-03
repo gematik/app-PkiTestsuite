@@ -16,13 +16,11 @@
 
 package de.gematik.pki.pkits.tsl.provider.api;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsConstants;
-import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto.HistoryDeleteOption;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
@@ -48,9 +46,8 @@ public final class TslProviderManager {
   public static void configure(
       @NonNull final String tslProvUri, final TslProviderConfigDto tslProviderConfigDto) {
     final String configUri = tslProvUri + WEBSERVER_CONFIG_ENDPOINT;
-    final TslConfigRequestDto configReq =
-        new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfigDto);
-    final String jsonContent = PkitsCommonUtils.createJsonContent(configReq);
+
+    final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfigDto);
     PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
     JsonTransceiver.sendJsonViaHttp(configUri, jsonContent);
   }

@@ -42,7 +42,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CertificateProviderAbsPathTest {
 
-  static final Path configFileInttestTemplatePath = Path.of("../docs/configs/inttest/pkits.yml");
+  static final Path configFileInttestTemplatePath = Path.of("./docs/configs/inttest/pkits.yml");
 
   @BeforeAll
   public void setup() throws IOException {
@@ -73,7 +73,7 @@ class CertificateProviderAbsPathTest {
   }
 
   private void createConfigFileWithAbsolutePathsToCerts() throws IOException {
-    final Path configFilePathSrc = Path.of("../docs/configs/inttest/pkits.yml");
+    final Path configFilePathSrc = Path.of("./docs/configs/inttest/pkits.yml");
 
     final String validCertRsaPath =
         Path.of("../testDataTemplates/certificates/rsa/valid").toString().replace("\\", "/");

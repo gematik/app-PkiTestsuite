@@ -30,22 +30,28 @@ class TslSequenceNrTest {
   /** Note: TslSequenceNr implements Singleton */
   @BeforeAll
   static void init() throws IOException {
+
     if (Files.exists(TSL_SEQNR_FILE_PATH)) {
       Files.delete(TSL_SEQNR_FILE_PATH);
     }
+
     final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+
     assertThat(tslSequenceNr).isNotNull();
     assertThat(tslSequenceNr.getCurrentNrInTestObject()).isEqualTo(1);
   }
 
   @Test
   void tslSeqNrIsAssignedFileExists() throws IOException {
-    final int seqNr = 42;
+    final int seqNr = 420000;
     Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(seqNr));
     final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+
     assertThat(tslSequenceNr.initializeCurrentTslSeqNr().getCurrentNrInTestObject())
         .isEqualTo(seqNr);
-    final int seqNrfromFile = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
-    assertThat(seqNr).isEqualTo(seqNrfromFile);
+
+    final int seqNrFromFile = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
+
+    assertThat(seqNr).isEqualTo(seqNrFromFile);
   }
 }

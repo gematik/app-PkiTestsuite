@@ -18,13 +18,11 @@ package de.gematik.pki.pkits.tsl.provider.controller;
 
 import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_BACKUP;
 import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
-import de.gematik.pki.pkits.tsl.provider.data.TslConfigRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import java.io.IOException;
@@ -68,17 +66,14 @@ class TslConfigControllerTest {
         "http://localhost:" + localServerPort + WEBSERVER_CONFIG_ENDPOINT;
     assertThat(tslConfigHolder.getTslProviderConfigDto().getActiveTslDownloadPoint())
         .isEqualTo(TSL_DOWNLOAD_POINT_PRIMARY);
-    assertThat(tslConfigHolder.getBearerToken()).isEqualTo(WEBSERVER_BEARER_TOKEN);
 
     final byte[] tslBytes = getTslFromResources();
     final TslProviderConfigDto tslProviderConfig =
         new TslProviderConfigDto(
             tslBytes, TSL_DOWNLOAD_POINT_BACKUP, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
-    final TslConfigRequestDto configReq =
-        new TslConfigRequestDto(WEBSERVER_BEARER_TOKEN, tslProviderConfig);
 
     log.info("new TslProviderConfig: {}", tslProviderConfig);
-    final String jsonContent = PkitsCommonUtils.createJsonContent(configReq);
+    final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfig);
 
     final HttpResponse<String> response =
         Unirest.post(WEBSERVER_CONFIG_URL).body(jsonContent).asString();

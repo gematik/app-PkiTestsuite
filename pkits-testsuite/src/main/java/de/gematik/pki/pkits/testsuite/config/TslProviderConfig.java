@@ -40,5 +40,5 @@ public class TslProviderConfig {
       description =
           "Path to the TSL provider jar which should be started during tests. This can be skipped"
               + " with the keyword \"externalStartup\".")
-  String appPath = "../pkits-tsl-provider/target/pkits-tsl-provider-exec.jar";
+  String appPath = "./bin/pkits-tsl-provider-exec.jar";
 }

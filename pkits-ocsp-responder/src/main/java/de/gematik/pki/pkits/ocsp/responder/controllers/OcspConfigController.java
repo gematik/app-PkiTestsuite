@@ -21,8 +21,8 @@ import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOI
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspConfigRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -43,29 +43,19 @@ public class OcspConfigController {
     log.info("Ocsp ConfigurationRequest received");
     final byte[] ocspConfigRequestByte =
         new ObjectMapper().readValue(request.getInputStream(), byte[].class);
-    final OcspConfigRequestDto ocspConfigRequest = bytesToDto(ocspConfigRequestByte);
-    processConfigurationRequest(ocspConfigRequest);
+    final OcspResponderConfigDto ocspResponderConfigDto = bytesToDto(ocspConfigRequestByte);
+    processConfigurationRequest(ocspResponderConfigDto);
     log.info("Ocsp ConfigurationRequest processed (and history cleared).");
   }
 
-  private void processConfigurationRequest(final OcspConfigRequestDto configRequest) {
-    log.info("ConfigurationRequest: {}", configRequest);
-    if (bearerTokenIsValid(configRequest.getBearerToken())) {
-      ocspResponseConfigHolder.setOcspResponderConfigDto(configRequest.getOcspResponderConfigDto());
-      ocspRequestHistory.deleteAll();
-    } else {
-      log.info(
-          "Invalid bearer token received: {}, expected: {}",
-          configRequest.getBearerToken(),
-          ocspResponseConfigHolder.getBearerToken());
-    }
+  private void processConfigurationRequest(final OcspResponderConfigDto ocspResponderConfigDto) {
+    log.info("ConfigurationRequest: {}", ocspResponderConfigDto);
+
+    ocspResponseConfigHolder.setOcspResponderConfigDto(ocspResponderConfigDto);
+    ocspRequestHistory.deleteAll();
   }
 
-  private boolean bearerTokenIsValid(final String receivedToken) {
-    return (ocspResponseConfigHolder.getBearerToken().compareTo(receivedToken)) == 0;
-  }
-
-  public static OcspConfigRequestDto bytesToDto(final byte[] bytes) {
-    return (OcspConfigRequestDto) PkitsCommonUtils.bytesToObject(bytes);
+  public static OcspResponderConfigDto bytesToDto(final byte[] bytes) {
+    return (OcspResponderConfigDto) PkitsCommonUtils.bytesToObject(bytes);
   }
 }

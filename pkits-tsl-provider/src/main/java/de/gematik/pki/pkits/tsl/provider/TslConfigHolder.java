@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 @Data
 public class TslConfigHolder {
 
-  private String bearerToken;
   private TslProviderConfigDto tslProviderConfigDto;
 
   public boolean isConfigured() {

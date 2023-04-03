@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.4.1</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>pkits-tls-client</artifactId>
@@ -77,6 +77,22 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${version.maven-clean-plugin}</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.build.releaseJarsDir}</directory>
+              <includes>
+                <include>pkits-tls-client.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <archive>
@@ -85,6 +101,7 @@
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
           </archive>
+          <outputDirectory>${project.build.releaseJarsDir}</outputDirectory>
         </configuration>
       </plugin>
     </plugins>

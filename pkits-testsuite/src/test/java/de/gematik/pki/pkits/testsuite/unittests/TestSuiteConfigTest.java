@@ -19,18 +19,12 @@ package de.gematik.pki.pkits.testsuite.unittests;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import de.gematik.pki.pkits.common.PkiCommonException;
-import de.gematik.pki.pkits.testsuite.config.ParameterDescription;
+import de.gematik.pki.pkits.testsuite.approval.ListParameters;
+import de.gematik.pki.pkits.testsuite.approval.ListParameters.YamlLine;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 class TestSuiteConfigTest {
@@ -53,139 +47,8 @@ class TestSuiteConfigTest {
         .isInstanceOf(Boolean.class);
   }
 
-  @Getter
-  static class YamlLine {
-    private final int level;
-    private final String path;
-    private final Field field;
-    private final boolean isEnd;
-    private final String description;
-    private final boolean withDefault;
-
-    public YamlLine(final int level, final String path, final Field field, final boolean isEnd) {
-      this.level = level;
-      this.path = path;
-      this.field = field;
-      this.isEnd = isEnd;
-
-      final ParameterDescription parameterDescription =
-          this.field.getAnnotation(ParameterDescription.class);
-      if (parameterDescription != null) {
-        this.description = parameterDescription.description();
-        this.withDefault = parameterDescription.withDefault();
-      } else {
-        this.description = "";
-        this.withDefault = false;
-      }
-    }
-
-    public boolean hasDescription() {
-      return StringUtils.isNotBlank(description);
-    }
-
-    public boolean isFieldStringLike() {
-      final Class<?> fieldClazz = field.getType();
-      return fieldClazz.equals(String.class) || fieldClazz.equals(Path.class);
-    }
-
-    public String getLineForYaml() {
-      final String valueStr;
-      String prefix = "";
-      if (isEnd) {
-        final Class<?> clazz = field.getDeclaringClass();
-        if (withDefault) {
-          try {
-            final Object obj = clazz.getDeclaredConstructor().newInstance();
-            field.setAccessible(true);
-
-            final Object value = field.get(obj);
-            if (isFieldStringLike()) {
-              valueStr = " \"%s\"".formatted(value);
-            } else {
-              valueStr = " " + value;
-            }
-          } catch (final NoSuchMethodException
-              | InvocationTargetException
-              | InstantiationException
-              | IllegalAccessException e) {
-            throw new PkiCommonException(
-                "Cannot generate instance of " + clazz.getCanonicalName(), e);
-          }
-
-        } else {
-          if (isFieldStringLike()) {
-            valueStr = " \"HasToBeDefined_%s\"".formatted(field.getName());
-          } else {
-            valueStr = " HasToBeDefined_" + field.getName();
-          }
-        }
-
-      } else {
-        valueStr = "";
-        prefix = "\n";
-      }
-
-      return prefix + StringUtils.repeat("  ", level) + field.getName() + ":" + valueStr;
-    }
-
-    public String getLineForYamlWithDescription(final int spacePads) {
-      if (!isEnd) {
-        return getLineForYaml();
-      }
-
-      final String formatStr = String.format("%%__-%d__s# %%s", spacePads).replace("_", "");
-      if (hasDescription()) {
-        return formatStr.formatted(getLineForYaml(), description);
-      } else {
-        return formatStr.formatted(getLineForYaml(), "");
-      }
-    }
-  }
-
-  static boolean isEnd(final Class<?> fieldClazz) {
-    return fieldClazz.isPrimitive()
-        || fieldClazz.equals(String.class)
-        || fieldClazz.equals(Path.class)
-        || fieldClazz.equals(Integer.class);
-  }
-
-  private static List<YamlLine> getFields(
-      final int level, final String parentPath, final Class<?> clazz) {
-    final Field[] fields = clazz.getDeclaredFields();
-
-    final List<YamlLine> yamlLines = new ArrayList<>();
-    for (final Field field : fields) {
-
-      final Class<?> fieldClazz = field.getType();
-      final String path = parentPath + "." + field.getName();
-      final String message =
-          "field %s of type %s in class %s: processing of the type is not implemented"
-              .formatted(field.getName(), fieldClazz.getCanonicalName(), clazz.getCanonicalName());
-
-      if (isEnd(fieldClazz)) {
-        yamlLines.add(new YamlLine(level, path, field, true));
-
-      } else if (fieldClazz.getCanonicalName().startsWith("de.gematik")) {
-        yamlLines.add(new YamlLine(level, path, field, false));
-        yamlLines.addAll(getFields(level + 1, path, fieldClazz));
-
-      } else if (fieldClazz.isArray()) {
-        throw new IllegalArgumentException(message);
-
-      } else if (fieldClazz.isEnum()) {
-
-        throw new IllegalArgumentException(message);
-
-      } else {
-        throw new IllegalArgumentException(message);
-      }
-    }
-
-    return yamlLines;
-  }
-
   private static int getAllFieldsNumber(final Class<?> clazz) {
-    final List<YamlLine> yamlLines = getFields(0, ".", clazz);
+    final List<YamlLine> yamlLines = ListParameters.getFields(0, ".", clazz);
     return yamlLines.stream().filter(YamlLine::isEnd).toList().size();
   }
 
@@ -211,40 +74,39 @@ class TestSuiteConfigTest {
     final int testObject_OcspTimeoutSeconds = 10;
 
     final String ocspResponder_Id = "OCSP Responder";
-    final String ocspResponder_AppPath =
-        "../pkits-ocsp-responder/target/pkits-ocsp-responder-exec.jar";
+    final String ocspResponder_AppPath = "./bin/pkits-ocsp-responder-exec.jar";
 
     final String tslProvider_id = "TSL Provider";
-    final String tslProvider_appPath = "../pkits-tsl-provider/target/pkits-tsl-provider-exec.jar";
+    final String tslProvider_appPath = "./bin/pkits-tsl-provider-exec.jar";
 
     final boolean testSuiteParameter_performInitialState = true;
     final boolean testSuiteParameter_CaptureNetworkTraffic = false;
     final Path testSuiteParameter_OcspSettings_KeystorePathOcsp =
-        Path.of("../testDataTemplates/certificates/ecc/ocspKeystore");
+        Path.of("./testDataTemplates/certificates/ecc/ocspKeystore");
     final String testSuiteParameter_OcspSettings_SignerPassword = "00";
     final int testSuiteParameter_OcspSettings_TimeoutDeltaMilliseconds = 1500;
     final int testSuiteParameter_OcspSettings_GracePeriodeExtraDelay = 5;
 
     final boolean testSuiteParameter_TslSettings_InitialStateTslImport = true;
     final Path testSuiteParameter_TslSettings_DefaultTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_default.xml");
+        Path.of("./testDataTemplates/tsl/TSL_default.xml");
     final Path testSuiteParameter_TslSettings_AlternativeTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_altCA.xml");
+        Path.of("./testDataTemplates/tsl/TSL_altCA.xml");
     final Path testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
+        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
     final Path testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
+        Path.of("./testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
     final Path testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
+        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
     final Path testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
+        Path.of("./testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
     final Path testSuiteParameter_TslSettings_AlternativeRevokedTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_altCA_revoked.xml");
+        Path.of("./testDataTemplates/tsl/TSL_altCA_revoked.xml");
     final Path testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_altCA_noLineBreak.xml");
+        Path.of("./testDataTemplates/tsl/TSL_altCA_noLineBreak.xml");
     final Path testSuiteParameter_TslSettings_Signer =
         Path.of(
-            "../testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
+            "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
     final String testSuiteParameter_TslSettings_SignerPassword = "00";
 
     ca.assertEquals(client_KeystorePassword, testSuiteConfig.getClient().getKeystorePassword());
@@ -346,11 +208,11 @@ class TestSuiteConfigTest {
     final String testSuiteParameter_CaptureNetworkTraffic = "9.9.9.9";
 
     final String client_KeystorePathValidCerts =
-        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid";
+        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid";
     final String client_KeystorePathAlternativeCerts =
-        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid-alternative";
+        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid-alternative";
     final String client_KeystorePathInvalidCerts =
-        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/invalid";
+        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/invalid";
 
     final String testObject_Name = "Server 0815";
     final String testObject_Type = "TlsServer";
@@ -365,7 +227,7 @@ class TestSuiteConfigTest {
     final String tslProvider_IpAddressOrFqdn = "127.0.0.1";
     final int tslProvider_Port = 8084;
 
-    final Path yamlMinimal = Path.of("../docs/configs/inttest/pkits.yml");
+    final Path yamlMinimal = Path.of("./docs/configs/inttest/pkits.yml");
 
     final TestSuiteConfig tscBlank = new TestSuiteConfig();
     final TestSuiteConfig tscMinimal = TestSuiteConfig.fromYaml(yamlMinimal);
@@ -418,7 +280,7 @@ class TestSuiteConfigTest {
   void testAllFieldsAsNonDefaults() { // NOSONAR
 
     final Path yamlAllParameters =
-        Path.of("./src/test/resources/all_pkits_parameters_unitTest.yml");
+        Path.of("./pkits-testsuite/src/main/resources/all_pkits_parameters_unitTest.yml");
     final TestSuiteConfig tsc = TestSuiteConfig.fromYaml(yamlAllParameters);
 
     // for readability, we use underscores
@@ -464,13 +326,13 @@ class TestSuiteConfigTest {
     final Path testSuiteParameter_TslSettings_AlternativeTemplate =
         Path.of("testSuiteParameter.tslSettings.alternativeTemplate");
     final Path testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
+        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
     final Path testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
+        Path.of("./testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
     final Path testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
+        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
     final Path testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate =
-        Path.of("../testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
+        Path.of("./testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
     final Path testSuiteParameter_TslSettings_AlternativeRevokedTemplate =
         Path.of("testSuiteParameter.tslSettings.alternativeRevokedTemplate");
     final Path testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate =
@@ -570,22 +432,5 @@ class TestSuiteConfigTest {
 
     final int numberOfAllFields = getAllFieldsNumber(TestSuiteConfig.class);
     assertThat(ca.counter).isEqualTo(numberOfAllFields);
-  }
-
-  @Test
-  void generateConfigWithAllParameters() {
-    final List<YamlLine> yamlLines = getFields(0, ".", TestSuiteConfig.class);
-
-    final int padSize = 90;
-
-    final List<String> lines =
-        yamlLines.stream()
-            .map(yamlLine -> yamlLine.getLineForYamlWithDescription(padSize))
-            .toList();
-
-    final String content = String.join("\n", lines) + "\n";
-
-    assertDoesNotThrow(
-        () -> Files.writeString(Path.of("../docs/all_pkits_parameters.yml"), content));
   }
 }

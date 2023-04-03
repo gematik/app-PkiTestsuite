@@ -28,7 +28,13 @@ import lombok.Setter;
 @Setter
 public class OcspRequestHistoryEntryDto {
 
+  private int tslSeqNr;
   private BigInteger certSerialNr;
   private String timeStamp;
-  private int tslSeqNr;
+
+  @Override
+  public String toString() {
+    return "OcspRequestHistoryEntryDto{tslSeqNr=%d, certSerialNr=%s, timeStamp='%s'}"
+        .formatted(tslSeqNr, certSerialNr, timeStamp);
+  }
 }

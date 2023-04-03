@@ -66,7 +66,10 @@ class TslDownloadTest {
 
   @Test
   void waitUntilTslDownloadCompleted() {
-    assertThatThrownBy(() -> tslDownload.waitUntilTslDownloadCompleted(IGNORE_SEQUENCE_NUMBER))
+    assertThatThrownBy(
+            () ->
+                tslDownload.waitUntilTslDownloadCompleted(
+                    IGNORE_SEQUENCE_NUMBER, IGNORE_SEQUENCE_NUMBER))
         .isInstanceOf(PkiCommonException.class);
   }
 

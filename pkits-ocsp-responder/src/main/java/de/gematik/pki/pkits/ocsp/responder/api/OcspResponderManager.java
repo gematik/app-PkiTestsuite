@@ -16,13 +16,11 @@
 
 package de.gematik.pki.pkits.ocsp.responder.api;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_BEARER_TOKEN;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsConstants;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspConfigRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspInfoRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
@@ -37,13 +35,15 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OcspResponderManager {
 
+  public static final int IGNORE_SEQUENCE_NUMBER = -1;
+  public static final BigInteger IGNORE_CERT_SERIAL_NUMBER = BigInteger.valueOf(-1);
+
   public static void configure(
       final String ocspRespUri, final OcspResponderConfigDto ocspResponderConfig) {
     final String configUri = ocspRespUri + WEBSERVER_CONFIG_ENDPOINT;
-    final OcspConfigRequestDto configReq =
-        new OcspConfigRequestDto(WEBSERVER_BEARER_TOKEN, ocspResponderConfig);
+
     final String jsonContent =
-        PkitsCommonUtils.createJsonContent(PkitsCommonUtils.objectToBytes(configReq));
+        PkitsCommonUtils.createJsonContent(PkitsCommonUtils.objectToBytes(ocspResponderConfig));
 
     PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
     /*
@@ -61,13 +61,15 @@ public final class OcspResponderManager {
    * Get the history of OcspRequests for given certificate serial number.
    *
    * @param uri OcspResponder URI
+   * @param tslSeqNr TSL sequence number
    * @param certSerialNr certificate serial number
    * @return all entries belonging to given certificate serial number as part of the history
    */
   public static List<OcspRequestHistoryEntryDto> getOcspHistoryPart(
-      final String uri, final BigInteger certSerialNr) {
+      final String uri, final Integer tslSeqNr, final BigInteger certSerialNr) {
     final OcspInfoRequestDto ocspInfoRequest =
-        new OcspInfoRequestDto(certSerialNr, OcspInfoRequestDto.HistoryDeleteOption.DELETE_NOTHING);
+        new OcspInfoRequestDto(
+            tslSeqNr, certSerialNr, OcspInfoRequestDto.HistoryDeleteOption.DELETE_NOTHING);
     return sendInfoRequest(uri, ocspInfoRequest);
   }
 
@@ -75,14 +77,15 @@ public final class OcspResponderManager {
    * Get and clear the history of OcspRequests for given certificate serial number.
    *
    * @param uri OcspResponder URI
+   * @param tslSeqNr TSL sequence number
    * @param certSerialNr certificate serial number
    * @return all entries belonging to given certificate serial number as part of the history
    */
   public static List<OcspRequestHistoryEntryDto> getAndClearOcspHistoryPart(
-      final String uri, final BigInteger certSerialNr) {
+      final String uri, final Integer tslSeqNr, final BigInteger certSerialNr) {
     final OcspInfoRequestDto ocspInfoRequest =
         new OcspInfoRequestDto(
-            certSerialNr, OcspInfoRequestDto.HistoryDeleteOption.DELETE_CERT_HISTORY);
+            tslSeqNr, certSerialNr, OcspInfoRequestDto.HistoryDeleteOption.DELETE_QUERIED_HISTORY);
     return sendInfoRequest(uri, ocspInfoRequest);
   }
 
@@ -93,20 +96,29 @@ public final class OcspResponderManager {
    */
   public static void clearOcspHistory(final String uri) {
 
-    final BigInteger invalidCertSerialNr = BigInteger.valueOf(-1);
     final OcspInfoRequestDto ocspInfoRequest =
         new OcspInfoRequestDto(
-            invalidCertSerialNr, OcspInfoRequestDto.HistoryDeleteOption.DELETE_FULL_HISTORY);
+            IGNORE_SEQUENCE_NUMBER,
+            IGNORE_CERT_SERIAL_NUMBER,
+            OcspInfoRequestDto.HistoryDeleteOption.DELETE_FULL_HISTORY);
+
     sendInfoRequest(uri, ocspInfoRequest);
-    log.info("OcspHistory cleared, at {} for certSerialNr {}", uri, invalidCertSerialNr);
+    log.info(
+        "OcspHistory cleared, at {} for tslSeqNr {} and certSerialNr {}",
+        uri,
+        IGNORE_SEQUENCE_NUMBER,
+        IGNORE_CERT_SERIAL_NUMBER);
   }
 
   private static List<OcspRequestHistoryEntryDto> sendInfoRequest(
       final String uri, final OcspInfoRequestDto ocspInfoRequestDto) {
+
     final String jsonContent = PkitsCommonUtils.createJsonContent(ocspInfoRequestDto);
+
     final String responseBodyAsJson =
         JsonTransceiver.txRxJsonViaHttp(
             uri + PkitsConstants.OCSP_WEBSERVER_INFO_ENDPOINT, jsonContent);
+
     log.debug("JsonTransceiver, responseBodyAsJson: {}", responseBodyAsJson);
     if (responseBodyAsJson.isEmpty()) {
       return Collections.emptyList();

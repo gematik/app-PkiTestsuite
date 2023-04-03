@@ -57,7 +57,7 @@ public class OcspRequestController {
       value = OCSP_SSP_ENDPOINT + "/{seqNr}",
       produces = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
   public ResponseEntity<Object> ocspService(
-      @PathVariable("seqNr") final int sequenceNr, final HttpServletRequest request) {
+      @PathVariable("seqNr") final int seqNr, final HttpServletRequest request) {
 
     if (!ocspResponseConfigHolder.isConfigured()) {
       return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
@@ -85,9 +85,10 @@ public class OcspRequestController {
       throw new OcspResponderException("CertSerialNr is not configured");
     }
     ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(certSerialNr, ZonedDateTime.now().toString(), sequenceNr));
+        new OcspRequestHistoryEntryDto(seqNr, certSerialNr, ZonedDateTime.now().toString()));
     log.info(
-        "Build OCSP Response for certSerialNr {} and send to {}:{}",
+        "Build OCSP Response for tslSeqNr {} and certSerialNr {} and send to {}:{}",
+        seqNr,
         certSerialNr,
         request.getRemoteHost(),
         request.getRemotePort());

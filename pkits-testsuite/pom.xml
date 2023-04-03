@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.4.1</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
@@ -12,18 +12,43 @@
   <description>PKI test suite</description>
 
   <properties>
-    <testReportDirectory>${basedir}/../out/testreport</testReportDirectory>
+    <sonar.skip>true</sonar.skip>
+    <sonar.coverage.exclusions>de/gematik/pki/pkits/testsuite/**/*</sonar.coverage.exclusions>
+
+    <testReportDirectory>${project.basedir}/../out/testreport</testReportDirectory>
     <!-- dependencies -->
     <version.httpclient>4.5.14</version.httpclient>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
     <version.snakeyaml>1.33</version.snakeyaml>
+    <version.junit-platform-launcher>1.8.2</version.junit-platform-launcher>
+    <version.itextpdf>5.5.13.3</version.itextpdf>
+    <version.itextpdf.html2pdf>4.0.5</version.itextpdf.html2pdf>
+    <version.commons-text>1.10.0</version.commons-text>
+    <version.commons-io>2.11.0</version.commons-io>
+    <version.picocli>4.7.1</version.picocli>
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
     <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
     <version.maven-pdf-plugin>1.6.1</version.maven-pdf-plugin>
+    <tsl-procurer.initialTslPrimaryDownloadUrl>http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000</tsl-procurer.initialTslPrimaryDownloadUrl>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>${version.junit-platform-launcher}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-suite-engine</artifactId>
+      <version>${version.junit-platform-launcher}</version>
+    </dependency>
 
     <dependency>
       <groupId>de.gematik.pki</groupId>
@@ -43,12 +68,10 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.24.1</version>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -77,22 +100,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
     </dependency>
@@ -100,6 +107,7 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j2-impl</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -117,27 +125,14 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-tsl-provider</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+      <version>${version.picocli}</version>
+    </dependency>
+
     <!-- required for mvn verify -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-      <scope>runtime</scope>
-    </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
@@ -155,7 +150,29 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>itextpdf</artifactId>
+      <version>${version.itextpdf}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>html2pdf</artifactId>
+      <version>${version.itextpdf.html2pdf}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>${version.commons-text}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${version.commons-io}</version>
     </dependency>
 
   </dependencies>
@@ -176,28 +193,15 @@
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
+            <fileset>
+              <directory>${project.build.releaseJarsDir}</directory>
+              <includes>
+                <include>pkits-testsuite.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
           </filesets>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${version.build-helper-maven-plugin}</version>
-        <executions>
-          <execution>
-            <id>reserve-ocsp-responder-port</id>
-            <goals>
-              <goal>reserve-network-port</goal>
-            </goals>
-            <phase>process-resources</phase>
-            <configuration>
-              <portNames>
-                <portName>ocsp-responder.http.port</portName>
-                <portName>tsl-provider.http.port</portName>
-              </portNames>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -217,24 +221,13 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${version.maven-failsafe-plugin}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <argLine>${failsafe.jacoco.args}</argLine>
-              <failIfNoTests>true</failIfNoTests>
-              <includes>
-                <include>**/approval/*.java</include>
-              </includes>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${version.maven-surefire-plugin}</version>
+        <configuration>
+          <workingDirectory>${project.basedir}/..</workingDirectory>
+        </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
@@ -254,32 +247,27 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${testReportDirectory}</outputDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pdf-plugin</artifactId>
-        <version>${version.maven-pdf-plugin}</version>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>pdf</id>
             <goals>
-              <goal>pdf</goal>
+              <goal>single</goal>
             </goals>
-            <phase>site</phase>
+            <phase>package</phase>
             <configuration>
-              <outputDirectory>${testReportDirectory}/</outputDirectory>
-              <includeReports>true</includeReports>
+              <finalName>pkits-testsuite</finalName>
+              <outputDirectory>${project.build.releaseJarsDir}</outputDirectory>
+              <archive>
+                <manifest>
+                  <mainClass>de.gematik.pki.pkits.testsuite.approval.PkitsTestsuiteRunner</mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
@@ -293,103 +281,5 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <profiles>
-    <profile>
-      <id>approval-test</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-    </profile>
-    <profile>
-      <id>dev</id>
-      <properties>
-        <report.server.host>Local springboot instance pkits-sut-server-sim</report.server.host>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>${version.build-helper-maven-plugin}</version>
-            <executions>
-              <execution>
-                <id>reserve-sut-server-sim-port</id>
-                <goals>
-                  <goal>reserve-network-port</goal>
-                </goals>
-                <phase>process-resources</phase>
-                <configuration>
-                  <portNames>
-                    <portName>sut-server-sim.http.port</portName>
-                  </portNames>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${version.maven-failsafe-plugin}</version>
-            <configuration>
-              <systemPropertyVariables>
-                <SUT_SERVER_PORT>${sut-server-sim.http.port}</SUT_SERVER_PORT>
-                <OCSP_RESPONDER_PORT>${ocsp-responder.http.port}</OCSP_RESPONDER_PORT>
-                <TSL_PROVIDER_PORT>${tsl-provider.http.port}</TSL_PROVIDER_PORT>
-              </systemPropertyVariables>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <configuration>
-              <wait>1000</wait>
-              <maxAttempts>180</maxAttempts>
-            </configuration>
-            <executions>
-              <execution>
-                <id>repackage</id>
-                <goals>
-                  <goal>repackage</goal>
-                </goals>
-                <configuration>
-                  <skip>true</skip>
-                </configuration>
-              </execution>
-              <execution>
-                <id>pre-integration-test-sut-server-sim</id>
-                <goals>
-                  <goal>start</goal>
-                </goals>
-                <configuration>
-                  <arguments>
-                    <argument>--server.port=${sut-server-sim.http.port}</argument>
-                  </arguments>
-                  <systemPropertyVariables>
-                    <OCSP_RESPONDER_PORT>${ocsp-responder.http.port}</OCSP_RESPONDER_PORT>
-                    <TSL_PROVIDER_PORT>${tsl-provider.http.port}</TSL_PROVIDER_PORT>
-                  </systemPropertyVariables>
-                  <!-- BOTH tags are needed to get all folders into the classpath for spring boot to startup correctly-->
-                  <classesDirectory>${project.basedir}/../pkits-sut-server-sim/target/classes</classesDirectory>
-                  <mainClass>de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication</mainClass>
-                  <skip>${skipITs}</skip>
-                </configuration>
-              </execution>
-              <execution>
-                <id>stop-sut-server-sim</id>
-                <goals>
-                  <goal>stop</goal>
-                </goals>
-                <phase>post-integration-test</phase>
-                <configuration>
-                  <skip>${skipITs}</skip>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

@@ -12,9 +12,9 @@ development is still ongoing [see Todo section](./README.md#todo)
 ## tl;dr
 
 ```console 
-$ git clone https://github.com/gematik/app-PkiTestsuite
+$ Download release zip file from https://github.com/gematik/app-PkiTestsuite/releases und extract it
 $ cp <UserDefinedConfigfile>.yml ./config/pkits.yml (examples see: /docs/config/inttest/)
-$ ./initialTslAndTa.sh (generates VA and TSL in ./out for import in test object)
+$ ./initialTslAndTa.sh (generates trust anchor and TSL in ./out for import in test object)
 $ # The test object has to be started and accessible from now on.
 $ ./checkInitialState.sh (acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case)
 $ ./startApprovalTest.sh (chose tests that shall be executed from allTests.txt)
@@ -28,27 +28,30 @@ implemented as maven modules:
 
 ### 1. PKI Test Suite
 
-This is the tests suite itself. It is used to start all following modules, configure them and read
+This is the test suite itself. It is used to start all following modules, configure them and read
 the results. It has
-a [package](pkits-testsuite/src/test/java/de/gematik/pki/pkits/testsuite/approval/) with classes to
+a [package](pkits-testsuite/src/main/java/de/gematik/pki/pkits/testsuite/approval/) with classes to
 all
-approval tests which are executed via maven-failsafe-plugin. The test suite calls a use
+approval tests. The test suite calls a use
 case (see [Use Case Modules](./README.md#4-use-case-modules)) and expects it to either pass or fail,
 depending on the test data used. If the expectation is fulfilled, the test case is passed.
 
 ### 2. TSL Provider
 
-The TSL provider is started as an own process. It is configured and started during the PKI tests by
-the PKI test suite module to deliver a TSL to the test object. It is implemented as a spring boot
-tomcat web server.
+The TSL provider is to deliver TSLs to the test object.
+The behaviour of the TSL provider, such as the content of a TSL offered to the test object, is configured in test cases over a REST interface.
+The TSL provider is implemented as a spring boot tomcat web server and runs as its own process. 
+The TSL provider can be started independently or by the test suite during its execution.
+To started independently then set `appPath` to `"externalStartup"`. 
 
 ### 3. OCSP Responder
 
-The OCSP responder is started as an own process. It is started and configured during the PKI tests
-by the PKI test suite module to answer OCSP requests sent by the test object. This configuration is
-done over a REST interface and absolutely transparent to the user. Depending on the tests executed
-it is configured to deliver unsigned OCSP responses, wrong cert hashes and so on. It is implemented
-as a spring boot tomcat web server.
+The OCSP responder is to generate responses to OCSP requests sent by the test object.
+The behaviour of the OCSP responder is configured over a REST interface and absolutely transparent to the user. 
+Depending on the tests executed it is configured to deliver unsigned OCSP responses, wrong cert hashes and so on.
+Similar to the TSL provider, it is implemented as a spring boot tomcat web server and runs as its own process.
+The OCSP responder can be started independently or by the test suite during its execution.
+To started independently then set `appPath` to `"externalStartup"`.
 
 ### 4. Use Case Modules
 
@@ -74,12 +77,12 @@ successful, **not if the script could be executed successful!**
 ## Configuration
 
 All configuration is done in one file: [/config/pkits.yml](./config/pkits.yml). You can find
-examples in [/docs/config/inttest/](./docs/configs/inttest/). The most important parameters
-are how to reach the test object and where to find the test data as well as where the test object
-can reach the TSL- and OCSP- simulators provided by this test suite. Paths are relative to the
-directory `./pkits-testsuite` or can be absolute. All available parameters including a short
-description can be found in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml). As this is
-a YAML file remember to strictly follow the syntax.
+examples in [/docs/config/inttest/](./docs/configs/inttest/). 
+The most important parameters are how to reach the test object and where to find the test data as well as where the test object can reach the TSL- and OCSP- simulators provided by this test suite.
+Paths in the `pkits.yml` in are relative to the base directory. 
+Absolute paths can be used as well.
+All available parameters including a short description can be found in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml). 
+As this is a YAML file remember to strictly follow the syntax.
 
 ### Test Data
 
@@ -92,8 +95,9 @@ the fly. If you use your own test data make sure that issuing certificates are a
 ### Initial TSL and Trust Anchor
 
 For the configuration of the test object it is necessary to initialize it with a trust space
-compatible to the test suite. For this, a convenient script is provided by the test suite:
-By executing `initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
+compatible to the test suite. 
+For this, a convenient script is provided by the test suite:
+By executing `./initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
 the `./out` directory for import into the test object. This TSL contains the TU trust store as well,
 this means, that the test object can be used during the pki tests by other services as well.
 
@@ -101,10 +105,9 @@ this means, that the test object can be used during the pki tests by other servi
 
 The test suite expects a test object that is running and accessible over the configured IP address
 and port (see [Configuration](./README.md#configuration)). Tests are executed via the
-script `./startApprovalTest.sh`. It will compile all modules
-and run the approval test classes via maven-failsafe-plugin. Furthermore,
-the [OCSP responder](./README.md#3-ocsp-responder)
-and [TSL provider](./README.md#2-tsl-provider) are started at the configured sockets (if they are
+script `./startApprovalTest.sh`. 
+Furthermore, the [OCSP responder](./README.md#3-ocsp-responder)
+and [TSL provider](./README.md#2-tsl-provider) communicate at the configured sockets (if they are
 not deactivated). Logs are written to the `./out/logs` directory. Afterwards a test report is
 generated in the `./out/testreport` directory.
 
@@ -121,8 +124,7 @@ and running and accessible by the testsuite and its components.
 
 Besides executing all tests, it is possible to select or exclude specific tests for execution.
 This is done via the file `allTests.txt`.
-The file lists test classes `CertificateApprovalTestsIT`, `OcspApprovalTestsIT`
-, `TslApprovalTestsIT`, `TslITSignerApprovalTestIT` and all tests defined in the test classes.
+The file lists test classes `CertificateApprovalTestsIT`, `OcspApprovalTestsIT`, `TslApprovalTestsIT`, `TslITSignerApprovalTestIT`, `TslVaApprovalTestsIT` and all tests defined in the test classes.
 Test classes as well as separate tests can be marked with `+` or `-`.
 Tests marked with a `+` will be executed when `./startApprovalTests.sh` is used the next time.
 Tests marked with a `-` are excluded from the execution.

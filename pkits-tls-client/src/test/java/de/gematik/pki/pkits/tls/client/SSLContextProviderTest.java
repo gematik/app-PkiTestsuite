@@ -71,7 +71,7 @@ class SSLContextProviderTest {
   @Test
   void connectEcc() throws URISyntaxException, UnknownHostException {
     final String certResourcePath =
-        "../testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid/ee_default.p12";
+        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid/ee_default.p12";
     final Path clientKeystorePath =
         Path.of(
             Objects.requireNonNull(

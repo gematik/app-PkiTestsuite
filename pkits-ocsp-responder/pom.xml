@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>0.4.1</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>pkits-ocsp-responder</artifactId>
@@ -92,6 +92,13 @@
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
+            <fileset>
+              <directory>${project.build.releaseJarsDir}/</directory>
+              <includes>
+                <include>pkits-ocsp-responder-exec.jar</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
           </filesets>
         </configuration>
       </plugin>
@@ -100,7 +107,70 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <classifier>exec</classifier>
+          <outputDirectory>${project.build.releaseJarsDir}</outputDirectory>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-docker-resources</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <skip>${skip.dockerbuild}</skip>
+              <encoding>UTF-8</encoding>
+              <outputDirectory>${project.build.directory}/tmpdocker</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/docker</directory>
+                  <includes>
+                    <include>**/*</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>${project.build.releaseJarsDir}</directory>
+                  <includes>
+                    <include>pkits-ocsp-responder-exec.jar</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${version.docker-maven-plugin}</version>
+        <configuration>
+          <skip>${skip.dockerbuild}</skip>
+          <images>
+            <image>
+              <build>
+                <dockerFile>${project.build.directory}/tmpdocker/Dockerfile</dockerFile>
+                <contextDir>${project.build.directory}/tmpdocker</contextDir>
+                <args>
+                  <VERSION>${project.version}</VERSION>
+                  <COMMIT_HASH>${commit_hash}</COMMIT_HASH>
+                </args>
+              </build>
+              <name>${docker.image.name.pkits-ocsp-responder}:${project.version}</name>
+            </image>
+          </images>
+          <verbose>true</verbose>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
