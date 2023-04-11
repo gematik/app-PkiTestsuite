@@ -301,13 +301,27 @@ public class PkitsTestsuiteRunner {
         StringUtils.splitByWholeSeparatorPreserveAllTokens(testNamesStr, ",");
     return Arrays.stream(testNames)
         .map(
-            testName -> {
+            testOrClass -> {
               final String classNameSeparator = "#";
-              String className = "";
-              String methodName = testName;
-              if (testName.contains(classNameSeparator)) {
-                className = StringUtils.substringBefore(testName, classNameSeparator);
-                methodName = StringUtils.substringAfter(testName, classNameSeparator);
+
+              String className;
+              String methodName;
+
+              if (testOrClass.contains(classNameSeparator)) {
+                className = StringUtils.substringBefore(testOrClass, classNameSeparator);
+                methodName = StringUtils.substringAfter(testOrClass, classNameSeparator);
+              } else {
+                try {
+                  // assuming all approval and utils test classes are in the same package as
+                  // ApprovalTestsBaseIT
+                  Class.forName(
+                      ClassUtils.getPackageName(ApprovalTestsBaseIT.class) + "." + testOrClass);
+                  className = testOrClass;
+                  methodName = "";
+                } catch (final ClassNotFoundException e) {
+                  className = "";
+                  methodName = testOrClass;
+                }
               }
               return new InputTestInfo(className, methodName, true);
             })
@@ -321,27 +335,27 @@ public class PkitsTestsuiteRunner {
 
     return inputTestInfoList.stream()
         .filter(inputTestInfo -> inputTestInfo.selected)
-        .map(
+        .flatMap(
             inputTestInfo -> {
+              final List<CustomTestInfo> matchedCustomTestInfos = new ArrayList<>();
               for (final CustomTestInfo customTestInfo : customTestInfoList) {
 
-                final boolean sameClassName =
-                    StringUtils.isBlank(inputTestInfo.className)
-                        || StringUtils.equalsAny(
-                            inputTestInfo.className,
-                            customTestInfo.getSimpleClassName(),
-                            customTestInfo.getClassName());
-                final boolean sameMethodName =
-                    customTestInfo.method.getName().equals(inputTestInfo.methodName);
+                final boolean sameClassName = customTestInfo.sameClassName(inputTestInfo.className);
 
-                if (sameClassName && sameMethodName) {
-                  return customTestInfo;
+                final boolean sameMethodName =
+                    customTestInfo.sameMethodName(inputTestInfo.methodName);
+
+                if (sameClassName || sameMethodName) {
+                  matchedCustomTestInfos.add(customTestInfo);
                 }
               }
 
-              throw new TestSuiteException(
-                  "unknown test case: %s of class %s"
-                      .formatted(inputTestInfo.methodName, inputTestInfo.className));
+              if (matchedCustomTestInfos.isEmpty()) {
+                throw new TestSuiteException(
+                    "unknown test case method <%s> or class with test cases <%s>"
+                        .formatted(inputTestInfo.methodName, inputTestInfo.className));
+              }
+              return matchedCustomTestInfos.stream();
             })
         .toList();
   }

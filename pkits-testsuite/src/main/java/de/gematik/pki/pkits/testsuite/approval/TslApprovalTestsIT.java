@@ -35,22 +35,24 @@ import de.gematik.pki.gemlibpki.tsl.TslValidator;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsConstants;
+import de.gematik.pki.pkits.testsuite.approval.support.OcspSeqNrUpdateMode;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistoryEntryDto;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.extern.slf4j.Slf4j;
@@ -67,11 +69,16 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
 
   public static final X509Certificate VALID_ISSUER_CERT_TSL_CA8 =
       CertReader.readX509(TestSuiteConstants.VALID_ISSUER_CERT_TSL_CA8_PATH);
+
+  /** TSLTypeID 4 */
   public static final Path alternativeCaRevokedPretty =
       Path.of(TSL_TEMPLATES_DIRNAME, "TSL_altCA_revoked_pretty.xml");
 
-  private void verifyUpdateTrustStoreInTestObject_initialStateWithAlternativeCert()
-      throws DatatypeConfigurationException, IOException {
+  /** TSLTypeID 194 */
+  public final Path tslAlternativeCaRevokedLater =
+      Path.of(TSL_TEMPLATES_DIRNAME, "TSL_altCA_revokedLater.xml");
+
+  private void verifyUpdateTrustStoreInTestObject_initialStateWithAlternativeCert() {
 
     log.info("verifyUpdateTrustStoreInTestObject: initialStateWithAlternativeCert");
 
@@ -89,8 +96,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
     useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
   }
 
-  private void verifyUpdateTrustStoreInTestObject1_AlternativeCaRevoked()
-      throws DatatypeConfigurationException, IOException {
+  private void verifyUpdateTrustStoreInTestObject1_AlternativeCaRevoked() {
 
     log.info("verifyUpdateTrustStoreInTestObject: case 1 - AlternativeCaRevoked");
     final Path tslTemplatePath = tslSettings.getAlternativeRevokedTemplate();
@@ -109,8 +115,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
     useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
   }
 
-  private void verifyUpdateTrustStoreInTestObject2_AlternativeCaNoLineBreaks()
-      throws DatatypeConfigurationException, IOException {
+  private void verifyUpdateTrustStoreInTestObject2_AlternativeCaNoLineBreaks() {
     log.info("verifyUpdateTrustStoreInTestObject: case 2 - AlternativeCaNoLineBreaks");
     final Path tslTemplatePath =
         testSuiteConfig
@@ -132,8 +137,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
     useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
   }
 
-  private void verifyUpdateTrustStoreInTestObject3_Default()
-      throws DatatypeConfigurationException, IOException {
+  private void verifyUpdateTrustStoreInTestObject3_Default() {
     log.info("verifyUpdateTrustStoreInTestObject: case 3 - Default");
     final Path tslTemplatePath =
         testSuiteConfig.getTestSuiteParameter().getTslSettings().getDefaultTemplate();
@@ -158,8 +162,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4649", description = "TUC_PKI_020: XML-Dokument validieren")
   @DisplayName("Test update of TSL with different XML format (pretty print)")
   @Disabled("Correct Testcase with PrettyPrint TSL (PKITS-158 and GLP-263)")
-  void verifyUpdateTrustStoreInTestObject(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyUpdateTrustStoreInTestObject(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
 
@@ -176,8 +179,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
       afoId = "TIP1-A_5120",
       description = "Clients des TSL-Dienstes: HTTP-Komprimierung unterstützen")
   @DisplayName("Test compression of TSL download")
-  void verifyTslDownloadCompression(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyTslDownloadCompression(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -208,8 +210,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4648", description = "TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 6")
   @DisplayName("Test TSL service does not provide updated TSL")
-  void verifyIrregularDifferencesBetweenCurrentAndNewTsls(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyIrregularDifferencesBetweenCurrentAndNewTsls(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -262,25 +263,27 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
           "initial tsl seqNr: {}, id: {}",
           initialTslDownload.getTsl().getId(),
           initialTslDownload.getTsl().getSchemeInformation().getTSLSequenceNumber());
-      final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
-      log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
 
-      final TslDownload tslDownload = getTslDownloadAlternativeTemplate(offeredSeqNr);
+      final Consumer<TslDownload> rewriteTslIdToInitial =
+          (tslDownload) -> {
+            final byte[] tslBytes = tslDownload.getTslBytes();
 
-      final byte[] tslBytes = tslDownload.getTslBytes();
+            final String newId = initialTslDownload.getTsl().getId();
+            final byte[] tslBytesWithNewId = TslModifier.modifiedTslId(tslBytes, newId);
 
-      final String newId = initialTslDownload.getTsl().getId();
-      final byte[] tslBytesWithNewId = TslModifier.modifiedTslId(tslBytes, newId);
+            signAndSetTslBytes(tslDownload, defaultTslSigner, tslBytesWithNewId);
+          };
 
-      signAndSetTslBytes(tslDownload, defaultTslSigner, tslBytesWithNewId);
-      writeTsl(tslDownload, "_modified");
-
-      tslSequenceNr.setLastOfferedNr(offeredSeqNr);
-      tslDownload.waitUntilTslDownloadCompletedOptional(tslSequenceNr.getExpectedNrInTestObject());
-
-      final Path certPath = getPathOfAlternativeCertificate();
-      useCaseWithCert(
-          certPath, USECASE_INVALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_DO_NOT_EXPECT);
+      updateTrustStore(
+          "Offer a TSL with the same tsl id, but new (incremented) seqNr",
+          tslSettings.getAlternativeTemplate(),
+          defaultTslSigner,
+          OCSP_REQUEST_IGNORE,
+          getPathOfAlternativeCertificate(),
+          USECASE_INVALID,
+          OCSP_REQUEST_DO_NOT_EXPECT,
+          rewriteTslIdToInitial,
+          OcspSeqNrUpdateMode.DO_NOT_UPDATE_OCSP_SEQ_NR);
     }
   }
 
@@ -290,13 +293,13 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 6")
   @DisplayName("Test bad CA certificate is not extractable from TSL")
-  void verifyForBadCertificateOfTSPService(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyForBadCertificateOfTSPService(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
     updateTrustStore(
+        "Offer a TSL with alternative test CAs whose ASN1 structure is invalid.",
         tslSettings.getDefectAlternativeCaBrokenTemplate(),
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -316,13 +319,13 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 6")
   @DisplayName("Test proper handling of unspecified CA certificate in TSL")
-  void verifyForUnspecifiedCertificateOfTSPService(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyForUnspecifiedCertificateOfTSPService(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
     updateTrustStore(
+        "Offer a TSL with alternative test CAs and \"irrelevant, unexpected\" CA.",
         tslSettings.getDefectAlternativeCaUnspecifiedTemplate(),
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -340,13 +343,14 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4749", description = "TUC_PKI_007: Prüfung Zertifikatstyp - Schritt 8")
   @DisplayName("Test CA certificate with missing service information extension in TSL")
-  void verifyForWrongServiceInfoExtCertificateOfTSPService(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyForWrongServiceInfoExtCertificateOfTSPService(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
     updateTrustStore(
+        "Offer a TSL with alternative test CAs whose ServiceInformationExtension elements are"
+            + " wrong.",
         tslSettings.getDefectAlternativeCaWrongSrvInfoExtTemplate(),
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -365,13 +369,13 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "A_17700", description = "TSL-Auswertung ServiceTypeIdentifier \"unspecified\"")
   @DisplayName("Test CA certificate with ServiceTypeIdentifier \"unspecified\" in TSL")
-  void verifyForUnspecifiedServiceTypeIdentifierOfTSPService(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyForUnspecifiedServiceTypeIdentifierOfTSPService(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
     updateTrustStore(
+        "Import TSL with ServiceTypeIdentifier \"unspecified\"",
         tslSettings.getAlternativeCaUnspecifiedStiTemplate(),
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -383,8 +387,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4652", description = "TUC_PKI_018: Zertifikatsprüfung in der TI - Schritt 5a")
   @DisplayName("Test CA certificate in TSL is revoked and EE certificate is issued later.")
-  void verifyRevokedCaCertificateInTslLater(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyRevokedCaCertificateInTslLater(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -392,6 +395,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
     waitForOcspCacheToExpire();
 
     updateTrustStore(
+        "Offer a TSL with alternative test CAs with ServiceStatus REVOKED",
         alternativeCaRevokedPretty,
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -409,43 +413,46 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4652", description = "TUC_PKI_018: Zertifikatsprüfung in der TI - Schritt 5")
   @DisplayName("Test CA certificate in TSL is revoked and EE certificate is issued earlier.")
-  void verifyRevokedCaCertificateInTsl(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyRevokedCaCertificateInTsl(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
     waitForOcspCacheToExpire();
 
-    final Path tslTemplatePath = Path.of(TSL_TEMPLATES_DIRNAME, "TSL_altCA_revokedLater.xml");
+    final Consumer<TslDownload> rewriteStatusStartingTimeToNowPlusOneDay =
+        tslDownload -> {
+          final ZonedDateTime newStatusStartingTime = GemLibPkiUtils.now().plusDays(1);
 
-    final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
-    log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
+          final byte[] tslBytes = tslDownload.getTslBytes();
+          final byte[] tslBytesWithNewStatusStartingTime;
+          try {
 
-    final TslDownload tslDownload = getTslDownloadWithTemplate(offeredSeqNr, tslTemplatePath);
+            tslBytesWithNewStatusStartingTime =
+                TslModifier.modifiedStatusStartingTime(
+                    tslBytes,
+                    PkitsConstants.GEMATIK_TEST_TSP,
+                    null,
+                    TslConstants.SVCSTATUS_REVOKED,
+                    newStatusStartingTime);
+          } catch (final DatatypeConfigurationException e) {
+            throw new TestSuiteException("cannot modify TSL", e);
+          }
 
-    final ZonedDateTime newStatusStartingTime = GemLibPkiUtils.now().plusDays(1);
+          signAndSetTslBytes(tslDownload, defaultTslSigner, tslBytesWithNewStatusStartingTime);
+        };
 
-    final byte[] tslBytes = tslDownload.getTslBytes();
-    final byte[] tslBytesWithNewStatusStartingTime =
-        TslModifier.modifiedStatusStartingTime(
-            tslBytes,
-            PkitsConstants.GEMATIK_TEST_TSP,
-            null,
-            TslConstants.SVCSTATUS_REVOKED,
-            newStatusStartingTime);
-
-    signAndSetTslBytes(tslDownload, defaultTslSigner, tslBytesWithNewStatusStartingTime);
-    writeTsl(tslDownload, "_modified");
-
-    printCurrentTslSeqNr();
-    tslSequenceNr.setLastOfferedNr(offeredSeqNr);
-    tslDownload.waitUntilTslDownloadCompleted(
-        tslSequenceNr.getExpectedNrInTestObject(), getExpectedOcspTslSeqNr());
-    tslSequenceNr.setExpectedNrInTestObject(offeredSeqNr);
-
-    final Path certPath = getPathOfAlternativeCertificate();
-    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
+    updateTrustStore(
+        "Offer a TSL with alternative CAs, ServiceStatus REVOKED, StatusStartingTime one day in the"
+            + " future.",
+        tslAlternativeCaRevokedLater,
+        defaultTslSigner,
+        OCSP_REQUEST_EXPECT,
+        getPathOfAlternativeCertificate(),
+        USECASE_VALID,
+        OCSP_REQUEST_EXPECT,
+        rewriteStatusStartingTimeToNowPlusOneDay,
+        OcspSeqNrUpdateMode.DO_NOT_UPDATE_OCSP_SEQ_NR);
   }
 
   /** gematikId: UE_PKI_TC_0105_009 */
@@ -453,39 +460,43 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4648", description = "Prüfung der Aktualität der TSL - Schritt 4")
   @Afo(afoId = "GS-GS-A_4651", description = "TUC_PKI_012: XML-Signatur-Prüfung")
   @DisplayName("Test TSL signature invalid - \"to be signed block\" with integrity violation")
-  void verifyTslSignatureInvalid(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyTslSignatureInvalid(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
-    final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
-    log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
+    final Consumer<TslDownload> rewriteMailToInvalidateSignature =
+        tslDownload -> {
+          assertThat(
+                  TslValidator.checkSignature(tslDownload.getTslBytes(), VALID_ISSUER_CERT_TSL_CA8))
+              .isTrue();
 
-    // create TSL and verify signature
-    final TslDownload tslDownload = getTslDownloadAlternativeTemplate(offeredSeqNr);
-    assertThat(TslValidator.checkSignature(tslDownload.getTslBytes(), VALID_ISSUER_CERT_TSL_CA8))
-        .isTrue();
+          // break integrity of TSL and verify signature again
+          final String mailToStrOld =
+              getFirstSchemeOperatorMailAddressOfTsl(tslDownload.getTslBytes());
+          final String mailToStrNew = "mailto:signatureInvalid@gematik.de";
+          final String tslStr = new String(tslDownload.getTslBytes(), StandardCharsets.UTF_8);
+          final byte[] brokenTsl =
+              tslStr.replace(mailToStrOld, mailToStrNew).getBytes(StandardCharsets.UTF_8);
 
-    // break integrity of TSL and verify signature again
-    final String mailToStrOld = getFirstSchemeOperatorMailAddressOfTsl(tslDownload.getTslBytes());
-    final String mailToStrNew = "mailto:signatureInvalid@gematik.de";
-    final String tslStr = new String(tslDownload.getTslBytes(), StandardCharsets.UTF_8);
-    final byte[] brokenTsl =
-        tslStr.replace(mailToStrOld, mailToStrNew).getBytes(StandardCharsets.UTF_8);
+          tslDownload.setTslBytes(brokenTsl);
 
-    tslDownload.setTslBytes(brokenTsl);
-    writeTsl(tslDownload, "_modified");
+          log.info("Verify test tsl has wrong signature.");
+          assertThat(
+                  TslValidator.checkSignature(tslDownload.getTslBytes(), VALID_ISSUER_CERT_TSL_CA8))
+              .isFalse();
+        };
 
-    log.info("Verify test tsl has wrong signature.");
-    assertThat(TslValidator.checkSignature(tslDownload.getTslBytes(), VALID_ISSUER_CERT_TSL_CA8))
-        .isFalse();
-
-    tslSequenceNr.setLastOfferedNr(offeredSeqNr);
-    tslDownload.waitUntilTslDownloadCompletedOptional(tslSequenceNr.getExpectedNrInTestObject());
-
-    final Path certPath = getPathOfAlternativeCertificate();
-    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_IGNORE);
+    updateTrustStore(
+        "Offer a TSL with alternative test CAs. The signature of the TSL is invalid.",
+        tslSettings.getAlternativeTemplate(),
+        defaultTslSigner,
+        OCSP_REQUEST_IGNORE,
+        getPathOfAlternativeCertificate(),
+        USECASE_INVALID,
+        OCSP_REQUEST_IGNORE,
+        rewriteMailToInvalidateSignature,
+        OcspSeqNrUpdateMode.DO_NOT_UPDATE_OCSP_SEQ_NR);
 
     useCaseWithCert(
         getPathOfFirstValidCert(),
@@ -510,8 +521,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4648", description = "TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 1")
   @Afo(afoId = "GS-A_4647", description = "TUC_PKI_016: Download der TSL-Datei - Schritt 3 und 4")
   @DisplayName("Test TSL download not possible")
-  void verifyRetryFailingTslDownload(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyRetryFailingTslDownload(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -599,8 +609,7 @@ class TslApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4648", description = "TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 1")
   @Afo(afoId = "GS-A_4647", description = "TUC_PKI_016: Download der TSL-Datei - Schritt 3 und 4")
   @DisplayName("Test TSL download on primary endpoint not possible")
-  void verifyUseBackupTslDownload(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyUseBackupTslDownload(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();

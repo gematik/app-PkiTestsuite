@@ -62,8 +62,10 @@ public class PkitsTestSuiteUtils {
           .pollInterval(Duration.ofMillis(pollIntervalMillis))
           .until(eventChecker);
     } catch (final ConditionTimeoutException e) {
-      final String message = "Timeout for event \"%s\":: %s".formatted(name, getCallerTrace());
-      log.error(message, e);
+      final String message =
+          "Timeout for event \"%s\"\n%s:%s\n:: %s%n"
+              .formatted(name, e.getClass().getCanonicalName(), e.getMessage(), getCallerTrace());
+      log.error(message);
       throw new TestSuiteException(message, e);
     }
     final ZonedDateTime zdtEnd = ZonedDateTime.now();

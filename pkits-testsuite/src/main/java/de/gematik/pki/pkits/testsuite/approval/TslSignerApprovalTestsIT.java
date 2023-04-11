@@ -43,6 +43,7 @@ import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusType;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.OcspResponderConfigDtoBuilder;
+import de.gematik.pki.pkits.testsuite.approval.support.OcspSeqNrUpdateMode;
 import de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
@@ -50,13 +51,13 @@ import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.DtoDateConfigOpt
 import de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.config.Afo;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import javax.xml.datatype.DatatypeConfigurationException;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -82,8 +83,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       final OcspResponderConfigDtoBuilder ocspResponderConfigDtoBuilder,
       final TslUpdateExpectation tslUpdateExpected,
       final Path certPath,
-      final UseCaseResult useCaseResult)
-      throws DatatypeConfigurationException, IOException {
+      final UseCaseResult useCaseResult) {
 
     currentTestInfo.setPhase("updateTrustStoreUsingOcspResponderConfig");
 
@@ -130,8 +130,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
         TestSuiteConstants.OCSP_SIGNER_DIFFERENT_KEY
       })
   void verifyMissingOcspSignerInTslForTslSignerCert(
-      final String ocspSignerFilename, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final String ocspSignerFilename, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -165,8 +164,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5a1")
   @DisplayName("Test invalid OCSP response signature for TSL signer certificate")
-  void verifyOcspResponseWithInvalidSignatureForTslSignerCert(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseWithInvalidSignatureForTslSignerCert(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -195,8 +193,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       final DtoDateConfigOption dateConfigOption,
       final int deltaMilliseconds,
       final TslUpdateExpectation tslUpdateExcected,
-      final UseCaseResult useCaseResult)
-      throws DatatypeConfigurationException, IOException {
+      final UseCaseResult useCaseResult) {
 
     final OcspResponderConfigDtoBuilder dtoBuilder =
         OcspResponderConfigDto.builder().eeCert(getDefaultTslSignerCert()).signer(ocspSigner);
@@ -223,8 +220,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in past within tolerance")
-  void verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -254,8 +250,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in past out of tolerance")
-  void verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -285,8 +280,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in future within tolerance")
-  void verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -299,11 +293,13 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
         producedAtDeltaMilliseconds,
         TSL_UPDATE_EXPECTED,
         USECASE_VALID);
+
     useCaseWithCert(
         getPathOfFirstValidCert(),
         USECASE_VALID,
         OCSP_RESP_TYPE_DEFAULT_USECASE,
         OCSP_REQUEST_EXPECT);
+
     waitForOcspCacheToExpire(
         testSuiteConfig.getTestObject().getOcspGracePeriodSeconds()
             + producedAtDeltaMilliseconds / 1000);
@@ -317,8 +313,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in future out of tolerance")
-  void verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -351,8 +346,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with thisUpdate in future within tolerance")
-  void verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -365,11 +359,13 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
         thisUpdateDeltaMilliseconds,
         TSL_UPDATE_EXPECTED,
         USECASE_VALID);
+
     useCaseWithCert(
         getPathOfFirstValidCert(),
         USECASE_VALID,
         OCSP_RESP_TYPE_DEFAULT_USECASE,
         OCSP_REQUEST_EXPECT);
+
     waitForOcspCacheToExpire(
         testSuiteConfig.getTestObject().getOcspGracePeriodSeconds()
             + thisUpdateDeltaMilliseconds / 1000);
@@ -383,8 +379,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with thisUpdate in future out of tolerance")
-  void verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -415,8 +410,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with nextUpdate in past within tolerance")
-  void verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -445,8 +439,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with nextUpdate in past out of tolerance")
-  void verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -474,8 +467,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response of TSL signer certificate with missing nextUpdate")
-  void verifyOcspResponseTslSignerCertMissingNextUpdate(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertMissingNextUpdate(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -512,8 +504,9 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       "Test various status of OCSP responses of TSL signer certificate with and without response"
           + " bytes")
   void verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes(
-      final OCSPRespStatus ocspRespStatus, final boolean withResponseBytes, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final OCSPRespStatus ocspRespStatus,
+      final boolean withResponseBytes,
+      final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -546,8 +539,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 7b")
   @DisplayName("Test OCSP response of TSL signer certificate with missing CertHash")
-  void verifyOcspResponseTslSignerCertMissingCertHash(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertMissingCertHash(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -579,8 +571,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 7c")
   @DisplayName("Test OCSP response of TSL signer certificate with invalid CertHash")
-  void verifyOcspResponseTslSignerCertInvalidCertHash(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertInvalidCertHash(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -616,8 +607,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 8b und 8c")
   @DisplayName("Test OCSP response of TSL signer certificate with status revoked and unknown")
   void verifyOcspResponseTslSignerCertStatusRevokedAndUnknown(
-      final CustomCertificateStatusType customCertificateStatusType, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final CustomCertificateStatusType customCertificateStatusType, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -649,8 +639,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
   @DisplayName("Test OCSP response of TSL signer certificate with responder id byName")
-  void verifyOcspResponseTslSignerCertResponderIdByName(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertResponderIdByName(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -684,8 +673,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @ValueSource(booleans = {true, false})
   @DisplayName("Test OCSP response of TSL signer certificate with null parameter in CertId")
   void verifyOcspResponseTslSignerCertWithNullParameterInCertId(
-      final boolean withNullParameterHashAlgoOfCertId, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final boolean withNullParameterHashAlgoOfCertId, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -717,8 +705,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP check - step 4c")
   @DisplayName("Test OCSP response TSL signer certificate with timeout and delay")
-  void verifyOcspResponseTslSignerCertTimeoutAndDelay(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTslSignerCertTimeoutAndDelay(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -789,8 +776,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP check - step 6b")
   @DisplayName("Test invalid cert id in OCSP response for TSL signer cert")
   void verifyOcspResponseTslSignerCertInvalidCertId(
-      final CertificateIdGeneration certificateIdGeneration, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final CertificateIdGeneration certificateIdGeneration, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -826,8 +812,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 2")
   @Afo(afoId = "GS-A_4653", description = "TUC_PKI_002: Gültigkeitsprüfung des Zertifikats")
   @DisplayName("Test TSL signer certificate that is not yet valid - notBefore is in the future")
-  void verifyTslSignerCertNotYetValid(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyTslSignerCertNotYetValid(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -852,8 +837,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       description = "TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 2")
   @Afo(afoId = "GS-A_4653", description = "TUC_PKI_002: Gültigkeitsprüfung des Zertifikats")
   @DisplayName("Test TSL signer certificate that is expired")
-  void verifyTslSignerCertExpired(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyTslSignerCertExpired(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -867,22 +851,26 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
         OCSP_REQUEST_EXPECT);
   }
 
-  private void breakTslSigner(final TslDownload tslDownload)
-      throws CertificateEncodingException, IOException {
+  private final Consumer<TslDownload> breakTslSigner =
+      tslDownload -> {
+        final byte[] tslBytes = tslDownload.getTslBytes();
+        final TrustStatusListType tsl = TslConverter.bytesToTsl(tslBytes);
+        final X509Certificate signerCert = TslUtils.getFirstTslSignerCertificate(tsl);
 
-    final byte[] tslBytes = tslDownload.getTslBytes();
-    final TrustStatusListType tsl = TslConverter.bytesToTsl(tslBytes);
-    final X509Certificate signerCert = TslUtils.getFirstTslSignerCertificate(tsl);
+        final byte[] signerCertBrokenBytes;
+        try {
+          signerCertBrokenBytes = signerCert.getEncoded();
+        } catch (CertificateEncodingException e) {
+          throw new TestSuiteException("cannot read signerCert", e);
+        }
 
-    final byte[] signerCertBrokenBytes = signerCert.getEncoded();
-    GemLibPkiUtils.change4Bytes(signerCertBrokenBytes, 4);
+        GemLibPkiUtils.change4Bytes(signerCertBrokenBytes, 4);
 
-    final byte[] tslWithSignerCertBroken =
-        TslModifier.modifiedSignerCert(tslBytes, signerCertBrokenBytes);
+        final byte[] tslWithSignerCertBroken =
+            TslModifier.modifiedSignerCert(tslBytes, signerCertBrokenBytes);
 
-    tslDownload.setTslBytes(tslWithSignerCertBroken);
-    writeTsl(tslDownload, "_modified");
-  }
+        tslDownload.setTslBytes(tslWithSignerCertBroken);
+      };
 
   /** gematikId: UE_PKI_TC_0105_001 */
   @Test
@@ -890,28 +878,22 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 3")
   @DisplayName("Test TSL signer certificate is broken")
-  void verifyTslSignerCertBroken(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException, CertificateEncodingException {
+  void verifyTslSignerCertBroken(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
 
-    final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
-    log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
-    final TslDownload tslDownload = getTslDownloadAlternativeTemplate(offeredSeqNr);
-
-    tslDownload.configureOcspResponderTslSignerStatusGood();
-
-    breakTslSigner(tslDownload);
-
-    tslSequenceNr.setLastOfferedNr(offeredSeqNr);
-    tslDownload.waitForTslDownload(tslSequenceNr.getExpectedNrInTestObject());
-
-    assertNoOcspRequest(tslDownload);
-
-    final Path certPath = getPathOfAlternativeCertificate();
-    useCaseWithCert(
-        certPath, USECASE_INVALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_DO_NOT_EXPECT);
+    updateTrustStore(
+        "Offer a TSL with alternative test CAs (the TSL signer certificate contains an invalid ASN1"
+            + " structure).",
+        tslSettings.getAlternativeTemplate(),
+        defaultTslSigner,
+        OCSP_REQUEST_DO_NOT_EXPECT,
+        getPathOfAlternativeCertificate(),
+        USECASE_INVALID,
+        OCSP_REQUEST_DO_NOT_EXPECT,
+        breakTslSigner,
+        OcspSeqNrUpdateMode.DO_NOT_UPDATE_OCSP_SEQ_NR);
 
     final Path validCertPath = getPathOfFirstValidCert();
     useCaseWithCert(
@@ -926,8 +908,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
   private void verifyForBadCertificateFromTrustAnchors(
       final String p12Filename,
       final boolean signerKeyUsageCheck,
-      final boolean signerValidityCheck)
-      throws DatatypeConfigurationException, IOException {
+      final boolean signerValidityCheck) {
 
     final Path p12ContainerBadPath = Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, p12Filename);
     final P12Container p12ContainerBad = P12Reader.getContentFromP12(p12ContainerBadPath, "00");
@@ -942,7 +923,8 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
             tslTemplate,
             p12ContainerBadPath,
             signerKeyUsageCheck,
-            signerValidityCheck);
+            signerValidityCheck,
+            null);
 
     final OcspResponderConfigDtoBuilder dtoBuilder =
         OcspResponderConfigDto.builder()
@@ -969,8 +951,7 @@ class TslSignerApprovalTestsIT extends ApprovalTestsBaseIT {
       afoId = "GS-A_4650",
       description = "TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 3")
   @DisplayName("Test TSL signer certificates with invalid key usage and extended key usage")
-  void verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();

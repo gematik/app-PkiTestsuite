@@ -4,10 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.6</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
+  <version>1.0.6</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
@@ -29,7 +30,6 @@
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
     <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
-    <version.maven-pdf-plugin>1.6.1</version.maven-pdf-plugin>
     <tsl-procurer.initialTslPrimaryDownloadUrl>http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000</tsl-procurer.initialTslPrimaryDownloadUrl>
   </properties>
 

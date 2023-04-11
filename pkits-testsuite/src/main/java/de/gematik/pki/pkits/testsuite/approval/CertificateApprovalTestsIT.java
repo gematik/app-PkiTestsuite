@@ -33,9 +33,7 @@ import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
 import de.gematik.pki.pkits.testsuite.common.VariableSource;
 import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
-import java.io.IOException;
 import java.nio.file.Path;
-import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -63,10 +61,11 @@ class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PKITS_CERT_VALID)
   @DisplayName("Test use case with valid certificates")
-  void verifyConnectCertsValid(final Path certPath, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyConnectCertsValid(final Path certPath, final TestInfo testInfo) {
+
     testCaseMessage(testInfo);
     initialState();
+
     useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
   }
 
@@ -76,11 +75,9 @@ class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4384", description = "RSA cipher suites for TLS")
   @Disabled("Our SUT does not support RSA yet")
   @DisplayName("Test use case with valid RSA certificate")
-  void verifyConnectCertsValidRsa(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyConnectCertsValidRsa(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
-
     initialState();
 
     final Path certPath = Path.of("./testDataTemplates/certificates/valid-rsa/ee_default-rsa.p12");
@@ -114,12 +111,11 @@ class CertificateApprovalTestsIT extends ApprovalTestsBaseIT {
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PKITS_CERT_INVALID)
   @DisplayName("Test use case with invalid certificates")
-  void verifyConnectCertsInvalid(final Path certPath, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyConnectCertsInvalid(final Path certPath, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
-
     initialState();
+
     useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_IGNORE);
   }
 }

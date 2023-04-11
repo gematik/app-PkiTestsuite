@@ -4,10 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.6</version>
   </parent>
 
   <artifactId>pkits-sut-server-sim</artifactId>
+  <version>1.0.6</version>
   <name>Test Object Simulator (Server)</name>
   <description>Test object simulator (server)</description>
 

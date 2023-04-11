@@ -2,6 +2,10 @@
 
 # Release notes PKI Test Suite
 
+## Release 1.0.6
+
+- upload binaries
+
 ## Release 1.0.1
 
 - migrate from maven based execution of approval tests to binary (jar) based

@@ -16,16 +16,15 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
-import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.SIGNER_VALIDITY_CHECK_ENABLED;
-
 import de.gematik.pki.gemlibpki.tsl.TslConstants;
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
 import de.gematik.pki.pkits.common.PkitsConstants;
+import de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
-import java.io.IOException;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.function.Consumer;
 import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class TslVaApprovalUtilsBaseIT extends ApprovalTestsBaseIT {
 
+  protected static final UseCaseResult SKIP_USECASE = null;
   final Path alternativeTslSignerP12Path =
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-9-TEST-ONLY.p12");
 
@@ -42,63 +42,43 @@ public abstract class TslVaApprovalUtilsBaseIT extends ApprovalTestsBaseIT {
   final Path tslSignerFromExpiredTrustAnchorP12Path =
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_expired_ta.p12");
 
-  protected enum OcspSeqNrUpdateMode {
-    UPDATE_OCSP_SEQ_NR,
-    DO_NOT_UPDATE_OCSP_SEQ_NR
+  protected static final String TA_NAME_DEFAULT = "default";
+  protected static final String TA_NAME_ALT1 = "first alternative";
+  protected static final String TA_NAME_ALT2 = "second alternative";
+
+  protected static String getSwitchMessage(final String anchorType1, final String anchorType2) {
+    return "Offer a TSL to switch from the %s trust anchor to the %s trust anchor."
+        .formatted(anchorType1, anchorType2);
+  }
+
+  Consumer<TslDownload> getActivationTimeModifier(
+      final Path tslSignerPath, final ZonedDateTime newActivationTime) {
+    return (tslDownload) -> {
+      if (newActivationTime != null) {
+        setNewActivationTime(tslDownload, tslSignerPath, newActivationTime);
+      }
+    };
   }
 
   private void setNewActivationTime(
       final TslDownload tslDownload,
       @NonNull final Path tslSignerPath,
-      final ZonedDateTime newActivationTime)
-      throws DatatypeConfigurationException, IOException {
+      final ZonedDateTime newActivationTime) {
 
     byte[] tslBytes = tslDownload.getTslBytes();
-    tslBytes =
-        TslModifier.modifiedStatusStartingTime(
-            tslBytes,
-            PkitsConstants.GEMATIK_TEST_TSP,
-            TslConstants.STI_SRV_CERT_CHANGE,
-            null,
-            newActivationTime);
+
+    try {
+      tslBytes =
+          TslModifier.modifiedStatusStartingTime(
+              tslBytes,
+              PkitsConstants.GEMATIK_TEST_TSP,
+              TslConstants.STI_SRV_CERT_CHANGE,
+              null,
+              newActivationTime);
+    } catch (final DatatypeConfigurationException e) {
+      throw new TestSuiteException("cannot modify TSL", e);
+    }
 
     signAndSetTslBytes(tslDownload, tslSignerPath, tslBytes);
-    writeTsl(tslDownload, "_modified");
-  }
-
-  protected void importNewValidTrustAnchor(
-      @NonNull final Path tslTemplate,
-      @NonNull final Path tslSignerPath,
-      final ZonedDateTime newActivationTime,
-      final OcspSeqNrUpdateMode ocspSeqNrUpdateMode)
-      throws DatatypeConfigurationException, IOException {
-
-    log.info("importNewValidTrustAnchor - start: tsl template {}", tslTemplate);
-
-    final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
-    log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
-
-    final TslDownload tslDownload =
-        getTslDownloadWithTemplateAndSigner(
-            offeredSeqNr,
-            tslTemplate,
-            tslSignerPath,
-            SIGNER_KEY_USAGE_CHECK_ENABLED,
-            SIGNER_VALIDITY_CHECK_ENABLED);
-
-    if (newActivationTime != null) {
-      setNewActivationTime(tslDownload, tslSignerPath, newActivationTime);
-    }
-
-    printCurrentTslSeqNr();
-    tslSequenceNr.setLastOfferedNr(offeredSeqNr);
-    tslDownload.waitUntilTslDownloadCompleted(offeredSeqNr, getExpectedOcspTslSeqNr());
-    tslSequenceNr.setExpectedNrInTestObject(offeredSeqNr);
-
-    if (ocspSeqNrUpdateMode == OcspSeqNrUpdateMode.UPDATE_OCSP_SEQ_NR) {
-      setExpectedOcspTslSeqNr(tslSequenceNr.getExpectedNrInTestObject());
-    }
-
-    log.info("importNewValidTrustAnchor - finish\n\n");
   }
 }

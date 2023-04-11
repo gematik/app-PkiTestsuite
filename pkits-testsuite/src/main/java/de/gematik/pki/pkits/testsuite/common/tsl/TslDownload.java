@@ -148,7 +148,7 @@ public class TslDownload {
     try {
       waitUntilOcspRequestForSigner();
     } catch (final TestSuiteException e) {
-      log.info("no ocsp optional requests received -> continue\n\n");
+      log.info("no (optional) OCSP requests received -> CONTINUE\n\n");
     }
   }
 

@@ -440,6 +440,14 @@ class ListApprovalTestsAndAfos {
           .toComparison();
     }
 
+    boolean sameClassName(final String className) {
+      return StringUtils.equalsAny(className, getSimpleClassName(), getClassName());
+    }
+
+    boolean sameMethodName(final String methodName) {
+      return method.getName().equals(methodName);
+    }
+
     @Override
     public String toString() {
       return "CustomTestInfo{class='%s', declaringClassName='%s', method='%s', displayName='%s'}"

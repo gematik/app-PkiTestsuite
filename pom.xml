@@ -9,7 +9,7 @@
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pkits-global</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.6</version>
   <packaging>pom</packaging>
   <name>PkiTs</name>
   <description>Uebergreifende Java PKI Testsuite</description>
@@ -104,6 +104,7 @@
     <version.maven-assembly-plugin>3.4.2</version.maven-assembly-plugin>
     <version.maven-clean-plugin>3.2.0</version.maven-clean-plugin>
     <version.maven-compiler-plugin>3.10.1</version.maven-compiler-plugin>
+    <version.maven-deploy-plugin>3.1.1</version.maven-deploy-plugin>
     <version.maven-enforcer-plugin>3.2.1</version.maven-enforcer-plugin>
     <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
     <version.maven-javadoc-plugin>3.5.0</version.maven-javadoc-plugin>
@@ -331,6 +332,11 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${version.maven-deploy-plugin}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -511,6 +517,10 @@
             </excludes>
           </markdown>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
 import de.gematik.pki.gemlibpki.tsl.TslReader;
+import de.gematik.pki.gemlibpki.tsl.TslUtils;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
@@ -44,6 +45,7 @@ import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.testsuite.UseCase;
 import de.gematik.pki.pkits.testsuite.approval.support.OcspResponderType;
+import de.gematik.pki.pkits.testsuite.approval.support.OcspSeqNrUpdateMode;
 import de.gematik.pki.pkits.testsuite.approval.support.PcapHelper;
 import de.gematik.pki.pkits.testsuite.approval.support.PcapManager;
 import de.gematik.pki.pkits.testsuite.approval.support.TestResultLoggerExtension;
@@ -66,6 +68,7 @@ import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.config.TslSettings;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
+import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -78,6 +81,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.NonNull;
@@ -85,6 +89,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.awaitility.core.ConditionTimeoutException;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -304,7 +313,7 @@ class ApprovalTestsBaseIT {
         .forEach(afo -> log.info("{} - {}", afo.afoId(), afo.description()));
   }
 
-  protected void initialState() throws DatatypeConfigurationException, IOException {
+  protected void initialState() {
 
     currentTestInfo.setPhase("initialState");
 
@@ -313,7 +322,6 @@ class ApprovalTestsBaseIT {
       if (tslSettings.isInitialStateTslImport()) {
         initialTslDownloadByTestObject();
       } else {
-        // tslSequenceNr.setExpectedNrInTestObject(tslSequenceNr.getCurrentNrInTestObject());
         log.info(
             "\n===> Initial state TSL import skipped by user request. - {}\n", currentTestInfo);
       }
@@ -330,7 +338,9 @@ class ApprovalTestsBaseIT {
     currentTestInfo.resetPhase();
   }
 
-  void initialStateWithAlternativeTemplate() throws DatatypeConfigurationException, IOException {
+  void initialStateWithAlternativeTemplate() {
+
+    currentTestInfo.setPhase("initialStateWithAlternativeTemplate");
 
     log.info("initialStateWithAlternativeTemplate - start");
     final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
@@ -344,7 +354,8 @@ class ApprovalTestsBaseIT {
             tslTemplate,
             defaultTslSigner,
             SIGNER_KEY_USAGE_CHECK_ENABLED,
-            SIGNER_VALIDITY_CHECK_ENABLED);
+            SIGNER_VALIDITY_CHECK_ENABLED,
+            null);
 
     tslSequenceNr.setLastOfferedNr(offeredSeqNr);
     tslDownload.waitUntilTslDownloadCompleted(IGNORE_SEQUENCE_NUMBER, IGNORE_SEQUENCE_NUMBER);
@@ -354,17 +365,20 @@ class ApprovalTestsBaseIT {
 
     final Path certPath = getPathOfAlternativeCertificate();
     useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_TYPE_DEFAULT_USECASE, OCSP_REQUEST_EXPECT);
+
+    currentTestInfo.resetPhase();
     log.info("initialStateWithAlternativeTemplate - finish\n\n");
   }
 
   void updateTrustStore(
+      final String description,
       final Path tslTemplate,
       final Path tslSignerP12Path,
       final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour,
       final Path useCaseCertPath,
-      final UseCaseResult useCaseResult)
-      throws DatatypeConfigurationException, IOException {
+      final UseCaseResult useCaseResult) {
     updateTrustStore(
+        description,
         tslTemplate,
         tslSignerP12Path,
         ocspRequestExpectationBehaviour,
@@ -374,16 +388,46 @@ class ApprovalTestsBaseIT {
   }
 
   void updateTrustStore(
+      final String description,
       final Path tslTemplate,
       final Path tslSignerP12Path,
       final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour,
       final Path useCaseCertPath,
       final UseCaseResult useCaseResult,
-      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviourForUseCase)
-      throws DatatypeConfigurationException, IOException {
+      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviourForUseCase) {
+    updateTrustStore(
+        description,
+        tslTemplate,
+        tslSignerP12Path,
+        ocspRequestExpectationBehaviour,
+        useCaseCertPath,
+        useCaseResult,
+        ocspRequestExpectationBehaviourForUseCase,
+        null,
+        OcspSeqNrUpdateMode.DO_NOT_UPDATE_OCSP_SEQ_NR);
+  }
 
-    currentTestInfo.setPhase("updateTrustStore");
-    log.info("START updateTrustStore - {}", PkitsTestSuiteUtils.getCallerTrace());
+  void updateTrustStore(
+      final String description,
+      final Path tslTemplate,
+      final Path tslSignerP12Path,
+      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour,
+      final Path useCaseCertPath,
+      final UseCaseResult useCaseResult,
+      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviourForUseCase,
+      final Consumer<TslDownload> modifyTsl,
+      final OcspSeqNrUpdateMode ocspSeqNrUpdateMode) {
+
+    final String customPhaseName = StringUtils.substringBetween(description, "<", ">");
+    final String phaseName = StringUtils.defaultString(customPhaseName, "updateTrustStore");
+
+    currentTestInfo.setPhase(phaseName);
+
+    log.info(
+        "START updateTrustStore -\ndescription: {},\n{}\n",
+        description,
+        PkitsTestSuiteUtils.getCallerTrace());
+
     final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
 
@@ -393,7 +437,8 @@ class ApprovalTestsBaseIT {
             tslTemplate,
             tslSignerP12Path,
             SIGNER_KEY_USAGE_CHECK_ENABLED,
-            SIGNER_VALIDITY_CHECK_ENABLED);
+            SIGNER_VALIDITY_CHECK_ENABLED,
+            modifyTsl);
 
     tslDownload.configureOcspResponderTslSignerStatusGood();
     tslSequenceNr.setLastOfferedNr(offeredSeqNr);
@@ -406,12 +451,17 @@ class ApprovalTestsBaseIT {
     } else if (ocspRequestExpectationBehaviour == OCSP_REQUEST_IGNORE) {
       tslDownload.waitUntilOcspRequestForSignerOptional();
     } else {
-      throw new TestSuiteException("not implemented");
+      assertNoOcspRequest(tslDownload);
+    }
+
+    if (ocspSeqNrUpdateMode == OcspSeqNrUpdateMode.UPDATE_OCSP_SEQ_NR) {
+      setExpectedOcspTslSeqNr(tslSequenceNr.getExpectedNrInTestObject());
     }
 
     if (useCaseResult == null) {
       log.info(
-          "END updateTrustStore (without useCaseResult) - {}",
+          "END updateTrustStore (without useCaseResult) -\ndescription: {},\n{}\n",
+          description,
           PkitsTestSuiteUtils.getCallerTrace());
       return;
     }
@@ -428,7 +478,11 @@ class ApprovalTestsBaseIT {
 
     useCaseWithCert(
         useCaseCertPath, useCaseResult, OCSP_RESP_TYPE_DEFAULT_USECASE, ocspRequestExpectation);
-    log.info("END updateTrustStore - {}", PkitsTestSuiteUtils.getCallerTrace());
+    log.info(
+        "END updateTrustStore (with useCaseResult) -\ndescription: {},\n{}\n",
+        description,
+        PkitsTestSuiteUtils.getCallerTrace());
+
     currentTestInfo.resetPhase();
   }
 
@@ -504,7 +558,6 @@ class ApprovalTestsBaseIT {
                 ocspRequestExpectationBehaviour);
 
     assertThat(UseCase.exec(certPath)).as(message).isEqualTo(useCaseResult.getExpectedReturnCode());
-    // mje 14.2. tslSequenceNr.saveCurrentTestObjectSeqNr(tslSequenceNr.getLastOfferedNr());
 
     if (ocspRequestExpectationBehaviour != OCSP_REQUEST_IGNORE) {
       log.info("{}", tslSequenceNr);
@@ -597,31 +650,29 @@ class ApprovalTestsBaseIT {
     OcspHistory.check(ocspRespUri, certSerialNr, tslSequenceNr, ocspRequestExpectationBehaviour);
   }
 
-  TslDownload getTslDownloadDefaultTemplate(final int offeredSeqNr)
-      throws DatatypeConfigurationException, IOException {
+  TslDownload getTslDownloadDefaultTemplate(final int offeredSeqNr) {
     return getTslDownloadWithTemplate(offeredSeqNr, tslSettings.getDefaultTemplate());
   }
 
-  TslDownload getTslDownloadAlternativeTemplate(final int offeredSeqNr)
-      throws DatatypeConfigurationException, IOException {
+  TslDownload getTslDownloadAlternativeTemplate(final int offeredSeqNr) {
     return getTslDownloadWithTemplate(offeredSeqNr, tslSettings.getAlternativeTemplate());
   }
 
   protected static final String TSL_DIRNAME = "./out/tsl";
   protected static final String TSL_FILENAME_PREFIX = "Tsl_";
 
-  protected static Path getTslOutputPath(final BigInteger tslSeqNr, final String tslId) {
-    return Path.of(TSL_DIRNAME, "%s%04d_%s.xml".formatted(TSL_FILENAME_PREFIX, tslSeqNr, tslId));
+  protected static Path getTslOutputPath(final BigInteger tslSeqNr, final String postfix) {
+    return Path.of(TSL_DIRNAME, "%s%04d_%s.xml".formatted(TSL_FILENAME_PREFIX, tslSeqNr, postfix));
   }
 
-  TslDownload getTslDownloadWithTemplate(final int offeredSeqNr, final Path template)
-      throws DatatypeConfigurationException, IOException {
+  TslDownload getTslDownloadWithTemplate(final int offeredSeqNr, final Path template) {
     return getTslDownloadWithTemplateAndSigner(
         offeredSeqNr,
         template,
         defaultTslSigner,
         SIGNER_KEY_USAGE_CHECK_ENABLED,
-        SIGNER_VALIDITY_CHECK_ENABLED);
+        SIGNER_VALIDITY_CHECK_ENABLED,
+        null);
   }
 
   TslDownload getTslDownloadWithTemplateAndSigner(
@@ -629,8 +680,8 @@ class ApprovalTestsBaseIT {
       final Path tslTemplate,
       final Path tslSignerP12Path,
       final boolean signerKeyUsageCheck,
-      final boolean signerValidityCheck)
-      throws DatatypeConfigurationException, IOException {
+      final boolean signerValidityCheck,
+      final Consumer<TslDownload> modifyTsl) {
 
     final P12Container tslSignerP12 =
         P12Reader.getContentFromP12(
@@ -658,6 +709,10 @@ class ApprovalTestsBaseIT {
             .tslSignerCert(tslSignerCert)
             .build();
 
+    if (modifyTsl != null) {
+      modifyTsl.accept(tslDownload);
+    }
+
     writeTsl(tslDownload, "");
 
     return tslDownload;
@@ -679,30 +734,55 @@ class ApprovalTestsBaseIT {
     tslDownload.setTslBytes(tslBytesSigned);
   }
 
-  protected void writeTsl(final TslDownload tslDownload, final String postfix) throws IOException {
+  private static String getCertIssuerCn(final TrustStatusListType tsl) {
+    try {
+      final X509Certificate signerCert = TslUtils.getFirstTslSignerCertificate(tsl);
+
+      final X500Name x500name = new JcaX509CertificateHolder(signerCert).getIssuer();
+      final RDN cnRdn = x500name.getRDNs(BCStyle.CN)[0];
+
+      final String issuerCn = IETFUtils.valueToString(cnRdn.getFirst().getValue());
+
+      return "_" + StringUtils.replace(issuerCn, " ", "_");
+
+    } catch (final Exception e) {
+    }
+
+    return "";
+  }
+
+  protected void writeTsl(final TslDownload tslDownload, final String postfix) {
 
     final String phase =
         StringUtils.isNotBlank(currentTestInfo.getPhase()) ? "__" + currentTestInfo.getPhase() : "";
 
+    final String trustAnchorIssuerCn = getCertIssuerCn(tslDownload.getTsl());
+
+    final String extendedPostfix =
+        "%s__%s_n%d%s%s%s"
+            .formatted(
+                tslDownload.getTsl().getId(),
+                currentTestInfo.getMethodName(),
+                currentTestInfo.tslCounter,
+                phase,
+                postfix,
+                trustAnchorIssuerCn);
+
     final Path tslOutputPath =
-        getTslOutputPath(
-            TslReader.getSequenceNumber(tslDownload.getTsl()),
-            tslDownload.getTsl().getId()
-                + "__"
-                + currentTestInfo.getMethodName()
-                + "_n"
-                + currentTestInfo.tslCounter
-                + phase
-                + postfix);
+        getTslOutputPath(TslReader.getSequenceNumber(tslDownload.getTsl()), extendedPostfix);
 
     currentTestInfo.tslCounter++;
 
-    if (!Files.exists(tslOutputPath.getParent())) {
-      Files.createDirectories(tslOutputPath.getParent());
-      Files.createFile(tslOutputPath);
+    try {
+      if (!Files.exists(tslOutputPath.getParent())) {
+        Files.createDirectories(tslOutputPath.getParent());
+        Files.createFile(tslOutputPath);
+      }
+      Files.write(tslOutputPath, tslDownload.getTslBytes());
+      log.info("saved TSL to file: {}", tslOutputPath);
+    } catch (final IOException e) {
+      throw new TestSuiteException("cannot save TSL to file", e);
     }
-    Files.write(tslOutputPath, tslDownload.getTslBytes());
-    log.info("saved TSL to file: {}", tslOutputPath);
   }
 
   protected void assignOcspTslSeqNrFromHistory(
@@ -713,15 +793,10 @@ class ApprovalTestsBaseIT {
     final int currentTslSeqNrForOcsp =
         lastOcspRequestHistoryEntries.get(lastOcspRequestHistoryEntries.size() - 1).getTslSeqNr();
 
-    //    if (currentTslSeqNrForOcsp == offeredSeqNr) {
-    //      throw new TestSuiteException("tslSeqNr equals to offeredSeqNr " + offeredSeqNr);
-    //    }
-
     setExpectedOcspTslSeqNr(currentTslSeqNrForOcsp);
   }
 
-  protected TslDownload initialTslDownloadByTestObject()
-      throws DatatypeConfigurationException, IOException {
+  protected TslDownload initialTslDownloadByTestObject() {
     final int offeredSeqNr = tslSequenceNr.getNextTslSeqNr();
 
     log.info("Offering TSL with seqNr. {} for download.", offeredSeqNr);
@@ -747,17 +822,20 @@ class ApprovalTestsBaseIT {
       final String tslSingerPassw,
       final int seqNr,
       final boolean signerKeyUsageCheck,
-      final boolean signerValidityCheck)
-      throws DatatypeConfigurationException {
+      final boolean signerValidityCheck) {
 
     final TslModification tslModification = getTslModification(seqNr);
-    return TslGeneration.createTslFromFile(
-        tslTemplate,
-        tslModification,
-        tslSinger,
-        tslSingerPassw,
-        signerKeyUsageCheck,
-        signerValidityCheck);
+    try {
+      return TslGeneration.createTslFromFile(
+          tslTemplate,
+          tslModification,
+          tslSinger,
+          tslSingerPassw,
+          signerKeyUsageCheck,
+          signerValidityCheck);
+    } catch (final DatatypeConfigurationException e) {
+      throw new TestSuiteException("cannot create TSL", e);
+    }
   }
 
   private static String getTslDownloadUrlPrimary(final int seqNr) {
@@ -816,8 +894,7 @@ class ApprovalTestsBaseIT {
   @Test
   @Order(1)
   @DisplayName("Check initial state")
-  void checkInitialState(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void checkInitialState(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     retrieveCurrentTslSeqNrInTestObject();

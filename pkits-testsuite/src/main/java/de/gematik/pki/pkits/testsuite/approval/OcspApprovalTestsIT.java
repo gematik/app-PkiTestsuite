@@ -37,9 +37,7 @@ import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.DtoDateConfigOpt
 import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
-import java.io.IOException;
 import java.nio.file.Path;
-import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -59,8 +57,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 1")
   @DisplayName("Test OCSP grace period")
-  void verifyOcspGracePeriod(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspGracePeriod(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -91,8 +88,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 4c")
   @DisplayName("Test OCSP response with timeout and delay")
-  void verifyOcspResponseTimeoutAndDelay(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseTimeoutAndDelay(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -135,11 +131,11 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
         TestSuiteConstants.OCSP_SIGNER_NOT_IN_TSL_FILENAME,
         TestSuiteConstants.OCSP_SIGNER_DIFFERENT_KEY
       })
-  void verifyMissingOcspSignerInTsl(final String signerFilename, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyMissingOcspSignerInTsl(final String signerFilename, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
+
     final P12Container signer =
         P12Reader.getContentFromP12(
             ocspSettings.getKeystorePathOcsp().resolve(signerFilename),
@@ -162,8 +158,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5a1")
   @DisplayName("Test invalid signature in OCSP response")
-  void verifyInvalidSignatureInOcspResponse(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyInvalidSignatureInOcspResponse(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -208,8 +203,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in past within tolerance")
-  void verifyOcspResponseProducedAtPastWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseProducedAtPastWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -226,8 +220,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in past out of tolerance")
-  void verifyOcspResponseProducedAtPastOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseProducedAtPastOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -244,8 +237,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in future within tolerance")
-  void verifyOcspResponseProducedAtFutureWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseProducedAtFutureWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -272,8 +264,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with producedAt in future out of tolerance")
-  void verifyOcspResponseProducedAtFutureOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseProducedAtFutureOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -299,8 +290,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with thisUpdate in future within tolerance")
-  void verifyOcspResponseThisUpdateFutureWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseThisUpdateFutureWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -327,8 +317,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with thisUpdate in future out of tolerance")
-  void verifyOcspResponseThisUpdateFutureOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseThisUpdateFutureOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -355,8 +344,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with nextUpdate in past within tolerance")
-  void verifyOcspResponseNextUpdatePastWithinTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseNextUpdatePastWithinTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -373,8 +361,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with nextUpdate in past out of tolerance")
-  void verifyOcspResponseNextUpdatePastOutOfTolerance(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseNextUpdatePastOutOfTolerance(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -391,8 +378,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
   @DisplayName("Test OCSP response with missing nextUpdate")
-  void verifyOcspResponseMissingNextUpdate(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseMissingNextUpdate(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -417,8 +403,9 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
       "de.gematik.pki.pkits.testsuite.common.TestSuiteConstants#provideOcspResponseVariousStatusAndResponseBytes")
   @DisplayName("Test various status of OCSP responses with and without response bytes")
   void verifyOcspResponseVariousStatusAndResponseBytes(
-      final OCSPRespStatus ocspRespStatus, final boolean withResponseBytes, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final OCSPRespStatus ocspRespStatus,
+      final boolean withResponseBytes,
+      final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -445,8 +432,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6b")
   @DisplayName("Test invalid cert id in OCSP response")
   void verifyInvalidCerIdInOcspResponse(
-      final CertificateIdGeneration certificateIdGeneration, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final CertificateIdGeneration certificateIdGeneration, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -469,8 +455,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 7b")
   @DisplayName("Test missing CertHash in OCSP response")
-  void verifyMissingCertHashInOcspResponse(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyMissingCertHashInOcspResponse(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -493,11 +478,11 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 7c")
   @DisplayName("Test invalid CertHash in OCSP response")
-  void verifyInvalidCertHashInOcspResponse(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyInvalidCertHashInOcspResponse(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
+
     final Path certPath = getPathOfFirstValidCert();
 
     final OcspResponderConfigDto dto =
@@ -520,8 +505,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 8b und 8c")
   @DisplayName("Test OCSP response with certificate status revoked and unknown")
   void verifyOcspCertificateStatusRevokedAndUnknown(
-      final CustomCertificateStatusType customCertificateStatusType, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final CustomCertificateStatusType customCertificateStatusType, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -543,8 +527,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @Test
   @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
   @DisplayName("Test OCSP response with responder id byName")
-  void verifyOcspResponseResponderIdByName(final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+  void verifyOcspResponseResponderIdByName(final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();
@@ -569,8 +552,7 @@ class OcspApprovalTestsIT extends ApprovalTestsBaseIT {
   @ValueSource(booleans = {true, false})
   @DisplayName("Test OCSP response with null parameter in CertId")
   void verifyOcspResponseWithNullParameterInCertId(
-      final boolean withNullParameterHashAlgoOfCertId, final TestInfo testInfo)
-      throws DatatypeConfigurationException, IOException {
+      final boolean withNullParameterHashAlgoOfCertId, final TestInfo testInfo) {
 
     testCaseMessage(testInfo);
     initialState();

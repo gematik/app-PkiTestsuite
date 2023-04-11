@@ -39,6 +39,7 @@ public class TslSettings {
       description = "Alternative template to generate a TSL with additional CAs during tests.")
   Path alternativeTemplate = Path.of("./testDataTemplates/tsl/TSL_altCA.xml");
 
+  /** TSLTypeID 202 */
   @ParameterDescription(
       withDefault = true,
       description =
@@ -46,6 +47,7 @@ public class TslSettings {
   Path defectAlternativeCaBrokenTemplate =
       Path.of("./testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
 
+  /** TSLTypeID 203 */
   @ParameterDescription(
       withDefault = true,
       description =
@@ -53,6 +55,7 @@ public class TslSettings {
   Path defectAlternativeCaUnspecifiedTemplate =
       Path.of("./testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
 
+  /** TSLTypeID 204 */
   @ParameterDescription(
       withDefault = true,
       description =

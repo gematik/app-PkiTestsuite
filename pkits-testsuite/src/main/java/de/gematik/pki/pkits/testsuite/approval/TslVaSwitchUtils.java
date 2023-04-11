@@ -20,9 +20,8 @@ import static de.gematik.pki.pkits.testsuite.approval.support.UseCaseResult.USEC
 import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
 
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import java.io.IOException;
+import de.gematik.pki.pkits.testsuite.approval.support.OcspSeqNrUpdateMode;
 import java.nio.file.Path;
-import javax.xml.datatype.DatatypeConfigurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -32,11 +31,17 @@ class TslVaSwitchUtils extends TslVaApprovalUtilsBaseIT {
 
   @Test
   @Order(101)
-  void switchFromDefaultToAlternativeFirst() throws DatatypeConfigurationException, IOException {
+  void switchFromDefaultToAlternativeFirst() {
 
-    switchTrustAnchor(TslVaApprovalTestsIT.tslTemplateTrustAnchorChange, defaultTslSigner, true);
+    switchTrustAnchor(
+        getSwitchMessage(TA_NAME_DEFAULT, TA_NAME_ALT1),
+        TslVaApprovalTestsIT.tslTemplateTrustAnchorChange,
+        defaultTslSigner,
+        true);
 
     updateTrustStore(
+        "Offer a TSL (with alternate test CAs), signed with the new (announced) first alternative"
+            + " trust anchor.",
         TslVaApprovalTestsIT.tslTemplateAlternativeTrustAnchorAlternativeCa,
         alternativeTslSignerP12Path,
         OCSP_REQUEST_EXPECT,
@@ -46,13 +51,15 @@ class TslVaSwitchUtils extends TslVaApprovalUtilsBaseIT {
 
   @Test
   @Order(102)
-  void switchFromAlternativeFirstToDefault() throws DatatypeConfigurationException, IOException {
+  void switchFromAlternativeFirstToDefault() {
     switchTrustAnchor(
+        getSwitchMessage(TA_NAME_ALT1, TA_NAME_DEFAULT),
         TslVaApprovalTestsIT.tslTemplateAlternativeTrustAnchorTrustAnchorChange,
         alternativeTslSignerP12Path,
         false);
 
     updateTrustStore(
+        "Offer the default TSL.",
         tslSettings.getDefaultTemplate(),
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -62,13 +69,16 @@ class TslVaSwitchUtils extends TslVaApprovalUtilsBaseIT {
 
   @Test
   @Order(103)
-  void switchFromDefaultToAlternativeSecond() throws DatatypeConfigurationException, IOException {
+  void switchFromDefaultToAlternativeSecond() {
     switchTrustAnchor(
+        getSwitchMessage(TA_NAME_DEFAULT, TA_NAME_ALT2),
         TslVaApprovalTestsIT.tslTemplateTrustAnchorChangeAlternativeTrustAnchor2FutureShort,
         defaultTslSigner,
         true);
 
     updateTrustStore(
+        "Offer a TSL with alternative test CAs and TSL signer certificate from the second"
+            + " (alternative) new trust anchor.",
         TslVaApprovalTestsIT.tslTemplateAlternativeTrustAnchor2AlternativeCa,
         alternativeSecondTslSignerP12Path,
         OCSP_REQUEST_EXPECT,
@@ -78,13 +88,15 @@ class TslVaSwitchUtils extends TslVaApprovalUtilsBaseIT {
 
   @Test
   @Order(104)
-  void switchFromAlternativeSecondToDefault() throws DatatypeConfigurationException, IOException {
+  void switchFromAlternativeSecondToDefault() {
     switchTrustAnchor(
+        getSwitchMessage(TA_NAME_ALT2, TA_NAME_DEFAULT),
         TslVaApprovalTestsIT.tslTemplateAlternativeTrustAnchor2TrustAnchorChange,
         alternativeSecondTslSignerP12Path,
         false);
 
     updateTrustStore(
+        "Offer the default TSL.",
         tslSettings.getDefaultTemplate(),
         defaultTslSigner,
         OCSP_REQUEST_EXPECT,
@@ -93,8 +105,10 @@ class TslVaSwitchUtils extends TslVaApprovalUtilsBaseIT {
   }
 
   void switchTrustAnchor(
-      final Path tslTemplate, final Path tslSignerP12Path, final boolean withInitialState)
-      throws DatatypeConfigurationException, IOException {
+      final String description,
+      final Path tslTemplate,
+      final Path tslSignerP12Path,
+      final boolean withInitialState) {
 
     retrieveCurrentTslSeqNrInTestObject();
     if (withInitialState) {
@@ -107,10 +121,15 @@ class TslVaSwitchUtils extends TslVaApprovalUtilsBaseIT {
     log.info(
         "switchTrustAnchor:\ntslTemplate {}\n, tslSignerP12Path {}", tslTemplate, tslSignerP12Path);
 
-    importNewValidTrustAnchor(
+    updateTrustStore(
+        description,
         tslTemplate,
         tslSignerP12Path,
-        GemLibPkiUtils.now(),
+        OCSP_REQUEST_EXPECT,
+        null,
+        SKIP_USECASE,
+        null,
+        getActivationTimeModifier(tslSignerP12Path, GemLibPkiUtils.now()),
         OcspSeqNrUpdateMode.UPDATE_OCSP_SEQ_NR);
 
     log.info("switchTrustAnchor\n\n");

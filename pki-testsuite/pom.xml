@@ -4,10 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pkits-global</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.6</version>
   </parent>
 
   <artifactId>pki-testsuite</artifactId>
+  <version>1.0.6</version>
   <packaging>pom</packaging>
 
   <name>PKITS Packaging</name>
