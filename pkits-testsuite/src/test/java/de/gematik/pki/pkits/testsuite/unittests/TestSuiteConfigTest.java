@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -19,10 +19,11 @@ package de.gematik.pki.pkits.testsuite.unittests;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import de.gematik.pki.pkits.testsuite.approval.ListParameters;
-import de.gematik.pki.pkits.testsuite.approval.ListParameters.YamlLine;
+import de.gematik.pki.pkits.testsuite.config.SshConfig;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
+import de.gematik.pki.pkits.testsuite.reporting.ListParameters;
+import de.gematik.pki.pkits.testsuite.reporting.ListParameters.YamlLine;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,13 @@ class TestSuiteConfigTest {
     final int testObject_TslProcessingTimeSeconds = 3;
     final int testObject_OcspTimeoutSeconds = 10;
 
+    final int testObject_sshConfig_port = 22;
+    final String testObject_sshConfig_cryptMethod = "ECC";
+    final long testObject_sshConfig_connectTimeoutSeconds = 4;
+    final long testObject_sshConfig_authTimeoutSeconds = 4;
+    final long testObject_sshConfig_channelOpenTimeoutSeconds = 4;
+    final long testObject_sshConfig_channelCloseTimeoutSeconds = 4;
+
     final String ocspResponder_Id = "OCSP Responder";
     final String ocspResponder_AppPath = "./bin/pkits-ocsp-responder-exec.jar";
 
@@ -88,22 +96,6 @@ class TestSuiteConfigTest {
     final int testSuiteParameter_OcspSettings_GracePeriodeExtraDelay = 5;
 
     final boolean testSuiteParameter_TslSettings_InitialStateTslImport = true;
-    final Path testSuiteParameter_TslSettings_DefaultTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_default.xml");
-    final Path testSuiteParameter_TslSettings_AlternativeTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_altCA.xml");
-    final Path testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
-    final Path testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
-    final Path testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
-    final Path testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
-    final Path testSuiteParameter_TslSettings_AlternativeRevokedTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_altCA_revoked.xml");
-    final Path testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_altCA_noLineBreak.xml");
     final Path testSuiteParameter_TslSettings_Signer =
         Path.of(
             "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
@@ -120,6 +112,17 @@ class TestSuiteConfigTest {
         testSuiteConfig.getTestObject().getOcspGracePeriodSeconds());
     ca.assertEquals(
         testObject_OcspTimeoutSeconds, testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
+
+    final SshConfig sshConfig = testSuiteConfig.getTestObject().getSshConfig();
+    ca.assertEquals(testObject_sshConfig_port, sshConfig.getPort());
+    ca.assertEquals(testObject_sshConfig_cryptMethod, sshConfig.getCryptMethod());
+    ca.assertEquals(
+        testObject_sshConfig_connectTimeoutSeconds, sshConfig.getConnectTimeoutSeconds());
+    ca.assertEquals(testObject_sshConfig_authTimeoutSeconds, sshConfig.getAuthTimeoutSeconds());
+    ca.assertEquals(
+        testObject_sshConfig_channelOpenTimeoutSeconds, sshConfig.getChannelOpenTimeoutSeconds());
+    ca.assertEquals(
+        testObject_sshConfig_channelCloseTimeoutSeconds, sshConfig.getChannelCloseTimeoutSeconds());
 
     ca.assertEquals(ocspResponder_Id, testSuiteConfig.getOcspResponder().getId());
     ca.assertEquals(ocspResponder_AppPath, testSuiteConfig.getOcspResponder().getAppPath());
@@ -150,45 +153,6 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_TslSettings_InitialStateTslImport,
         testSuiteConfig.getTestSuiteParameter().getTslSettings().isInitialStateTslImport());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefaultTemplate,
-        testSuiteConfig.getTestSuiteParameter().getTslSettings().getDefaultTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeTemplate,
-        testSuiteConfig.getTestSuiteParameter().getTslSettings().getAlternativeTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate,
-        testSuiteConfig
-            .getTestSuiteParameter()
-            .getTslSettings()
-            .getDefectAlternativeCaBrokenTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate,
-        testSuiteConfig
-            .getTestSuiteParameter()
-            .getTslSettings()
-            .getDefectAlternativeCaUnspecifiedTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate,
-        testSuiteConfig
-            .getTestSuiteParameter()
-            .getTslSettings()
-            .getDefectAlternativeCaWrongSrvInfoExtTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate,
-        testSuiteConfig
-            .getTestSuiteParameter()
-            .getTslSettings()
-            .getAlternativeCaUnspecifiedStiTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeRevokedTemplate,
-        testSuiteConfig.getTestSuiteParameter().getTslSettings().getAlternativeRevokedTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate,
-        testSuiteConfig
-            .getTestSuiteParameter()
-            .getTslSettings()
-            .getAlternativeNoLineBreakTemplate());
 
     ca.assertEquals(
         testSuiteParameter_TslSettings_Signer,
@@ -198,21 +162,49 @@ class TestSuiteConfigTest {
         testSuiteConfig.getTestSuiteParameter().getTslSettings().getSignerPassword());
   }
 
+  void testNonDefaultsInSshConfig(final TestSuiteConfig tscMinimal, final CustomAsserter ca) {
+
+    // these parameters are optional and without default: they are not set in the tscMinimal
+    final String testObject_sshConfig_username = "HasToBeDefined_username";
+    final String testObject_sshConfig_password = "HasToBeDefined_password";
+    final String testObject_sshConfig_host = "HasToBeDefined_host";
+    final Path testObject_sshConfig_privateKey = Path.of("HasToBeDefined_privateKey");
+    final String testObject_sshConfig_passphrase = "HasToBeDefined_privateKeyPassphrase";
+    final String testObject_sshConfig_appDataHttpFwdSocket = "HasToBeDefined_appDataHttpFwdSocket";
+    final Path testObject_sshConfig_filesToCopyRootDir =
+        Path.of("HasToBeDefined_filesToCopyRootDir");
+    final String testObject_sshConfig_filesToCopyPattern = "HasToBeDefined_filesToCopyPattern";
+    final String testObject_sshConfig_remoteTargetDir = "HasToBeDefined_remoteTargetDir";
+    final String testObject_sshConfig_remoteLogFile = "HasToBeDefined_remoteLogFile";
+
+    final SshConfig sshConfig = tscMinimal.getTestObject().getSshConfig();
+    ca.assertEquals(testObject_sshConfig_username, sshConfig.getUsername());
+    ca.assertEquals(testObject_sshConfig_password, sshConfig.getPassword());
+    ca.assertEquals(testObject_sshConfig_host, sshConfig.getHost());
+    ca.assertEquals(testObject_sshConfig_privateKey, sshConfig.getPrivateKey());
+    ca.assertEquals(testObject_sshConfig_passphrase, sshConfig.getPrivateKeyPassphrase());
+    ca.assertEquals(testObject_sshConfig_appDataHttpFwdSocket, sshConfig.getAppDataHttpFwdSocket());
+    ca.assertEquals(testObject_sshConfig_filesToCopyRootDir, sshConfig.getFilesToCopyRootDir());
+    ca.assertEquals(testObject_sshConfig_filesToCopyPattern, sshConfig.getFilesToCopyPattern());
+    ca.assertEquals(testObject_sshConfig_remoteTargetDir, sshConfig.getRemoteTargetDir());
+    ca.assertEquals(testObject_sshConfig_remoteLogFile, sshConfig.getRemoteLogFile());
+  }
+
   @Test
   void testDefaultsAndNonDefault() {
     // for better readability, we use underscores
 
     // definition of parameters without defaults
 
-    // captureNetworkTraffic is optional, and set manually in tscMinimal
+    // these parameters are optional and without default: they are not set in the tscMinimal
     final String testSuiteParameter_CaptureNetworkTraffic = "9.9.9.9";
 
     final String client_KeystorePathValidCerts =
-        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid";
+        "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid";
     final String client_KeystorePathAlternativeCerts =
-        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid-alternative";
+        "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid-alternative";
     final String client_KeystorePathInvalidCerts =
-        "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/invalid";
+        "./testDataTemplates/certificates/ecc/fachmodulClientCerts/invalid";
 
     final String testObject_Name = "Server 0815";
     final String testObject_Type = "TlsServer";
@@ -239,7 +231,30 @@ class TestSuiteConfigTest {
     tscMinimal
         .getTestObject()
         .setTslProcessingTimeSeconds(tscBlank.getTestObject().getTslProcessingTimeSeconds());
-    tscMinimal.getTestSuiteParameter().setCaptureInterface("9.9.9.9");
+    tscMinimal.getTestSuiteParameter().setCaptureInterfaces("9.9.9.9");
+
+    tscMinimal.getTestObject().getSshConfig().setUsername("HasToBeDefined_username");
+    tscMinimal.getTestObject().getSshConfig().setPassword("HasToBeDefined_password");
+    tscMinimal.getTestObject().getSshConfig().setHost("HasToBeDefined_host");
+    tscMinimal.getTestObject().getSshConfig().setPrivateKey(Path.of("HasToBeDefined_privateKey"));
+    tscMinimal
+        .getTestObject()
+        .getSshConfig()
+        .setPrivateKeyPassphrase("HasToBeDefined_privateKeyPassphrase");
+    tscMinimal
+        .getTestObject()
+        .getSshConfig()
+        .setAppDataHttpFwdSocket("HasToBeDefined_appDataHttpFwdSocket");
+    tscMinimal
+        .getTestObject()
+        .getSshConfig()
+        .setFilesToCopyRootDir(Path.of("HasToBeDefined_filesToCopyRootDir"));
+    tscMinimal
+        .getTestObject()
+        .getSshConfig()
+        .setFilesToCopyPattern("HasToBeDefined_filesToCopyPattern");
+    tscMinimal.getTestObject().getSshConfig().setRemoteTargetDir("HasToBeDefined_remoteTargetDir");
+    tscMinimal.getTestObject().getSshConfig().setRemoteLogFile("HasToBeDefined_remoteLogFile");
 
     final CustomAsserter ca = new CustomAsserter();
 
@@ -257,6 +272,7 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testObject_TslDownloadIntervalSeconds,
         tscMinimal.getTestObject().getTslDownloadIntervalSeconds());
+
     ca.assertEquals(
         ocspResponder_IpAddressOrFqdn, tscMinimal.getOcspResponder().getIpAddressOrFqdn());
     ca.assertEquals(ocspResponder_Port, tscMinimal.getOcspResponder().getPort());
@@ -264,16 +280,58 @@ class TestSuiteConfigTest {
     ca.assertEquals(tslProvider_Port, tscMinimal.getTslProvider().getPort());
     ca.assertEquals(
         testSuiteParameter_CaptureNetworkTraffic,
-        tscMinimal.getTestSuiteParameter().getCaptureInterface());
+        tscMinimal.getTestSuiteParameter().getCaptureInterfaces());
 
-    assertThat(ca.counter).as("13 parameters without defaults").isEqualTo(13);
+    testNonDefaultsInSshConfig(tscMinimal, ca);
+
+    assertThat(ca.counter).as("23 parameters without defaults").isEqualTo(23);
 
     testDefaults(ca, tscMinimal);
+
     final int numberOfAllFields = getAllFieldsNumber(TestSuiteConfig.class);
     assertThat(ca.counter).isEqualTo(numberOfAllFields);
 
     final CustomAsserter caDefaults = new CustomAsserter();
     testDefaults(caDefaults, tscBlank);
+  }
+
+  void testAllFieldsAsNonDefaultInSshConfig(final CustomAsserter ca, final TestSuiteConfig tsc) {
+    final String sshConfig_username = "testObject.sshConfig.username";
+    final String sshConfig_password = "testObject.sshConfig.password";
+    final String sshConfig_host = "testObject.sshConfig.host";
+    final int sshConfig_port = -100;
+    final Path sshConfig_privateKey = Path.of("testObject.sshConfig.privateKey");
+    final String sshConfig_passphrase = "testObject.sshConfig.privateKeyPassphrase";
+    final String sshConfig_appDataHttpFwdSocket = "testObject.sshConfig.appDataHttpFwdSocket";
+    final String sshConfig_cryptMethod = "testObject.sshConfig.cryptMethod";
+    final Path sshConfig_filesToCopyRootDir = Path.of("testObject.sshConfig.filesToCopyRootDir");
+    final String sshConfig_filesToCopyPattern = "testObject.sshConfig.filesToCopyPattern";
+    final String sshConfig_remoteTargetDir = "testObject.sshConfig.remoteTargetDir";
+    final String sshConfig_remoteLogFile = "testObject.sshConfig.remoteLogFile";
+    final long sshConfig_connectTimeoutSeconds = -200;
+    final long sshConfig_authTimeoutSeconds = -300;
+    final long sshConfig_channelOpenTimeoutSeconds = -400;
+    final long sshConfig_channelCloseTimeoutSeconds = -500;
+
+    final SshConfig sshConfig = tsc.getTestObject().getSshConfig();
+
+    ca.assertEquals(sshConfig_username, sshConfig.getUsername());
+    ca.assertEquals(sshConfig_password, sshConfig.getPassword());
+    ca.assertEquals(sshConfig_host, sshConfig.getHost());
+    ca.assertEquals(sshConfig_port, sshConfig.getPort());
+    ca.assertEquals(sshConfig_privateKey, sshConfig.getPrivateKey());
+    ca.assertEquals(sshConfig_passphrase, sshConfig.getPrivateKeyPassphrase());
+    ca.assertEquals(sshConfig_appDataHttpFwdSocket, sshConfig.getAppDataHttpFwdSocket());
+    ca.assertEquals(sshConfig_cryptMethod, sshConfig.getCryptMethod());
+    ca.assertEquals(sshConfig_filesToCopyRootDir, sshConfig.getFilesToCopyRootDir());
+    ca.assertEquals(sshConfig_filesToCopyPattern, sshConfig.getFilesToCopyPattern());
+    ca.assertEquals(sshConfig_remoteTargetDir, sshConfig.getRemoteTargetDir());
+    ca.assertEquals(sshConfig_remoteLogFile, sshConfig.getRemoteLogFile());
+    ca.assertEquals(sshConfig_connectTimeoutSeconds, sshConfig.getConnectTimeoutSeconds());
+    ca.assertEquals(sshConfig_authTimeoutSeconds, sshConfig.getAuthTimeoutSeconds());
+    ca.assertEquals(sshConfig_channelOpenTimeoutSeconds, sshConfig.getChannelOpenTimeoutSeconds());
+    ca.assertEquals(
+        sshConfig_channelCloseTimeoutSeconds, sshConfig.getChannelCloseTimeoutSeconds());
   }
 
   @Test
@@ -311,7 +369,7 @@ class TestSuiteConfigTest {
 
     final boolean testSuiteParameter_performInitialState = false;
     final boolean testSuiteParameter_captureNetworkTraffic = true;
-    final String testSuiteParameter_captureInterface = "testSuiteParameter.captureInterface";
+    final String testSuiteParameter_captureInterfaces = "testSuiteParameter.captureInterfaces";
 
     final Path testSuiteParameter_ocspSettings_KeystorePathOcsp =
         Path.of("testSuiteParameter.ocspSettings.keystorePathOcsp");
@@ -321,22 +379,6 @@ class TestSuiteConfigTest {
     final int testSuiteParameter_ocspSettings_GracePeriodExtraDelay = -1000;
 
     final boolean testSuiteParameter_TslSettings_InitialStateTslImport = false;
-    final Path testSuiteParameter_TslSettings_DefaultTemplate =
-        Path.of("testSuiteParameter.tslSettings.defaultTemplate");
-    final Path testSuiteParameter_TslSettings_AlternativeTemplate =
-        Path.of("testSuiteParameter.tslSettings.alternativeTemplate");
-    final Path testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_broken.xml");
-    final Path testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml");
-    final Path testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml");
-    final Path testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate =
-        Path.of("./testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml");
-    final Path testSuiteParameter_TslSettings_AlternativeRevokedTemplate =
-        Path.of("testSuiteParameter.tslSettings.alternativeRevokedTemplate");
-    final Path testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate =
-        Path.of("testSuiteParameter.tslSettings.alternativeNoLineBreakTemplate");
     final Path testSuiteParameter_TslSettings_Signer =
         Path.of("testSuiteParameter.tslSettings.signer");
     final String testSuiteParameter_TslSettings_SignerPassword =
@@ -379,7 +421,7 @@ class TestSuiteConfigTest {
         testSuiteParameter_captureNetworkTraffic,
         tsc.getTestSuiteParameter().isCaptureNetworkTraffic());
     ca.assertEquals(
-        testSuiteParameter_captureInterface, tsc.getTestSuiteParameter().getCaptureInterface());
+        testSuiteParameter_captureInterfaces, tsc.getTestSuiteParameter().getCaptureInterfaces());
 
     ca.assertEquals(
         testSuiteParameter_ocspSettings_KeystorePathOcsp,
@@ -397,38 +439,15 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_TslSettings_InitialStateTslImport,
         tsc.getTestSuiteParameter().getTslSettings().isInitialStateTslImport());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefaultTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getDefaultTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getAlternativeTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefectAlternativeCaBrokenTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getDefectAlternativeCaBrokenTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefectAlternativeCaUnspecifiedTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getDefectAlternativeCaUnspecifiedTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_DefectAlternativeCaWrongSrvInfoExtTemplate,
-        tsc.getTestSuiteParameter()
-            .getTslSettings()
-            .getDefectAlternativeCaWrongSrvInfoExtTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeCaUnspecifiedStiTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getAlternativeCaUnspecifiedStiTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeRevokedTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getAlternativeRevokedTemplate());
-    ca.assertEquals(
-        testSuiteParameter_TslSettings_AlternativeNoLineBreakTemplate,
-        tsc.getTestSuiteParameter().getTslSettings().getAlternativeNoLineBreakTemplate());
+
     ca.assertEquals(
         testSuiteParameter_TslSettings_Signer,
         tsc.getTestSuiteParameter().getTslSettings().getSigner());
     ca.assertEquals(
         testSuiteParameter_TslSettings_SignerPassword,
         tsc.getTestSuiteParameter().getTslSettings().getSignerPassword());
+
+    testAllFieldsAsNonDefaultInSshConfig(ca, tsc);
 
     final int numberOfAllFields = getAllFieldsNumber(TestSuiteConfig.class);
     assertThat(ca.counter).isEqualTo(numberOfAllFields);

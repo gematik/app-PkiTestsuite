@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -17,9 +17,9 @@
 package de.gematik.pki.pkits.testsuite.common;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT;
+import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
+import de.gematik.pki.pkits.testsuite.config.ClientConfig;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
@@ -67,13 +67,12 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
 
   @Override
   public void accept(final VariableSource variableSource) {
-    final PKITS_CERT pkits_cert = variableSource.value();
-    final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
-    switch (pkits_cert) {
-      case PKITS_CERT_VALID -> certDir = testSuiteConfig.getClient().getKeystorePathValidCerts();
-      case PKITS_CERT_INVALID -> certDir =
-          testSuiteConfig.getClient().getKeystorePathInvalidCerts();
-      default -> throw new PkiCommonException("Unknown PKITS_CERT");
+    final PkitsCertType pkitsCertType = variableSource.value();
+    final ClientConfig clientConfig = TestConfigManager.getTestSuiteConfig().getClient();
+    switch (pkitsCertType) {
+      case PKITS_CERT_VALID -> certDir = clientConfig.getKeystorePathValidCerts();
+      case PKITS_CERT_INVALID -> certDir = clientConfig.getKeystorePathInvalidCerts();
+      default -> throw new PkiCommonException("Unknown PkitsCertType");
     }
     certDir = PkitsTestSuiteUtils.buildAbsolutePath(certDir).toString();
   }

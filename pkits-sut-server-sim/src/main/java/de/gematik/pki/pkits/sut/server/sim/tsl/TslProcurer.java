@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -19,6 +19,7 @@ package de.gematik.pki.pkits.sut.server.sim.tsl;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 import static de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication.PRODUCT_TYPE;
 
+import de.gematik.pki.gemlibpki.error.ErrorCode;
 import de.gematik.pki.gemlibpki.exception.GemPkiException;
 import de.gematik.pki.gemlibpki.exception.GemPkiRuntimeException;
 import de.gematik.pki.gemlibpki.ocsp.OcspRespCache;
@@ -32,6 +33,7 @@ import de.gematik.pki.gemlibpki.tsl.TspService;
 import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier;
 import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier.TrustAnchorUpdate;
 import de.gematik.pki.gemlibpki.utils.CertReader;
+import de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslProcurerConfig;
@@ -52,6 +54,7 @@ import kong.unirest.UnirestException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXParseException;
 
 @Component
 @Slf4j
@@ -99,26 +102,39 @@ public class TslProcurer {
 
   private void processTslDownloadHttpResponse() {
 
-    log.info("Starting new TSL download interval!");
-    final Optional<TslDownloadResults> tslDownloadResultsOpt = downloadTslIfHashIsDifferent();
+    try {
+      log.info("Starting new TSL download interval!");
+      final Optional<TslDownloadResults> tslDownloadResultsOpt = downloadTslIfHashIsDifferent();
 
-    if (tslDownloadResultsOpt.isPresent() && !tslDownloadResultsOpt.get().failed) {
+      if (tslDownloadResultsOpt.isPresent() && !tslDownloadResultsOpt.get().failed) {
 
-      final byte[] tslBytesRx = tslDownloadResultsOpt.get().tslBytes;
-      log.info("TSL download successful. ({} bytes)", tslBytesRx.length);
+        final byte[] tslBytesRx = tslDownloadResultsOpt.get().tslBytes;
+        log.info("TSL download successful. ({} bytes)", tslBytesRx.length);
 
-      final Tsl rxTsl = new Tsl(calculateSha256Hex(tslBytesRx), tslBytesRx);
-      initializeEmptyTrustStore(rxTsl);
-      processReceivedTsl(rxTsl);
+        final Tsl rxTsl = new Tsl(calculateSha256Hex(tslBytesRx), tslBytesRx);
+        initializeEmptyTrustStore(rxTsl);
+        processReceivedTsl(rxTsl);
 
-      log.info("TSL download interval finished!");
-    } else {
-      log.info("Retry TSL download in {} seconds", tslProcurerConfig.getDownloadInterval());
+        log.info("TSL download interval finished!");
+      } else {
+        log.info("Retry TSL download in {} seconds", tslProcurerConfig.getDownloadInterval());
+      }
+    } catch (final GemPkiRuntimeException e) {
+      if (e.getCause() instanceof SAXParseException) {
+        log.error("cannot parse tsl", e);
+        log.error(
+            ErrorCode.TE_1011_TSL_NOT_WELLFORMED.getErrorMessage(
+                PkiSutServerSimApplication.PRODUCT_TYPE));
+      } else {
+        log.error("something is wrong - cannot process tsl", e);
+      }
+    } catch (final Exception e) {
+      log.error("something is wrong - cannot process tsl", e);
     }
   }
 
-  private TslDownloadResults downloadTsl(final String tslUrl) {
-    log.info("Downloading new TSL at: {}", tslUrl);
+  private TslDownloadResults downloadTsl(final String tslUrl, final String additionalInfo) {
+    log.info("{}: downloading TSL at: {}", additionalInfo, tslUrl);
     try {
       final HttpResponse<byte[]> bytesResponse = Unirest.get(tslUrl).asBytes();
       return TslDownloadResults.forTslBytes(bytesResponse);
@@ -129,59 +145,78 @@ public class TslProcurer {
     return TslDownloadResults.fail();
   }
 
+  private boolean hasSameHash(
+      final Optional<String> tslPrimaryUrl, final Optional<String> tslBackupUrl) {
+    final Optional<String> hashPrimaryUrl = makeHashUrl(tslPrimaryUrl);
+    final Optional<String> hashBackupUrl = makeHashUrl(tslBackupUrl);
+
+    TslDownloadResults hashTslDownloadResults =
+        hashPrimaryUrl.isPresent()
+            ? downloadTslHash(hashPrimaryUrl.get())
+            : TslDownloadResults.fail();
+
+    if (hashTslDownloadResults.failed) {
+      hashTslDownloadResults =
+          hashBackupUrl.isPresent()
+              ? downloadTslHash(hashBackupUrl.get())
+              : TslDownloadResults.fail();
+    }
+
+    if (hashTslDownloadResults.failed) {
+      return false;
+    }
+
+    return hasSameTslHash(currentTsl.tslHash, hashTslDownloadResults.hashValue);
+  }
+
   private Optional<TslDownloadResults> downloadTslIfHashIsDifferent() {
 
     if (currentTsl == null) {
       final String tslInitialUrl = getInitialTslUrl();
-      log.info("Downloading initial TSL at: {}", tslInitialUrl);
-      final TslDownloadResults tslDownloadResults = downloadTsl(tslInitialUrl);
+      final TslDownloadResults tslDownloadResults = downloadTsl(tslInitialUrl, "Initial TSL");
       return Optional.of(tslDownloadResults);
     }
 
-    final String tslPrimaryUrl = getPrimaryTslUrl();
+    final Optional<String> tslPrimaryUrl = getPrimaryTslUrl();
 
-    final String tslBackupUrl = getTslBackupUrl();
+    final Optional<String> tslBackupUrl = getTslBackupUrl();
 
-    final String hashPrimaryUrl = makeHashUrl(tslPrimaryUrl);
-    final String hashBackupUrl = makeHashUrl(tslBackupUrl);
-
-    TslDownloadResults hashTslDownloadResults = downloadTslHash(hashPrimaryUrl);
-
-    if (hashTslDownloadResults.failed) {
-      hashTslDownloadResults = downloadTslHash(hashBackupUrl);
-    }
-
-    final boolean isTslHashDifferent;
-    if (hashTslDownloadResults.failed) {
-      isTslHashDifferent = true;
-    } else {
-      isTslHashDifferent = isTslHashDifferent(currentTsl.tslHash, hashTslDownloadResults.hashValue);
-    }
-
-    if (!isTslHashDifferent) {
+    if (hasSameHash(tslPrimaryUrl, tslBackupUrl)) {
       log.info(
-          "No TSL download required due to same hash value: {}, url {}",
-          currentTsl.tslHash,
-          hashPrimaryUrl);
+          "No TSL download required, since hash value was not changed - {}", currentTsl.tslHash);
       return Optional.empty();
     }
 
     for (int i = 0; i < 8; ++i) {
 
-      final TslDownloadResults tslDownloadResults;
+      final Optional<String> urlToUseOpt;
+      final String urlType;
       if (i < 4) {
-        tslDownloadResults = downloadTsl(tslPrimaryUrl);
+        urlToUseOpt = tslPrimaryUrl;
+        urlType = "Primary";
       } else {
-        tslDownloadResults = downloadTsl(tslBackupUrl);
+        urlToUseOpt = tslBackupUrl;
+        urlType = "Backup ";
+      }
+
+      final TslDownloadResults tslDownloadResults;
+      if (urlToUseOpt.isPresent()) {
+        tslDownloadResults =
+            downloadTsl(urlToUseOpt.get(), "%s, attempt count=%d.".formatted(urlType, i + 1));
+      } else {
+        log.info("{}, attempt count={} is SKIPPED as the URL is undefined.", urlType, (i + 1));
+        tslDownloadResults = TslDownloadResults.fail();
       }
 
       if (!tslDownloadResults.failed) {
-        log.info("Successful TSL download after {} attempts", i + 1);
+        log.info("Successful TSL download after {} attempts.", i + 1);
         return Optional.of(tslDownloadResults);
       }
     }
 
-    log.error("TSL_DOWNLOAD_ERROR");
+    log.error(
+        ErrorCode.TE_1006_TSL_DOWNLOAD_ERROR.getErrorMessage(
+            PkiSutServerSimApplication.PRODUCT_TYPE));
     return Optional.empty();
   }
 
@@ -189,16 +224,28 @@ public class TslProcurer {
     return TslConfig.buildTslDownloadUrl(tslProcurerConfig.getInitialTslPrimaryDownloadUrl());
   }
 
-  private String getPrimaryTslUrl() {
-    return TslReader.getTslDownloadUrlPrimary(currentTsl.trustStatusListType);
+  private Optional<String> getPrimaryTslUrl() {
+    try {
+      return Optional.of(TslReader.getTslDownloadUrlPrimary(currentTsl.trustStatusListType));
+    } catch (final GemPkiRuntimeException e) {
+      log.warn("cannot extract primary tsl url: {}", e.getMessage());
+      return Optional.empty();
+    }
   }
 
-  private String getTslBackupUrl() {
-    return TslReader.getTslDownloadUrlBackup(currentTsl.trustStatusListType);
+  private Optional<String> getTslBackupUrl() {
+
+    try {
+      return Optional.of(TslReader.getTslDownloadUrlBackup(currentTsl.trustStatusListType));
+
+    } catch (final GemPkiRuntimeException e) {
+      log.warn("cannot extract backup tsl url: {}", e.getMessage());
+      return Optional.empty();
+    }
   }
 
-  private String makeHashUrl(final String tslDownloadUrl) {
-    return tslDownloadUrl.replace(".xml", ".sha2");
+  private Optional<String> makeHashUrl(final Optional<String> tslDownloadUrl) {
+    return tslDownloadUrl.map(s -> s.replace(".xml", ".sha2"));
   }
 
   private TslDownloadResults downloadTslHash(@NonNull final String hashUrl) {
@@ -213,11 +260,11 @@ public class TslProcurer {
     return TslDownloadResults.fail();
   }
 
-  private boolean isTslHashDifferent(
+  private boolean hasSameTslHash(
       @NonNull final String hashValueLocal, @NonNull final String hashValueOnline)
       throws UnirestException {
     log.info("Comparing TSL hash: local ({}) vs. online ({})", hashValueLocal, hashValueOnline);
-    return !hashValueOnline.equals(hashValueLocal);
+    return hashValueOnline.equals(hashValueLocal);
   }
 
   private void processReceivedTsl(@NonNull final Tsl rxTsl) {
@@ -327,14 +374,20 @@ public class TslProcurer {
     }
   }
 
-  static TspService getIssuerTspServiceForTslSigner(final TrustStatusListType tsl)
-      throws GemPkiException {
+  static TspService getIssuerTspServiceForTslSigner(final TrustStatusListType tsl) {
     final TslInformationProvider tslIp = new TslInformationProvider(tsl);
 
     final TspInformationProvider tspIp =
         new TspInformationProvider(tslIp.getTspServices(), PRODUCT_TYPE);
 
-    return tspIp.getIssuerTspService(TslUtils.getFirstTslSignerCertificate(tsl));
+    try {
+      return tspIp.getIssuerTspService(TslUtils.getFirstTslSignerCertificate(tsl));
+    } catch (final GemPkiException e) {
+      final String message =
+          "Error finding trust anchor in TSL information: "
+              + e.getError().getErrorMessage(PkiSutServerSimApplication.PRODUCT_TYPE);
+      throw new TosException(message);
+    }
   }
 
   /**
@@ -348,13 +401,8 @@ public class TslProcurer {
     }
 
     currentTsl = initialTsl;
+    tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
 
-    try {
-      tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
-    } catch (final GemPkiException e) {
-      final String message = "Something is wrong, the initial TSL should be rejected!";
-      throw new TosException(message);
-    }
     log.info(
         "Initial TSL with sequence nr {} and hash {} assigned.",
         initialTsl.sequenceNr,
@@ -363,6 +411,8 @@ public class TslProcurer {
 
   private synchronized void updateTruststore(final Tsl newTsl) {
     currentTsl = newTsl;
+    // in fact, we should handle the trust anchor separately and not as a typical CA cert
+    tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
     log.info(
         "New TSL with sequence nr {} and hash {} assigned.", newTsl.sequenceNr, newTsl.tslHash);
   }

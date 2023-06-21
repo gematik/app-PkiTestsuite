@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.testsuite.common;
 
 import static org.awaitility.Awaitility.await;
 
+import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.lang.StackWalker.StackFrame;
 import java.nio.file.Files;
@@ -31,17 +32,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.awaitility.core.ConditionTimeoutException;
 
 @Slf4j
-public class PkitsTestSuiteUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class PkitsTestSuiteUtils {
 
   public static long waitForEvent(
       final String name, final long timeoutSecs, final Callable<Boolean> eventChecker) {
-    final int POLL_INTERVAL_MILLIS = 500;
+    final int POLL_INTERVAL_MILLIS = 250;
     return waitForEventMillis(name, timeoutSecs, POLL_INTERVAL_MILLIS, eventChecker);
   }
 
@@ -55,7 +61,7 @@ public class PkitsTestSuiteUtils {
         name,
         timeoutSecs,
         pollIntervalMillis);
-    final ZonedDateTime zdtStart = ZonedDateTime.now();
+    final ZonedDateTime timeStart = GemLibPkiUtils.now();
     try {
       await()
           .atMost(Duration.ofSeconds(timeoutSecs))
@@ -63,13 +69,13 @@ public class PkitsTestSuiteUtils {
           .until(eventChecker);
     } catch (final ConditionTimeoutException e) {
       final String message =
-          "Timeout for event \"%s\"\n%s:%s\n:: %s%n"
+          "Timeout for event \"%s\"%n%s:%s%n:: %s%n"
               .formatted(name, e.getClass().getCanonicalName(), e.getMessage(), getCallerTrace());
       log.error(message);
       throw new TestSuiteException(message, e);
     }
-    final ZonedDateTime zdtEnd = ZonedDateTime.now();
-    final long waitingTime = ChronoUnit.SECONDS.between(zdtStart, zdtEnd);
+    final ZonedDateTime timeEnd = GemLibPkiUtils.now();
+    final long waitingTime = ChronoUnit.SECONDS.between(timeStart, timeEnd);
     log.info("Event \"{}\" occurred after: {} seconds.:: {}", name, waitingTime, getCallerTrace());
     return waitingTime;
   }
@@ -84,6 +90,20 @@ public class PkitsTestSuiteUtils {
     } else {
       throw new TestSuiteException("Path: " + aPath + " is not valid");
     }
+  }
+
+  public static String getShortenedStackTrace(final Throwable throwable) {
+    String stackTrace = ExceptionUtils.getStackTrace(throwable);
+    stackTrace =
+        RegExUtils.replaceAll(
+            stackTrace, "\tat (org.junit|java.base/).*", "\tat <org.junit or java.base>...");
+
+    stackTrace =
+        RegExUtils.replaceAll(
+            stackTrace,
+            "(\tat <org.junit or java.base>...\r?\n)+",
+            "\tat <org.junit or java.base>...X times \n");
+    return stackTrace;
   }
 
   public static String getCallerTrace() {
@@ -107,7 +127,7 @@ public class PkitsTestSuiteUtils {
     String previousClassName = "";
     for (final StackFrame frame : frames) {
 
-      String currentClassName = ClassUtils.getShortClassName(frame.getClassName());
+      final String currentClassName = ClassUtils.getShortClassName(frame.getClassName());
       final String className;
       if (!currentClassName.equals(previousClassName)) {
         className = currentClassName + ".";
@@ -117,7 +137,8 @@ public class PkitsTestSuiteUtils {
 
       previousClassName = currentClassName;
 
-      String part = "%s%s:%d".formatted(className, frame.getMethodName(), frame.getLineNumber());
+      final String part =
+          "%s%s:%d".formatted(className, frame.getMethodName(), frame.getLineNumber());
 
       parts.add(part);
     }

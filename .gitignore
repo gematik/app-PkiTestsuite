@@ -4,9 +4,14 @@
 *.log
 out/
 bin/
+/pid.file
+
+**/sampleAllTests.txt
+
 docs/configs/tuTestObjects/
 docs/configs/inttest/pkits_ltu_run.yml
 testDataTemplates/tsl/TSL_default_new_nextUpdate.xml
+docker-compose-baseSut.yml
 docker-compose-deployHot.yml
 docker-compose-deployLTU_DEV.yml
 docs/dev/

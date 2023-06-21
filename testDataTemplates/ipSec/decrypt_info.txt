@@ -1,0 +1,17 @@
+Decrypt ISAKMP
+Initiator SPI -> generating rule 0 IKE_SPI
+Responder SPI -> generating rule 1 IKE_SPI
+SK_ei         -> Sk_ei secret
+SK_er         -> Sk_er secret
+Enc Alg       -> AES-CBC.256
+SK_ai         -> Sk_ai secret
+SK_ar         -> Sk_ar secret
+Integ Alg     -> HMAC_SHA2_256_128
+
+Decrypt ESP
+SPI           -> CHILD_SA (_o is src _i is destination SPI)
+enc           -> AES-CBC
+Enc Key       -> CHD encryption initiator key
+auth          -> SHA256
+Auth Key      -> CHD integrity initiator key
+

@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -25,12 +25,16 @@ public class TslProviderInstance extends InstanceProviderNanny {
 
   private static TslProviderInstance instance;
 
-  public static synchronized InstanceProviderNanny getInstance() {
+  public static synchronized TslProviderInstance getInstance() {
     if (instance == null) {
       instance = new TslProviderInstance();
       instance.initialize();
     }
     return instance;
+  }
+
+  private static synchronized void unsetInstance() {
+    instance = null;
   }
 
   private void initialize() {
@@ -41,5 +45,11 @@ public class TslProviderInstance extends InstanceProviderNanny {
     setIpAddressJvmParam(TestSuiteConstants.TSL_PROVIDER_JVM_PARAM_IP_ADDRESS_NAME);
     setIpAddressConfig(testSuiteConfig.getTslProvider().getIpAddressOrFqdn());
     setPortConfig(testSuiteConfig.getTslProvider().getPort());
+  }
+
+  @Override
+  public void stopServer() {
+    super.stopServer();
+    unsetInstance();
   }
 }

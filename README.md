@@ -2,12 +2,20 @@
 
 # PKI Test Suite
 
+---
+<img align="left" height="150" src="docs/img/PKI_Testsuite_Blau_gematik.svg" />
+
 This test suite is used to verify a telematic infrastructure (TI) product server of the German
 health care system against gematik gemSpec_PKI specifications available
 at [gematik Fachportal](https://fachportal.gematik.de/). Especially TUC_PKI_001 (TSL validation),
 TUC_PKI_018 (certificate validation) and TUC_PKI_006 (OCSP response validation). It is used for
 approval tests of every PKI related aspect. It is a re-development of our test suite from 2016. The
 development is still ongoing [see Todo section](./README.md#todo)
+
+Products tested by this test suite are: Intermediär, VSDM Fachdienst, VPN Zugangsdienst:
+Registrierungsdienst and Konzentrator , IDP Fachdienst, KIM Fachdienst. More are coming.
+
+---
 
 ## tl;dr
 
@@ -31,27 +39,30 @@ implemented as maven modules:
 This is the test suite itself. It is used to start all following modules, configure them and read
 the results. It has
 a [package](pkits-testsuite/src/main/java/de/gematik/pki/pkits/testsuite/approval/) with classes to
-all
-approval tests. The test suite calls a use
-case (see [Use Case Modules](./README.md#4-use-case-modules)) and expects it to either pass or fail,
+all approval tests. The test suite calls a use case
+(see [Use Case Modules](./README.md#4-use-case-modules)) and expects it to either pass or fail,
 depending on the test data used. If the expectation is fulfilled, the test case is passed.
 
 ### 2. TSL Provider
 
-The TSL provider is to deliver TSLs to the test object.
-The behaviour of the TSL provider, such as the content of a TSL offered to the test object, is configured in test cases over a REST interface.
-The TSL provider is implemented as a spring boot tomcat web server and runs as its own process. 
-The TSL provider can be started independently or by the test suite during its execution.
-To started independently then set `appPath` to `"externalStartup"`. 
+The TSL provider is a service that delivers TSLs to the test object.
+The behaviour of this service, such as the content of a TSL offered to the test object, is
+configured automatically during the test execution over a REST interface.
+The TSL provider is implemented as a spring boot tomcat web server and runs as its own process.
+It can be started independently or by the test suite. To start it independently one has to
+set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to the jar
+via `--server.port=[port]` and `--server.address=[IpOrFqdn]`
 
 ### 3. OCSP Responder
 
-The OCSP responder is to generate responses to OCSP requests sent by the test object.
-The behaviour of the OCSP responder is configured over a REST interface and absolutely transparent to the user. 
-Depending on the tests executed it is configured to deliver unsigned OCSP responses, wrong cert hashes and so on.
-Similar to the TSL provider, it is implemented as a spring boot tomcat web server and runs as its own process.
-The OCSP responder can be started independently or by the test suite during its execution.
-To started independently then set `appPath` to `"externalStartup"`.
+The OCSP responder is a service to generate responses to OCSP requests sent by the test object.
+The behaviour of this service is configured over a REST interface and transparent to the user.
+Depending on the tests it can be configured to deliver unsigned OCSP responses, wrong cert
+hashes and so on.
+Similar to the TSL provider, it is implemented as a spring boot tomcat web server and runs as its
+own process. It can be started independently or by the test suite. To start it independently one has
+to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to the
+jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`
 
 ### 4. Use Case Modules
 
@@ -60,9 +71,24 @@ object has to be a server. This means, the PKI test suite acts like a client dur
 
 #### TLS Client
 
-The TLS client module is called from the test suite. It establishes a TLS handshake to a test object
-with a given certificate (see [test data section](./README.md#test-data)) and returns exit code "0"
-if the handshake was established or "1" if it was not.
+For tests against a TSL Server, the PKI testsuite has to be configured as follows:
+
+```console
+  testObject:
+    type: "TlsServer"
+```
+
+This configuration will use a TSL client implementation bundled with the test suite.
+It establishes a TLS handshake to a test object with a given certificate (
+see [test data section](./README.md#test-data)).
+Corresponding to AFOs: xxx the TLS handshake will follow the specifications from gemSpec_Krypt with
+following parameter:
+
+* TLS Version: 1.2
+* cipher suites used: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 or
+  TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+* The used elliptic curves are taken from the test data delivered with the testsuite (i.e.
+  brainpoolP256r1)
 
 #### Script
 
@@ -74,15 +100,28 @@ Be sure to return exit code "0" if the communication was successful and "1" if i
 careful about the exit code. Thr script solely should only return "0" if the use case was
 successful, **not if the script could be executed successful!**
 
+##### Script over SSH
+
+It is possible to execute a script remotely over ssh. See `sshConfig` section in the configuration
+file. You have to configure the authentication (password or certificate), files that have to be
+copied to the remote location and back. As wells as the IP and port of the remote machine.
+
 ## Configuration
 
 All configuration is done in one file: [/config/pkits.yml](./config/pkits.yml). You can find
-examples in [/docs/config/inttest/](./docs/configs/inttest/). 
-The most important parameters are how to reach the test object and where to find the test data as well as where the test object can reach the TSL- and OCSP- simulators provided by this test suite.
-Paths in the `pkits.yml` in are relative to the base directory. 
-Absolute paths can be used as well.
-All available parameters including a short description can be found in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml). 
+examples in [/docs/config/inttest/](./docs/configs/inttest/).
+The most important parameters are how to reach the test object and where to find the test data as
+well as where the test object can reach the TSL- and OCSP- simulators provided by this test suite.
+Paths in the `pkits.yml` are relative to the base directory. Absolute paths can be used as well.
+All available parameters including a short description can be found
+in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml).
 As this is a YAML file remember to strictly follow the syntax.
+
+```console 
+Remember: A change of parameters that will change the TSL (i.e.OCSP responder adress and port or 
+TSL provider adress an port) require a new generation of the initial TSL and import to the test 
+object.
+``` 
 
 ### Test Data
 
@@ -95,7 +134,7 @@ the fly. If you use your own test data make sure that issuing certificates are a
 ### Initial TSL and Trust Anchor
 
 For the configuration of the test object it is necessary to initialize it with a trust space
-compatible to the test suite. 
+compatible to the test suite.
 For this, a convenient script is provided by the test suite:
 By executing `./initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
 the `./out` directory for import into the test object. This TSL contains the TU trust store as well,
@@ -105,7 +144,7 @@ this means, that the test object can be used during the pki tests by other servi
 
 The test suite expects a test object that is running and accessible over the configured IP address
 and port (see [Configuration](./README.md#configuration)). Tests are executed via the
-script `./startApprovalTest.sh`. 
+script `./startApprovalTest.sh`.
 Furthermore, the [OCSP responder](./README.md#3-ocsp-responder)
 and [TSL provider](./README.md#2-tsl-provider) communicate at the configured sockets (if they are
 not deactivated). Logs are written to the `./out/logs` directory. Afterwards a test report is
@@ -124,7 +163,9 @@ and running and accessible by the testsuite and its components.
 
 Besides executing all tests, it is possible to select or exclude specific tests for execution.
 This is done via the file `allTests.txt`.
-The file lists test classes `CertificateApprovalTestsIT`, `OcspApprovalTestsIT`, `TslApprovalTestsIT`, `TslITSignerApprovalTestIT`, `TslVaApprovalTestsIT` and all tests defined in the test classes.
+The file lists test classes `CertificateApprovalTests`, `OcspApprovalTests`,
+`TslApprovalTests`, `TslITSignerApprovalTests`, `TslTaApprovalTests` and all tests defined in
+the test classes.
 Test classes as well as separate tests can be marked with `+` or `-`.
 Tests marked with a `+` will be executed when `./startApprovalTests.sh` is used the next time.
 Tests marked with a `-` are excluded from the execution.
@@ -137,6 +178,26 @@ execution, except those marked with `+`.
 
 In order to run the test suite, you need a build environment according to the settings in
 the [pom.xml](./pom.xml).
+
+## Running PKITS Components in Docker Containers
+
+It is possible to containerize the components of the test suite (OCSP Responder, TSL Provider).
+You can start them _localy_ as docker compose services. See these configuration files:
+
+* [docker-compose-base.yml](docker-compose-base.yml)
+* [docker-compose-deployLocal.yml](docker-compose-deployLocal.yml)
+
+The following scripts from directory ./docs/docker/ can be used to build, run and use the container
+images:
+
+* [docker1_BuildImages.sh](docs%2Fdocker%2Fdocker1_BuildImages.sh)
+* [docker2_StartContainers.sh](docs%2Fdocker%2Fdocker2_StartContainers.sh)
+* [docker3_RunTests.sh](docs%2Fdocker%2Fdocker3_RunTests.sh)
+
+Docker-Desktop 4.17.1 with Docker Compose v2.15.1 was used for testing this functionality.
+
+Make sure that your particular configuration file (`pkits.yml`) is used by the `docker3_RunTests.sh`
+script.
 
 ## Versioning
 
@@ -151,8 +212,12 @@ Cryptographic private keys used in this project are solely used in test resource
 (unit) tests. We are fully aware of the content and meaning of the test data. We never publish
 productive data.
 
+## License
+
+Apache License Version 2.0
+
+See [LICENSE](./LICENSE).
+
 ## Todo
 
-- add missing tests of TUC_PKI_001
-- add PKI client tests
-- add generation of test data on the fly
+- add generation of certificates on the fly

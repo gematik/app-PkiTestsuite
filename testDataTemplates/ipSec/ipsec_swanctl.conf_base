@@ -1,0 +1,48 @@
+connections {
+        konzentrator_rsa {
+                local_addrs  = 10.11.200.54
+                remote_addrs = #IP#
+                proposals    = aes256-sha256-prfsha256-modp2048
+                unique       = replace
+                version      = 2
+                vips         = 0.0.0.0
+                local {
+                        auth  = pubkey-sha256
+                        certs = /home/uepki-testsuite/ipsec/#CERTIFICATE#
+                }
+                remote {
+                        auth = pubkey-sha256
+                }
+                children {
+                        konzentrator_rsa_child {
+                                local_ts = 172.20.0.0/14
+                                remote_ts = 172.24.0.0/14,172.28.0.0/15 # cp: /15 weil sonst Ueberlappung mit gotop FD Adressbereich
+                                esp_proposals = aes256-sha256-prfsha256-modp2048
+                        }
+                }
+        }
+        konzentrator_ecc {
+                local_addrs  = 10.11.200.54
+                remote_addrs = #IP#
+                proposals    = aes128gcm12-aes256gcm12-aes128gcm16-aes256gcm16-prfsha256-ecp256bp
+                unique       = replace
+                version      = 2
+                vips         = 0.0.0.0
+                local {
+                        auth  = ecdsa-256-sha256
+                        certs = /home/uepki-testsuite/ipsec/#CERTIFICATE#
+                }
+                remote {
+                        auth = ecdsa-256-sha256
+                }
+                children {
+                        konzentrator_ecc_child {
+                                local_ts = 172.20.0.0/14
+                                remote_ts = 172.24.0.0/14,172.28.0.0/15 # cp: /15 weil sonst Ueberlappung mit gotop FD Adressbereich
+                                esp_proposals = aes128gcm12-aes256gcm12-aes128gcm16-aes256gcm16-prfsha256-ecp256bp
+                        }
+                }
+        }
+
+}
+

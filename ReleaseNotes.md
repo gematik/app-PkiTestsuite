@@ -2,9 +2,30 @@
 
 # Release notes PKI Test Suite
 
+## Release 1.1.3
+
+- fix bug in mechanism of test selection in allTests.txt
+- do not execute checkInitialState more than once
+- remove example yaml from config dir, this file should not be used in own test and lead to
+  confusion
+- generate test data (TSLs) on-fly (instead of reading manually prepared TSL XML templates)
+- add some more test cases for deeper TSL testing
+- add helper scripts and documentation for running OCSP- and TSL simulator in docker containers
+- add possibility to execute scripts on remote servers via ssh
+- update dependencies
+- refactoring and optimizations
+
+## Releases before 1.1.3
+
+- internal releases
+
 ## Release 1.0.6
 
 - upload binaries
+
+## Releases before 1.0.6
+
+- internal releases
 
 ## Release 1.0.1
 
@@ -12,10 +33,15 @@
 - enable building docker images for OCSP Responder and TSL Provider
 - add verification of expected sequence number in OCSP responses
 
+## Release 1.0.0
+
+- internal release
+
 ## Release 0.4.1
 
 - add test cases checking number of retries for primary and backend endpoints for TSL download
-- add test cases in the context of Trust Anchor Change verification - the tests are set to run as the last
+- add test cases in the context of Trust Anchor Change verification - the tests are set to run as
+  the last
 - add test cases in the context of TSL signer certificate verification
 - add test cases in the context of TSL approval verification
 - force trust anchor change tests to run as last
@@ -23,7 +49,8 @@
   files: [AFOs description](./docs/afoCoverage_afoDescriptions.txt),
   [AFOs to tests mapping](./docs/afoCoverage_afoToTests.txt),
   [tests to AFOs mapping](./docs/afoCoverage_testToAfos.txt)
-- introduce `externalStartup` for the case when OcspResponder and TslProvider are started externally (not by the test
+- introduce `externalStartup` for the case when OcspResponder and TslProvider are started
+  externally (not by the test
   suite)
 - integrate logs and configuration into PDF report
 

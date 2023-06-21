@@ -3,14 +3,19 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
-    <artifactId>pkits-global</artifactId>
-    <version>1.0.6</version>
+    <artifactId>pki-testsuite</artifactId>
+    <version>1.1.3</version>
   </parent>
 
   <artifactId>pkits-tls-client</artifactId>
-  <version>1.0.6</version>
+  <version>1.1.3</version>
+
   <name>TLS Client</name>
   <description>TLS Client</description>
+
+  <properties>
+    <sonar.coverage.exclusions>**/de/gematik/pki/pkits/tls/client/**/*</sonar.coverage.exclusions>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -30,29 +35,13 @@
       <artifactId>bctls-jdk18on</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -72,40 +61,5 @@
       <artifactId>pkits-common</artifactId>
     </dependency>
   </dependencies>
-
-  <build>
-    <finalName>${project.artifactId}</finalName>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>${version.maven-clean-plugin}</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${project.build.releaseJarsDir}</directory>
-              <includes>
-                <include>pkits-tls-client.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>de.gematik.pki.pkits.tls.client.TlsClientApplication</mainClass>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-          </archive>
-          <outputDirectory>${project.build.releaseJarsDir}</outputDirectory>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

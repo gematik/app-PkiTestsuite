@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -21,16 +21,12 @@ import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DO
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
@@ -61,13 +57,14 @@ class TslConfigControllerTest {
   }
 
   @Test
-  void tslConfigNew() throws IOException, URISyntaxException {
+  void tslConfigNew() {
     final String WEBSERVER_CONFIG_URL =
         "http://localhost:" + localServerPort + WEBSERVER_CONFIG_ENDPOINT;
     assertThat(tslConfigHolder.getTslProviderConfigDto().getActiveTslDownloadPoint())
         .isEqualTo(TSL_DOWNLOAD_POINT_PRIMARY);
 
-    final byte[] tslBytes = getTslFromResources();
+    final byte[] tslBytes =
+        ResourceReader.getFileFromResourceAsBytes(TSL_FILEPATH, this.getClass());
     final TslProviderConfigDto tslProviderConfig =
         new TslProviderConfigDto(
             tslBytes, TSL_DOWNLOAD_POINT_BACKUP, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
@@ -82,15 +79,6 @@ class TslConfigControllerTest {
     assertThat(tslConfigHolder.getTslProviderConfigDto().getActiveTslDownloadPoint())
         .isEqualTo(TSL_DOWNLOAD_POINT_BACKUP);
     assertThat(tslConfigHolder.getTslProviderConfigDto().getTslBytes()).hasSameSizeAs(tslBytes);
-  }
-
-  private byte[] getTslFromResources() throws IOException, URISyntaxException {
-    return Files.readAllBytes(
-        Path.of(
-            Objects.requireNonNull(
-                    getClass().getClassLoader().getResource(TSL_FILEPATH),
-                    "Read TSL from resources failed.")
-                .toURI()));
   }
 
   private void invalidateTslProviderConfiguration() {

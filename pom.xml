@@ -4,16 +4,16 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.5</version>
+    <version>3.1.0</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
-  <artifactId>pkits-global</artifactId>
-  <version>1.0.6</version>
+  <artifactId>pki-testsuite</artifactId>
+  <version>1.1.3</version>
   <packaging>pom</packaging>
-  <name>PkiTs</name>
-  <description>Uebergreifende Java PKI Testsuite</description>
-  <url>https://github.com/gematik/app-pkits</url>
+  <name>PKI Testsuite</name>
+  <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the gemSpec_PKI specification. This test suite is used for approval tests of different products like Intermediär, VSDM Fachdienst, VPNZugD, IDP FD, KIM-FD, etc.</description>
+  <url>https://github.com/gematik/app-PkiTestsuite</url>
 
   <organization>
     <name>gematik GmbH</name>
@@ -42,9 +42,9 @@
     <module>pkits-ocsp-responder</module>
     <module>pkits-tsl-provider</module>
     <module>pkits-tls-client</module>
+    <module>pkits-tsl-generator</module>
     <module>pkits-testsuite</module>
     <module>pkits-coverage-reports</module>
-    <module>pki-testsuite</module>
   </modules>
 
   <scm>
@@ -59,16 +59,18 @@
   </issueManagement>
 
   <properties>
+    <!-- NOTE: update it periodically - manually set version of a transitive dependency used by spring boot-->
+    <snakeyaml.version>2.0</snakeyaml.version>
+
     <!-- header-->
     <skipUTs>false</skipUTs>
-    <skipITs>false</skipITs>
 
     <skip.dockerbuild>true</skip.dockerbuild>
 
-    <version.docker-maven-plugin>0.41.0</version.docker-maven-plugin>
     <docker.registry.gematik>eu.gcr.io/gematik-all-infra-prod</docker.registry.gematik>
     <docker.image.name.pkits-ocsp-responder>${docker.registry.gematik}/pkits/pkits-ocsp-responder</docker.image.name.pkits-ocsp-responder>
     <docker.image.name.pkits-tsl-provider>${docker.registry.gematik}/pkits/pkits-tsl-provider</docker.image.name.pkits-tsl-provider>
+    <docker.image.name.pkits-sut-server-sim>${docker.registry.gematik}/pkits/pkits-sut-server-sim</docker.image.name.pkits-sut-server-sim>
 
     <version.java>17</version.java>
     <version.maven>3.6.3</version.maven>
@@ -84,39 +86,43 @@
     <version.ardikars.pcap>1.5.0</version.ardikars.pcap>
     <version.assertj-core>3.24.2</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
-    <version.bouncycastle>1.72</version.bouncycastle>
+    <version.bouncycastle>1.74</version.bouncycastle>
     <version.commons-compress>1.23.0</version.commons-compress>
-    <version.gemLibPki>0.11.0</version.gemLibPki>
-    <version.jackson>2.14.2</version.jackson>
-    <version.jakarta.activation-api>2.1.1</version.jakarta.activation-api>
+    <version.commons-io>2.13.0</version.commons-io>
+    <version.commons-text>1.10.0</version.commons-text>
+    <version.docker-maven-plugin>0.43.0</version.docker-maven-plugin>
+    <version.jfiglet>1.0.1</version.jfiglet>
+    <version.gemLibPki>0.12.0</version.gemLibPki>
+    <version.jackson>2.15.2</version.jackson>
+    <version.jakarta.activation-api>2.1.2</version.jakarta.activation-api>
     <version.jakarta.validation-api>3.0.2</version.jakarta.validation-api>
     <version.jakarta.xml.bind-api>4.0.0</version.jakarta.xml.bind-api>
     <version.jaxb-api>2.4.0-b180830.0359</version.jaxb-api>
     <version.jaxb-impl>2.3.6</version.jaxb-impl>
-    <version.junit-jupiter>5.9.2</version.junit-jupiter>
+    <version.junit-jupiter>5.9.3</version.junit-jupiter>
     <version.log4j2>2.20.0</version.log4j2>
-    <version.lombok>1.18.26</version.lombok>
-    <version.unirest-java>3.14.1</version.unirest-java>
+    <version.lombok>1.18.28</version.lombok>
+    <version.unirest-java>3.14.4</version.unirest-java>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
-    <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
-    <version.maven-assembly-plugin>3.4.2</version.maven-assembly-plugin>
+    <version.git-commit-id-maven-plugin>6.0.0</version.git-commit-id-maven-plugin>
+    <version.jacoco-maven-plugin>0.8.10</version.jacoco-maven-plugin>
+    <version.maven-assembly-plugin>3.6.0</version.maven-assembly-plugin>
     <version.maven-clean-plugin>3.2.0</version.maven-clean-plugin>
-    <version.maven-compiler-plugin>3.10.1</version.maven-compiler-plugin>
+    <version.maven-compiler-plugin>3.11.0</version.maven-compiler-plugin>
     <version.maven-deploy-plugin>3.1.1</version.maven-deploy-plugin>
-    <version.maven-enforcer-plugin>3.2.1</version.maven-enforcer-plugin>
+    <version.maven-enforcer-plugin>3.3.0</version.maven-enforcer-plugin>
     <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
     <version.maven-javadoc-plugin>3.5.0</version.maven-javadoc-plugin>
-    <version.maven-project-info-reports-plugin>3.4.2</version.maven-project-info-reports-plugin>
+    <version.maven-project-info-reports-plugin>3.4.5</version.maven-project-info-reports-plugin>
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
-    <version.maven-antrun-plugin>3.1.0</version.maven-antrun-plugin>
     <version.maven-site-plugin>3.12.1</version.maven-site-plugin>
-    <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
-    <version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
+    <version.maven-source-plugin>3.3.0</version.maven-source-plugin>
+    <version.maven-surefire-plugin>3.1.2</version.maven-surefire-plugin>
     <version.sonar-maven-plugin>3.9.1.2184</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>2.33.0</version.spotless-maven-plugin>
-    <version.spotless.google-java-format>1.15.0</version.spotless.google-java-format>
+    <version.spotless-maven-plugin>2.37.0</version.spotless-maven-plugin>
+    <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../pkits-coverage-reports/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -133,6 +139,7 @@
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>${version.assertj-core}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>
@@ -160,6 +167,7 @@
         <artifactId>gemLibPki</artifactId>
         <version>${version.gemLibPki}</version>
       </dependency>
+
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
@@ -168,6 +176,11 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
+        <version>${version.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
         <version>${version.jackson}</version>
       </dependency>
       <dependency>
@@ -191,30 +204,40 @@
         <artifactId>jaxb-impl</artifactId>
         <version>${version.jaxb-impl}</version>
       </dependency>
+
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
         <version>${version.commons-compress}</version>
       </dependency>
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${version.commons-io}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>${version.commons-text}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>${version.junit-jupiter}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
         <version>${version.junit-jupiter}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>${version.junit-jupiter}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
         <version>${version.junit-jupiter}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
@@ -268,6 +291,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>pkits-tsl-generator</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.konghq</groupId>
         <artifactId>unirest-java</artifactId>
         <version>${version.unirest-java}</version>
@@ -292,12 +320,35 @@
         <version>${version.jakarta.activation-api}</version>
       </dependency>
 
+      <dependency>
+        <groupId>com.github.dtmo.jfiglet</groupId>
+        <artifactId>jfiglet</artifactId>
+        <version>${version.jfiglet}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${version.maven-clean-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>${version.git-commit-id-maven-plugin}</version>
+          <configuration>
+            <includeOnlyProperties>
+              <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+              <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+            </includeOnlyProperties>
+            <commitIdGenerationMode>full</commitIdGenerationMode>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
@@ -311,31 +362,35 @@
             <skip>true</skip>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${version.maven-assembly-plugin}</version>
-          <configuration>
-            <descriptors>
-              <descriptor>../assembly.xml</descriptor>
-            </descriptors>
-            <appendAssemblyId>false</appendAssemblyId>
-          </configuration>
-          <executions>
-            <execution>
-              <id>make-assembly</id>
-              <goals>
-                <goal>single</goal>
-              </goals>
-              <phase>package</phase>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>${version.maven-deploy-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${version.maven-surefire-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-report-plugin</artifactId>
+          <version>${version.maven-surefire-report-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${version.jacoco-maven-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <version>${version.docker-maven-plugin}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -344,7 +399,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>${version.maven-clean-plugin}</version>
         <configuration>
           <filesets>
             <!-- delete logfiles -->
@@ -362,7 +416,6 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${version.jacoco-maven-plugin}</version>
         <executions>
           <execution>
             <id>jacoco-prepare-agent</id>
@@ -436,7 +489,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${version.maven-surefire-plugin}</version>
         <configuration>
           <argLine>${surefire.jacoco.args}</argLine>
           <skipTests>${skipUTs}</skipTests>
@@ -549,6 +601,41 @@
                 <goals>
                   <goal>jar</goal>
                 </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>final-zip</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skipUTs>true</skipUTs>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>${version.maven-assembly-plugin}</version>
+            <executions>
+              <execution>
+                <id>make-assembly</id>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <skipAssembly>false</skipAssembly>
+                  <finalName>pki-testsuite-${project.version}</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <descriptors>
+                    <descriptor>assembly.xml</descriptor>
+                  </descriptors>
+                </configuration>
               </execution>
             </executions>
           </plugin>

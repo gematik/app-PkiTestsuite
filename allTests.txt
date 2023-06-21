@@ -1,14 +1,16 @@
-+	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTestsIT
++	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
 	verifyConnectCertsInvalid   Test use case with invalid certificates
 	verifyConnectCertsValid     Test use case with valid certificates
-	verifyConnectCertsValidRsa  Test use case with valid RSA certificate
+	verifyConnectRsaCertsValid  Test use case with valid RSA certificate
 
-+	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTestsIT
++	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
+	verifyForCaCertificateIsNotInTsl                   NOT IMPLEMENTED YET - CA certificate is not included in TSL (for nonQES certificate).
+	verifyForCaCertificateWithoutServiceSupplyPoint    CA certificate in TSL without ServiceSupplyPoint.
 	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
 	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP response
 	verifyInvalidSignatureInOcspResponse               Test invalid signature in OCSP response
 	verifyMissingCertHashInOcspResponse                Test missing CertHash in OCSP response
-	verifyMissingOcspSignerInTsl                       Test missing OCSP signer in TSL
+	verifyMissingOcspSignerInTslForUseCaseCertificate  Test missing OCSP signer in TSL
 	verifyOcspCertificateStatusRevokedAndUnknown       Test OCSP response with certificate status revoked and unknown
 	verifyOcspGracePeriod                              Test OCSP grace period
 	verifyOcspResponseMissingNextUpdate                Test OCSP response with missing nextUpdate
@@ -25,21 +27,25 @@
 	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes
 	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
 
-+	de.gematik.pki.pkits.testsuite.approval.TslApprovalTestsIT
++	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
 	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
-	verifyForUnspecifiedCertificateOfTSPService            Test proper handling of unspecified CA certificate in TSL
+	verifyForTslInSystemIsOutOfTime                        NOT IMPLEMENTED YET - TSL in the system is out of time.
+	verifyForTslInvalidXmlSchemaOrNonCompliantElement      TSL with invalid XML schema or schema non-compliant element.
+	verifyForTslNotWellFormedXmlStructure                  TSL with not well-formed XML structure.
+	verifyForTslWithInvalidOidDownloadAddresses            TSL with invalid OID of download addresses.
 	verifyForUnspecifiedServiceTypeIdentifierOfTSPService  Test CA certificate with ServiceTypeIdentifier "unspecified" in TSL
 	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
 	verifyIrregularDifferencesBetweenCurrentAndNewTsls     Test TSL service does not provide updated TSL
 	verifyRetryFailingTslDownload                          Test TSL download not possible
-	verifyRevokedCaCertificateInTsl                        Test CA certificate in TSL is revoked and EE certificate is issued earlier.
+	verifyRevokedCaCertificateInTslInPast                  Test CA certificate in TSL is revoked and EE certificate is issued earlier.
 	verifyRevokedCaCertificateInTslLater                   Test CA certificate in TSL is revoked and EE certificate is issued later.
 	verifyTslDownloadCompression                           Test compression of TSL download
 	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
 	verifyUpdateTrustStoreInTestObject                     Test update of TSL with different XML format (pretty print)
 	verifyUseBackupTslDownload                             Test TSL download on primary endpoint not possible
 
-+	de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTestsIT
++	de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
+	verifyForInvalidSignatureOfTslSigner                            Invalid signature of the TSL signer certificate.
 	verifyMissingOcspSignerInTslForTslSignerCert                    Test missing OCSP signer in TSL for TSL signer certificate
 	verifyOcspResponseTslSignerCertInvalidCertHash                  Test OCSP response of TSL signer certificate with invalid CertHash
 	verifyOcspResponseTslSignerCertInvalidCertId                    Test invalid cert id in OCSP response for TSL signer cert
@@ -64,9 +70,9 @@
 	verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage           Test TSL signer certificates with invalid key usage and extended key usage
 	verifyTslSignerCertNotYetValid                                  Test TSL signer certificate that is not yet valid - notBefore is in the future
 
--	de.gematik.pki.pkits.testsuite.approval.TslVaApprovalTestsIT
--	verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors
--	verifyMultipleAnnouncedTrustAnchorsInTsl                                     Test multiple announced trust anchors in single TSL
--	verifyNewTrustAnchorInvalidTime                                              Test updating trust anchor with certificates that have invalid times
--	verifyNewTrustAnchorsIsBroken                                                Test for an announced broken trust anchor and cannot be extracted
--	verifyUpdateTrustAnchor                                                      Test updating trust anchor
++	de.gematik.pki.pkits.testsuite.approval.TslTaApprovalTests
+	verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors
+	verifyMultipleAnnouncedTrustAnchorsInTsl                                     Test multiple announced trust anchors in single TSL
+	verifyNewTrustAnchorInvalidTime                                              Test updating trust anchor with certificates that have invalid times
+	verifyNewTrustAnchorsIsBroken                                                Test for an announced broken trust anchor and cannot be extracted
+	verifyUpdateTrustAnchor                                                      Test updating trust anchor

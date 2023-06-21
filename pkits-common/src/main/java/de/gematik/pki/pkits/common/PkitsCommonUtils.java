@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -22,32 +22,41 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.Attributes.Name;
+import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PkitsCommonUtils {
 
@@ -56,13 +65,8 @@ public final class PkitsCommonUtils {
   }
 
   public static String calculateSha256Hex(final byte[] byteArray) {
-    try {
-      final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      final byte[] hash = digest.digest(byteArray);
-      return new String(Hex.encode(hash), StandardCharsets.UTF_8);
-    } catch (final NoSuchAlgorithmException e) {
-      throw new PkiCommonException("Instantiation of Digest object failed.", e);
-    }
+    final byte[] hash = GemLibPkiUtils.calculateSha256(byteArray);
+    return new String(Hex.encode(hash), StandardCharsets.UTF_8);
   }
 
   public static byte[] readContent(final String path) {
@@ -150,5 +154,65 @@ public final class PkitsCommonUtils {
       ret = matcher.group(1);
     }
     return ret;
+  }
+
+  @Getter
+  @ToString
+  public static class GitProperties {
+    private String commitIdShort = "not-defined";
+    private String commitIdFull = "not-defined";
+
+    public GitProperties() {}
+
+    public GitProperties(final Properties prop) {
+      commitIdShort = prop.getProperty("git.commit.id.abbrev");
+      commitIdFull = prop.getProperty("git.commit.id.full");
+    }
+  }
+
+  public static GitProperties readGitProperties(final Class<?> clazz) {
+    final Properties props = new Properties();
+    final String gitPropsFilename = "git.properties";
+    try {
+      // load a properties file from class path, inside static method
+      props.load(clazz.getClassLoader().getResourceAsStream(gitPropsFilename));
+
+      return new GitProperties(props);
+
+    } catch (final NullPointerException | IOException e) {
+      log.warn("continue: cannot read {} - {}", gitPropsFilename, e.getMessage());
+      return new GitProperties();
+    }
+  }
+
+  public static Attributes readManifestAttributes(final Class<?> clazz) {
+    final ClassLoader classLoader = clazz.getClassLoader();
+    final String manifestFilename = "META-INF/MANIFEST.MF";
+    final URL url = classLoader.getResource(manifestFilename);
+    if (url == null) {
+      throw new PkiCommonException("cannot find " + manifestFilename);
+    }
+    try {
+      final InputStream inputStream = url.openStream();
+      final Manifest manifest = new Manifest(inputStream);
+      return manifest.getMainAttributes();
+    } catch (final IOException e) {
+      throw new PkiCommonException("cannot process " + manifestFilename, e);
+    }
+  }
+
+  public static String getBannerStr(final Class<?> clazz) {
+    final Attributes attributes = PkitsCommonUtils.readManifestAttributes(clazz);
+
+    final String bannerFormat =
+        ResourceReader.getFileFromResourceAsString("bannerFormat.txt", clazz);
+    final String title = attributes.getValue(Name.IMPLEMENTATION_TITLE);
+    final String version = attributes.getValue(Name.IMPLEMENTATION_VERSION);
+    final String springBootVersion = attributes.getValue("Spring-Boot-Version");
+
+    final GitProperties gitProperties = PkitsCommonUtils.readGitProperties(clazz);
+
+    return bannerFormat.formatted(
+        title, version, gitProperties.getCommitIdShort(), springBootVersion);
   }
 }

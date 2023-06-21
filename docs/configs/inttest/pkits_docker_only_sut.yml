@@ -1,0 +1,22 @@
+client:
+  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid"
+  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid-alternative"
+  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/invalid"
+
+testObject:
+  name: "Server 0815"
+  type: "TlsServer"
+  ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
+  port: 8443
+  ocspGracePeriodSeconds: 0
+  tslDownloadIntervalSeconds: 2
+  tslProcessingTimeSeconds: 2
+
+ocspResponder:
+  ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
+  port: 8083
+
+
+tslProvider:
+  ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
+  port: 8084
