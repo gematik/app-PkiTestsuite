@@ -10,14 +10,3 @@ services:
     uts: "host"
     ports:
       - "8084:8084"
-
-  pkits-sut-server-sim:
-    uts: "host"
-    environment:
-      - TSL_PROCURER_INITIAL_TSL_PRIMARY_DOWNLOAD_URL=http://${HOSTNAME}:8084/tsl/tsl.xml?activeTslSeqNr=70000
-      - OCSP_SERVICE_URL=http://${HOSTNAME}:8083/ocsp
-
-    ports:
-      - "8443:8443"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
