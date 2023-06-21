@@ -39,4 +39,4 @@ Provide any other important details below.
 
 :question:
 
-[1]: https://github.com/gematik/github-templates/blob/master/.github/CONTRIBUTING.md
+[1]: https://github.com/gematik/github-templates/blob/main/.github/CONTRIBUTING.md

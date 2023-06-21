@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 
@@ -36,15 +37,15 @@ public abstract class InstanceProviderNanny {
   private boolean processIsAlreadyUp = false;
 
   private int port;
-  private int portConfig;
-  private String portJvmParam;
+  @Setter private int portConfig;
+  @Setter private String portJvmParam;
 
   private String ipAddressOrFqdn;
-  private String ipAddressConfig;
-  private String ipAddressJvmParam;
+  @Setter private String ipAddressConfig;
+  @Setter private String ipAddressJvmParam;
 
-  private String appPath;
-  private String serverId;
+  @Setter private String appPath;
+  @Setter private String serverId;
 
   protected static Optional<Integer> getProcessExitValue(final Process process) {
     try {
@@ -52,30 +53,6 @@ public abstract class InstanceProviderNanny {
     } catch (final IllegalThreadStateException ex) {
       return Optional.empty();
     }
-  }
-
-  protected void setIpAddressConfig(final String ipAddressName) {
-    ipAddressConfig = ipAddressName;
-  }
-
-  protected void setIpAddressJvmParam(final String ipAddressName) {
-    ipAddressJvmParam = ipAddressName;
-  }
-
-  protected void setPortConfig(final int port) {
-    portConfig = port;
-  }
-
-  protected void setPortJvmParam(final String portName) {
-    portJvmParam = portName;
-  }
-
-  protected void setAppPath(final String path) {
-    appPath = path;
-  }
-
-  protected void setServerId(final String id) {
-    serverId = id;
   }
 
   public void startServer() {
@@ -132,7 +109,7 @@ public abstract class InstanceProviderNanny {
   protected void startServerProcess() {
     final ProcessBuilder processBuilder =
         new ProcessBuilder(
-            "java",
+            "java", // NOSONAR java:S4036
             "-jar",
             appPath,
             "--server.port=" + port,
@@ -153,18 +130,16 @@ public abstract class InstanceProviderNanny {
     final String uri = "http://" + ipAddressOrFqdn + ":" + port;
     if (PkitsCommonUtils.isExternalStartup(appPath)) {
       log.info("Web server <{}> is started externally and should be up", serverId);
-      return uri;
-    }
-
-    if (isProcessRunning()) {
+    } else if (isProcessRunning()) {
       final Callable<Boolean> webServerIsUp = new WebServerHealthOk();
       PkitsTestSuiteUtils.waitForEvent(serverId, timeoutSecs, webServerIsUp);
       log.info("Web server <{}> should be up now", serverId);
-      return uri;
+    } else {
+      processIsAlreadyUp = false;
+      throw new PkiCommonException("Web server <" + serverId + "> is down");
     }
 
-    processIsAlreadyUp = false;
-    throw new PkiCommonException("Web server <" + serverId + "> is down");
+    return uri;
   }
 
   protected boolean isProcessRunning() {

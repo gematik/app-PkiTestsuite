@@ -1,14 +1,16 @@
-de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTestsIT
-  verifyConnectCertsInvalid   GS-A_4652, GS-A_4663
+de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
+  verifyConnectCertsInvalid   GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
   verifyConnectCertsValid     A_17124, GS-A_4357, GS-A_4652, GS-A_4663
-  verifyConnectCertsValidRsa  GS-A_4357, GS-A_4384
+  verifyConnectRsaCertsValid  GS-A_4357, GS-A_4384
 
-de.gematik.pki.pkits.testsuite.approval.OcspApprovalTestsIT
+de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
+  verifyForCaCertificateIsNotInTsl                   GS-A_4656, GS-A_4657, TODO - GS-A_4654
+  verifyForCaCertificateWithoutServiceSupplyPoint    GS-A_4656, GS-A_4657
   verifyInvalidCerIdInOcspResponse                   GS-A_4657
   verifyInvalidCertHashInOcspResponse                GS-A_4657
   verifyInvalidSignatureInOcspResponse               GS-A_4657
   verifyMissingCertHashInOcspResponse                GS-A_4657
-  verifyMissingOcspSignerInTsl                       GS-A_4657
+  verifyMissingOcspSignerInTslForUseCaseCertificate  GS-A_4657
   verifyOcspCertificateStatusRevokedAndUnknown       GS-A_4657
   verifyOcspGracePeriod                              GS-A_4657
   verifyOcspResponseMissingNextUpdate                GS-A_4657
@@ -25,21 +27,25 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTestsIT
   verifyOcspResponseVariousStatusAndResponseBytes    GS-A_4657
   verifyOcspResponseWithNullParameterInCertId        RFC 5280, RFC 6960
 
-de.gematik.pki.pkits.testsuite.approval.TslApprovalTestsIT
+de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
   verifyForBadCertificateOfTSPService                    GS-A_4642
-  verifyForUnspecifiedCertificateOfTSPService            GS-A_4642
+  verifyForTslInSystemIsOutOfTime                        GS-A_4642, TODO - GS-A_4648
+  verifyForTslInvalidXmlSchemaOrNonCompliantElement      GS-A_4642, GS-A_4648, GS-A_4649
+  verifyForTslNotWellFormedXmlStructure                  GS-A_4642, GS-A_4648, GS-A_4649
+  verifyForTslWithInvalidOidDownloadAddresses            GS-A_4647, GS-A_4648
   verifyForUnspecifiedServiceTypeIdentifierOfTSPService  A_17700
   verifyForWrongServiceInfoExtCertificateOfTSPService    GS-A_4749
   verifyIrregularDifferencesBetweenCurrentAndNewTsls     GS-A_4648
   verifyRetryFailingTslDownload                          GS-A_4642, GS-A_4647, GS-A_4648
-  verifyRevokedCaCertificateInTsl                        GS-A_4652
+  verifyRevokedCaCertificateInTslInPast                  GS-A_4652
   verifyRevokedCaCertificateInTslLater                   GS-A_4652
   verifyTslDownloadCompression                           TIP1-A_5120
-  verifyTslSignatureInvalid                              GS-A_4648, GS-GS-A_4651
+  verifyTslSignatureInvalid                              GS-A_4648, GS-A_4651
   verifyUpdateTrustStoreInTestObject                     GS-A_4649
   verifyUseBackupTslDownload                             GS-A_4642, GS-A_4647, GS-A_4648
 
-de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTestsIT
+de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
+  verifyForInvalidSignatureOfTslSigner                            GS-A_4642, GS-A_4648, GS-A_4650
   verifyMissingOcspSignerInTslForTslSignerCert                    GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertInvalidCertHash                  GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertInvalidCertId                    GS-A_4642, GS-A_4657
@@ -64,7 +70,7 @@ de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTestsIT
   verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage           GS-A_4642, GS-A_4648, GS-A_4650
   verifyTslSignerCertNotYetValid                                  GS-A_4642, GS-A_4648, GS-A_4650, GS-A_4653
 
-de.gematik.pki.pkits.testsuite.approval.TslVaApprovalTestsIT
+de.gematik.pki.pkits.testsuite.approval.TslTaApprovalTests
   verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  GS-A_4642, GS-A_4643
   verifyMultipleAnnouncedTrustAnchorsInTsl                                     GS-A_4642, GS-A_4643
   verifyNewTrustAnchorInvalidTime                                              GS-A_4642, GS-A_4643

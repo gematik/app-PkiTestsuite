@@ -7,10 +7,28 @@ client:
 
 testObject:
   name: "HasToBeDefined_name"                                                              # Name of the test object, for better identification in logs and configuration files.
-  type: "HasToBeDefined_type"                                                              # Test object type (TlsServer|Script).
+  type: "HasToBeDefined_type"                                                              # Test object type (TlsServer|Script|ScriptOverSsh).
   ipAddressOrFqdn: "HasToBeDefined_ipAddressOrFqdn"                                        # FQDN or IP address to connect to the test object.
   port: HasToBeDefined_port                                                                # Port where the test object listens on.
   scriptPath: "unused by default"                                                          # Absolute or relative path to the use case script when test object type is set to 'Script'.
+
+  sshConfig:
+    username: "HasToBeDefined_username"                                                    # TODO
+    password: "HasToBeDefined_password"                                                    # TODO
+    host: "HasToBeDefined_host"                                                            # TODO
+    port: 22                                                                               # TODO
+    privateKey: "HasToBeDefined_privateKey"                                                # TODO
+    privateKeyPassphrase: "HasToBeDefined_privateKeyPassphrase"                            # TODO
+    appDataHttpFwdSocket: "HasToBeDefined_appDataHttpFwdSocket"                            # send AppData over http-forwarder (to gematik OCSP-sim, as defined in bash script)
+    cryptMethod: "ECC"                                                                     # RSA or ECC
+    filesToCopyRootDir: "HasToBeDefined_filesToCopyRootDir"                                # TODO
+    filesToCopyPattern: "HasToBeDefined_filesToCopyPattern"                                # TODO see https://docs.oracle.com/javase/8/docs/api/java/nio/file/FileSystem.html#getPathMatcher-java.lang.String-
+    remoteTargetDir: "HasToBeDefined_remoteTargetDir"                                      # TODO
+    remoteLogFile: "HasToBeDefined_remoteLogFile"                                          # TODO
+    connectTimeoutSeconds: 4                                                               # TODO
+    authTimeoutSeconds: 4                                                                  # TODO
+    channelOpenTimeoutSeconds: 4                                                           # TODO
+    channelCloseTimeoutSeconds: 4                                                          # TODO
   ocspGracePeriodSeconds: 30                                                               # OCSP grace period in seconds configured in the test object.
   tslDownloadIntervalSeconds: HasToBeDefined_tslDownloadIntervalSeconds                    # TSL download interval in seconds configured in the test object.
   tslProcessingTimeSeconds: 3                                                              # Amount of seconds to wait after a TSL update for processing inside the test object.
@@ -30,8 +48,8 @@ tslProvider:
 
 testSuiteParameter:
   performInitialState: true                                                                # Execute smoke test (TSL and use case including OCSP) before each test.
-  captureNetworkTraffic: false                                                             # Capture network traffic in pcap file format. Configuration of interface to sniff on is done by parameter "captureInterface" If OCSP responder and TSL provider are not started externally, sniffing on there interfaces is activated as well.
-  captureInterface: "HasToBeDefined_captureInterface"                                      # IP address of an interface to sniff communication with the test object from.
+  captureNetworkTraffic: false                                                             # Capture network traffic in pcap file format. Configuration of interfaces to sniff on is done by parameter "captureInterfaces" If OCSP responder and TSL provider are not started externally, sniffing on there interfaces is activated as well.
+  captureInterfaces: "HasToBeDefined_captureInterfaces"                                    # Comma separated list of IP addresses for interfaces to sniff communication with the test object from.
 
   ocspSettings:
     keystorePathOcsp: "./testDataTemplates/certificates/ecc/ocspKeystore"                  # Absolute or relative path to key store files in p12 format to sign OCSP requests. with.
@@ -41,13 +59,5 @@ testSuiteParameter:
 
   tslSettings:
     initialStateTslImport: true                                                            # Import a new TSL during initial state in each use case.
-    defaultTemplate: "./testDataTemplates/tsl/TSL_default.xml"                             # Default template to generate TSL during tests from.
-    alternativeTemplate: "./testDataTemplates/tsl/TSL_altCA.xml"                           # Alternative template to generate a TSL with additional CAs during tests.
-    defectAlternativeCaBrokenTemplate: "./testDataTemplates/tsl/TSL_defect_altCA_broken.xml" # Alternative template to generate a TSL with an additional broken CA during tests.
-    defectAlternativeCaUnspecifiedTemplate: "./testDataTemplates/tsl/TSL_defect_unspecified-CA_altCA.xml" # Alternative template to generate a TSL with an additional unspecified CA during tests.
-    defectAlternativeCaWrongSrvInfoExtTemplate: "./testDataTemplates/tsl/TSL_defect_altCA_wrong-srvInfoExt.xml" # Alternative template to generate a TSL with an additional wrong (service info extension) CA during tests.
-    alternativeCaUnspecifiedStiTemplate: "./testDataTemplates/tsl/TSL_altCA_unspecifiedSTI.xml" # Alternative template to generate a TSL with an unspecified ServiceTypeIdentifier in TSP service during tests.
-    alternativeRevokedTemplate: "./testDataTemplates/tsl/TSL_altCA_revoked.xml"            # Alternative template to generate a TSL with additional revoked CAs during tests.
-    alternativeNoLineBreakTemplate: "./testDataTemplates/tsl/TSL_altCA_noLineBreak.xml"    # Alternative template to generate a TSL with additional CAs without line breaks during tests.
     signer: "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12" # Absolute or relative path to key store in p12 format to sign TSLs with.
     signerPassword: "00"                                                                   # Password used for the TSL signer key store.

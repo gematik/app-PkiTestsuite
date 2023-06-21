@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.4.1_1-jre
+FROM eclipse-temurin:17.0.7_7-jre
 
 ARG COMMIT_HASH
 ARG VERSION
@@ -6,7 +6,7 @@ ARG VERSION
 LABEL de.gematik.vendor="gematik GmbH" \
       maintainer="software-development@gematik.de" \
       de.gematik.app="TSL Server Simulator" \
-      de.gematik.git-repo-name="https://gitlab.prod.ccs.gematik.solutions/git/Fachteam-Repos/pkits.git" \
+      de.gematik.git-repo-name="https://github.com/gematik/app-PkiTestsuite.git" \
       de.gematik.commit-sha=$COMMIT_HASH \
       de.gematik.version=$VERSION
 

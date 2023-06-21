@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -40,16 +40,11 @@ public class TestSuiteConstants {
   public static final Path PKITS_CFG_FILE_PATH;
 
   public static final Path VALID_ISSUER_CERT_TSL_CA8_PATH =
-      Path.of("./testDataTemplates/certificates/ecc/trustAnchor/GEM.TSL-CA8-TEST-ONLY.pem");
+      Path.of("./testDataTemplates/certificates/ecc/trustAnchor/GEM.TSL-CA8_TEST-ONLY.pem");
 
-  public static final String OCSP_SIGNER_FILENAME = "ee_default.p12";
+  public static final String OCSP_SIGNER_FILENAME = "OCSP_Signer_09_ecc_TEST-ONLY.p12";
   public static final String OCSP_SIGNER_NOT_IN_TSL_FILENAME = "ee_not-in-tsl.p12";
   public static final String OCSP_SIGNER_DIFFERENT_KEY = "ee_different-key.p12";
-
-  public static final boolean SIGNER_KEY_USAGE_CHECK_ENABLED = true;
-  public static final boolean SIGNER_KEY_USAGE_CHECK_DISABLED = false;
-  public static final boolean SIGNER_VALIDITY_CHECK_ENABLED = true;
-  public static final boolean SIGNER_VALIDITY_CHECK_DISABLED = false;
 
   static {
     final String pkitsConfigPath = System.getProperty("pkitsConfig");
@@ -63,7 +58,7 @@ public class TestSuiteConstants {
     log.info("pkits yml config file is set to {}", PKITS_CFG_FILE_PATH);
   }
 
-  public enum PKITS_CERT {
+  public enum PkitsCertType {
     PKITS_CERT_VALID,
     PKITS_CERT_INVALID
   }

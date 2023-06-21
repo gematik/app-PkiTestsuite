@@ -1,48 +1,58 @@
-A_17124       ECDSA cipher suites for TLS
-A_17700       TSL-Auswertung ServiceTypeIdentifier "unspecified"
-GS-A_4357     ECDSA algorithms - Tab_KRYPT_002a
-GS-A_4357     RSA algorithms - Tab_KRYPT_002
-GS-A_4384     RSA cipher suites for TLS
-GS-A_4642     TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 2
-GS-A_4642     TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 3
-GS-A_4642     TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4
-GS-A_4642     TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 5
-GS-A_4642     TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 6
-GS-A_4642     TUC_PKI_001: Prüfung der Aktualität der TSL - Schritt 2
-GS-A_4643     TUC_PKI_013: Import TI-Vertrauensanker aus TSL
-GS-A_4643     TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 1
-GS-A_4643     TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 2
-GS-A_4643     TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 4
-GS-A_4643     TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 6
-GS-A_4647     TUC_PKI_016: Download der TSL-Datei - Schritt 3 und 4
-GS-A_4648     Prüfung der Aktualität der TSL - Schritt 4
-GS-A_4648     TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 1
-GS-A_4648     TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 3
-GS-A_4648     TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 6
-GS-A_4649     TUC_PKI_020: XML-Dokument validieren
-GS-A_4650     TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 2
-GS-A_4650     TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 3
-GS-A_4652     TUC_PKI_018: Zertifikatsprüfung in der TI - Schritt 5
-GS-A_4652     TUC_PKI_018: Zertifikatsprüfung in der TI - Schritt 5a
-GS-A_4652     TUC_PKI_018: Zertifikatsprüfung in der TI - negative cases
-GS-A_4652     TUC_PKI_018: Zertifikatsprüfung in der TI - positive cases
-GS-A_4653     TUC_PKI_002: Gültigkeitsprüfung des Zertifikats
-GS-A_4657     TUC_PKI_006: OCSP check - step 4c
-GS-A_4657     TUC_PKI_006: OCSP check - step 6b
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 1
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 4c
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 5a
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 5a1
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 6
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 6a
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 6b
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 7b
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 7c
-GS-A_4657     TUC_PKI_006: OCSP-Abfrage - Schritt 8b und 8c
-GS-A_4663     Zertifikats-Prüfparameter für den TLS-Handshake - negative cases
-GS-A_4663     Zertifikats-Prüfparameter für den TLS-Handshake - positive cases
-GS-A_4749     TUC_PKI_007: Prüfung Zertifikatstyp - Schritt 8
-GS-GS-A_4651  TUC_PKI_012: XML-Signatur-Prüfung
-RFC 5280      4.1.1.2. signatureAlgorithm
-RFC 6960      4.2.1. ASN.1 Specification of the OCSP Response
-TIP1-A_5120   Clients des TSL-Dienstes: HTTP-Komprimierung unterstützen
+A_17124           ECDSA cipher suites for TLS
+A_17700           TSL-Auswertung ServiceTypeIdentifier "unspecified"
+GS-A_4357         ECDSA algorithms - Tab_KRYPT_002a
+GS-A_4357         RSA algorithms - Tab_KRYPT_002
+GS-A_4384         RSA cipher suites for TLS
+GS-A_4642         TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 2
+GS-A_4642         TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 3
+GS-A_4642         TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4
+GS-A_4642         TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 5
+GS-A_4642         TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 6
+GS-A_4642         TUC_PKI_001: Prüfung der Aktualität der TSL - Schritt 2
+GS-A_4643         TUC_PKI_013: Import TI-Vertrauensanker aus TSL
+GS-A_4643         TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 1
+GS-A_4643         TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 2
+GS-A_4643         TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 4
+GS-A_4643         TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 6
+GS-A_4647         TUC_PKI_016: Download der TSL-Datei - Schritt 3
+GS-A_4647         TUC_PKI_016: Download der TSL-Datei - Schritt 3 und 4
+GS-A_4648         TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 1
+GS-A_4648         TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 2
+GS-A_4648         TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 3
+GS-A_4648         TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 4
+GS-A_4648         TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 6
+GS-A_4649         TUC_PKI_020: XML-Dokument validieren
+GS-A_4649         TUC_PKI_020: XML-Dokument validieren - Schritt 2
+GS-A_4649         TUC_PKI_020: XML-Dokument validieren - Schritt 3
+GS-A_4650         TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 2
+GS-A_4650         TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 3
+GS-A_4650         TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 5
+GS-A_4651         TUC_PKI_012: XML-Signatur-Prüfung
+GS-A_4652         TUC_PKI_018: Zertifikatsprüfung in der TI - Schritt 5
+GS-A_4652         TUC_PKI_018: Zertifikatsprüfung in der TI - Schritt 5a
+GS-A_4652         TUC_PKI_018: Zertifikatsprüfung in der TI - negative cases
+GS-A_4652         TUC_PKI_018: Zertifikatsprüfung in der TI - positive cases
+GS-A_4653         TUC_PKI_002: Gültigkeitsprüfung des Zertifikats
+GS-A_4654         TUC_PKI_003: CA-Zertifikat finden - Schritt 3
+GS-A_4656         TUC_PKI_005: Adresse für Status- und Sperrprüfung ermitteln - Schritt 2b
+GS-A_4657         TUC_PKI_006: OCSP check - step 4c
+GS-A_4657         TUC_PKI_006: OCSP check - step 6b
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 1
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 2
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 4c
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 5a
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 5a1
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 6
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 6a
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 6b
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 7b
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 7c
+GS-A_4657         TUC_PKI_006: OCSP-Abfrage - Schritt 8b und 8c
+GS-A_4663         Zertifikats-Prüfparameter für den TLS-Handshake - negative cases
+GS-A_4663         Zertifikats-Prüfparameter für den TLS-Handshake - positive cases
+GS-A_4749         TUC_PKI_007: Prüfung Zertifikatstyp - Schritt 8
+RFC 5280          4.1.1.2. signatureAlgorithm
+RFC 6960          4.2.1. ASN.1 Specification of the OCSP Response
+TIP1-A_5120       Clients des TSL-Dienstes: HTTP-Komprimierung unterstützen
+TODO - GS-A_4648  TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 7
+TODO - GS-A_4654  TUC_PKI_003: CA-Zertifikat finden - Schritt 2b

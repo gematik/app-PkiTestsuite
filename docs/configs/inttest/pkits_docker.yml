@@ -1,23 +1,23 @@
 client:
-  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid"
-  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/valid-alternative"
-  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodul_clientCerts/invalid"
+  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid"
+  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid-alternative"
+  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/invalid"
 
 testObject:
   name: "Server 0815"
   type: "TlsServer"
-  ipAddressOrFqdn: "127.0.0.1"
+  ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
   port: 8443
   ocspGracePeriodSeconds: 0
   tslDownloadIntervalSeconds: 2
   tslProcessingTimeSeconds: 2
 
 ocspResponder:
-  ipAddressOrFqdn: "127.0.0.1"
+  ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
   port: 8083
   appPath: "externalStartup"
 
 tslProvider:
-  ipAddressOrFqdn: "127.0.0.1"
+  ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
   port: 8084
   appPath: "externalStartup"

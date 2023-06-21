@@ -1,0 +1,110 @@
+# @desc   - IPSec connection script for usage with automated tests in telematik infrastructure
+#         - needs an indepentendly running and correct configured strongswan with specifically named ee-certs and correct routing
+#         - needs write access to ipsec.conf and strongswan.conf and read perms for /etc/strongswan folder 
+#               chmod 666 /etc/strongswan/strongswan.conf /etc/strongswan/ipsec.conf && chmod 755 /etc/strongswan/
+#         - needs user in group wireshark and eventually "setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/dumpcap"
+#         - needs user to execute ipsec and tshark with root privilages
+#              visudo: uepki-testsuite ALL = NOPASSWD: /usr/sbin/strongswan, /usr/sbin/tshark
+#         - needs correct configured or disabled firewall (systemctl stop firewalld.service)
+# @author Mirko Jechow 
+# @remark Copyright: gematik GmbH 2021
+# @todo   backup and restore previous confs
+#
+#!/bin/bash
+if [ "$1" == "" ]; then echo "Missing Parameter (bool:   SEND_RECEIVE_APPLICATION_DATA)!";      exit 254; fi;
+if [ "$2" == "" ]; then echo "Missing Parameter (string: TO_IPSEC_APPDATA_HTTP_FWD_SOCKET)!";   exit 253; fi;
+if [ "$3" == "" ]; then echo "Missing Parameter (string: ee-nk-certificate)!";                  exit 252; fi;
+if [ "$4" == "" ]; then echo "Missing Parameter (string: Konzentrator IP)!";                    exit 251; fi;
+if [ "$5" == "" ]; then echo "Missing Parameter (string: Method (RSA|ECC)!";                    exit 250; fi;
+if [ "$6" == "" ]; then echo "Missing Parameter (float: OCSP-delay)!";                          exit 249; fi;
+
+set -x
+
+script_dir=$HOME/ipsec
+LOG=$script_dir/strongswan.log
+SEND_APPDATA=$1;
+HTTP_FWD=$2;
+CERT=$3;
+HOST=$4;
+METHOD=$5;
+OCSP_DELAY=$6;
+if [ ! -d "$script_dir" ]; then
+  mkdir $script_dir
+fi
+
+if [ "$METHOD" = "RSA" ]; then
+    CONFIG=konzentrator_rsa_child;
+elif [ "$METHOD" = "ECC" ]; then
+    CONFIG=konzentrator_ecc_child;
+else
+    echo "Unknown method (only RSA or ECC allowed)!";
+    exit 250;
+fi
+
+function disconnect() {
+ # pgrep tshark | xargs kill -15 2>/dev/null;
+  sudo /usr/sbin/swanctl -t -c $CONFIG &>/dev/null
+  sudo /bin/systemctl stop strongswan.service
+  sudo /bin/systemctl status -l --no-pager -n99999 strongswan.service > $LOG
+  sleep 3;
+}
+function init() {
+  rm -f $LOG
+  sudo /bin/systemctl start strongswan.service
+  sleep 3;
+  sudo /usr/sbin/swanctl -q &>/dev/null
+  sleep 5;
+}
+    
+# prepare conf file with corresonding EE zert from desired CA and IP for Konzentrator
+rm -f $script_dir/konzentrator.conf
+#${2%.p12}
+sed "s/#CERTIFICATE#/$CERT/" $script_dir/ipsec_swanctl.conf_base > $script_dir/konzentrator.conf
+sed -i "s/#IP#/$HOST/" $script_dir/konzentrator.conf
+
+disconnect;
+
+# copy conf file to strongswan config dir
+cp $script_dir/konzentrator.conf /etc/swanctl/conf.d/konzentrator.conf;
+cp $script_dir/ipsec_strongswan.conf /etc/strongswan.conf;
+
+# start capturing strongswan connection 30s) -f "host $HOST"
+#tshark -i eth1 -a duration:30 -n -q -w $script_dir/ipsec.pcap &
+
+# start strongswan connection and wait for OCSP handling
+OCSP_DELAY=$(awk "BEGIN {print (4+$OCSP_DELAY)}")
+
+init;
+sudo /usr/sbin/swanctl -i -c $CONFIG &>/dev/null; sleep $OCSP_DELAY
+sleep 3;
+STATUS=$(sudo /usr/sbin/swanctl -l);
+
+#extract left IP from status message:
+IP=$(echo "$STATUS" | gawk '/^.*local.*\/32/ {gsub("/32","",$2); print $2}');
+
+if [ "$IP" != "" ]; then 
+    echo "did connect (ip=$IP)";
+    if [ "$SEND_APPDATA" = TRUE ]; then
+        #test connection sending http requenst to gematik OCSP Sim01 over http forwarder through ipsec tunnel interface
+        #wget --bind-address=172.23.0.23 -e use_proxy=yes -e http_proxy=172.25.144.70:3128 http://172.30.68.3:8080/ocsp/OCSPSimulator/x
+        HTTP_RESPONSE=$(curl -sm 30 --interface $IP -x $HTTP_FWD http://ocsp-sim01-test.gem.telematik-test:8080/ocsp/OCSPSimulator/x);
+        EXPECTED_HTTP=$(echo $HTTP_RESPONSE | grep 'Gematik OCSP Responder Simulator');
+        if [ "$EXPECTED_HTTP" != "" ]; then 
+            echo "Received expected http response";
+            disconnect; exit 0;
+        else
+            echo "Did not receive expected http response!";
+            disconnect; exit 255;
+        fi;
+    else
+        echo "No application data were send, check was disabled!";
+        disconnect; exit 0;
+    fi;
+else
+    echo "didn't connect"; 
+    disconnect; exit 1;
+fi;
+
+# script should never pass this line:
+echo "Unexpected end of script!";
+disconnect; exit 255;

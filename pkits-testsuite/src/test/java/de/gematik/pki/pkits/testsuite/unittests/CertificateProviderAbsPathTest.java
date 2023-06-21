@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -16,12 +16,11 @@
 
 package de.gematik.pki.pkits.testsuite.unittests;
 
-import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT.PKITS_CERT_INVALID;
-import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CERT.PKITS_CERT_VALID;
 import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CFG_FILE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
+import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
 import de.gematik.pki.pkits.testsuite.common.VariableSource;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,7 +57,7 @@ class CertificateProviderAbsPathTest {
 
   @ParameterizedTest
   @ArgumentsSource(CertificateProvider.class)
-  @VariableSource(value = PKITS_CERT_VALID)
+  @VariableSource(value = PkitsCertType.PKITS_CERT_VALID)
   void testAbsPathArgumentsSourceValidCerts(final Path certPath) {
     log.info("\n\n Test with certificate \"{}\"\n", certPath);
     assertThat(certPath.toString()).contains(".p12");
@@ -66,7 +65,7 @@ class CertificateProviderAbsPathTest {
 
   @ParameterizedTest
   @ArgumentsSource(CertificateProvider.class)
-  @VariableSource(value = PKITS_CERT_INVALID)
+  @VariableSource(value = PkitsCertType.PKITS_CERT_INVALID)
   void testAbsPathArgumentsSourceInvalidCerts(final Path certPath) {
     log.info("\n\n Test with certificate \"{}\"\n", certPath);
     assertThat(certPath.toString()).contains(".p12");

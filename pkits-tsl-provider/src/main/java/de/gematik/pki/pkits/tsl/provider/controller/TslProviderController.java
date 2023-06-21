@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -34,7 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHeaders;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,7 +66,7 @@ public class TslProviderController {
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
 
-    log.info("Starting tsl xml endpoint at {}", TSL_XML_PRIMARY_ENDPOINT);
+    log.info("Receiving request on tsl xml endpoint at {}", TSL_XML_PRIMARY_ENDPOINT);
     addHistoryEntry(activeTslSeqNr, TSL_XML_PRIMARY_ENDPOINT, request);
     return getResponseEntityWithTsl(true);
   }
@@ -75,7 +75,7 @@ public class TslProviderController {
   public ResponseEntity<String> getTslHashPrimary(
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
-    log.info("Starting tsl hash endpoint at {}", TSL_HASH_PRIMARY_ENDPOINT);
+    log.info("Receiving request on tsl hash endpoint at {}", TSL_HASH_PRIMARY_ENDPOINT);
     addHistoryEntry(activeTslSeqNr, TSL_HASH_PRIMARY_ENDPOINT, request);
     return getResponseEntityWithHash();
   }
@@ -84,7 +84,7 @@ public class TslProviderController {
   public ResponseEntity<byte[]> getTslXmlBackup(
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
-    log.info("Starting tsl backup xml endpoint at {}", TSL_XML_BACKUP_ENDPOINT);
+    log.info("Receiving request on tsl backup xml endpoint at {}", TSL_XML_BACKUP_ENDPOINT);
     addHistoryEntry(activeTslSeqNr, TSL_XML_BACKUP_ENDPOINT, request);
     return getResponseEntityWithTsl(false);
   }
@@ -94,7 +94,7 @@ public class TslProviderController {
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
 
-    log.info("Starting tsl backup hash endpoint at {}", TSL_HASH_BACKUP_ENDPOINT);
+    log.info("Receiving request on tsl backup hash endpoint at {}", TSL_HASH_BACKUP_ENDPOINT);
     addHistoryEntry(activeTslSeqNr, TSL_HASH_BACKUP_ENDPOINT, request);
     return getResponseEntityWithHash();
   }
@@ -102,6 +102,9 @@ public class TslProviderController {
   private ResponseEntity<byte[]> getResponseEntityWithTsl(final boolean isPrimaryEndpoint) {
 
     if (!tslConfigHolder.isConfigured()) {
+      log.info(
+          "Tsl provider not configured -> response with status code {}",
+          HttpStatus.INTERNAL_SERVER_ERROR);
       return ResponseEntity.internalServerError()
           .body(NOT_CONFIGURED.getBytes(StandardCharsets.UTF_8));
     }
@@ -117,17 +120,19 @@ public class TslProviderController {
     }
 
     if (statusCode == HttpStatus.NOT_FOUND.value()) {
-      log.info("statusCode=404 -> response with http status {}", HttpStatus.NOT_FOUND);
+      log.info("statusCode = 404 -> response with http status {}", HttpStatus.NOT_FOUND);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    final byte[] tsl = getTsl();
+    final byte[] tslBytes = getTsl();
 
-    if (tsl.length == 0) {
-      log.info("tsl.length == 0 -> response with status code {}", HttpStatus.INTERNAL_SERVER_ERROR);
+    if (tslBytes.length == 0) {
+      log.info(
+          "tslBytes.length = 0 -> response with status code {}", HttpStatus.INTERNAL_SERVER_ERROR);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     } else {
-      return ResponseEntity.ok(tsl);
+      log.info("Sending TSL with size: {}", tslBytes.length);
+      return ResponseEntity.ok(tslBytes);
     }
   }
 
@@ -137,12 +142,15 @@ public class TslProviderController {
       return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
     }
 
-    final byte[] tsl = getTsl();
+    final byte[] tslBytes = getTsl();
 
-    if (tsl.length == 0) {
+    if (tslBytes.length == 0) {
+      log.info(
+          "tslBytes.length = 0 -> response with status code {}", HttpStatus.INTERNAL_SERVER_ERROR);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     } else {
-      return ResponseEntity.ok(calculateSha256Hex(tsl));
+      log.info("sending TSL hash : {}", calculateSha256Hex(tslBytes));
+      return ResponseEntity.ok(calculateSha256Hex(tslBytes));
     }
   }
 

@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2023 gematik GmbH
- * 
- * Licensed under the Apache License, Version 2.0 (the License);
+ *  Copyright 2023 gematik GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -17,6 +17,7 @@
 package de.gematik.pki.pkits.tsl.provider.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
@@ -36,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TslInfoController {
   private final TslRequestHistory tslRequestHistory;
 
+  private final ObjectReader reader = new ObjectMapper().readerFor(TslInfoRequestDto.class);
+
   /**
    * @param request InfoRequest
    * @return An excerpt of the history of requests
@@ -44,14 +47,13 @@ public class TslInfoController {
   @PostMapping(value = PkitsConstants.TSL_WEBSERVER_INFO_ENDPOINT)
   public List<TslRequestHistoryEntryDto> info(final HttpServletRequest request) throws IOException {
 
-    final TslInfoRequestDto tslInfoRequest =
-        new ObjectMapper().readValue(request.getInputStream(), TslInfoRequestDto.class);
+    final TslInfoRequestDto tslInfoRequest = reader.readValue(request.getInputStream());
 
-    log.info("InfoRequest for SequenceNr: {} received.", tslInfoRequest.getSequenceNr());
+    log.debug("InfoRequest for SequenceNr: {} received.", tslInfoRequest.getSequenceNr());
     final List<TslRequestHistoryEntryDto> list =
         tslRequestHistory.getExcerpt(tslInfoRequest.getSequenceNr());
 
-    log.info("Found history with {} entries.", list.size());
+    log.debug("Found history with {} entries.", list.size());
     deleteHistoryOnDemand(tslInfoRequest);
 
     return Collections.unmodifiableList(list);

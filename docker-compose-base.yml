@@ -28,7 +28,7 @@ x-service-network: &service-network-ref
 
 services:
   # OCSP responder
-  pkitsocspresponder:
+  pkits-ocsp-responder:
     image: eu.gcr.io/gematik-all-infra-prod/pkits/pkits-ocsp-responder:${appVersion}
     user: 10000:10000
     container_name: pkits-ocsp-responder
@@ -42,7 +42,7 @@ services:
       test: "curl --fail --silent http://localhost:8083/actuator/health | grep UP"
 
   # TSL provider
-  pkitstslprovider:
+  pkits-tsl-provider:
     image: eu.gcr.io/gematik-all-infra-prod/pkits/pkits-tsl-provider:${appVersion}
     user: 10000:10000
     container_name: pkits-tsl-provider
