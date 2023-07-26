@@ -23,8 +23,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class TslRequestHistoryTest {
-  public static TslRequestHistoryEntryDto getEntry(final int seqNr) {
-    return new TslRequestHistoryEntryDto(seqNr, TSL_XML_PRIMARY_ENDPOINT, true, "HTTP/1.1");
+  public static TslRequestHistoryEntryDto getEntry(final int tslSeqNr) {
+    return new TslRequestHistoryEntryDto(tslSeqNr, TSL_XML_PRIMARY_ENDPOINT, true, "HTTP/1.1");
   }
 
   @Test

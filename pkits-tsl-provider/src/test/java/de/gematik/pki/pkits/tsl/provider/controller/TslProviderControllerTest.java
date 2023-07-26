@@ -22,7 +22,6 @@ import static de.gematik.pki.pkits.common.PkitsConstants.TSL_HASH_PRIMARY_ENDPOI
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
@@ -176,7 +175,6 @@ class TslProviderControllerTest {
     tslConfigHolder.setTslProviderConfigDto(
         new TslProviderConfigDto(
             tslStr.getBytes(StandardCharsets.UTF_8),
-            TSL_DOWNLOAD_POINT_PRIMARY,
             TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200));
   }
 

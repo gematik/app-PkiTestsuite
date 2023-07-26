@@ -22,7 +22,7 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class InputTestInfo {
 
-  @NonNull String className;
+  String className;
   @NonNull String methodName;
   boolean selected;
 

@@ -35,6 +35,24 @@ import org.junit.jupiter.api.extension.TestWatcher;
 @Slf4j
 public class TestResultLoggerExtension implements TestWatcher {
 
+  private static String stopExecutionOfRemainingTestsReason;
+
+  public static void stopExecutionOfRemainingTests(final String reasonMessage) {
+    stopExecutionOfRemainingTestsReason = reasonMessage;
+  }
+
+  public static void allowExecutionOfRemainingTests() {
+    stopExecutionOfRemainingTestsReason = null;
+  }
+
+  public static String getStopExecutionOfRemainingTestsReason() {
+    return stopExecutionOfRemainingTestsReason;
+  }
+
+  public static boolean canContinueExecutionOfRemainingTests() {
+    return stopExecutionOfRemainingTestsReason == null;
+  }
+
   private static class TestResultsContainer {
     private static final List<TestResultInfo> testResultsStatusList =
         Collections.synchronizedList(new ArrayList<>());
@@ -118,6 +136,7 @@ public class TestResultLoggerExtension implements TestWatcher {
     }
 
     TestResultsContainer.testResultsStatusList.add(testResultInfo);
+
     log.info(
         "\nTest Results ---> {}  {} <--- Test Results\n\n{}\n\n",
         StringUtils.rightPad(testResultInfo.testResultStatus.name(), 12),
@@ -141,7 +160,7 @@ public class TestResultLoggerExtension implements TestWatcher {
     log.info(
         """
             Test results progress:
-              found:      {}
+              selected:   {}
               successful: {}
               failed:     {}
               aborted:    {}

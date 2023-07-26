@@ -31,6 +31,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -49,6 +50,10 @@ public final class TslProviderManager {
 
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfigDto);
     PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
+
+    /*
+     * received by {@link de.gematik.pki.pkits.tsl.provider.controller.TslConfigController#tslConfig}
+     */
     JsonTransceiver.sendJsonViaHttp(configUri, jsonContent);
   }
 
@@ -57,10 +62,19 @@ public final class TslProviderManager {
   }
 
   public static List<TslRequestHistoryEntryDto> getTslRequestHistoryPart(
-      final String uri, final int sequenceNr) {
+      final String uri, final int tslSeqNr, final TslDownloadEndpointType tslDownloadEndpointType) {
+
     final TslInfoRequestDto tslInfoRequest =
-        new TslInfoRequestDto(sequenceNr, HistoryDeleteOption.DELETE_NOTHING);
-    return sendInfoRequest(uri, tslInfoRequest);
+        new TslInfoRequestDto(tslSeqNr, HistoryDeleteOption.DELETE_NOTHING);
+
+    final List<TslRequestHistoryEntryDto> historyEntryDtos = sendInfoRequest(uri, tslInfoRequest);
+
+    return historyEntryDtos.stream()
+        .filter(
+            entry ->
+                StringUtils.endsWithAny(
+                    entry.getTslDownloadEndpoint(), tslDownloadEndpointType.getEndpoints()))
+        .toList();
   }
 
   private static List<TslRequestHistoryEntryDto> sendInfoRequest(

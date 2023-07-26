@@ -30,3 +30,4 @@ tsl-procurer:
   initialTslPrimaryDownloadUrl: "http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=0"
   downloadInterval: 2
   repetitions: 4
+  tslGracePeriodDays: 0

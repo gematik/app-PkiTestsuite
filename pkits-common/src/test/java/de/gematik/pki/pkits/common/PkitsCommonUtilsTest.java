@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.common;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.getFirstSubStringByPattern;
+import static de.gematik.pki.pkits.common.PkitsCommonUtils.getHttpAdressString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -29,6 +30,11 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 class PkitsCommonUtilsTest {
+
+  @Test
+  void verifyGetUrl() {
+    assertThat(getHttpAdressString("1", 2)).isEqualTo("http://1:2");
+  }
 
   @Test
   void testIsExternalStartUp() {

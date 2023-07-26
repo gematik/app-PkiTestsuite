@@ -20,7 +20,6 @@ import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOI
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
-import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import kong.unirest.HttpResponse;
@@ -30,12 +29,10 @@ import org.apache.http.HttpStatus;
 
 public class TslConfigurator {
 
-  public static void configureTsl(
-      final int tslPort, final byte[] tslBytes, final TslDownloadPoint activeTslDownloadPoint)
+  public static void configureTsl(final int tslPort, final byte[] tslBytes)
       throws UnirestException {
     final TslProviderConfigDto tslProviderConfigDto =
-        new TslProviderConfigDto(
-            tslBytes, activeTslDownloadPoint, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
+        new TslProviderConfigDto(tslBytes, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
 
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfigDto);
 

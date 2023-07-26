@@ -18,8 +18,11 @@ package de.gematik.pki.pkits.testsuite.ssh;
 
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase;
+import de.gematik.pki.pkits.testsuite.config.ScriptUseCase;
 import de.gematik.pki.pkits.testsuite.config.SshConfig;
+import de.gematik.pki.pkits.testsuite.config.SshUseCaseParameters;
 import de.gematik.pki.pkits.testsuite.config.TestObjectConfig;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.exceptions.DebugListener;
@@ -57,28 +60,25 @@ import org.apache.sshd.scp.common.helpers.ScpTimestampCommandDetails;
 
 @Slf4j
 public class SshUseCaseApplication {
-
-  private static final boolean SEND_RECEIVE_APPLICATION_DATA = true;
-
   protected static final ScpTransferEventListener DEBUG_LISTENER = new DebugListener();
 
   private final TestObjectConfig testObjectConfig;
+  private final ScriptUseCase scriptUseCase;
   private final SshConfig sshConfig;
+  private final SshUseCaseParameters sshUseCaseParameters;
   private final String clientKeystorePassword;
   private final Path certPath;
-  private final int ocspTimeoutDelayMilliseconds;
 
-  public SshUseCaseApplication(
-      final TestSuiteConfig testSuiteConfig,
-      final Path certPath,
-      final int ocspTimeoutDelayMilliseconds) {
+  public SshUseCaseApplication(final Path certPath, final TestSuiteConfig testSuiteConfig) {
 
     this.testObjectConfig = testSuiteConfig.getTestObject();
-    this.sshConfig = testObjectConfig.getSshConfig();
+    this.scriptUseCase = testSuiteConfig.getTestObject().getScriptUseCase();
+    this.sshConfig = testSuiteConfig.getSshConfig();
+    this.sshUseCaseParameters = testSuiteConfig.getSshConfig().getSshUseCaseParameters();
+
     this.clientKeystorePassword = testSuiteConfig.getClient().getKeystorePassword();
 
     this.certPath = certPath;
-    this.ocspTimeoutDelayMilliseconds = ocspTimeoutDelayMilliseconds;
   }
 
   private void setIdentityProviders(final ClientSession session) {
@@ -287,7 +287,7 @@ public class SshUseCaseApplication {
 
   String getRemoteCrtFilename(final Path p12CertPath) {
     final String crtFilename = FilenameUtils.getBaseName(p12CertPath.toString()) + ".crt";
-    return makeLinuxPath(sshConfig.getRemoteTargetDir(), crtFilename);
+    return makeLinuxPath(sshUseCaseParameters.getRemoteTargetDir(), crtFilename);
   }
 
   private String getSshCommand() {
@@ -297,16 +297,17 @@ public class SshUseCaseApplication {
     parts.add(
         "bash "
             + makeLinuxPath(
-                sshConfig.getRemoteTargetDir(),
-                FilenameUtils.getBaseName(testObjectConfig.getScriptPath())));
-    parts.add(boolToStr(SEND_RECEIVE_APPLICATION_DATA));
-    parts.add(getOrThrow(sshConfig.getAppDataHttpFwdSocket(), "sshConfig.appDataHttpFwdSocket"));
+                sshUseCaseParameters.getRemoteTargetDir(),
+                FilenameUtils.getBaseName(scriptUseCase.getScriptPath())));
+    parts.add(boolToStr(scriptUseCase.isSendReceiveApplicationData()));
+    parts.add(
+        getOrThrow(scriptUseCase.getAppDataHttpFwdSocket(), "scriptUseCase.appDataHttpFwdSocket"));
     // TODO clarify if we need getOrThrow here and below
 
     parts.add(FilenameUtils.getName(getRemoteCrtFilename(certPath)));
     parts.add(testObjectConfig.getIpAddressOrFqdn());
-    parts.add(sshConfig.getCryptMethod());
-    parts.add(String.valueOf(ocspTimeoutDelayMilliseconds));
+    parts.add(scriptUseCase.getCryptMethod());
+    parts.add(String.valueOf(testObjectConfig.getOcspTimeoutSeconds()));
 
     return String.join(" ", parts);
   }
@@ -314,16 +315,17 @@ public class SshUseCaseApplication {
   public int execute() {
     try {
 
-      if (Files.notExists(sshConfig.getFilesToCopyRootDir())) {
+      if (Files.notExists(sshUseCaseParameters.getFilesToCopyRootDir())) {
         throw new TestSuiteException(
             "Directory "
-                + sshConfig.getFilesToCopyRootDir()
+                + sshUseCaseParameters.getFilesToCopyRootDir()
                 + " (in sshConfig.filesToCopyRootDir) does not exists!");
       }
       final SearchFileByWildcard searchFileByWildcard = new SearchFileByWildcard();
       final List<Path> filesToCopy =
           searchFileByWildcard.searchWithWildcard(
-              sshConfig.getFilesToCopyRootDir(), sshConfig.getFilesToCopyPattern());
+              sshUseCaseParameters.getFilesToCopyRootDir(),
+              sshUseCaseParameters.getFilesToCopyPattern());
 
       final byte[] crtContent =
           CertReader.getX509FromP12(certPath, clientKeystorePassword).getEncoded();
@@ -333,14 +335,28 @@ public class SshUseCaseApplication {
           getRemoteCrtFilename(certPath),
           EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
 
-      uploadAllFiles(filesToCopy, sshConfig.getRemoteTargetDir());
+      uploadAllFiles(filesToCopy, sshUseCaseParameters.getRemoteTargetDir());
       final String sshCommand = getSshCommand();
       log.info("sshCommand:\n{}", sshCommand);
 
       final int returnCode = runCommand(sshCommand);
 
-      final String localLogFilename =
-          Path.of(ApprovalTestsBase.OUT_LOGS_DIRNAME, sshConfig.getRemoteLogFile()).toString();
+      String localLogFilename =
+          Path.of(ApprovalTestsBase.OUT_LOGS_DIRNAME, sshUseCaseParameters.getRemoteLogFile())
+              .toString();
+
+      final String timestampPostfix = "_" + PkitsCommonUtils.asTimestampStr(GemLibPkiUtils.now());
+      final String localLogFilenameExtension = FilenameUtils.getExtension(localLogFilename);
+
+      if (StringUtils.isBlank(localLogFilenameExtension)) {
+        localLogFilename += timestampPostfix;
+      } else {
+        localLogFilename =
+            FilenameUtils.removeExtension(localLogFilename)
+                + timestampPostfix
+                + FilenameUtils.EXTENSION_SEPARATOR_STR
+                + localLogFilenameExtension;
+      }
 
       final Path targetDir = Path.of(localLogFilename).getParent();
       if ((targetDir != null) && Files.notExists(targetDir)) {
@@ -348,7 +364,8 @@ public class SshUseCaseApplication {
       }
 
       final String remoteLogFile =
-          makeLinuxPath(sshConfig.getRemoteTargetDir(), sshConfig.getRemoteLogFile());
+          makeLinuxPath(
+              sshUseCaseParameters.getRemoteTargetDir(), sshUseCaseParameters.getRemoteLogFile());
       downloadAllFiles(remoteLogFile, localLogFilename);
       return returnCode;
     } catch (final IOException | CertificateEncodingException e) {

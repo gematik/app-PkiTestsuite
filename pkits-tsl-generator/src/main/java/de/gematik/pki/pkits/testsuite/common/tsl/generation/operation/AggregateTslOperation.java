@@ -40,11 +40,6 @@ public class AggregateTslOperation implements TslOperation {
     public AggregateTslOperation build() {
       return aggregateTslOperation;
     }
-
-    public AggregateTslOperationBuilder remove(final Class<? extends TslOperation> clazz) {
-      aggregateTslOperation.remove(clazz);
-      return this;
-    }
   }
 
   @Getter private final List<TslOperation> tslOperations = new ArrayList<>();
@@ -69,6 +64,7 @@ public class AggregateTslOperation implements TslOperation {
     this.tslOperations.removeIf(clazz::isInstance);
   }
 
+  @Override
   public TslContainer apply(final TslContainer tslContainer) {
 
     TslContainer currentTslContainer = new TslContainer(tslContainer);

@@ -1,7 +1,7 @@
 client:
-  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid"
-  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid-alternative"
-  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/invalid"
+  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid"
+  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid-alternative"
+  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/invalid"
 
 testObject:
   name: "Server 0815"

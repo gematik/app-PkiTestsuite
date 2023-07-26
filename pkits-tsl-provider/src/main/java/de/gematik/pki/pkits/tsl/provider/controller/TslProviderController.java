@@ -66,7 +66,10 @@ public class TslProviderController {
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
 
-    log.info("Receiving request on tsl xml endpoint at {}", TSL_XML_PRIMARY_ENDPOINT);
+    log.info(
+        "Receiving request on tsl xml endpoint at {} with parameter activeTslSeqNr: {}",
+        TSL_XML_PRIMARY_ENDPOINT,
+        activeTslSeqNr);
     addHistoryEntry(activeTslSeqNr, TSL_XML_PRIMARY_ENDPOINT, request);
     return getResponseEntityWithTsl(true);
   }
@@ -75,7 +78,10 @@ public class TslProviderController {
   public ResponseEntity<String> getTslHashPrimary(
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
-    log.info("Receiving request on tsl hash endpoint at {}", TSL_HASH_PRIMARY_ENDPOINT);
+    log.info(
+        "Receiving request on tsl hash endpoint at {} with parameter activeTslSeqNr {}",
+        TSL_HASH_PRIMARY_ENDPOINT,
+        activeTslSeqNr);
     addHistoryEntry(activeTslSeqNr, TSL_HASH_PRIMARY_ENDPOINT, request);
     return getResponseEntityWithHash();
   }
@@ -84,7 +90,10 @@ public class TslProviderController {
   public ResponseEntity<byte[]> getTslXmlBackup(
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
-    log.info("Receiving request on tsl backup xml endpoint at {}", TSL_XML_BACKUP_ENDPOINT);
+    log.info(
+        "Receiving request on tsl backup xml endpoint at {} with parameter activeTslSeqNr: {}",
+        TSL_XML_BACKUP_ENDPOINT,
+        activeTslSeqNr);
     addHistoryEntry(activeTslSeqNr, TSL_XML_BACKUP_ENDPOINT, request);
     return getResponseEntityWithTsl(false);
   }
@@ -94,7 +103,10 @@ public class TslProviderController {
       final HttpServletRequest request,
       @RequestParam(name = TSL_SEQNR_PARAM_ENDPOINT) final int activeTslSeqNr) {
 
-    log.info("Receiving request on tsl backup hash endpoint at {}", TSL_HASH_BACKUP_ENDPOINT);
+    log.info(
+        "Receiving request on tsl backup hash endpoint at {} with parameter activeTslSeqNr: {}",
+        TSL_HASH_BACKUP_ENDPOINT,
+        activeTslSeqNr);
     addHistoryEntry(activeTslSeqNr, TSL_HASH_BACKUP_ENDPOINT, request);
     return getResponseEntityWithHash();
   }

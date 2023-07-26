@@ -16,10 +16,9 @@
 
 package de.gematik.pki.pkits.tsl.provider.data;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
+import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TslProviderConfigDto {
 
   private byte[] tslBytes;
-  private TslDownloadPoint activeTslDownloadPoint;
   private TslProviderEndpointsConfig tslProviderEndpointsConfig =
       TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200;
 
@@ -57,24 +55,20 @@ public class TslProviderConfigDto {
 
   @Override
   public String toString() {
-    final Object message;
-    if (activeTslDownloadPoint != null) {
-      message = activeTslDownloadPoint.name();
-    } else {
-      message = NOT_CONFIGURED;
-    }
 
-    String tslInfo = "ignore: tslId and seqNr: tsl - cannot be parsed";
+    String tslInfo = "ignore: tslId and tslSeqNr: tsl - cannot be parsed";
     try {
       final TrustStatusListType tsl = TslConverter.bytesToTsl(tslBytes);
       tslInfo =
-          "tslId: " + tsl.getId() + " seqNr: " + tsl.getSchemeInformation().getTSLSequenceNumber();
+          "tslId: %s tslSeqNr: %s"
+              .formatted(tsl.getId(), tsl.getSchemeInformation().getTSLSequenceNumber());
     } catch (final Exception e) {
       log.debug(tslInfo, e);
     }
 
     return String.format(
-        "tslDownloadPoint: %s, tsl size: %d bytes, %s, tslProviderEndpointsConfig: %s",
-        message, tslBytes.length, tslInfo, tslProviderEndpointsConfig);
+        "tslDownloadPoint: tsl size: %d bytes, tsl hash: %s,  %s, tslProviderEndpointsConfig:"
+            + " %s",
+        tslBytes.length, calculateSha256Hex(tslBytes), tslInfo, tslProviderEndpointsConfig);
   }
 }

@@ -2,9 +2,36 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.0.0 - Beryllium
+
+- API CHANGE: rename some test cases, so old and new [allTests.txt](./allTests.txt) are incompatible
+- API CHANGE: restructure pkits.yml so old config files are incompatible
+  (see: [all parameters](./docs/all_pkits_parameters.yml) for more info)
+- BUGFIX: repair broken test data certificates
+- BUGFIX: do not execute remaining tests if a trust anchor test case failed
+- BUGFIX: change ocsp request handling in verifyOcspResponseTimeoutAndDelay
+- NEW test case: verifyOcspRequestStructure
+- NEW test case: verifyUseCaseCertsNotInTsl
+- NEW test case: verify critical extensions in certificates
+- NEW test case: verifyExpiredTslInSystem. ATTENTION: this test case is executed at the end. The
+  test object has to be reinitialized with a new trust space afterward, because its trust space
+  is not valid anymore.
+- introduce allFailed.txt to execute all failed tests quick & easy (
+  see [readme](./README.md#selecting-specific-tests))
+- prevent startup of PcapManager, OCSP and TSL simulators during initalTslandTa execution
+- restructure the order of topics in the test report
+- OCPS Responder and TSL Provider are started only once for each run
+- update docker files for use with latest docker version
+- add possibility to change log level over *.sh scripts
+- stabilise some test cases with rare race conditions (i.e. verifyUseBackupTslDownload,
+  verifyRetryFailingTslDownload, verifyIrregularDifferencesBetweenCurrentAndNewTsls)
+- increase code coverage
+- restructure code for better readability
+- update dependencies
+
 ## Release 1.1.3
 
-- fix bug in mechanism of test selection in allTests.txt
+- BUGFIX: in mechanism of test selection in allTests.txt
 - do not execute checkInitialState more than once
 - remove example yaml from config dir, this file should not be used in own test and lead to
   confusion
@@ -33,7 +60,7 @@
 - enable building docker images for OCSP Responder and TSL Provider
 - add verification of expected sequence number in OCSP responses
 
-## Release 1.0.0
+## Release 1.0.0 - Aluminium
 
 - internal release
 

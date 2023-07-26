@@ -76,9 +76,9 @@ public class TspServiceGenerator {
   public static final X509Certificate CERT_TA_SECOND_ALTERNATIVE =
       CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA16_TEST-ONLY.pem"));
   public static final X509Certificate CERT_TA_EXPIRED =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA17_TEST-ONLY.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA17_TEST-ONLY_expired.pem"));
   public static final X509Certificate CERT_TA_NOT_YET_VALID =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA18_TEST-ONLY.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA18_TEST-ONLY_not-yet-valid.pem"));
   public static final X509Certificate CERT_OCSP_SIGNER =
       P12Reader.getContentFromP12(
               ocspKeystoreDir.resolve("OCSP_Signer_09_ecc_TEST-ONLY.p12"), keystorePassword)
@@ -197,7 +197,8 @@ public class TspServiceGenerator {
     final String serviceNameToUse;
     if (useServiceNameFromCert) {
       if (certificate == null) {
-        throw new TslGenerationException("Certificate is null, but expected to be provided!");
+        throw new TslGenerationException(
+            "Certificate is null, but expected to be provided!", new IllegalArgumentException());
       }
       serviceNameToUse = certificate.getSubjectX500Principal().getName();
     } else {

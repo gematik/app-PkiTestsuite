@@ -1,16 +1,17 @@
+#!/bin/bash
+
 # @desc   - IPSec connection script for usage with automated tests in telematik infrastructure
 #         - needs an indepentendly running and correct configured strongswan with specifically named ee-certs and correct routing
-#         - needs write access to ipsec.conf and strongswan.conf and read perms for /etc/strongswan folder 
+#         - needs write access to ipsec.conf and strongswan.conf and read perms for /etc/strongswan folder
 #               chmod 666 /etc/strongswan/strongswan.conf /etc/strongswan/ipsec.conf && chmod 755 /etc/strongswan/
 #         - needs user in group wireshark and eventually "setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/dumpcap"
 #         - needs user to execute ipsec and tshark with root privilages
 #              visudo: uepki-testsuite ALL = NOPASSWD: /usr/sbin/strongswan, /usr/sbin/tshark
 #         - needs correct configured or disabled firewall (systemctl stop firewalld.service)
-# @author Mirko Jechow 
+# @author Mirko Jechow
 # @remark Copyright: gematik GmbH 2021
 # @todo   backup and restore previous confs
-#
-#!/bin/bash
+
 if [ "$1" == "" ]; then echo "Missing Parameter (bool:   SEND_RECEIVE_APPLICATION_DATA)!";      exit 254; fi;
 if [ "$2" == "" ]; then echo "Missing Parameter (string: TO_IPSEC_APPDATA_HTTP_FWD_SOCKET)!";   exit 253; fi;
 if [ "$3" == "" ]; then echo "Missing Parameter (string: ee-nk-certificate)!";                  exit 252; fi;
@@ -88,7 +89,7 @@ if [ "$IP" != "" ]; then
         #test connection sending http requenst to gematik OCSP Sim01 over http forwarder through ipsec tunnel interface
         #wget --bind-address=172.23.0.23 -e use_proxy=yes -e http_proxy=172.25.144.70:3128 http://172.30.68.3:8080/ocsp/OCSPSimulator/x
         HTTP_RESPONSE=$(curl -sm 30 --interface $IP -x $HTTP_FWD http://ocsp-sim01-test.gem.telematik-test:8080/ocsp/OCSPSimulator/x);
-        EXPECTED_HTTP=$(echo $HTTP_RESPONSE | grep 'Gematik OCSP Responder Simulator');
+        EXPECTED_HTTP=`echo "$HTTP_RESPONSE" | grep 'Gematik OCSP Responder Simulator'`;
         if [ "$EXPECTED_HTTP" != "" ]; then 
             echo "Received expected http response";
             disconnect; exit 0;

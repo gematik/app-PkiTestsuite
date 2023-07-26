@@ -33,6 +33,7 @@ import de.gematik.pki.gemlibpki.tsl.TspService;
 import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier;
 import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier.TrustAnchorUpdate;
 import de.gematik.pki.gemlibpki.utils.CertReader;
+import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslConfig;
@@ -43,6 +44,7 @@ import jakarta.annotation.PreDestroy;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -53,8 +55,8 @@ import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXParseException;
 
 @Component
 @Slf4j
@@ -64,7 +66,8 @@ public class TslProcurer {
   private final TslProcurerConfig tslProcurerConfig;
   private ScheduledExecutorService scheduledExecutorServiceFetchTsl;
 
-  private Tsl currentTsl;
+  private boolean isInitialized = false;
+  private Tsl currentTsl = null;
   private TspService tspServiceTrustAnchor = null;
 
   private final StatefulTrustAnchorUpdate statefulTrustAnchorUpdate =
@@ -102,31 +105,30 @@ public class TslProcurer {
 
   private void processTslDownloadHttpResponse() {
 
+    if (isInitialized && !hasValidTrustStore()) {
+      log.error(
+          "Test Object does not have a valid trust store anymore. New TSL must be manually"
+              + " imported!");
+      return;
+    }
+
     try {
       log.info("Starting new TSL download interval!");
       final Optional<TslDownloadResults> tslDownloadResultsOpt = downloadTslIfHashIsDifferent();
 
       if (tslDownloadResultsOpt.isPresent() && !tslDownloadResultsOpt.get().failed) {
 
-        final byte[] tslBytesRx = tslDownloadResultsOpt.get().tslBytes;
-        log.info("TSL download successful. ({} bytes)", tslBytesRx.length);
+        final byte[] rxTslBytes = tslDownloadResultsOpt.get().tslBytes;
+        log.info("TSL download successful. ({} bytes)", rxTslBytes.length);
 
-        final Tsl rxTsl = new Tsl(calculateSha256Hex(tslBytesRx), tslBytesRx);
-        initializeEmptyTrustStore(rxTsl);
-        processReceivedTsl(rxTsl);
+        final String rxTslHash = calculateSha256Hex(rxTslBytes);
+
+        initializeEmptyTrustStore(rxTslHash, rxTslBytes);
+        processReceivedTsl(rxTslHash, rxTslBytes);
 
         log.info("TSL download interval finished!");
       } else {
         log.info("Retry TSL download in {} seconds", tslProcurerConfig.getDownloadInterval());
-      }
-    } catch (final GemPkiRuntimeException e) {
-      if (e.getCause() instanceof SAXParseException) {
-        log.error("cannot parse tsl", e);
-        log.error(
-            ErrorCode.TE_1011_TSL_NOT_WELLFORMED.getErrorMessage(
-                PkiSutServerSimApplication.PRODUCT_TYPE));
-      } else {
-        log.error("something is wrong - cannot process tsl", e);
       }
     } catch (final Exception e) {
       log.error("something is wrong - cannot process tsl", e);
@@ -169,9 +171,18 @@ public class TslProcurer {
     return hasSameTslHash(currentTsl.tslHash, hashTslDownloadResults.hashValue);
   }
 
+  private void invalidateTrustStore() {
+    tspServiceTrustAnchor = null;
+    currentTsl = null;
+  }
+
+  private boolean hasValidTrustStore() {
+    return ObjectUtils.allNotNull(tspServiceTrustAnchor, currentTsl);
+  }
+
   private Optional<TslDownloadResults> downloadTslIfHashIsDifferent() {
 
-    if (currentTsl == null) {
+    if (!isInitialized) {
       final String tslInitialUrl = getInitialTslUrl();
       final TslDownloadResults tslDownloadResults = downloadTsl(tslInitialUrl, "Initial TSL");
       return Optional.of(tslDownloadResults);
@@ -183,7 +194,12 @@ public class TslProcurer {
 
     if (hasSameHash(tslPrimaryUrl, tslBackupUrl)) {
       log.info(
-          "No TSL download required, since hash value was not changed - {}", currentTsl.tslHash);
+          "No TSL download required, since hash value was not changed - {}  (current tslSeqNr {})",
+          currentTsl.tslHash,
+          currentTsl.tslSeqNr);
+
+      verifyTslValidity();
+
       return Optional.empty();
     }
 
@@ -210,6 +226,10 @@ public class TslProcurer {
 
       if (!tslDownloadResults.failed) {
         log.info("Successful TSL download after {} attempts.", i + 1);
+
+        if (Arrays.equals(tslDownloadResults.tslBytes, currentTsl.tslBytes)) {
+          verifyTslValidity();
+        }
         return Optional.of(tslDownloadResults);
       }
     }
@@ -218,6 +238,20 @@ public class TslProcurer {
         ErrorCode.TE_1006_TSL_DOWNLOAD_ERROR.getErrorMessage(
             PkiSutServerSimApplication.PRODUCT_TYPE));
     return Optional.empty();
+  }
+
+  private void verifyTslValidity() {
+    try {
+      TucPki001Verifier.verifyTslValidity(
+          GemLibPkiUtils.now(),
+          tslProcurerConfig.getTslGracePeriodDays(),
+          currentTsl.trustStatusListType,
+          PRODUCT_TYPE);
+    } catch (final GemPkiException e) {
+      invalidateTrustStore();
+      log.error("TSL is not valid anymore; Trust Store was cleared.");
+      throw new TosException(e.getMessage());
+    }
   }
 
   private String getInitialTslUrl() {
@@ -267,20 +301,21 @@ public class TslProcurer {
     return hashValueOnline.equals(hashValueLocal);
   }
 
-  private void processReceivedTsl(@NonNull final Tsl rxTsl) {
+  private void processReceivedTsl(
+      @NonNull final String rxTslHash, @NonNull final byte[] rxTslBytes) {
 
     log.info(
         "before processReceivedTsl - current tsl TSL ID: {}, ({} bytes)",
         currentTsl.trustStatusListType.getId(),
         currentTsl.tslBytes.length);
 
-    log.info("Downloaded TSL has seqNr {} and hash {}", rxTsl.sequenceNr, rxTsl.tslHash);
+    log.info("Downloaded TSL has hash {}", rxTslHash);
 
     tspServiceTrustAnchor =
         statefulTrustAnchorUpdate.getFutureTspServiceTrustAnchorOrCurrent(tspServiceTrustAnchor);
 
     final Optional<TucPki001Verifier> tucPki001VerifierOpt =
-        initTucPki001Verifier(rxTsl, tspServiceTrustAnchor);
+        initTucPki001Verifier(rxTslBytes, tspServiceTrustAnchor);
 
     if (tucPki001VerifierOpt.isEmpty()) {
       log.info("tucPki001VerifierOpt.isEmpty()");
@@ -300,7 +335,7 @@ public class TslProcurer {
       final X509Certificate cert = CertReader.readX509(certBytes);
 
       log.info(
-          "current trust anchor: serialNumber {}, subjectName {}",
+          "current trust anchor: certSerialNr {}, subjectName {}",
           cert.getSerialNumber(),
           cert.getSubjectX500Principal().getName());
 
@@ -308,10 +343,10 @@ public class TslProcurer {
       final Optional<TrustAnchorUpdate> newTrustAnchorUpdateOpt =
           tucPki001VerifierOpt.get().performTucPki001Checks();
 
-      log.info("statefulTrustAnchorUpdate.updateTrustAnchorIfNecessary(rxTsl) - start");
+      final Tsl rxTsl = new Tsl(rxTslHash, rxTslBytes);
+
       statefulTrustAnchorUpdate.updateTrustAnchorIfNecessary(rxTsl, newTrustAnchorUpdateOpt);
-      log.info(
-          "statefulTrustAnchorUpdate.checkForNewAnnouncedTrustAnchorAndSave(rxTsl) - finished");
+
       updateTruststore(rxTsl);
     } catch (final GemPkiException e) {
       log.info(TUC_PKI_001_FAILED, e);
@@ -335,7 +370,7 @@ public class TslProcurer {
   }
 
   private Optional<TucPki001Verifier> initTucPki001Verifier(
-      @NonNull final Tsl rxTsl, final TspService tspServiceTrustAnchor) {
+      @NonNull final byte[] rxTslBytes, final TspService tspServiceTrustAnchor) {
 
     final String currentTslId = currentTsl.trustStatusListType.getId();
     final BigInteger currentTslSeqNr =
@@ -359,10 +394,10 @@ public class TslProcurer {
               .ocspRespCache(ocspRespCache)
               .productType(PRODUCT_TYPE)
               .withOcspCheck(true)
-              .tslToCheck(rxTsl.tslBytes)
+              .tslToCheck(rxTslBytes)
               .currentTrustedServices(tspServices)
               .currentTslId(currentTslId)
-              .currentSeqNr(currentTslSeqNr)
+              .currentTslSeqNr(currentTslSeqNr)
               .ocspTimeoutSeconds(ocspConfig.getOcspTimeoutSeconds())
               .tolerateOcspFailure(ocspConfig.isTolerateOcspFailure())
               .build();
@@ -393,28 +428,29 @@ public class TslProcurer {
   /**
    * On startup the truststore is empty. This method sets any TSL as initial truststore.
    *
-   * @param initialTsl The initial TSL.
+   * @param tslHash hash of the initial TSL
+   * @param tslBytes content of the initial TSL
    */
-  private void initializeEmptyTrustStore(final Tsl initialTsl) {
-    if (currentTsl != null) {
+  private void initializeEmptyTrustStore(final String tslHash, final byte[] tslBytes) {
+    if (isInitialized) {
       return;
     }
 
-    currentTsl = initialTsl;
+    currentTsl = new Tsl(tslHash, tslBytes);
     tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
+    isInitialized = true;
 
     log.info(
-        "Initial TSL with sequence nr {} and hash {} assigned.",
-        initialTsl.sequenceNr,
-        initialTsl.tslHash);
+        "Initial TSL with tslSeqNr {} and hash {} assigned.",
+        currentTsl.tslSeqNr,
+        currentTsl.tslHash);
   }
 
   private synchronized void updateTruststore(final Tsl newTsl) {
     currentTsl = newTsl;
     // in fact, we should handle the trust anchor separately and not as a typical CA cert
     tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
-    log.info(
-        "New TSL with sequence nr {} and hash {} assigned.", newTsl.sequenceNr, newTsl.tslHash);
+    log.info("New TSL with tslSeqNr {} and hash {} assigned.", newTsl.tslSeqNr, newTsl.tslHash);
   }
 
   @PreDestroy

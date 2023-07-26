@@ -1,18 +1,19 @@
 +	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-	verifyConnectCertsInvalid   Test use case with invalid certificates
-	verifyConnectCertsValid     Test use case with valid certificates
-	verifyConnectRsaCertsValid  Test use case with valid RSA certificate
+	verifyUseCaseCertsInvalid   Test use case with invalid certificates (multiple data variants)
+	verifyUseCaseCertsNotInTsl  Test use case with valid certificates with issuer not in trust store (multiple data variants)
+	verifyUseCaseCertsValid     Test use case with valid certificates (multiple data variants)
+	verifyUseCaseRsaCertValid   NOT IMPLEMENTED YET - Test use case with valid RSA certificate
 
 +	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
-	verifyForCaCertificateIsNotInTsl                   NOT IMPLEMENTED YET - CA certificate is not included in TSL (for nonQES certificate).
-	verifyForCaCertificateWithoutServiceSupplyPoint    CA certificate in TSL without ServiceSupplyPoint.
-	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
+	verifyForCaCertificateWithoutServiceSupplyPoint    CA certificate in TSL without ServiceSupplyPoint
+	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response (multiple data variants)
 	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP response
 	verifyInvalidSignatureInOcspResponse               Test invalid signature in OCSP response
 	verifyMissingCertHashInOcspResponse                Test missing CertHash in OCSP response
-	verifyMissingOcspSignerInTslForUseCaseCertificate  Test missing OCSP signer in TSL
-	verifyOcspCertificateStatusRevokedAndUnknown       Test OCSP response with certificate status revoked and unknown
+	verifyMissingOcspSignerInTslForUseCaseCertificate  Test missing OCSP signer in TSL (multiple data variants)
+	verifyOcspCertificateStatusRevokedAndUnknown       Test OCSP response with certificate status revoked and unknown (multiple data variants)
 	verifyOcspGracePeriod                              Test OCSP grace period
+	verifyOcspRequestStructure                         Test OCSP request structure
 	verifyOcspResponseMissingNextUpdate                Test OCSP response with missing nextUpdate
 	verifyOcspResponseNextUpdatePastOutOfTolerance     Test OCSP response with nextUpdate in past out of tolerance
 	verifyOcspResponseNextUpdatePastWithinTolerance    Test OCSP response with nextUpdate in past within tolerance
@@ -24,12 +25,14 @@
 	verifyOcspResponseThisUpdateFutureOutOfTolerance   Test OCSP response with thisUpdate in future out of tolerance
 	verifyOcspResponseThisUpdateFutureWithinTolerance  Test OCSP response with thisUpdate in future within tolerance
 	verifyOcspResponseTimeoutAndDelay                  Test OCSP response with timeout and delay
-	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes
-	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
+	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes (multiple data variants)
+	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId (multiple data variants)
+
++	de.gematik.pki.pkits.testsuite.approval.TslApprovalExtraTests
+	verifyExpiredTslInSystem  Expired TSL in system (NextUpdate is outside the TSL Grace Period). WARNING: After the test a TSL must then be manually inserted into the system.
 
 +	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
 	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
-	verifyForTslInSystemIsOutOfTime                        NOT IMPLEMENTED YET - TSL in the system is out of time.
 	verifyForTslInvalidXmlSchemaOrNonCompliantElement      TSL with invalid XML schema or schema non-compliant element.
 	verifyForTslNotWellFormedXmlStructure                  TSL with not well-formed XML structure.
 	verifyForTslWithInvalidOidDownloadAddresses            TSL with invalid OID of download addresses.
@@ -46,9 +49,9 @@
 
 +	de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
 	verifyForInvalidSignatureOfTslSigner                            Invalid signature of the TSL signer certificate.
-	verifyMissingOcspSignerInTslForTslSignerCert                    Test missing OCSP signer in TSL for TSL signer certificate
+	verifyMissingOcspSignerInTslForTslSignerCert                    Test missing OCSP signer in TSL for TSL signer certificate (multiple data variants)
 	verifyOcspResponseTslSignerCertInvalidCertHash                  Test OCSP response of TSL signer certificate with invalid CertHash
-	verifyOcspResponseTslSignerCertInvalidCertId                    Test invalid cert id in OCSP response for TSL signer cert
+	verifyOcspResponseTslSignerCertInvalidCertId                    Test invalid cert id in OCSP response for TSL signer cert (multiple data variants)
 	verifyOcspResponseTslSignerCertMissingCertHash                  Test OCSP response of TSL signer certificate with missing CertHash
 	verifyOcspResponseTslSignerCertMissingNextUpdate                Test OCSP response of TSL signer certificate with missing nextUpdate
 	verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance     Test OCSP response of TSL signer certificate with nextUpdate in past out of tolerance
@@ -58,12 +61,12 @@
 	verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     Test OCSP response of TSL signer certificate with producedAt in past out of tolerance
 	verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    Test OCSP response of TSL signer certificate with producedAt in past within tolerance
 	verifyOcspResponseTslSignerCertResponderIdByName                Test OCSP response of TSL signer certificate with responder id byName
-	verifyOcspResponseTslSignerCertStatusRevokedAndUnknown          Test OCSP response of TSL signer certificate with status revoked and unknown
+	verifyOcspResponseTslSignerCertStatusRevokedAndUnknown          Test OCSP response of TSL signer certificate with status revoked and unknown (multiple data variants)
 	verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance   Test OCSP response of TSL signer certificate with thisUpdate in future out of tolerance
 	verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance  Test OCSP response of TSL signer certificate with thisUpdate in future within tolerance
 	verifyOcspResponseTslSignerCertTimeoutAndDelay                  Test OCSP response TSL signer certificate with timeout and delay
-	verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes    Test various status of OCSP responses of TSL signer certificate with and without response bytes
-	verifyOcspResponseTslSignerCertWithNullParameterInCertId        Test OCSP response of TSL signer certificate with null parameter in CertId
+	verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes    Test various status of OCSP responses of TSL signer certificate with and without response bytes (multiple data variants)
+	verifyOcspResponseTslSignerCertWithNullParameterInCertId        Test OCSP response of TSL signer certificate with null parameter in CertId (multiple data variants)
 	verifyOcspResponseWithInvalidSignatureForTslSignerCert          Test invalid OCSP response signature for TSL signer certificate
 	verifyTslSignerCertBroken                                       Test TSL signer certificate is broken
 	verifyTslSignerCertExpired                                      Test TSL signer certificate that is expired
@@ -71,7 +74,7 @@
 	verifyTslSignerCertNotYetValid                                  Test TSL signer certificate that is not yet valid - notBefore is in the future
 
 +	de.gematik.pki.pkits.testsuite.approval.TslTaApprovalTests
-	verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors
+	verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors (multiple data variants)
 	verifyMultipleAnnouncedTrustAnchorsInTsl                                     Test multiple announced trust anchors in single TSL
 	verifyNewTrustAnchorInvalidTime                                              Test updating trust anchor with certificates that have invalid times
 	verifyNewTrustAnchorsIsBroken                                                Test for an announced broken trust anchor and cannot be extracted

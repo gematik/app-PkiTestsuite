@@ -37,7 +37,7 @@ public final class PluginConfig {
       final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
       try {
         final String cfgFile =
-            ResourceReader.getFileFromResourceAsString("application.yml", PluginConfig.class);
+            ResourceReader.getFileFromResourceAsString("config.yml", PluginConfig.class);
         instance = yamlMapper.readValue(cfgFile, PluginConfig.class);
       } catch (final IOException e) {
         throw new PkiCommonException("Cannot process yamlPath", e);

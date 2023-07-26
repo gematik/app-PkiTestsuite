@@ -18,26 +18,21 @@ package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
 import de.gematik.pki.gemlibpki.tsl.TslSigner;
 import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
-import java.nio.file.Path;
 import lombok.NonNull;
 import org.w3c.dom.Document;
 
 public class SignTslOperation implements TslOperation {
 
-  @NonNull final Path tslSignerPath;
-  @NonNull final String tslSignerPassword;
+  @NonNull final P12Container tslSignerP12;
   final boolean signerKeyUsageCheck;
   final boolean signerValidityCheck;
 
   public SignTslOperation(
-      @NonNull final Path tslSignerPath,
-      @NonNull final String tslSignerPassword,
+      @NonNull final P12Container tslSignerP12,
       final boolean signerKeyUsageCheck,
       final boolean signerValidityCheck) {
-    this.tslSignerPath = tslSignerPath;
-    this.tslSignerPassword = tslSignerPassword;
+    this.tslSignerP12 = tslSignerP12;
     this.signerKeyUsageCheck = signerKeyUsageCheck;
     this.signerValidityCheck = signerValidityCheck;
   }
@@ -47,12 +42,10 @@ public class SignTslOperation implements TslOperation {
 
     final Document tslDoc = tslContainer.getAsTslDoc();
 
-    final P12Container p12Container = P12Reader.getContentFromP12(tslSignerPath, tslSignerPassword);
-
     final TslSigner tslSigner =
         TslSigner.builder()
             .tslToSign(tslDoc)
-            .tslSignerP12(p12Container)
+            .tslSignerP12(tslSignerP12)
             .checkSignerKeyUsage(signerKeyUsageCheck)
             .checkSignerValidity(signerValidityCheck)
             .build();

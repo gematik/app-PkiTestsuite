@@ -40,7 +40,7 @@ class StatefulTrustAnchorUpdate {
     status = TrustAnchorUpdateStatus.SAVED;
 
     log.info(
-        "saved new trustAnchorUpdate: cert serialNumber {}, statusStartingTime {}",
+        "saved new trustAnchorUpdate: certSerialNr {}, statusStartingTime {}",
         trustAnchorUpdate.getFutureTrustAnchor().getSerialNumber(),
         trustAnchorUpdate.getStatusStartingTime());
     log.info("TrustAnchorUpdateStatus.{} - changed right now", status);
@@ -50,7 +50,7 @@ class StatefulTrustAnchorUpdate {
 
     if ((status == TrustAnchorUpdateStatus.SAVED) && trustAnchorUpdate.isToActivateNow()) {
       log.info(
-          "activated trustAnchorUpdate: cert serialNumber {}, statusStartingTime {}",
+          "activated trustAnchorUpdate: certSerialNr {}, statusStartingTime {}",
           trustAnchorUpdate.getFutureTrustAnchor().getSerialNumber(),
           trustAnchorUpdate.getStatusStartingTime());
 
@@ -73,12 +73,15 @@ class StatefulTrustAnchorUpdate {
     }
   }
 
+  // NOTE: further optimization possible - get rid off rxTsl, all info should be saved in
+  // newTrustAnchorUpdateOpt
   void updateTrustAnchorIfNecessary(
       final Tsl rxTsl, final Optional<TrustAnchorUpdate> newTrustAnchorUpdateOpt) {
 
     if (newTrustAnchorUpdateOpt.isPresent()) {
       final TSPServiceType tspServiceType =
           getTspServiceTSLServiceCertChange(rxTsl.trustStatusListType);
+
       final TspService tspServiceNewTrustAnchor = new TspService(tspServiceType);
       makeSaved(newTrustAnchorUpdateOpt.get(), tspServiceNewTrustAnchor);
     }

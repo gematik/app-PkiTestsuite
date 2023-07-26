@@ -49,9 +49,9 @@ public class TslInfoController {
 
     final TslInfoRequestDto tslInfoRequest = reader.readValue(request.getInputStream());
 
-    log.debug("InfoRequest for SequenceNr: {} received.", tslInfoRequest.getSequenceNr());
+    log.debug("InfoRequest for tslSeqNr {} received.", tslInfoRequest.getTslSeqNr());
     final List<TslRequestHistoryEntryDto> list =
-        tslRequestHistory.getExcerpt(tslInfoRequest.getSequenceNr());
+        tslRequestHistory.getExcerpt(tslInfoRequest.getTslSeqNr());
 
     log.debug("Found history with {} entries.", list.size());
     deleteHistoryOnDemand(tslInfoRequest);
@@ -66,8 +66,8 @@ public class TslInfoController {
         log.debug("TSLProvider history: cleared");
       }
       case DELETE_SEQNR_ENTRY -> {
-        tslRequestHistory.deleteEntries(tslInfoRequestDto.getSequenceNr());
-        log.debug("TSLProvider history: cleared seqNr {}", tslInfoRequestDto.getSequenceNr());
+        tslRequestHistory.deleteEntries(tslInfoRequestDto.getTslSeqNr());
+        log.debug("TSLProvider history: cleared tslSeqNr {}", tslInfoRequestDto.getTslSeqNr());
       }
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }

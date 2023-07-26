@@ -22,11 +22,11 @@ import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.time.ZonedDateTime;
 
 public class ModifyTslIdTslOperation implements TslOperation {
-  private final int sequenceNr;
+  private final int tslSeqNr;
   private final ZonedDateTime issueDate;
 
-  public ModifyTslIdTslOperation(final int sequenceNr, final ZonedDateTime issueDate) {
-    this.sequenceNr = sequenceNr;
+  public ModifyTslIdTslOperation(final int tslSeqNr, final ZonedDateTime issueDate) {
+    this.tslSeqNr = tslSeqNr;
     this.issueDate = issueDate;
   }
 
@@ -34,7 +34,7 @@ public class ModifyTslIdTslOperation implements TslOperation {
   public TslContainer apply(final TslContainer tslContainer) {
     final TrustStatusListType tsl = tslContainer.getAsTsl();
 
-    tsl.setId(TslModifier.generateTslId(sequenceNr, issueDate));
+    tsl.setId(TslModifier.generateTslId(tslSeqNr, issueDate));
 
     return new TslContainer(tsl);
   }

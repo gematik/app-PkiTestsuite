@@ -28,9 +28,9 @@ import lombok.NonNull;
 
 public class OcspResponderTestUtils {
 
-  public static OcspRequestHistoryEntryDto getEntry(final int seqNr, final String certSerialNr) {
+  public static OcspRequestHistoryEntryDto getEntry(final int tslSeqNr, final String certSerialNr) {
     return new OcspRequestHistoryEntryDto(
-        seqNr, new BigInteger(certSerialNr), ZonedDateTime.now().toString());
+        tslSeqNr, new BigInteger(certSerialNr), ZonedDateTime.now().toString(), null);
   }
 
   public static void configure(

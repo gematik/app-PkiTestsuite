@@ -21,6 +21,8 @@ import de.gematik.pki.gemlibpki.utils.P12Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyManagementException;
@@ -40,6 +42,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
+import org.bouncycastle.tls.TlsFatalAlertReceived;
 
 @Builder
 @Slf4j
@@ -49,6 +52,7 @@ public class TlsConnection {
   private final InetAddress serverAddress;
   private final int sutServerPort;
   private final TlsSettings tlsSettings;
+  private final int ocspDelaySeconds;
 
   static {
     Security.setProperty("ssl.KeyManagerFactory.algorithm", "PKIX");
@@ -65,7 +69,8 @@ public class TlsConnection {
           NoSuchAlgorithmException,
           KeyStoreException,
           KeyManagementException,
-          TlsClientException {
+          TlsClientException,
+          TlsConnectionException {
     tlsConnect(certPath, clientKeystorePassw, serverAddress, sutServerPort);
   }
 
@@ -80,10 +85,8 @@ public class TlsConnection {
           CertificateException,
           UnrecoverableKeyException,
           KeyManagementException,
-          TlsClientException {
-
-    final SSLContext sslContextClient =
-        new SSLContextProvider().createSSLContext(clientKeystorePath, clientKeystorePassw);
+          TlsClientException,
+          TlsConnectionException {
 
     final P12Container p12Container =
         P12Reader.getContentFromP12(clientKeystorePath, clientKeystorePassw);
@@ -115,12 +118,16 @@ public class TlsConnection {
     keystoreIs.close();
 
     kmf.init(ks, clientKeystorePassw.toCharArray());
+
+    final SSLContext sslContextClient =
+        new SSLContextProvider().createSSLContext(clientKeystorePath, clientKeystorePassw);
+
     sslContextClient.init(kmf.getKeyManagers(), new TrustManager[] {new BlindTrustManager()}, null);
 
     log.info("algorithm: {}, ciphersSuites: {}", algorithm, Arrays.asList(ciphersSuites));
 
     try (final SSLSocket clientSSLSocket =
-        (SSLSocket) sslContextClient.getSocketFactory().createSocket(serverAddress, serverPort)) {
+        (SSLSocket) sslContextClient.getSocketFactory().createSocket()) {
       log.info(
           "try to connect with cert \"{}\" to {}:{} ",
           clientKeystorePath,
@@ -129,20 +136,27 @@ public class TlsConnection {
 
       final SSLParameters sslParameters = clientSSLSocket.getSSLParameters();
       sslParameters.setCipherSuites(ciphersSuites);
-
       clientSSLSocket.setSSLParameters(sslParameters);
       clientSSLSocket.setEnabledProtocols(tlsSettings.getEnabledProtocols());
-      clientSSLSocket.setSoTimeout(tlsSettings.getSocketTimeoutMsec());
+      // clientSSLSocket.setSoTimeout(tlsSettings.getSocketTimeoutMsec());
       clientSSLSocket.setUseClientMode(true);
       clientSSLSocket.addHandshakeCompletedListener(new TlsHandshakeCompletedListener());
+      clientSSLSocket.connect(
+          new InetSocketAddress(serverAddress, serverPort), ocspDelaySeconds * 1000);
       clientSSLSocket.startHandshake();
       log.info(
           "Handshake started. To send application data implement:"
               + " clientSSLSocket.getOutputStream().write()");
       log.info("Socket we connect from: {}", clientSSLSocket.getLocalSocketAddress());
 
+    } catch (final TlsFatalAlertReceived e) {
+      log.info("No ssl connection established: {}", e.getMessage());
+      throw new TlsConnectionException("No ssl connection established.", e);
+    } catch (SocketTimeoutException e) {
+      log.info("No ssl connection tiomeout: {}", e.getMessage());
+      throw new TlsConnectionException("No ssl connection timeout.", e);
     } catch (final IOException e) {
-      throw new TlsClientException("Cannot create SSL socket", e);
+      throw new TlsClientException("Problems creating or using client SSL socket.", e);
     }
   }
 }

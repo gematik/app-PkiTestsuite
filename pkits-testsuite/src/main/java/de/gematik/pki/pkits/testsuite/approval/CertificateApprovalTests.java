@@ -16,8 +16,9 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
+import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_PRECONFIGURED;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
@@ -38,7 +39,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -60,9 +60,8 @@ class CertificateApprovalTests extends ApprovalTestsBase {
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_VALID)
   @DisplayName("Test use case with valid certificates")
-  void verifyConnectCertsValid(final Path certPath, final TestInfo testInfo) {
+  void verifyUseCaseCertsValid(final Path certPath) {
 
-    testCaseMessage(testInfo);
     initialState();
 
     useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_WITH_PROVIDED_CERT, OCSP_REQUEST_EXPECT);
@@ -70,13 +69,12 @@ class CertificateApprovalTests extends ApprovalTestsBase {
 
   /** gematikId: UE_PKI_TS_0305_001 */
   @Test
-  @Afo(afoId = "GS-A_4357", description = "RSA algorithms - Tab_KRYPT_002")
-  @Afo(afoId = "GS-A_4384", description = "RSA cipher suites for TLS")
+  @Afo(afoId = "TODO - GS-A_4357", description = "RSA algorithms - Tab_KRYPT_002")
+  @Afo(afoId = "TODO - GS-A_4384", description = "RSA cipher suites for TLS")
   @Disabled("Our SUT does not support RSA yet")
-  @DisplayName("Test use case with valid RSA certificate")
-  void verifyConnectRsaCertsValid(final TestInfo testInfo) {
+  @DisplayName("NOT IMPLEMENTED YET - Test use case with valid RSA certificate")
+  void verifyUseCaseRsaCertValid() {
 
-    testCaseMessage(testInfo);
     initialState();
 
     final Path certPath = Path.of("./testDataTemplates/certificates/valid-rsa/ee_default-rsa.p12");
@@ -97,11 +95,39 @@ class CertificateApprovalTests extends ApprovalTestsBase {
     useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);
   }
 
+  /** gematikId: UE_PKI_TS_0302_001 */
+  @ParameterizedTest
+  @Afo(
+      afoId = "GS-A_4652",
+      description = "TUC_PKI_018: Zertifikatsprüfung in der TI - negative cases")
+  @Afo(
+      afoId = "GS-A_4663",
+      description = "Zertifikats-Prüfparameter für den TLS-Handshake - negative cases")
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 2")
+  @Afo(
+      afoId = "GS-A_4656",
+      description = "TUC_PKI_005: Adresse für Status- und Sperrprüfung ermitteln - Schritt 2b")
+  @Afo(afoId = "GS-A_4654", description = "TUC_PKI_003: CA-Zertifikat finden - Schritt 3")
+  @ArgumentsSource(CertificateProvider.class)
+  @VariableSource(value = PkitsCertType.PKITS_CERT_VALID_ALTERNATIVE)
+  @DisplayName("Test use case with valid certificates with issuer not in trust store")
+  void verifyUseCaseCertsNotInTsl(final Path certPathAlternative) {
+
+    initialState();
+
+    useCaseWithCert(
+        certPathAlternative,
+        USECASE_INVALID,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        OCSP_REQUEST_DO_NOT_EXPECT);
+  }
+
   // TODO UE_PKI_TS_0302_007 ee_invalid-keyusage.p12
   // TODO UE_PKI_TS_0302_029 ee_invalid-ext-keyusage.p12
-  // TODO UE_PKI_TS_0302_010 ee_invalid-extension-crit.p12  does not throw...?
-
-  /** gematikId: UE_PKI_TS_0302_003, UE_PKI_TS_0302_005, UE_PKI_TS_0302_006, UE_PKI_TS_0302_040 */
+  /**
+   * gematikId: UE_PKI_TS_0302_003, UE_PKI_TS_0302_005, UE_PKI_TS_0302_006, UE_PKI_TS_0302_040,
+   * UE_PKI_TS_0302_010
+   */
   @ParameterizedTest
   @Afo(
       afoId = "GS-A_4652",
@@ -117,9 +143,8 @@ class CertificateApprovalTests extends ApprovalTestsBase {
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_INVALID)
   @DisplayName("Test use case with invalid certificates")
-  void verifyConnectCertsInvalid(final Path certPath, final TestInfo testInfo) {
+  void verifyUseCaseCertsInvalid(final Path certPath) {
 
-    testCaseMessage(testInfo);
     initialState();
 
     // NOTE: we ignore OCSP requests, although in some cases the specification defines that OCSP

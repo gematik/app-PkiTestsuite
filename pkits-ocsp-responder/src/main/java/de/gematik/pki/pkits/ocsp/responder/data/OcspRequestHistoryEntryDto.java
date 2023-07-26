@@ -32,9 +32,11 @@ public class OcspRequestHistoryEntryDto {
   private BigInteger certSerialNr;
   private String timeStamp;
 
+  private byte[] ocspReqBytes;
+
   @Override
   public String toString() {
-    return "OcspRequestHistoryEntryDto{tslSeqNr=%d, certSerialNr=%s, timeStamp='%s'}"
-        .formatted(tslSeqNr, certSerialNr, timeStamp);
+    return "OcspRequestHistoryEntryDto{tslSeqNr=%d, certSerialNr=%s, timeStamp='%s', ocspReqBytes size: %s}"
+        .formatted(tslSeqNr, certSerialNr, timeStamp, ocspReqBytes.length);
   }
 }
