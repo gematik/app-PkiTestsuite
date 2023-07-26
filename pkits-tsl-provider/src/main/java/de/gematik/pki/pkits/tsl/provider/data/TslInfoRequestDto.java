@@ -27,7 +27,7 @@ import lombok.Setter;
 @Setter
 public class TslInfoRequestDto {
 
-  private int sequenceNr;
+  private int tslSeqNr;
   private HistoryDeleteOption historyDeleteOption;
 
   public enum HistoryDeleteOption {

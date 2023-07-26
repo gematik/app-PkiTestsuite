@@ -1,10 +1,10 @@
 de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-  verifyConnectCertsInvalid   GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
-  verifyConnectCertsValid     A_17124, GS-A_4357, GS-A_4652, GS-A_4663
-  verifyConnectRsaCertsValid  GS-A_4357, GS-A_4384
+  verifyUseCaseCertsInvalid   GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
+  verifyUseCaseCertsNotInTsl  GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
+  verifyUseCaseCertsValid     A_17124, GS-A_4357, GS-A_4652, GS-A_4663
+  verifyUseCaseRsaCertValid   TODO - GS-A_4357, TODO - GS-A_4384
 
 de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
-  verifyForCaCertificateIsNotInTsl                   GS-A_4656, GS-A_4657, TODO - GS-A_4654
   verifyForCaCertificateWithoutServiceSupplyPoint    GS-A_4656, GS-A_4657
   verifyInvalidCerIdInOcspResponse                   GS-A_4657
   verifyInvalidCertHashInOcspResponse                GS-A_4657
@@ -13,6 +13,7 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
   verifyMissingOcspSignerInTslForUseCaseCertificate  GS-A_4657
   verifyOcspCertificateStatusRevokedAndUnknown       GS-A_4657
   verifyOcspGracePeriod                              GS-A_4657
+  verifyOcspRequestStructure                         GS-A_4657, GS-A_4674, RFC5019, RFC6960
   verifyOcspResponseMissingNextUpdate                GS-A_4657
   verifyOcspResponseNextUpdatePastOutOfTolerance     GS-A_4657
   verifyOcspResponseNextUpdatePastWithinTolerance    GS-A_4657
@@ -27,9 +28,11 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
   verifyOcspResponseVariousStatusAndResponseBytes    GS-A_4657
   verifyOcspResponseWithNullParameterInCertId        RFC 5280, RFC 6960
 
+de.gematik.pki.pkits.testsuite.approval.TslApprovalExtraTests
+  verifyExpiredTslInSystem  GS-A_4642, GS-A_4648
+
 de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
   verifyForBadCertificateOfTSPService                    GS-A_4642
-  verifyForTslInSystemIsOutOfTime                        GS-A_4642, TODO - GS-A_4648
   verifyForTslInvalidXmlSchemaOrNonCompliantElement      GS-A_4642, GS-A_4648, GS-A_4649
   verifyForTslNotWellFormedXmlStructure                  GS-A_4642, GS-A_4648, GS-A_4649
   verifyForTslWithInvalidOidDownloadAddresses            GS-A_4647, GS-A_4648

@@ -27,10 +27,6 @@ public class TslGenerationException extends RuntimeException {
     super(message, e);
   }
 
-  public TslGenerationException(final String message) {
-    super(message);
-  }
-
   public TslGenerationException(final Exception e) {
     super(e);
   }

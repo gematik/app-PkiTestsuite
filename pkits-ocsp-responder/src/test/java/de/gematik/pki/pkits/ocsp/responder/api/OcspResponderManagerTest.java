@@ -74,7 +74,7 @@ class OcspResponderManagerTest {
   }
 
   private void assertGetOcspHistoryPart(
-      final Integer seqNr, final String certSerialNrStr, final int expectedAmount) {
+      final Integer tslSeqNr, final String certSerialNrStr, final int expectedAmount) {
 
     BigInteger certSerialNr = null;
 
@@ -83,7 +83,7 @@ class OcspResponderManagerTest {
     }
 
     final List<OcspRequestHistoryEntryDto> entries =
-        OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+        OcspResponderManager.getOcspHistoryPart(ocspRespUri, tslSeqNr, certSerialNr);
 
     assertThat(entries).hasSize(expectedAmount);
   }
@@ -137,7 +137,7 @@ class OcspResponderManagerTest {
   }
 
   private void assertGetAndClearOcspHistoryPart(
-      final Integer seqNr, final String certSerialNrStr, final int expectedAmount) {
+      final Integer tslSeqNr, final String certSerialNrStr, final int expectedAmount) {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
@@ -158,10 +158,10 @@ class OcspResponderManagerTest {
 
     List<OcspRequestHistoryEntryDto> entries;
 
-    entries = OcspResponderManager.getAndClearOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+    entries = OcspResponderManager.getAndClearOcspHistoryPart(ocspRespUri, tslSeqNr, certSerialNr);
     assertThat(entries).hasSize(expectedAmount);
 
-    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, tslSeqNr, certSerialNr);
     assertThat(entries).isEmpty();
   }
 
@@ -203,7 +203,7 @@ class OcspResponderManagerTest {
   }
 
   private void assertClearOcspHistory(
-      final Integer seqNr, final String certSerialNrStr, final int expectedAmount) {
+      final Integer tslSeqNr, final String certSerialNrStr, final int expectedAmount) {
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
@@ -224,12 +224,12 @@ class OcspResponderManagerTest {
 
     List<OcspRequestHistoryEntryDto> entries;
 
-    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, tslSeqNr, certSerialNr);
     assertThat(entries).hasSize(expectedAmount);
 
     OcspResponderManager.clearOcspHistory(ocspRespUri);
 
-    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerialNr);
+    entries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, tslSeqNr, certSerialNr);
     assertThat(entries).isEmpty();
 
     entries =

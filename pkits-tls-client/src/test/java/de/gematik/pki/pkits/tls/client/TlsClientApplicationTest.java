@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.tls.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,13 +29,16 @@ class TlsClientApplicationTest {
 
   @BeforeAll
   static void setUp() {
-    clientKeystorePath = Path.of("../testDataTemplates/certificates/rsa/valid/ee_default.p12");
+    clientKeystorePath =
+        ResourceReader.getFilePathFromResources(
+            "certificates/rsa/valid/ee_default.p12", TlsClientApplicationTest.class);
   }
 
   @Test
   void verifyMainNoServerAvailable() {
 
-    final int exitCode = TlsClientApplication.connectTls("unknown", 8443, clientKeystorePath, "00");
+    final int exitCode =
+        TlsClientApplication.connectTls("unknown", 8443, clientKeystorePath, "00", 0);
     assertThat(exitCode).isEqualTo(2);
   }
 
@@ -42,7 +46,7 @@ class TlsClientApplicationTest {
   void verifyMainWithoutOcsp() {
 
     final int exitCode =
-        TlsClientApplication.connectTls("localhost", 8443, clientKeystorePath, "00");
-    assertThat(exitCode).isEqualTo(1);
+        TlsClientApplication.connectTls("localhost", 8443, clientKeystorePath, "00", 0);
+    assertThat(exitCode).isEqualTo(2);
   }
 }

@@ -132,6 +132,11 @@ public class ListParameters {
         || fieldClazz.equals(Integer.class);
   }
 
+  public static int getNumberOfAllFields(final Class<?> clazz) {
+    final List<YamlLine> yamlLines = ListParameters.getFields(0, ".", clazz);
+    return yamlLines.stream().filter(YamlLine::isEnd).toList().size();
+  }
+
   public static List<YamlLine> getFields(
       final int level, final String parentPath, final Class<?> clazz) {
     final Field[] fields = clazz.getDeclaredFields();

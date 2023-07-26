@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 class OcspRequestHistoryTest {
 
-  /** Store one element, check size, TSL seqNr does not matter */
+  /** Store one element, check size, tslSeqNr does not matter */
   @Test
   void add() {
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
@@ -36,7 +36,7 @@ class OcspRequestHistoryTest {
     assertThat(ocspRequestHistory.size()).isEqualTo(1);
   }
 
-  /** Store one element, check size, TSL seqNr does not matter */
+  /** Store one element, check size, tslSeqNr does not matter */
   @Test
   void add2() {
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
@@ -46,7 +46,7 @@ class OcspRequestHistoryTest {
   }
 
   /**
-   * Store some elements with different certSerialNr, get excerpt and check certSerialNr, TSL seqNr
+   * Store some elements with different certSerialNr, get excerpt and check certSerialNr, tslSeqNr
    * does not matter
    */
   @Test
@@ -73,7 +73,7 @@ class OcspRequestHistoryTest {
 
   /**
    * Store some elements with same and different certSerialNr, get excerpt and check amount and
-   * certSerialNr,TSL seqNr does not matter
+   * certSerialNr, tslSeqNr does not matter
    */
   @Test
   void getExcerptExpectSeveral() {
@@ -127,7 +127,7 @@ class OcspRequestHistoryTest {
   }
 
   /**
-   * Store some elements with different certSerialNr, delete one and check size, TSL seqNr does not
+   * Store some elements with different certSerialNr, delete one and check size, tslSeqNr does not
    * matter
    */
   @Test
@@ -150,7 +150,7 @@ class OcspRequestHistoryTest {
   }
 
   /**
-   * Store some elements with different tslSeqNr, delete one and check size, TSL seqNr does not
+   * Store some elements with different tslSeqNr, delete one and check size, tslSeqNr does not
    * matter
    */
   @Test
@@ -172,8 +172,8 @@ class OcspRequestHistoryTest {
   }
 
   /**
-   * Store some elements, some of them have equal certSerialNr, delete them and check size, TSL
-   * seqNr does not matter
+   * Store some elements, some of them have equal certSerialNr, delete them and check size, tslSeqNr
+   * does not matter
    */
   @Test
   void deleteSameEntries() {
@@ -221,7 +221,7 @@ class OcspRequestHistoryTest {
     assertThat(ocspRequestHistory.size()).isZero();
   }
 
-  /** Store some elements, delete all and check size, TSL seqNr does not matter */
+  /** Store some elements, delete all and check size, tslSeqNr does not matter */
   @Test
   void deleteAll() {
     final OcspRequestHistory ocspRequestHistory = new OcspRequestHistory();
@@ -236,7 +236,7 @@ class OcspRequestHistoryTest {
     assertThat(ocspRequestHistory.size()).isZero();
   }
 
-  /** Store some elements and check size, TSL seqNr does not matter */
+  /** Store some elements and check size, tslSeqNr does not matter */
   @Test
   void size() {
     final int elementsPut = 42;

@@ -27,12 +27,12 @@ class Tsl {
   final byte[] tslBytes;
   final TrustStatusListType trustStatusListType;
 
-  final BigInteger sequenceNr;
+  final BigInteger tslSeqNr;
 
   public Tsl(final String tslHash, final byte[] tslBytes) {
     this.tslHash = tslHash;
     this.tslBytes = tslBytes;
     this.trustStatusListType = TslConverter.bytesToTsl(tslBytes);
-    this.sequenceNr = TslReader.getSequenceNumber(trustStatusListType);
+    this.tslSeqNr = TslReader.getTslSeqNr(trustStatusListType);
   }
 }

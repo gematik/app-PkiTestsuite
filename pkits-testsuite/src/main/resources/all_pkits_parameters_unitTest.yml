@@ -9,28 +9,34 @@ testObject:
   type: "testObject.type"
   ipAddressOrFqdn: "testObject.ipAddressOrFqdn"
   port: -99
-  scriptPath: "testObject.scriptPath"
   tslDownloadIntervalSeconds: -100
+  tslGracePeriodDays: -150
   tslProcessingTimeSeconds: -200
+  ocspProcessingTimeSeconds: -250
   ocspGracePeriodSeconds: -300
   ocspTimeoutSeconds: -400
-  sshConfig:
-    username: "testObject.sshConfig.username"
-    password: "testObject.sshConfig.password"
-    host: "testObject.sshConfig.host"
-    port: -100
-    privateKey: "testObject.sshConfig.privateKey"
-    privateKeyPassphrase: "testObject.sshConfig.privateKeyPassphrase"
-    appDataHttpFwdSocket: "testObject.sshConfig.appDataHttpFwdSocket"
-    cryptMethod: "testObject.sshConfig.cryptMethod"
-    filesToCopyRootDir: "testObject.sshConfig.filesToCopyRootDir"
-    filesToCopyPattern: "testObject.sshConfig.filesToCopyPattern"
-    remoteTargetDir: "testObject.sshConfig.remoteTargetDir"
-    remoteLogFile: "testObject.sshConfig.remoteLogFile"
-    connectTimeoutSeconds: -200
-    authTimeoutSeconds: -300
-    channelOpenTimeoutSeconds: -400
-    channelCloseTimeoutSeconds: -500
+  scriptUseCase:
+    scriptPath: "testObject.scriptUseCase.scriptPath"
+    sendReceiveApplicationData: false
+    appDataHttpFwdSocket: "testObject.scriptUseCase.appDataHttpFwdSocket"
+    cryptMethod: "testObject.scriptUseCase.cryptMethod"
+
+sshConfig:
+  username: "sshConfig.username"
+  password: "sshConfig.password"
+  host: "sshConfig.host"
+  port: -100
+  privateKey: "sshConfig.privateKey"
+  privateKeyPassphrase: "sshConfig.privateKeyPassphrase"
+  connectTimeoutSeconds: -200
+  authTimeoutSeconds: -300
+  channelOpenTimeoutSeconds: -400
+  channelCloseTimeoutSeconds: -500
+  sshUseCaseParameters:
+    filesToCopyRootDir: "sshConfig.sshUseCaseParameters.filesToCopyRootDir"
+    filesToCopyPattern: "sshConfig.sshUseCaseParameters.filesToCopyPattern"
+    remoteTargetDir: "sshConfig.sshUseCaseParameters.remoteTargetDir"
+    remoteLogFile: "sshConfig.sshUseCaseParameters.remoteLogFile"
 
 ocspResponder:
   ipAddressOrFqdn: "ocspResponder.ipAddressOrFqdn"

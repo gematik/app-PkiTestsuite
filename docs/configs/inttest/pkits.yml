@@ -1,7 +1,13 @@
 client:
-  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid"
-  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid-alternative"
-  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClientCerts/invalid"
+  # Example test data for tests of an KIM Fachdienst
+  #keystorePathValidCerts: "./testDataTemplates/certificates/ecc/kimClientModul/valid"
+  #keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/kimClientModul/valid-alternative"
+  #keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/kimClientModul/invalid"
+
+  # Example test data for tests of an Intermediär Server or VPNZugD RegServer
+  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid"
+  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid-alternative"
+  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/invalid"
 
 testObject:
   name: "Server 0815"

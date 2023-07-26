@@ -16,8 +16,6 @@
 
 package de.gematik.pki.pkits.tsl.provider.controller;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_BACKUP;
-import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -60,14 +58,11 @@ class TslConfigControllerTest {
   void tslConfigNew() {
     final String WEBSERVER_CONFIG_URL =
         "http://localhost:" + localServerPort + WEBSERVER_CONFIG_ENDPOINT;
-    assertThat(tslConfigHolder.getTslProviderConfigDto().getActiveTslDownloadPoint())
-        .isEqualTo(TSL_DOWNLOAD_POINT_PRIMARY);
 
     final byte[] tslBytes =
         ResourceReader.getFileFromResourceAsBytes(TSL_FILEPATH, this.getClass());
     final TslProviderConfigDto tslProviderConfig =
-        new TslProviderConfigDto(
-            tslBytes, TSL_DOWNLOAD_POINT_BACKUP, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
+        new TslProviderConfigDto(tslBytes, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
 
     log.info("new TslProviderConfig: {}", tslProviderConfig);
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfig);
@@ -76,17 +71,12 @@ class TslConfigControllerTest {
         Unirest.post(WEBSERVER_CONFIG_URL).body(jsonContent).asString();
 
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
-    assertThat(tslConfigHolder.getTslProviderConfigDto().getActiveTslDownloadPoint())
-        .isEqualTo(TSL_DOWNLOAD_POINT_BACKUP);
     assertThat(tslConfigHolder.getTslProviderConfigDto().getTslBytes()).hasSameSizeAs(tslBytes);
   }
 
   private void invalidateTslProviderConfiguration() {
     final byte[] tslBytes = "this is not a TSL :-)".getBytes(StandardCharsets.UTF_8);
     tslConfigHolder.setTslProviderConfigDto(
-        new TslProviderConfigDto(
-            tslBytes,
-            TSL_DOWNLOAD_POINT_PRIMARY,
-            TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200));
+        new TslProviderConfigDto(tslBytes, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200));
   }
 }

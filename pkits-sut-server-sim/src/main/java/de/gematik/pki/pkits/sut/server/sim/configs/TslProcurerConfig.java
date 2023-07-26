@@ -29,4 +29,5 @@ public class TslProcurerConfig {
   private URL initialTslPrimaryDownloadUrl;
   private int downloadInterval;
   private int repetitions;
+  private int tslGracePeriodDays;
 }

@@ -21,12 +21,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 
 public class CustomTestExecutionListener implements TestExecutionListener {
 
+  @Getter @Setter private static boolean stopComponentsClassAfterAll = true;
   private final Map<String, TestExecutionOutcome> testExecutionOutcomes = new LinkedHashMap<>();
 
   @Override

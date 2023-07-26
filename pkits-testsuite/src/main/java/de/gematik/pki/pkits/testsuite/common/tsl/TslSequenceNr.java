@@ -35,7 +35,7 @@ public final class TslSequenceNr {
   @Getter @Setter private int expectedNrInTestObject = 1;
 
   // last sequence number of the tsl that was offered for downloaded to the test object
-  @Getter private int lastOfferedNr = 0;
+  @Getter private int lastOfferedTslSeqNr = 0;
 
   private static TslSequenceNr instance;
 
@@ -64,43 +64,43 @@ public final class TslSequenceNr {
     if (Files.exists(TSL_SEQNR_FILE_PATH)) {
       readTslSeqNrFromFile();
     } else {
-      saveCurrentTestObjectSeqNr(currentNrInTestObject);
+      saveCurrentTestObjectTslSeqNr(currentNrInTestObject);
     }
     return instance;
   }
 
-  public void setLastOfferedNr(final int offeredSeqNr) {
-    lastOfferedNr = offeredSeqNr;
-    persistSeqNr();
+  public void setLastOfferedTslSeqNr(final int offeredTslSeqNr) {
+    lastOfferedTslSeqNr = offeredTslSeqNr;
+    persistTslSeqNr();
   }
 
-  private void persistSeqNr() {
+  private void persistTslSeqNr() {
     try {
-      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(lastOfferedNr));
+      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(lastOfferedTslSeqNr));
     } catch (final IOException e) {
       throw new TestSuiteException("Cannot write sequence number file!", e);
     }
   }
 
-  public void saveCurrentTestObjectSeqNr(final int seqNr) {
+  public void saveCurrentTestObjectTslSeqNr(final int tslSeqNr) {
     try {
-      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(seqNr));
-      this.currentNrInTestObject = seqNr;
+      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(tslSeqNr));
+      this.currentNrInTestObject = tslSeqNr;
     } catch (final IOException e) {
       throw new TestSuiteException("Could not write TslSeqNr to file.", e);
     }
   }
 
   public int getNextTslSeqNr() {
-    if (lastOfferedNr == 0) {
+    if (lastOfferedTslSeqNr == 0) {
       return getCurrentNrInTestObject() + 1;
     }
-    return lastOfferedNr + 1;
+    return lastOfferedTslSeqNr + 1;
   }
 
   @Override
   public String toString() {
-    return "TslSequenceNr{currentNrInTestObject=%d, lastOfferedNr=%d, expectedNrInTestObject=%d}"
-        .formatted(currentNrInTestObject, lastOfferedNr, expectedNrInTestObject);
+    return "TslSequenceNr{currentNrInTestObject=%d, lastOfferedTslSeqNr=%d, expectedNrInTestObject=%d}"
+        .formatted(currentNrInTestObject, lastOfferedTslSeqNr, expectedNrInTestObject);
   }
 }

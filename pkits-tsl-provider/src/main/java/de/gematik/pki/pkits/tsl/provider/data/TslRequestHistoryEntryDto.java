@@ -27,14 +27,14 @@ import lombok.Setter;
 @Setter
 public class TslRequestHistoryEntryDto {
 
-  private int sequenceNr;
+  private int tslSeqNr;
   private String tslDownloadEndpoint;
   private boolean isGzipCompressed;
   private String protocol;
 
   @Override
   public String toString() {
-    return "TslRequestHistoryEntryDto{sequenceNr=%d, tslDownloadEndpoint='%s', isGzipCompressed=%s, protocol='%s'}"
-        .formatted(sequenceNr, tslDownloadEndpoint, isGzipCompressed, protocol);
+    return "TslRequestHistoryEntryDto{tslSeqNr=%d, tslDownloadEndpoint='%s', isGzipCompressed=%s, protocol='%s'}"
+        .formatted(tslSeqNr, tslDownloadEndpoint, isGzipCompressed, protocol);
   }
 }

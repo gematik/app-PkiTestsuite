@@ -34,34 +34,33 @@ public class TslRequestHistory {
       Collections.synchronizedList(new ArrayList<>());
 
   public void add(final TslRequestHistoryEntryDto newItem) {
-    log.debug("Add new entry with seqNr: {} - {}", newItem.getSequenceNr(), newItem);
+    log.debug("Add new entry with tslSeqNr: {} - {}", newItem.getTslSeqNr(), newItem);
     history.add(newItem);
   }
 
   public void add(
-      final int sequenceNr,
+      final int tslSeqNr,
       final String endpoint,
       final boolean isGzipCompressed,
       final String protocol) {
 
     final TslRequestHistoryEntryDto newItem =
-        new TslRequestHistoryEntryDto(sequenceNr, endpoint, isGzipCompressed, protocol);
+        new TslRequestHistoryEntryDto(tslSeqNr, endpoint, isGzipCompressed, protocol);
 
     add(newItem);
   }
 
-  public List<TslRequestHistoryEntryDto> getExcerpt(final int sequenceNr) {
+  public List<TslRequestHistoryEntryDto> getExcerpt(final int tslSeqNr) {
 
-    final boolean requestedFullHistory = (sequenceNr == IGNORE_SEQUENCE_NUMBER);
+    final boolean requestedFullHistory = (tslSeqNr == IGNORE_SEQUENCE_NUMBER);
 
     return history.stream()
-        .filter(
-            historyEntry -> requestedFullHistory || (historyEntry.getSequenceNr() == sequenceNr))
+        .filter(historyEntry -> requestedFullHistory || (historyEntry.getTslSeqNr() == tslSeqNr))
         .toList();
   }
 
-  public void deleteEntries(final int sequenceNr) {
-    history.removeIf(historyEntry -> historyEntry.getSequenceNr() == sequenceNr);
+  public void deleteEntries(final int tslSeqNr) {
+    history.removeIf(historyEntry -> historyEntry.getTslSeqNr() == tslSeqNr);
   }
 
   public void deleteAll() {

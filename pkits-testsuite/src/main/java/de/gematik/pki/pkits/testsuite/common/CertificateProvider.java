@@ -20,8 +20,8 @@ import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
 import de.gematik.pki.pkits.testsuite.config.ClientConfig;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,7 +55,7 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
             }
           });
     } catch (final IOException e) {
-      throw new UncheckedIOException("Fehler beim Lesen des Verzeichnisses: " + directory, e);
+      throw new TestSuiteException("Fehler beim Lesen des Verzeichnisses: " + directory, e);
     }
     return fileList.stream();
   }
@@ -71,6 +71,7 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
     final ClientConfig clientConfig = TestConfigManager.getTestSuiteConfig().getClient();
     switch (pkitsCertType) {
       case PKITS_CERT_VALID -> certDir = clientConfig.getKeystorePathValidCerts();
+      case PKITS_CERT_VALID_ALTERNATIVE -> certDir = clientConfig.getKeystorePathAlternativeCerts();
       case PKITS_CERT_INVALID -> certDir = clientConfig.getKeystorePathInvalidCerts();
       default -> throw new PkiCommonException("Unknown PkitsCertType");
     }

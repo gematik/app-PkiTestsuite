@@ -1,0 +1,31 @@
+client:
+  # Example test data for tests of an KIM Fachdienst
+  #keystorePathValidCerts: "./testDataTemplates/certificates/ecc/kimClientModul/valid"
+  #keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/kimClientModul/valid-alternative"
+  #keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/kimClientModul/invalid"
+
+  # Example test data for tests of an Intermediär Server or VPNZugD RegServer
+  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid"
+  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid-alternative"
+  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/invalid"
+
+testObject:
+  name: "Server 0815"
+  type: "TlsServer"
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8443
+  ocspGracePeriodSeconds: 0
+  tslDownloadIntervalSeconds: 2
+  tslProcessingTimeSeconds: 3
+
+ocspResponder:
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8083
+
+tslProvider:
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8084
+
+testSuiteParameter:
+  tslSettings:
+    initialStateTslImport: false

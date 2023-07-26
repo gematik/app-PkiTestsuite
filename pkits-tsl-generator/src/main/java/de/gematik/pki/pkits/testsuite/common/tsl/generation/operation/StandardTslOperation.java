@@ -28,7 +28,7 @@ public class StandardTslOperation extends AggregateTslOperation {
   @Getter
   @Builder
   public static class StandardTslOperationConfig {
-    private int sequenceNr;
+    private int tslSeqNr;
     private String tspName;
     private String newSsp;
     private String tslDownloadUrlPrimary;
@@ -43,8 +43,8 @@ public class StandardTslOperation extends AggregateTslOperation {
     add(
         new ModifyIssueDateAndRelatedNextUpdateTslOperation(
             config.issueDate, config.nextUpdate, config.daysUntilNextUpdate));
-    add(new ModifyTslIdTslOperation(config.sequenceNr, config.issueDate));
-    add(new ModifySeqNrTslOperation(config.sequenceNr));
+    add(new ModifyTslIdTslOperation(config.tslSeqNr, config.issueDate));
+    add(new ModifyTslSeqNrTslOperation(config.tslSeqNr));
     add(new ModifySspForCAsOfTspTslOperation(config.tspName, config.newSsp));
     add(new ModifyPrimaryUrlTslOperation(config.tslDownloadUrlPrimary));
     add(new ModifyBackupUrlTslOperation(config.tslDownloadUrlBackup));

@@ -1,8 +1,8 @@
 <Configuration>
 
   <Properties>
-    <Property name="l4j.dir">./logs</Property>
-    <Property name="l4j.level">trace</Property>
+    <Property name="l4j.dir">./out/logs</Property>
+    <Property name="l4j.level">${sys:log4j2.rootLogLevelOcspResponder:-info}</Property>
     <Property name="l4j.append">false</Property>
     <Property name="l4j.additivity">false</Property>
     <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1}:%L - %msg%n</Property>
