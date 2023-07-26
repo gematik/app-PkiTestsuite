@@ -33,6 +33,8 @@ import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +62,17 @@ import org.slf4j.Logger;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PkitsCommonUtils {
 
+  private static final DateTimeFormatter dateTimeFormatter =
+      DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
+  public static String asTimestampStr(final ZonedDateTime dateTime) {
+    return dateTime.format(dateTimeFormatter);
+  }
+
+  public static String getHttpAdressString(final String ipAdressOrFqdn, final int port) {
+    return "http://" + ipAdressOrFqdn + ":" + port;
+  }
+
   public static boolean isExternalStartup(final String appPath) {
     return PkitsConstants.EXTERNAL_STARTUP.equals(appPath);
   }
@@ -80,6 +93,7 @@ public final class PkitsCommonUtils {
   public static void waitMilliseconds(final long milliseconds) {
 
     try {
+      log.info("Waiting for {} milliseconds.", milliseconds);
       final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
       executorService.schedule(() -> 0, milliseconds, TimeUnit.MILLISECONDS).get();
     } catch (final InterruptedException | ExecutionException e) {

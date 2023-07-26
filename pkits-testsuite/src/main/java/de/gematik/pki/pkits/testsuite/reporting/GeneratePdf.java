@@ -27,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -36,7 +38,7 @@ import org.apache.commons.text.StringEscapeUtils;
 @Slf4j
 public class GeneratePdf {
 
-  public static boolean noHtml = false;
+  @Getter @Setter private static boolean noHtml = false;
 
   public static final String htmlDocPrefix() {
     return noHtml
@@ -77,7 +79,7 @@ public class GeneratePdf {
     return noHtml ? content : "<h%s>%s</h%s>".formatted(headerLevel, content, headerLevel);
   }
 
-  public static final String htmlBr() {
+  public static String htmlBr() {
     return noHtml ? "" : "<br>";
   }
 
@@ -90,29 +92,27 @@ public class GeneratePdf {
   }
 
   public static void saveHtmlAndPdf(
-      final String reportContent, final Path baseFilename, final boolean alsoWithTimestamp)
+      final String reportContent, final Path baseFilename, final boolean onlyWithTimestamp)
       throws IOException {
 
     final Path outputHtmlFile = Path.of(baseFilename + ".html");
     final Path outputPdfFile = Path.of(baseFilename + ".pdf");
 
-    if (alsoWithTimestamp) {
-      final String timestamp =
-          "_" + GemLibPkiUtils.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-      final Path outputHtmlFileWithTimestamp = Path.of(baseFilename + "_" + timestamp + ".html");
-      final Path outputPdfFileWithTimestamp = Path.of(baseFilename + "_" + timestamp + ".pdf");
+    final String timestamp =
+        "_" + GemLibPkiUtils.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    final Path outputHtmlFileWithTimestamp = Path.of(baseFilename + "_" + timestamp + ".html");
+    final Path outputPdfFileWithTimestamp = Path.of(baseFilename + "_" + timestamp + ".pdf");
 
-      log.info(
-          "save pdf and html files: {}, {}",
-          outputPdfFileWithTimestamp,
-          outputHtmlFileWithTimestamp);
-      createPdf(reportContent, outputPdfFileWithTimestamp);
-      Files.writeString(outputHtmlFileWithTimestamp, reportContent, StandardCharsets.UTF_8);
+    log.info(
+        "save pdf and html files: {}, {}", outputPdfFileWithTimestamp, outputHtmlFileWithTimestamp);
+    createPdf(reportContent, outputPdfFileWithTimestamp);
+    Files.writeString(outputHtmlFileWithTimestamp, reportContent, StandardCharsets.UTF_8);
+
+    if (!onlyWithTimestamp) {
+      log.info("save pdf and html files: {}, {}", outputPdfFile, outputHtmlFile);
+      createPdf(reportContent, outputPdfFile);
+      Files.writeString(outputHtmlFile, reportContent, StandardCharsets.UTF_8);
     }
-
-    log.info("save pdf and html files: {}, {}", outputPdfFile, outputHtmlFile);
-    createPdf(reportContent, outputPdfFile);
-    Files.writeString(outputHtmlFile, reportContent, StandardCharsets.UTF_8);
     log.info("done!");
   }
 

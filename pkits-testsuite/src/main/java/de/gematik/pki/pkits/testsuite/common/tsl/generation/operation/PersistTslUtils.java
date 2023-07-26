@@ -32,10 +32,10 @@ import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class PersistTslUtils {
+public final class PersistTslUtils {
 
-  protected static final String TSL_DIRNAME = "./out/tsl";
-  protected static final String TSL_FILENAME_PREFIX = "Tsl_";
+  private static final String TSL_DIRNAME = "./out/tsl";
+  private static final String TSL_FILENAME_PREFIX = "Tsl_";
 
   public static String getSignerCertIssuerCn(final TrustStatusListType tsl) {
     try {
@@ -81,6 +81,6 @@ public class PersistTslUtils {
     return Path.of(
         TSL_DIRNAME,
         "%s%04d_%s.xml"
-            .formatted(TSL_FILENAME_PREFIX, TslReader.getSequenceNumber(tsl), extendedPostfix));
+            .formatted(TSL_FILENAME_PREFIX, TslReader.getTslSeqNr(tsl), extendedPostfix));
   }
 }

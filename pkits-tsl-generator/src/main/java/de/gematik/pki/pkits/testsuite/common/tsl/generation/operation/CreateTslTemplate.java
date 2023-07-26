@@ -79,12 +79,6 @@ public final class CreateTslTemplate {
     return tspServices;
   }
 
-  private static TslContainer deleteSignature(final TslContainer tslContainer) {
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
-    tsl.setSignature(null);
-    return new TslContainer(tsl);
-  }
-
   static TSPInformationType getStandardTspInformation() {
 
     final String LANG_DE = "DE";
@@ -199,10 +193,14 @@ public final class CreateTslTemplate {
   }
 
   private static TslContainer baseTslContainer() {
+
     TslContainer tslContainer = new TslContainer(TslReader.getTsl(ARVATO_TU_TSL));
     tslContainer = deleteInitialTspServices(tslContainer);
-    tslContainer = deleteSignature(tslContainer);
-    return tslContainer;
+
+    final TrustStatusListType tsl = tslContainer.getAsTsl();
+    TslModifier.deleteSignature(tsl);
+
+    return new TslContainer(tsl);
   }
 
   /** TSLTypeID 1 */

@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 @Slf4j
 @DisplayName("PKI check initial state.")
@@ -31,9 +30,8 @@ public class InitialStateTest extends ApprovalTestsBase {
   @Test
   @Order(1)
   @DisplayName("Check initial state")
-  void checkInitialState(final TestInfo testInfo) {
+  void checkInitialState() {
 
-    testCaseMessage(testInfo);
     retrieveCurrentTslSeqNrInTestObject();
     initialState();
   }

@@ -19,20 +19,25 @@ Registrierungsdienst and Konzentrator , IDP Fachdienst, KIM Fachdienst. More are
 
 ## tl;dr
 
-```console 
-$ Download release zip file from https://github.com/gematik/app-PkiTestsuite/releases und extract it
-$ cp <UserDefinedConfigfile>.yml ./config/pkits.yml (examples see: /docs/config/inttest/)
-$ ./initialTslAndTa.sh (generates trust anchor and TSL in ./out for import in test object)
-$ # The test object has to be started and accessible from now on.
-$ ./checkInitialState.sh (acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case)
-$ ./startApprovalTest.sh (chose tests that shall be executed from allTests.txt)
-$ # Testreport can be found in ./out directory.
+```bash 
+# Download release zip file from https://github.com/gematik/app-PkiTestsuite/releases and extract it
+cp <UserDefinedConfigfile>.yml ./config/pkits.yml (examples: /docs/config/inttest/)
+./initialTslAndTa.sh (generates trust anchor and TSL in ./out for import in test object)
+# The test object has to be started and accessible from now on.
+./checkInitialState.sh (acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case)
+./startApprovalTest.sh (chose tests that shall be executed from allTests.txt)
+# Testreport can be found in ./out directory.
 ```
 
 ## Technical Functionality
 
 The test suite consists of four parts necessary for validating a PKI test object. These are
-implemented as maven modules:
+implemented as maven modules and can be used independently or in conjunction with the test suite.
+
+### Requirements
+
+To execute the test suite you need at least Java 17. We are
+using [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
 
 ### 1. PKI Test Suite
 
@@ -73,7 +78,7 @@ object has to be a server. This means, the PKI test suite acts like a client dur
 
 For tests against a TSL Server, the PKI testsuite has to be configured as follows:
 
-```console
+```yaml
   testObject:
     type: "TlsServer"
 ```
@@ -81,8 +86,8 @@ For tests against a TSL Server, the PKI testsuite has to be configured as follow
 This configuration will use a TSL client implementation bundled with the test suite.
 It establishes a TLS handshake to a test object with a given certificate (
 see [test data section](./README.md#test-data)).
-Corresponding to AFOs: xxx the TLS handshake will follow the specifications from gemSpec_Krypt with
-following parameter:
+Corresponding to AFOs: GS-A_4385 and A_17127-01 the TLS handshake will follow the specifications
+from gemSpec_Krypt with following parameter:
 
 * TLS Version: 1.2
 * cipher suites used: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 or
@@ -117,7 +122,7 @@ All available parameters including a short description can be found
 in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml).
 As this is a YAML file remember to strictly follow the syntax.
 
-```console 
+```text 
 Remember: A change of parameters that will change the TSL (i.e.OCSP responder adress and port or 
 TSL provider adress an port) require a new generation of the initial TSL and import to the test 
 object.
@@ -125,11 +130,20 @@ object.
 
 ### Test Data
 
-We deliver some test data in the directory `./testDataTemplates`. These test data are for our own
-integration tests and can be used for approval tests as well. The test data form an own PKI, hence
-it is not easy to create them by yourself. In later releases it is planned to generate test data on
-the fly. If you use your own test data make sure that issuing certificates are added in the
-[tsl templates](./testDataTemplates/tsl/) as well.
+We deliver some test data in the directory `./testDataTemplates`. Currently, these test data support
+tests for the following TI product:
+
+| Test data directory | Corresponding test object               |
+|---------------------|-----------------------------------------|
+| fachmodulClient     | Intermediär Server and VpnZuD RegServer |
+| intermediaerClient  | VSDM Fachdienst                         |
+| kimClientModul      | KIM Fachdienst                          |
+| netzkonnektorClient | VPN-ZugD Konzentrator                   |
+
+These test data are for our own integration tests and can be used for approval tests as well.
+The test data form an own PKI, hence it is not easy to create them by yourself. In later releases
+it is planned to generate test data on the fly. If you use your own test data make sure that issuing
+certificates are added in the [tsl template](./testDataTemplates/tsl/) as well.
 
 ### Initial TSL and Trust Anchor
 
@@ -147,7 +161,7 @@ and port (see [Configuration](./README.md#configuration)). Tests are executed vi
 script `./startApprovalTest.sh`.
 Furthermore, the [OCSP responder](./README.md#3-ocsp-responder)
 and [TSL provider](./README.md#2-tsl-provider) communicate at the configured sockets (if they are
-not deactivated). Logs are written to the `./out/logs` directory. Afterwards a test report is
+not deactivated). Logs are written to the `./out/logs` directory. Afterward a test report is
 generated in the `./out/testreport` directory.
 
 ### Smoke Test
@@ -155,7 +169,7 @@ generated in the `./out/testreport` directory.
 In oder to make a quick check if everything is set up correctly, the test object can be reach by the
 test suite, and to initialize the test suite with the tsl sequence number set in the test object, we
 implemented a script that runs an initial test: `./checkInitialState.sh`. Within a TSL download by
-the test object is exacted and afterwards a use case is triggered with a valid certificate. OCSP
+the test object is exacted and afterward a use case is triggered with a valid certificate. OCSP
 requests are expected and answered correctly as well. Therefor a configured test object has to be up
 and running and accessible by the testsuite and its components.
 
@@ -173,11 +187,9 @@ If a test class is marked with `+` then all tests of the test class are selected
 except those marked with `-`.
 Inversely, if a test class is marked with `-` then all tests of the test class are excluded from
 execution, except those marked with `+`.
-
-### Requirements
-
-In order to run the test suite, you need a build environment according to the settings in
-the [pom.xml](./pom.xml).
+All failed or aborted tests are saved into file `./allFailedOrAborted.txt` (default name).
+This file then can be used to run all or selected of the failed or aborted tests.
+Run `java -jar ./bin/pkits-testsuite-exec.jar --help` for more information.
 
 ## Running PKITS Components in Docker Containers
 
@@ -194,10 +206,32 @@ images:
 * [docker2_StartContainers.sh](docs%2Fdocker%2Fdocker2_StartContainers.sh)
 * [docker3_RunTests.sh](docs%2Fdocker%2Fdocker3_RunTests.sh)
 
-Docker-Desktop 4.17.1 with Docker Compose v2.15.1 was used for testing this functionality.
+Docker-Desktop 4.21.1 (with Docker Engine 24.0.2 and Docker Compose: v2.19.1) was used for testing
+this functionality.
 
 Make sure that your particular configuration file (`pkits.yml`) is used by the `docker3_RunTests.sh`
 script.
+
+## Building the project
+
+Building the project requires at least Java 17, [Apache
+Maven 3.6.3](https://maven.apache.org/index.html) and a local or online accessible Maven Central
+cache.
+
+The following commands will build the sources and generate a zip package like the one from the
+release.
+
+```bash
+mvn clean package
+mvn install --non-recursive --activate-profiles final-zip  
+```
+
+You can find the zip package in the directory `./out/pkitestsuite-x.x.x.zip`.
+
+## Contact
+
+For question or issues, feel free to open a
+ticket: https://service.gematik.de/servicedesk/customer/portal/36
 
 ## Versioning
 

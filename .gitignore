@@ -10,12 +10,10 @@ bin/
 
 docs/configs/tuTestObjects/
 docs/configs/inttest/pkits_ltu_run.yml
-testDataTemplates/tsl/TSL_default_new_nextUpdate.xml
+docs/dev/
 docker-compose-baseSut.yml
 docker-compose-deployHot.yml
 docker-compose-deployLTU_DEV.yml
-docs/dev/
-LICENSE_PLACEHOLDER
 Pipeline.CI.Jenkinsfile
 Pipeline.DeployGitHub.Jenkinsfile
 Pipeline.InternalRelease.Jenkinsfile

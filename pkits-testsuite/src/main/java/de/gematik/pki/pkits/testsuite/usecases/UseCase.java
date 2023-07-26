@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.testsuite.usecases;
 
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
 import de.gematik.pki.pkits.testsuite.config.TestObjectConfig;
+import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.ssh.SshUseCaseApplication;
 import de.gematik.pki.pkits.tls.client.TlsClientApplication;
@@ -33,22 +34,19 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UseCase {
 
-  private static final TestObjectConfig TEST_OBJECT_CONFIG =
-      TestConfigManager.getTestSuiteConfig().getTestObject();
+  public static int exec(final Path certPath, final TestSuiteConfig testSuiteConfig) {
 
-  public static int exec(final Path certPath) {
+    final TestObjectConfig testObjectConfig = testSuiteConfig.getTestObject();
 
-    return switch (TEST_OBJECT_CONFIG.getType()) {
+    return switch (testObjectConfig.getType()) {
       case "TlsServer" -> TlsClientApplication.connectTls(
-          TEST_OBJECT_CONFIG.getIpAddressOrFqdn(),
-          TEST_OBJECT_CONFIG.getPort(),
+          testObjectConfig.getIpAddressOrFqdn(),
+          testObjectConfig.getPort(),
           certPath,
-          TestConfigManager.getTestSuiteConfig().getClient().getKeystorePassword());
-      case "Script" -> connectScript(
-          certPath, TestConfigManager.getTestSuiteConfig().getClient().getKeystorePassword());
-      case "ScriptOverSsh" -> new SshUseCaseApplication(
-              TestConfigManager.getTestSuiteConfig(), certPath, 0)
-          .execute();
+          TestConfigManager.getTestSuiteConfig().getClient().getKeystorePassword(),
+          testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
+      case "Script" -> connectScript(certPath, testSuiteConfig);
+      case "ScriptOverSsh" -> new SshUseCaseApplication(certPath, testSuiteConfig).execute();
       default -> throw new TestSuiteException("Unknown test object type.");
     };
   }
@@ -80,15 +78,19 @@ public final class UseCase {
     }
   }
 
-  private static int connectScript(final Path certPath, final String password) {
+  private static int connectScript(final Path certPath, final TestSuiteConfig testSuiteConfig) {
 
-    final String filename = TEST_OBJECT_CONFIG.getScriptPath();
+    final String filename = testSuiteConfig.getTestObject().getScriptUseCase().getScriptPath();
 
     checkFile(filename);
     final ProcessBuilder processBuilder =
-        new ProcessBuilder(filename, certPath.toString(), password);
+        new ProcessBuilder(
+            filename,
+            certPath.toString(),
+            testSuiteConfig.getClient().getKeystorePassword(),
+            String.valueOf(testSuiteConfig.getTestObject().getOcspTimeoutSeconds()));
 
-    log.info("Run script {}", TEST_OBJECT_CONFIG.getScriptPath());
+    log.info("Run script {}", filename);
     return runProcessBuild(processBuilder);
   }
 }

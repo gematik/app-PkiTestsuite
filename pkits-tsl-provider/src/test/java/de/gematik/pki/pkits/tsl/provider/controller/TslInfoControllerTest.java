@@ -19,7 +19,6 @@ package de.gematik.pki.pkits.tsl.provider.controller;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
 import static de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory.IGNORE_SEQUENCE_NUMBER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -75,15 +74,13 @@ class TslInfoControllerTest {
   }
 
   /**
-   * Get full TslRequestHistory. Send a few requests with different sequenceNr. History should
-   * contain these requests. Expected is a JSONArray of exact size. Clean history.
+   * Get full TslRequestHistory. Send a few requests with different tslSeqNr. History should contain
+   * these requests. Expected is a JSONArray of exact size. Clean history.
    */
   @Test
   void getFullTslRequestHistoryAsJson() throws JSONException {
     TslConfigurator.configureTsl(
-        localServerPort,
-        "dummy tsl content".getBytes(StandardCharsets.UTF_8),
-        TSL_DOWNLOAD_POINT_PRIMARY);
+        localServerPort, "dummy tsl content".getBytes(StandardCharsets.UTF_8));
     final int REQUEST_AMOUNT = 4;
     for (int i = 0; i < REQUEST_AMOUNT; i++) {
       sendTslDownloadRequest(i);
@@ -95,16 +92,13 @@ class TslInfoControllerTest {
   }
 
   /**
-   * Get TslRequestHistory for a sequenceNr. Send a few requests with same sequenceNr. History
-   * should contain these requests. Expected is a JSONArray of exact size. Clean history for this
-   * sequenceNr.
+   * Get TslRequestHistory for a tslSeqNr. Send a few requests with same tslSeqNr. History should
+   * contain these requests. Expected is a JSONArray of exact size. Clean history for this tslSeqNr.
    */
   @Test
   void getTslRequestHistoryAsJsonForSequenceNr() throws JSONException {
     TslConfigurator.configureTsl(
-        localServerPort,
-        "dummy tsl content".getBytes(StandardCharsets.UTF_8),
-        TSL_DOWNLOAD_POINT_PRIMARY);
+        localServerPort, "dummy tsl content".getBytes(StandardCharsets.UTF_8));
     final int SEQ_NR = 2;
     final int REQUEST_AMOUNT = 4;
     for (int i = 0; i < REQUEST_AMOUNT; i++) {
@@ -122,14 +116,14 @@ class TslInfoControllerTest {
   }
 
   /**
-   * Get empty TslRequestHistory. Send a request with imaginary sequenceNr. History should be empty.
+   * Get empty TslRequestHistory. Send a request with imaginary tslSeqNr. History should be empty.
    * Expected is a String that represents an empty array.
    */
   @Test
   void getEmptyTslRequestHistoryForImaginarySequenceNrAsJson() {
-    final int sequenceNr = 4711;
+    final int tslSeqNr = 4711;
     final TslInfoRequestDto tslInfoRequest =
-        new TslInfoRequestDto(sequenceNr, HistoryDeleteOption.DELETE_NOTHING);
+        new TslInfoRequestDto(tslSeqNr, HistoryDeleteOption.DELETE_NOTHING);
     final String requestBodyAsJson = PkitsCommonUtils.createJsonContent(tslInfoRequest);
     final String responseBodyAsJson =
         JsonTransceiver.txRxJsonViaHttp(tslInfoUrl, requestBodyAsJson);
@@ -137,45 +131,43 @@ class TslInfoControllerTest {
   }
 
   /**
-   * Send a few requests with different sequenceNr, delete full history via InfoRequest with used
-   * sequenceNr. Check via InfoRequest with other used sequenceNr if history is clear.
+   * Send a few requests with different tslSeqNr, delete full history via InfoRequest with used
+   * tslSeqNr. Check via InfoRequest with other used tslSeqNr if history is clear.
    */
   @Test
   void deleteCompleteTslRequestHistory() throws JSONException {
     TslConfigurator.configureTsl(
-        localServerPort,
-        "dummy tsl content".getBytes(StandardCharsets.UTF_8),
-        TSL_DOWNLOAD_POINT_PRIMARY);
+        localServerPort, "dummy tsl content".getBytes(StandardCharsets.UTF_8));
     final int REQUEST_AMOUNT = 25;
     for (int i = 0; i < REQUEST_AMOUNT; i++) {
       sendTslDownloadRequest(i);
     }
 
-    final int usedSeqNr = 18;
-    // make sure that seqNr was in request loop
-    assertThat(usedSeqNr).isLessThan(REQUEST_AMOUNT);
-    final JSONArray jsonArray1 = getHistoryAndClear(usedSeqNr);
+    final int usedTslSeqNr = 18;
+    // make sure that tslSeqNr was in request loop
+    assertThat(usedTslSeqNr).isLessThan(REQUEST_AMOUNT);
+    final JSONArray jsonArray1 = getHistoryAndClear(usedTslSeqNr);
     assertThat(jsonArray1.length()).isEqualTo(1);
 
-    final int otherUsedSeqNr = 22;
-    // make sure that seqNr was in request loop
-    assertThat(otherUsedSeqNr).isLessThan(REQUEST_AMOUNT);
-    final JSONArray jsonArray2 = getHistoryAndClear(otherUsedSeqNr);
+    final int otherUsedTslSeqNr = 22;
+    // make sure that tslSeqNr was in request loop
+    assertThat(otherUsedTslSeqNr).isLessThan(REQUEST_AMOUNT);
+    final JSONArray jsonArray2 = getHistoryAndClear(otherUsedTslSeqNr);
     assertThat(jsonArray2.length()).isZero();
   }
 
-  private JSONArray getHistoryAndClear(final int seqNr) throws JSONException {
+  private JSONArray getHistoryAndClear(final int tslSeqNr) throws JSONException {
     final TslInfoRequestDto tslInfoRequest =
-        new TslInfoRequestDto(seqNr, HistoryDeleteOption.DELETE_FULL_HISTORY);
+        new TslInfoRequestDto(tslSeqNr, HistoryDeleteOption.DELETE_FULL_HISTORY);
     final String requestBodyAsJson = PkitsCommonUtils.createJsonContent(tslInfoRequest);
     final String responseBodyAsJson =
         JsonTransceiver.txRxJsonViaHttp(tslInfoUrl, requestBodyAsJson);
     return new JSONArray(responseBodyAsJson);
   }
 
-  private void sendTslDownloadRequest(final int seqNr) throws UnirestException {
+  private void sendTslDownloadRequest(final int tslSeqNr) throws UnirestException {
     final HttpResponse<byte[]> response =
-        Unirest.get(tslServiceUrlPrimary).queryString(TSL_SEQNR_PARAM_ENDPOINT, seqNr).asBytes();
+        Unirest.get(tslServiceUrlPrimary).queryString(TSL_SEQNR_PARAM_ENDPOINT, tslSeqNr).asBytes();
     Assertions.assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
   }
 

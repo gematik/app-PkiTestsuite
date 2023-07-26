@@ -30,8 +30,11 @@ import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.reporting.CustomTestExecutionListener;
 import de.gematik.pki.pkits.testsuite.reporting.GeneratePdf;
+import de.gematik.pki.pkits.testsuite.reporting.ListApprovalTestsAndAfos;
 import de.gematik.pki.pkits.testsuite.reporting.ListApprovalTestsAndAfos.TestClassesContainer;
 import de.gematik.pki.pkits.testsuite.reporting.TestExecutionOutcome;
+import de.gematik.pki.pkits.testsuite.simulators.OcspResponderInstance;
+import de.gematik.pki.pkits.testsuite.simulators.TslProviderInstance;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -42,7 +45,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -95,12 +97,6 @@ public class PkitsTestsuiteRunner {
 
   static void runTests(final List<CustomTestInfo> customTestInfoList) {
 
-    final String selectedCustomTestInfoListStr =
-        customTestInfoList.stream().map(CustomTestInfo::toString).collect(Collectors.joining("\n"));
-
-    log.info(
-        "\n\nselected tests to run:\n{}\n\n", String.join("\n", selectedCustomTestInfoListStr));
-
     final List<DiscoverySelector> selectors = new ArrayList<>();
 
     for (final CustomTestInfo customTestInfo : customTestInfoList) {
@@ -118,6 +114,7 @@ public class PkitsTestsuiteRunner {
 
     final UniqueIdTrackingListener uniqueIdTrackingListener = new UniqueIdTrackingListener();
 
+    CustomTestExecutionListener.setStopComponentsClassAfterAll(false);
     try (final LauncherSession session = LauncherFactory.openSession()) {
       final Launcher launcher = session.getLauncher();
       // Register a listener of your choice
@@ -129,7 +126,13 @@ public class PkitsTestsuiteRunner {
 
       // Execute test plan
       launcher.execute(testPlan);
+    } catch (final Exception e) {
+      log.error("problems occurred executing tests", e);
     }
+
+    CustomTestExecutionListener.setStopComponentsClassAfterAll(true);
+    OcspResponderInstance.getInstance().stopServer();
+    TslProviderInstance.getInstance().stopServer();
   }
 
   private static final int COLUMN_SIZE_STATUS = 15;
@@ -170,9 +173,9 @@ public class PkitsTestsuiteRunner {
                       testExecutionOutcome.getStatus(),
                       methodSource.getClassName(),
                       methodSource.getMethodName(),
-                      testExecutionOutcome.getTestIdentifier().getDisplayName()));
+                      testExecutionOutcome.getDisplayName()));
             });
-    final String header = htmlHeader(1, "Tests Execution Results:");
+    final String header = htmlHeader(2, "Tests Execution Results:");
     final String columnNames =
         htmlTt(
             toHtml(
@@ -188,53 +191,59 @@ public class PkitsTestsuiteRunner {
         htmlBr());
   }
 
+  private static List<TestExecutionOutcome> getFailedOrAbortedTestCases() {
+    return customTestExecutionListener.getTestExecutionOutcomes().stream()
+        .filter(
+            testExecutionOutcome -> {
+              if (!testExecutionOutcome.getTestIdentifier().isTest()) {
+                return false;
+              }
+              return StringUtils.equalsAny(testExecutionOutcome.getStatus(), "FAILED", "ABORTED");
+            })
+        .toList();
+  }
+
   private static String getFailedAndAbortedShort() {
 
     final List<String> parts = new ArrayList<>();
 
-    final List<TestExecutionOutcome> failedTestCases =
-        customTestExecutionListener.getTestExecutionOutcomes().stream()
-            .filter(
-                testExecutionOutcome -> {
-                  if (!testExecutionOutcome.getTestIdentifier().isTest()) {
-                    return false;
-                  }
-                  return StringUtils.equalsAny(
-                      testExecutionOutcome.getStatus(), "FAILED", "ABORTED");
-                })
-            .toList();
+    final List<TestExecutionOutcome> failedOrAbortedTestCases = getFailedOrAbortedTestCases();
 
-    failedTestCases.forEach(
+    failedOrAbortedTestCases.forEach(
         testExecutionOutcome -> {
           final MethodSource methodSource = testExecutionOutcome.getMethodSource();
 
           parts.add(
               getDetailsRow(
-                  testExecutionOutcome.getStartedAt().format(dateTimeFormatter),
-                  testExecutionOutcome.getStatus(),
-                  ClassUtils.getShortClassName(methodSource.getClassName()),
-                  methodSource.getMethodName(),
-                  testExecutionOutcome.getTestIdentifier().getDisplayName()));
-          parts.add(testExecutionOutcome.getFurtherInfo());
+                      testExecutionOutcome.getStartedAt().format(dateTimeFormatter),
+                      testExecutionOutcome.getStatus(),
+                      ClassUtils.getShortClassName(methodSource.getClassName()),
+                      methodSource.getMethodName(),
+                      testExecutionOutcome.getDisplayName())
+                  + "\n"
+                  + testExecutionOutcome.getFurtherInfo());
         });
 
+    final String separator = "\n" + StringUtils.repeat("=", 120) + "\n\n\n";
+    final String testResults = String.join(separator, parts);
+
     final String header =
-        htmlHeader(1, failedTestCases.size() + " Failed / Aborted Tests - Details:");
-    return header + "\n" + htmlTt(GeneratePdf.toHtml(String.join("\n", parts))) + htmlBr();
+        htmlHeader(2, failedOrAbortedTestCases.size() + " Failed / Aborted Tests - Details:");
+    return header + "\n" + htmlTt(GeneratePdf.toHtml(testResults)) + htmlBr();
   }
 
   static List<String> getTestExecutionResultsToReport(
       final TestExecutionSummary summary, final boolean noHtml) {
     final List<String> resultsReportParts = new ArrayList<>();
-    final boolean oldWithHtml = GeneratePdf.noHtml;
+    final boolean oldWithHtml = GeneratePdf.isNoHtml();
 
-    GeneratePdf.noHtml = noHtml;
+    GeneratePdf.setNoHtml(noHtml);
 
-    resultsReportParts.add(getDetails());
     resultsReportParts.add(getCustomSummary(summary));
+    resultsReportParts.add(getDetails());
     resultsReportParts.add(getFailedAndAbortedShort());
 
-    GeneratePdf.noHtml = oldWithHtml;
+    GeneratePdf.setNoHtml(oldWithHtml);
     return resultsReportParts;
   }
 
@@ -257,13 +266,13 @@ public class PkitsTestsuiteRunner {
 
     final List<String> parts = new ArrayList<>();
 
-    parts.add(func.apply("found:     ", summary.getTestsFoundCount()));
+    parts.add(func.apply("selected:  ", summary.getTestsFoundCount()));
     parts.add(func.apply("successful:", summary.getTestsSucceededCount()));
     parts.add(func.apply("failed:    ", summary.getTestsFailedCount()));
     parts.add(func.apply("aborted:   ", summary.getTestsAbortedCount()));
     parts.add(func.apply("skipped:   ", summary.getTestsSkippedCount()));
 
-    final String header = htmlHeader(1, "Tests Execution Summary:");
+    final String header = htmlHeader(2, "Tests Execution Summary:");
     return header + "\n" + htmlPre(String.join("\n", parts)) + htmlBr();
   }
 
@@ -287,19 +296,21 @@ public class PkitsTestsuiteRunner {
 
     if (!skipPdfReport) {
 
-      GeneratePdf.noHtml = false;
+      GeneratePdf.setNoHtml(false);
       final List<String> contentParts = new ArrayList<>();
       contentParts.add(GeneratePdf.htmlDocPrefix());
+      contentParts.add(htmlTt(GeneratePdf.toHtml(getPkiTestsuiteBanner())));
+
+      contentParts.add(htmlHeader(2, "Configuration:"));
+      contentParts.add(htmlPre(configContent));
+      contentParts.add(htmlBr());
+
       contentParts.addAll(getTestExecutionResultsToReport(summary, false));
 
       final Path logFile = getLog4jLoggerFileName(PkitsTestsuiteRunner.class);
       final String logContent = Files.readString(logFile, StandardCharsets.UTF_8);
 
-      contentParts.add(htmlHeader(1, "Configuration:"));
-      contentParts.add(htmlPre(configContent));
-      contentParts.add(htmlBr());
-
-      contentParts.add(htmlHeader(1, "Test Suite Log:"));
+      contentParts.add(htmlHeader(2, "Test Suite Log:"));
       contentParts.add(htmlTt(GeneratePdf.toHtml(logContent)));
       contentParts.add(GeneratePdf.htmlDocPostfix());
       contentParts.add(htmlBr());
@@ -317,7 +328,7 @@ public class PkitsTestsuiteRunner {
     System.exit(exitCode);
   }
 
-  static void printBanner() {
+  static String getPkiTestsuiteBanner() {
 
     final Attributes attributes =
         PkitsCommonUtils.readManifestAttributes(PkitsTestsuiteRunner.class);
@@ -329,14 +340,41 @@ public class PkitsTestsuiteRunner {
 
     final String versionAndCommitId =
         "Version: " + version + " (Commit Id: " + gitProperties.getCommitIdShort() + ")";
-    final String banner = String.join("\n", toBanner("PKI Test Suite"), title, versionAndCommitId);
 
-    log.info("\n\n{}\n\n", banner);
+    return String.join("\n", toBanner("PKI Test Suite"), title, versionAndCommitId);
+  }
+
+  static String getSummaryForFailedOrAborted() {
+    final List<TestExecutionOutcome> failedOrAbortedTestCases = getFailedOrAbortedTestCases();
+
+    final List<String> lines =
+        failedOrAbortedTestCases.stream()
+            .map(
+                testExecutionOutcome -> {
+                  final MethodSource methodSource = testExecutionOutcome.getMethodSource();
+
+                  final String sign = "+";
+                  final int padN = 50;
+
+                  final String methodNamePadded =
+                      ListApprovalTestsAndAfos.padRight(methodSource.getMethodName(), padN);
+
+                  return "%s\t%s   %s %s  %s"
+                      .formatted(
+                          sign,
+                          methodNamePadded,
+                          testExecutionOutcome.getStatus(),
+                          ClassUtils.getShortClassName(methodSource.getClassName()),
+                          testExecutionOutcome.getDisplayName());
+                })
+            .toList();
+
+    return String.join("\n", lines);
   }
 
   public static void main(final String[] args) throws IOException {
 
-    printBanner();
+    log.info("\n\n{}\n\n", getPkiTestsuiteBanner());
 
     final PkitsTestsuiteRunnerParams runnerParams = new PkitsTestsuiteRunnerParams();
     new CommandLine(runnerParams).parseArgs(args);
@@ -357,10 +395,16 @@ public class PkitsTestsuiteRunner {
     final TestClassesContainer testClassesContainer =
         TestClassesContainer.readForDefaultTestClasses();
 
-    final List<CustomTestInfo> selectedCustomTestInfoList =
-        PkitsTestsuiteRunnerUtils.getTestToRun(inputTestInfoList, testClassesContainer);
+    final List<CustomTestInfo> testsToRun =
+        PkitsTestsuiteRunnerUtils.getTestsToRun(
+            inputTestInfoList, testClassesContainer, runnerParams.getPercent());
 
-    runTests(selectedCustomTestInfoList);
+    runTests(testsToRun);
+
+    if (runnerParams.failedTestCases != null) {
+      final String content = getSummaryForFailedOrAborted();
+      Files.writeString(runnerParams.failedTestCases, content);
+    }
     reportAndEvaluate(runnerParams.isSkipPdfReport());
   }
 }

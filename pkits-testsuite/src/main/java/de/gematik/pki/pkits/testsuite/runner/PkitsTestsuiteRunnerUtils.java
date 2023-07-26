@@ -25,7 +25,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -124,29 +128,56 @@ final class PkitsTestsuiteRunnerUtils {
         .toList();
   }
 
-  static List<CustomTestInfo> getTestToRun(
+  static List<CustomTestInfo> getTestsToRun(
       final List<InputTestInfo> inputTestInfoList,
-      final TestClassesContainer testClassesContainer) {
+      final TestClassesContainer testClassesContainer,
+      final int percent) {
 
     final List<CustomTestInfo> customTestInfoList = testClassesContainer.getAllCustomTestInfos();
 
-    return inputTestInfoList.stream()
-        .filter(inputTestInfo -> inputTestInfo.selected)
-        .flatMap(
-            inputTestInfo -> {
-              final List<CustomTestInfo> matchedCustomTestInfos =
-                  customTestInfoList.stream()
-                      .filter(customTestInfo -> customTestInfo.matches(inputTestInfo))
-                      .toList();
+    final Function<InputTestInfo, Stream<CustomTestInfo>> mapInputTestInfo =
+        inputTestInfo -> {
+          final List<CustomTestInfo> matchedCustomTestInfos =
+              customTestInfoList.stream()
+                  .filter(customTestInfo -> customTestInfo.matches(inputTestInfo))
+                  .toList();
 
-              if (matchedCustomTestInfos.isEmpty()) {
-                throw new TestSuiteException(
-                    "unknown test case method <%s> or class with test cases <%s>"
-                        .formatted(inputTestInfo.methodName, inputTestInfo.className));
-              }
-              return matchedCustomTestInfos.stream();
-            })
-        .distinct()
-        .toList();
+          if (matchedCustomTestInfos.isEmpty()) {
+            throw new TestSuiteException(
+                "unknown test case method <%s> or class with test cases <%s>"
+                    .formatted(inputTestInfo.methodName, inputTestInfo.className));
+          }
+          return matchedCustomTestInfos.stream();
+        };
+
+    final List<CustomTestInfo> allSelected =
+        inputTestInfoList.stream()
+            .filter(inputTestInfo -> inputTestInfo.selected)
+            .flatMap(mapInputTestInfo)
+            .distinct()
+            .collect(Collectors.toCollection(ArrayList::new));
+
+    final String allSelectedStr =
+        customTestInfoList.stream().map(CustomTestInfo::toString).collect(Collectors.joining("\n"));
+
+    log.info("\n\nAll selected tests,  n={}:\n{}\n\n", allSelected.size(), allSelectedStr);
+
+    Collections.shuffle(allSelected);
+
+    final int minTestsToSelect = Math.min(1, allSelected.size());
+    final int testsToSelect =
+        Math.max(minTestsToSelect, (int) Math.round(allSelected.size() * percent / 100.0));
+
+    final List<CustomTestInfo> selectedToRun = allSelected.subList(0, testsToSelect);
+    final String selectedToRunStr =
+        selectedToRun.stream().map(CustomTestInfo::toString).collect(Collectors.joining("\n"));
+
+    log.info(
+        "\n\nTests to run after applying value (={}) of option -p or --percent,  n={}:\n{}\n\n",
+        percent,
+        selectedToRun.size(),
+        selectedToRunStr);
+
+    return selectedToRun;
   }
 }

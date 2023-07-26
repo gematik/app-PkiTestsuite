@@ -39,15 +39,6 @@ public class TestObjectConfig {
 
   @ParameterDescription(
       withDefault = true,
-      description =
-          "Absolute or relative path to the use case script when test object type is set to"
-              + " 'Script'.")
-  String scriptPath = "unused by default";
-
-  SshConfig sshConfig = new SshConfig();
-
-  @ParameterDescription(
-      withDefault = true,
       description = "OCSP grace period in seconds configured in the test object.")
   int ocspGracePeriodSeconds = 30;
 
@@ -58,12 +49,28 @@ public class TestObjectConfig {
   @ParameterDescription(
       withDefault = true,
       description =
+          "Duration in days after expiration of the TSL during which the TSL is still regarded as"
+              + " valid.")
+  int tslGracePeriodDays = 0;
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
           "Amount of seconds to wait after a TSL update for processing inside the test object.")
   int tslProcessingTimeSeconds = 3;
 
   @ParameterDescription(
       withDefault = true,
       description =
+          "Amount of seconds to wait for OCSP requests to be processed by the test object and"
+              + " corresponding network.")
+  int ocspProcessingTimeSeconds = 1;
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
           "Amount of seconds after OCSP responses are not accepted by the test object anymore.")
   int ocspTimeoutSeconds = 10;
+
+  ScriptUseCase scriptUseCase = new ScriptUseCase();
 }

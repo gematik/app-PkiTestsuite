@@ -16,6 +16,8 @@
 
 package de.gematik.pki.pkits.testsuite.pcap;
 
+import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.reporting.CurrentTestInfo;
 import java.io.BufferedOutputStream;
@@ -27,9 +29,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,9 +71,6 @@ import pcap.spi.util.DefaultTimeout;
 
 @Slf4j
 public class PcapManager implements Closeable {
-
-  private static final DateTimeFormatter dateTimeFormatter =
-      DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
 
   private final Service service;
   private final List<DeviceInfo> deviceInfos;
@@ -212,7 +208,7 @@ public class PcapManager implements Closeable {
   static String generatePcapFilename(
       final String outputDirname, final String ipAddress, final TestInfo testInfo) {
 
-    final String timestampStr = ZonedDateTime.now(ZoneOffset.UTC).format(dateTimeFormatter);
+    final String timestampStr = PkitsCommonUtils.asTimestampStr(GemLibPkiUtils.now());
     final String postfix = StringUtils.isNotBlank(ipAddress) ? "__" + ipAddress : "";
 
     final String parameterizedIndex = CurrentTestInfo.getParameterizedIndex(testInfo);
@@ -231,6 +227,9 @@ public class PcapManager implements Closeable {
       final Set<String> remainingIpAddresses) {
     for (final Address address : device.addresses()) {
 
+      if (address.address() == null) {
+        continue;
+      }
       log.info(
           "CanonicalHostName: {}; HostAddress: {}; Hostname: {}; Address: {}; Address: {};"
               + " Netmask: {}; Broadcast: {}; Destination: {}",

@@ -31,65 +31,44 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SshConfig {
 
-  @ParameterDescription(description = "TODO")
+  @ParameterDescription(description = "Username for the SSH login")
   String username;
 
-  @ParameterDescription(description = "TODO")
+  @ParameterDescription(description = "Passwort in case of password based authentication.")
   String password;
 
-  @ParameterDescription(description = "TODO")
+  @ParameterDescription(description = "IP address to connect to via SSH.")
   String host;
 
-  @ParameterDescription(withDefault = true, description = "TODO")
+  @ParameterDescription(withDefault = true, description = "Port for the SSH connect.")
   @Default
   int port = 22;
 
-  @ParameterDescription(description = "TODO")
+  @ParameterDescription(description = "Private key in case of key based authentication.")
   Path privateKey;
 
-  @ParameterDescription(description = "TODO")
+  @ParameterDescription(
+      description = "Password for the private key in case of key based authentication.")
   String privateKeyPassphrase;
 
-  // -------------------------------------------------------------
+  @ParameterDescription(withDefault = true, description = "Timeout for the SSH session.")
+  @Default
+  long connectTimeoutSeconds = 60;
 
   @ParameterDescription(
+      withDefault = true,
       description =
-          "send AppData over http-forwarder (to gematik OCSP-sim, as defined in bash script)")
-  String appDataHttpFwdSocket;
-
-  @ParameterDescription(withDefault = true, description = "RSA or ECC")
+          "Timeout for the verification phase during the session connection establishment.")
   @Default
-  String cryptMethod = "ECC";
+  long authTimeoutSeconds = 60;
 
-  // -------------------------------------------------------------
-  @ParameterDescription(description = "TODO")
-  Path filesToCopyRootDir;
-
-  @ParameterDescription(
-      description =
-          "TODO see"
-              + " https://docs.oracle.com/javase/8/docs/api/java/nio/file/FileSystem.html#getPathMatcher-java.lang.String-")
-  String filesToCopyPattern;
-
-  @ParameterDescription(description = "TODO")
-  String remoteTargetDir;
-
-  @ParameterDescription(description = "TODO")
-  String remoteLogFile;
-
-  @ParameterDescription(withDefault = true, description = "TODO")
+  @ParameterDescription(withDefault = true, description = "Timeout during channel establishment.")
   @Default
-  long connectTimeoutSeconds = 4;
+  long channelOpenTimeoutSeconds = 60;
 
-  @ParameterDescription(withDefault = true, description = "TODO")
+  @ParameterDescription(withDefault = true, description = "Timeout during SSH channel.")
   @Default
-  long authTimeoutSeconds = 4;
+  long channelCloseTimeoutSeconds = 60;
 
-  @ParameterDescription(withDefault = true, description = "TODO")
-  @Default
-  long channelOpenTimeoutSeconds = 4;
-
-  @ParameterDescription(withDefault = true, description = "TODO")
-  @Default
-  long channelCloseTimeoutSeconds = 4;
+  @Default private SshUseCaseParameters sshUseCaseParameters = new SshUseCaseParameters();
 }

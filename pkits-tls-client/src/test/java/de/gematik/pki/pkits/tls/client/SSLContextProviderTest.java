@@ -18,11 +18,10 @@ package de.gematik.pki.pkits.tls.client;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import java.net.InetAddress;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
-import java.util.Objects;
 import javax.net.ssl.SSLContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -35,7 +34,8 @@ class SSLContextProviderTest {
   @Test
   void createSSLContext() {
     final Path clientKeystorePath =
-        Path.of("../testDataTemplates/certificates/rsa/valid/ee_default.p12");
+        ResourceReader.getFilePathFromResources(
+            "certificates/rsa/valid/ee_default.p12", getClass());
 
     final SSLContext sslContext =
         new SSLContextProvider().createSSLContext(clientKeystorePath, "00");
@@ -45,14 +45,11 @@ class SSLContextProviderTest {
 
   @Disabled("Development only")
   @Test
-  void connectRsa() throws URISyntaxException, UnknownHostException {
-    final String certResourcePath = "../testDataTemplates/certificates/rsa/valid/ee_default.p12";
+  void connectRsa() throws UnknownHostException {
+
     final Path clientKeystorePath =
-        Path.of(
-            Objects.requireNonNull(
-                    getClass().getClassLoader().getResource(certResourcePath),
-                    "Resource Path: " + certResourcePath + " in configuration does not exist.")
-                .toURI());
+        ResourceReader.getFilePathFromResources(
+            "certificates/rsa/valid/ee_default.p12", getClass());
 
     final TlsConnection connection =
         TlsConnection.builder()
@@ -69,15 +66,10 @@ class SSLContextProviderTest {
 
   @Disabled("Development only")
   @Test
-  void connectEcc() throws URISyntaxException, UnknownHostException {
-    final String certResourcePath =
-        "./testDataTemplates/certificates/ecc/fachmodulClientCerts/valid/ee_default.p12";
+  void connectEcc() throws UnknownHostException {
     final Path clientKeystorePath =
-        Path.of(
-            Objects.requireNonNull(
-                    getClass().getClassLoader().getResource(certResourcePath),
-                    "Resource Path: " + certResourcePath + " in configuration does not exist.")
-                .toURI());
+        ResourceReader.getFilePathFromResources(
+            "certificates/ecc/valid/ee_default.p12", getClass());
 
     final TlsConnection connection =
         TlsConnection.builder()

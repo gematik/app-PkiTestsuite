@@ -21,13 +21,11 @@ import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
-import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint.TSL_DOWNLOAD_POINT_PRIMARY;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
 
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.AggregateTslOperation;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.AggregateTslOperation.AggregateTslOperationBuilder;
@@ -41,8 +39,6 @@ import de.gematik.pki.pkits.testsuite.reporting.CurrentTestInfo;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -53,6 +49,9 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 public class TslGenerator {
 
+  public static final String TSL_NAME_DEFAULT = "defaultTsl";
+  public static final String TSL_NAME_ALTERNATVE = "alternativeTsl";
+
   public static final String TRUST_ANCHOR_TEMPLATES_DIRNAME =
       "./testDataTemplates/certificates/ecc/trustAnchor/";
 
@@ -60,7 +59,7 @@ public class TslGenerator {
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_invalid-signature.p12");
 
   public static final Path tslSignerFromNotYetValidTrustAnchorP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_notyetvalid_ta.p12");
+      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_not-yet-valid_ta.p12");
   public static final Path tslSignerExpired =
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_expired.p12");
 
@@ -91,41 +90,43 @@ public class TslGenerator {
 
   private int tslDownloadIntervalSeconds;
   private int tslProcessingTimeSeconds;
+  private int ocspProcessingTimeSeconds;
+
   protected String ocspRespUri;
   protected String tslProvUri;
-  protected Path defaultTslSigner;
-  protected String tslSignerKeystorePassw;
+
+  protected P12Container tslSigner;
+  protected P12Container ocspSigner;
 
   @Getter @Setter protected int tslSeqNr;
 
   @Builder.Default private TslOperation modifyTsl = null;
 
   public TslDownload getTslDownloadWithTemplateAndSigner(
-      final int offeredSeqNr,
+      final int offeredTslSeqNr,
       final TrustStatusListType tsl,
-      final Path tslSignerP12Path,
+      final P12Container tslSigner,
       final boolean signerKeyUsageCheck,
       final boolean signerValidityCheck) {
     return getTslDownloadWithTemplateAndSigner(
-        null, offeredSeqNr, tsl, tslSignerP12Path, signerKeyUsageCheck, signerValidityCheck);
+        null, offeredTslSeqNr, tsl, tslSigner, signerKeyUsageCheck, signerValidityCheck);
   }
 
   public TslDownload getTslDownloadWithTemplateAndSigner(
       final Path tslOutputFile,
-      final int offeredSeqNr,
+      final int offeredTslSeqNr,
       final TrustStatusListType tsl,
-      final Path tslSignerP12Path,
+      final P12Container tslSigner,
       final boolean signerKeyUsageCheck,
       final boolean signerValidityCheck) {
 
     final AggregateTslOperationBuilder aggregateBuilder = AggregateTslOperation.builder();
 
-    aggregateBuilder.chained(getStandardTslOperation(offeredSeqNr));
-    aggregateBuilder.chained(new ChangNameTslOperation(tslName));
+    aggregateBuilder.chained(getStandardTslOperation(offeredTslSeqNr));
+    aggregateBuilder.chained(new ChangNameTslOperation("gematik Test-TSL: " + tslName));
 
     aggregateBuilder.chained(
-        new SignTslOperation(
-            tslSignerP12Path, tslSignerKeystorePassw, signerKeyUsageCheck, signerValidityCheck));
+        new SignTslOperation(tslSigner, signerKeyUsageCheck, signerValidityCheck));
 
     if (modifyTsl != null) {
       aggregateBuilder.chained(modifyTsl);
@@ -139,69 +140,59 @@ public class TslGenerator {
 
     final byte[] tslBytes = aggregateBuilder.build().apply(tsl).getAsTslBytes();
 
-    return getTslDownload(tslBytes, tslSignerP12Path);
+    return getTslDownload(tslBytes, tslSigner);
   }
 
   public TslDownload getStandardTslDownload(final TrustStatusListType tsl) {
-    return getStandardTslDownload(tsl, defaultTslSigner);
+    return getStandardTslDownload(tsl, tslSigner);
   }
 
   public TslDownload getStandardTslDownload(
-      final TrustStatusListType tsl, final Path tslSignerP12Path) {
+      final TrustStatusListType tsl, final P12Container tslSigner) {
 
     return getTslDownloadWithTemplateAndSigner(
-        tslSeqNr,
-        tsl,
-        tslSignerP12Path,
-        SIGNER_KEY_USAGE_CHECK_ENABLED,
-        SIGNER_VALIDITY_CHECK_ENABLED);
+        tslSeqNr, tsl, tslSigner, SIGNER_KEY_USAGE_CHECK_ENABLED, SIGNER_VALIDITY_CHECK_ENABLED);
   }
 
-  public TslDownload getTslDownload(final byte[] tslBytes, final Path tslSignerP12Path) {
-
-    final P12Container tslSignerP12 =
-        P12Reader.getContentFromP12(
-            GemLibPkiUtils.readContent(tslSignerP12Path), tslSignerKeystorePassw);
+  public TslDownload getTslDownload(final byte[] tslBytes, final P12Container tslSignerP12) {
 
     final X509Certificate tslSignerCert = tslSignerP12.getCertificate();
 
     return TslDownload.builder()
         .tslBytes(tslBytes)
-        .tslDownloadIntervalSeconds(tslDownloadIntervalSeconds + 5)
+        .tslDownloadIntervalSeconds(tslDownloadIntervalSeconds)
         .tslProcessingTimeSeconds(tslProcessingTimeSeconds)
+        .ocspProcessingTimeSeconds(ocspProcessingTimeSeconds)
         .tslProvUri(tslProvUri)
         .ocspRespUri(ocspRespUri)
-        .tslDownloadPoint(TSL_DOWNLOAD_POINT_PRIMARY)
         .tslSignerCert(tslSignerCert)
+        .ocspSigner(ocspSigner)
         .build();
   }
 
-  public TslOperation signTslOperation(@NonNull final Path tslSignerPath) {
+  public TslOperation signTslOperation(@NonNull final P12Container tslSigner) {
 
     return new SignTslOperation(
-        tslSignerPath,
-        tslSignerKeystorePassw,
-        SIGNER_KEY_USAGE_CHECK_ENABLED,
-        SIGNER_VALIDITY_CHECK_ENABLED);
+        tslSigner, SIGNER_KEY_USAGE_CHECK_ENABLED, SIGNER_VALIDITY_CHECK_ENABLED);
   }
 
-  public String getTslDownloadUrlPrimary(final int seqNr) {
-    return tslProvUri + TSL_XML_PRIMARY_ENDPOINT + "?" + TSL_SEQNR_PARAM_ENDPOINT + "=" + seqNr;
+  public String getTslDownloadUrlPrimary(final int tslSeqNr) {
+    return tslProvUri + TSL_XML_PRIMARY_ENDPOINT + "?" + TSL_SEQNR_PARAM_ENDPOINT + "=" + tslSeqNr;
   }
 
-  public String getTslDownloadUrlBackup(final int seqNr) {
-    return tslProvUri + TSL_XML_BACKUP_ENDPOINT + "?" + TSL_SEQNR_PARAM_ENDPOINT + "=" + seqNr;
+  public String getTslDownloadUrlBackup(final int tslSeqNr) {
+    return tslProvUri + TSL_XML_BACKUP_ENDPOINT + "?" + TSL_SEQNR_PARAM_ENDPOINT + "=" + tslSeqNr;
   }
 
-  public TslOperation getStandardTslOperation(final int offeredSeqNr) {
+  public TslOperation getStandardTslOperation(final int offeredTslSeqNr) {
     final StandardTslOperationConfig standardTslOperationConfig =
         StandardTslOperationConfig.builder()
-            .sequenceNr(offeredSeqNr)
+            .tslSeqNr(offeredTslSeqNr)
             .tspName(GEMATIK_TEST_TSP)
-            .newSsp(ocspRespUri + OCSP_SSP_ENDPOINT + "/" + offeredSeqNr)
-            .tslDownloadUrlPrimary(getTslDownloadUrlPrimary(offeredSeqNr))
-            .tslDownloadUrlBackup(getTslDownloadUrlBackup(offeredSeqNr))
-            .issueDate(ZonedDateTime.now(ZoneOffset.UTC))
+            .newSsp(ocspRespUri + OCSP_SSP_ENDPOINT + "/" + offeredTslSeqNr)
+            .tslDownloadUrlPrimary(getTslDownloadUrlPrimary(offeredTslSeqNr))
+            .tslDownloadUrlBackup(getTslDownloadUrlBackup(offeredTslSeqNr))
+            .issueDate(GemLibPkiUtils.now())
             .nextUpdate(null)
             .daysUntilNextUpdate(TSL_DAYS_UNTIL_NEXTUPDATE)
             .build();

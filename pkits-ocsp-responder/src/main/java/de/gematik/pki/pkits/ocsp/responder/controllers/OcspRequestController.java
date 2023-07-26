@@ -23,6 +23,7 @@ import static org.bouncycastle.internal.asn1.isismtt.ISISMTTObjectIdentifiers.id
 
 import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator;
+import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;
@@ -35,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
@@ -63,22 +63,10 @@ public class OcspRequestController {
       value = OCSP_SSP_ENDPOINT + "/{seqNr}",
       produces = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
   public ResponseEntity<Object> ocspService(
-      @PathVariable("seqNr") final int seqNr, final HttpServletRequest request) {
+      @PathVariable("seqNr") final int tslSeqNr, final HttpServletRequest request) {
 
     if (!ocspResponseConfigHolder.isConfigured()) {
       return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
-    }
-
-    final int delayMilliseconds =
-        ocspResponseConfigHolder.getOcspResponderConfigDto().getDelayMilliseconds();
-
-    if (delayMilliseconds < 0) {
-      throw new PkiCommonException("delayMilliseconds is < 0");
-    }
-
-    if (delayMilliseconds > 0) {
-      log.info("Delay sending OCSP Response for {} milliseconds", delayMilliseconds);
-      PkitsCommonUtils.waitMilliseconds(delayMilliseconds);
     }
 
     final OCSPReq ocspReq = createOcspReqFromServletRequest(request);
@@ -90,22 +78,44 @@ public class OcspRequestController {
           ocspResponseConfigHolder.getOcspResponderConfigDto().getEeCert().getSerialNumber());
       throw new OcspResponderException("CertSerialNr is not configured");
     }
+
+    final byte[] ocspReqBytes;
+    try {
+      ocspReqBytes = ocspReq.getEncoded();
+    } catch (final IOException e) {
+      throw new OcspResponderException("Cannot serialize ocspReq", e);
+    }
+
     ocspRequestHistory.add(
-        new OcspRequestHistoryEntryDto(seqNr, certSerialNr, ZonedDateTime.now().toString()));
+        new OcspRequestHistoryEntryDto(
+            tslSeqNr, certSerialNr, ZonedDateTime.now().toString(), ocspReqBytes));
     log.info(
         "Build OCSP Response for tslSeqNr {} and certSerialNr {} and send to {}:{}",
-        seqNr,
+        tslSeqNr,
         certSerialNr,
         request.getRemoteHost(),
         request.getRemotePort());
 
+    final int delayMilliseconds =
+        ocspResponseConfigHolder.getOcspResponderConfigDto().getDelayMilliseconds();
+
+    if (delayMilliseconds < 0) {
+      throw new PkiCommonException("delayMilliseconds is < 0");
+    }
+
     final byte[] ocspResponseBytes = buildOcspResponseBytes(ocspReq);
+
+    if (delayMilliseconds > 0) {
+      log.info("Delay sending OCSP Response for {} milliseconds", delayMilliseconds);
+      PkitsCommonUtils.waitMilliseconds(delayMilliseconds);
+    }
+    log.info("Sending OCSP response.");
     return new ResponseEntity<>(ocspResponseBytes, HttpStatus.OK);
   }
 
   private byte[] buildOcspResponseBytes(final OCSPReq ocspReq) {
     final OcspResponderConfigDto dto = ocspResponseConfigHolder.getOcspResponderConfigDto();
-    final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+    final ZonedDateTime now = GemLibPkiUtils.now();
 
     ZonedDateTime nextUpdate = null;
     if (dto.getNextUpdateDeltaMilliseconds() != null) {

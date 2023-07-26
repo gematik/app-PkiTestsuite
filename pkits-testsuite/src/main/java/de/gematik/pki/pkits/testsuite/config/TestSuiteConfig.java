@@ -32,6 +32,8 @@ public class TestSuiteConfig {
 
   private TestObjectConfig testObject = new TestObjectConfig();
 
+  private SshConfig sshConfig = new SshConfig();
+
   private OcspResponderConfig ocspResponder = new OcspResponderConfig();
 
   private TslProviderConfig tslProvider = new TslProviderConfig();
@@ -60,8 +62,8 @@ public class TestSuiteConfig {
         testSuiteConfig.getTestSuiteParameter().setTslSettings(new TslSettings());
       }
 
-      if (testSuiteConfig.getTestObject().getSshConfig() == null) {
-        testSuiteConfig.getTestObject().setSshConfig(new SshConfig());
+      if (testSuiteConfig.getSshConfig() == null) {
+        testSuiteConfig.setSshConfig(new SshConfig());
       }
 
       return testSuiteConfig;

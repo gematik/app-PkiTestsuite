@@ -55,7 +55,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 @Slf4j
 public class ListApprovalTestsAndAfos {
 
-  public static final Path ALL_TESTCASES_FILE = Path.of("./allTests.txt");
+  public static final String ALL_TESTCASES_FILENAME = "./allTests.txt";
+  public static final String ALL_FAILED_OR_ABORTED_TESTCASES_FILENAME = "./allFailedOrAborted.txt";
   private static final Path TEST_TO_AFOS_FILE = Path.of("./docs/afoCoverage_testToAfos.txt");
   private static final Path AFOS_DESCRIPTION_FILE =
       Path.of("./docs/afoCoverage_afoDescriptions.txt");
@@ -126,7 +127,7 @@ public class ListApprovalTestsAndAfos {
     return methods;
   }
 
-  private static String padRight(final String s, final int n) {
+  public static String padRight(final String s, final int n) {
     return ("%-" + n + "s").formatted(s);
   }
 
@@ -279,12 +280,15 @@ public class ListApprovalTestsAndAfos {
                 }
 
                 final String methodNamePadded = padRight(customTestInfo.getMethodName(), padN);
+                final String additionalInfo =
+                    customTestInfo.isParameterizedTest() ? " (multiple data variants)" : "";
                 final String line =
-                    "%s\t%s%s"
+                    "%s\t%s%s%s"
                         .formatted(
                             sign,
                             methodNamePadded,
-                            StringUtils.defaultString(customTestInfo.getDisplayName()));
+                            StringUtils.defaultString(customTestInfo.getDisplayName()),
+                            additionalInfo);
                 lines.add(line);
               });
     }
@@ -319,7 +323,7 @@ public class ListApprovalTestsAndAfos {
   static void saveOrVerifyAllTestsFile(
       final Map<String, Set<CustomTestInfo>> classTestMap, final ExecutionMode executionMode) {
     final String generatedContent = generateContentForAllTests(classTestMap);
-    saveOrVerify(ALL_TESTCASES_FILE, generatedContent, executionMode);
+    saveOrVerify(Path.of(ALL_TESTCASES_FILENAME), generatedContent, executionMode);
   }
 
   private static void afosCheck(final CustomTestInfo customTestInfo, final Set<String> errors) {

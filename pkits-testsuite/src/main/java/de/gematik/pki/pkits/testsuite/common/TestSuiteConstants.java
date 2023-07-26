@@ -60,6 +60,7 @@ public class TestSuiteConstants {
 
   public enum PkitsCertType {
     PKITS_CERT_VALID,
+    PKITS_CERT_VALID_ALTERNATIVE,
     PKITS_CERT_INVALID
   }
 

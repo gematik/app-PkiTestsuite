@@ -32,7 +32,11 @@ import org.apache.commons.lang3.StringUtils;
 public class TlsClientApplication {
 
   public static int connectTls(
-      final String ipAddressOrFqdn, final int port, final Path certPath, final String password) {
+      final String ipAddressOrFqdn,
+      final int port,
+      final Path certPath,
+      final String password,
+      final int ocspDelaySeconds) {
     try {
 
       final InetAddress serverAddress = InetAddress.getByName(ipAddressOrFqdn);
@@ -43,15 +47,19 @@ public class TlsClientApplication {
               .sutServerPort(port)
               .clientKeystorePassw(password)
               .tlsSettings(PluginConfig.getInstance().getTlsSettings())
+              .ocspDelaySeconds(ocspDelaySeconds)
               .build();
 
       log.info("TLS connection: start");
       connection.tlsConnectCerts(certPath);
       log.info("TLS connected.");
 
-    } catch (final TlsClientException e) {
+    } catch (final TlsConnectionException e) {
       log.info("No ssl connection established.");
       return 1;
+    } catch (final TlsClientException e) {
+      log.info("Error in TLS client Application.", e);
+      return 2;
     } catch (final UnknownHostException e) {
       log.info("Host unknown: {}", ipAddressOrFqdn);
       return 2;
@@ -79,8 +87,10 @@ public class TlsClientApplication {
     final int serverPort = Integer.parseUnsignedInt(args[1]);
     final Path certPath = Path.of(args[2]);
     final String clientKeystorePassw = args[3];
+    final int ocspDelaySeconds = Integer.parseUnsignedInt(args[4]);
 
-    final int returnCode = connectTls(ipAddressOrFqdn, serverPort, certPath, clientKeystorePassw);
+    final int returnCode =
+        connectTls(ipAddressOrFqdn, serverPort, certPath, clientKeystorePassw, ocspDelaySeconds);
 
     System.exit(returnCode);
   }

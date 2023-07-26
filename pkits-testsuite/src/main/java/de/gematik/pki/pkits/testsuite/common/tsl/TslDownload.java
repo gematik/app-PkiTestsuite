@@ -16,25 +16,19 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
 import static de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory.IGNORE_SEQUENCE_NUMBER;
 
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
 import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;
-import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
-import de.gematik.pki.pkits.testsuite.config.OcspSettings;
-import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
+import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestHistoryContainer;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
-import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
+import de.gematik.pki.pkits.tsl.provider.api.TslDownloadEndpointType;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistoryEntryDto;
@@ -54,46 +48,42 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 public class TslDownload {
 
-  private static final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
-
-  private static final OcspSettings ocspSettings =
-      testSuiteConfig.getTestSuiteParameter().getOcspSettings();
-
-  private static final P12Container ocspSigner =
-      P12Reader.getContentFromP12(
-          ocspSettings.getKeystorePathOcsp().resolve(TestSuiteConstants.OCSP_SIGNER_FILENAME),
-          ocspSettings.getSignerPassword());
+  public enum ClearConfigAfterWaiting {
+    CLEAR_CONFIG,
+    DO_NOT_CLEAR_CONFIG
+  }
 
   @Builder.Default private final int tslDownloadIntervalSeconds = 1;
 
   @Builder.Default private final int tslProcessingTimeSeconds = 3;
+  @Builder.Default private final int ocspProcessingTimeSeconds = 1;
 
   @Setter private byte @NonNull [] tslBytes;
   @NonNull private final String tslProvUri;
   @NonNull private final String ocspRespUri;
 
-  @NonNull private final TslDownloadPoint tslDownloadPoint;
   @NonNull private X509Certificate tslSignerCert;
-
-  private List<OcspRequestHistoryEntryDto> lastOcspRequestHistoryEntries;
+  @NonNull private final P12Container ocspSigner;
+  private final OcspRequestHistoryContainer ocspRequestHistoryContainer =
+      new OcspRequestHistoryContainer();
 
   public TrustStatusListType getTsl() {
     return TslConverter.bytesToTsl(tslBytes);
   }
 
-  public void waitUntilTslDownloadCompleted(final int sequenceNr, final int ocspSeqNr) {
-    configureOcspResponderTslSignerStatusGood();
-    waitForTslDownload(sequenceNr);
-    waitUntilOcspRequestForSigner(ocspSeqNr);
+  public void waitUntilTslDownloadCompleted(final int tslSeqNr, final int ocspSeqNr) {
+    configureOcspResponderForTslSigner();
+    waitForTslDownload(tslSeqNr);
+    waitUntilOcspRequestForTslSigner(ocspSeqNr);
   }
 
-  public void waitUntilTslDownloadCompletedOptional(final int sequenceNr) {
-    configureOcspResponderTslSignerStatusGood();
-    waitForTslDownload(sequenceNr);
+  public void waitUntilTslDownloadCompletedOptional(final int tslSeqNr) {
+    configureOcspResponderForTslSigner();
+    waitForTslDownload(tslSeqNr);
     waitUntilOcspRequestForSignerOptional();
   }
 
-  public void configureOcspResponderTslSignerStatusGood() {
+  public void configureOcspResponderForTslSigner() {
     try {
       final OcspResponderConfigDto dto =
           OcspResponderConfigDto.builder().eeCert(tslSignerCert).signer(ocspSigner).build();
@@ -104,7 +94,7 @@ public class TslDownload {
     }
   }
 
-  public void configureOcspResponderTslSignerStatusGood(
+  public void configureOcspResponderForTslSigner(
       final OcspResponderConfigDto.OcspResponderConfigDtoBuilder builder) {
     try {
       TestEnvironment.configureOcspResponder(ocspRespUri, builder.build());
@@ -113,61 +103,85 @@ public class TslDownload {
     }
   }
 
-  public void waitForTslDownload(final int expectedSeqNr) {
-
-    TestEnvironment.configureTslProvider(
-        tslProvUri, tslBytes, tslDownloadPoint, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
-    log.info("Waiting at most {} seconds for TSL download.", tslDownloadIntervalSeconds);
-    PkitsTestSuiteUtils.waitForEvent(
-        "TslDownloadHistoryHasEntry for seqNr " + expectedSeqNr,
-        tslDownloadIntervalSeconds,
-        tslDownloadHistoryHasSpecificEntry(tslProvUri, expectedSeqNr));
-    TestEnvironment.clearTslProviderConfig(tslProvUri);
+  public void waitForTslDownload(final int expectedTslSeqNr) {
+    waitForTslDownload(
+        expectedTslSeqNr,
+        TslDownloadEndpointType.XML_ENDPOINTS,
+        ClearConfigAfterWaiting.CLEAR_CONFIG);
   }
 
-  public static Integer getSeqNrOfLastTslDownload(final String tslProvUri, final int sequenceNr) {
-    log.info("Expecting download from TSL with seqNr.: {}", sequenceNr);
+  public void waitForTslDownload(
+      final int expectedTslSeqNr,
+      final TslDownloadEndpointType tslDownloadEndpointType,
+      final ClearConfigAfterWaiting clearConfigAfterWaiting) {
+
+    TestEnvironment.configureTslProvider(
+        tslProvUri, tslBytes, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
+    log.info("Waiting at most {} seconds for TSL download.", tslDownloadIntervalSeconds);
+    PkitsTestSuiteUtils.waitForEvent(
+        "TslDownloadHistoryHasEntry for tslSeqNr " + expectedTslSeqNr,
+        tslDownloadIntervalSeconds,
+        tslDownloadHistoryHasSpecificEntry(tslProvUri, expectedTslSeqNr, tslDownloadEndpointType));
+
+    if (clearConfigAfterWaiting == ClearConfigAfterWaiting.CLEAR_CONFIG) {
+      TestEnvironment.clearTslProviderConfig(tslProvUri);
+    }
+  }
+
+  public static Integer getTslSeqNrOfLastTslDownloadRequest(
+      final String tslProvUri, final int tslSeqNr) {
+    log.info("Expecting download from TSL with tslSeqNr: {}", tslSeqNr);
 
     final List<TslRequestHistoryEntryDto> historyEntryDtos =
-        TslProviderManager.getTslRequestHistoryPart(tslProvUri, sequenceNr);
+        TslProviderManager.getTslRequestHistoryPart(
+            tslProvUri, tslSeqNr, TslDownloadEndpointType.ANY_ENDPOINT);
 
     if (historyEntryDtos.isEmpty()) {
-      log.info("history for seqNr {} is empty", sequenceNr);
+      log.info("history for tslSeqNr {} is empty", tslSeqNr);
       return null;
     }
 
-    final int seqNrOfLastTslDownloadHistEntry =
-        historyEntryDtos.get(historyEntryDtos.size() - 1).getSequenceNr();
+    final int tslSeqNrOfLastTslDownloadHistEntry =
+        historyEntryDtos.get(historyEntryDtos.size() - 1).getTslSeqNr();
 
-    log.info("TSL seqNr from last download: {}", seqNrOfLastTslDownloadHistEntry);
-    return seqNrOfLastTslDownloadHistEntry;
+    log.info("tslSeqNr from last download: {}", tslSeqNrOfLastTslDownloadHistEntry);
+    return tslSeqNrOfLastTslDownloadHistEntry;
   }
 
   public void waitUntilOcspRequestForSignerOptional() {
 
     try {
-      waitUntilOcspRequestForSigner();
+      waitUntilOcspRequestForTslSigner();
     } catch (final TestSuiteException e) {
       log.info("no (optional) OCSP requests received -> CONTINUE\n\n");
     }
   }
 
-  public void waitUntilOcspRequestForSigner() {
-    waitUntilOcspRequestForSigner(IGNORE_SEQUENCE_NUMBER);
+  public void waitUntilOcspRequestForTslSigner() {
+    waitUntilOcspRequestForTslSigner(IGNORE_SEQUENCE_NUMBER);
   }
 
-  public void waitUntilOcspRequestForSigner(final int seqNr) {
+  public void waitUntilOcspRequestForTslSigner(final int ocspSeqNr) {
+    waitUntilOcspRequestForTslSigner(ocspSeqNr, ClearConfigAfterWaiting.CLEAR_CONFIG);
+  }
+
+  public void waitUntilOcspRequestForTslSigner(
+      final int tslSeqNr, final ClearConfigAfterWaiting clearConfigAfterWaiting) {
     final BigInteger tslSignerCertSerialNr = tslSignerCert.getSerialNumber();
+
+    log.info("Waiting {} seconds for ocsp request for tsl signer.", tslProcessingTimeSeconds);
     final long ocsRequestWaitingTimeSeconds =
         PkitsTestSuiteUtils.waitForEvent(
-            "OcspRequestHistoryHasEntry for seqNr %s and TSL signer cert %s"
-                .formatted(seqNr, tslSignerCertSerialNr),
+            "OcspRequestHistoryHasEntry for tslSeqNr %s and TSL signer cert %s"
+                .formatted(tslSeqNr, tslSignerCertSerialNr),
             tslProcessingTimeSeconds,
-            ocspRequestHistoryHasEntryForCert(seqNr, tslSignerCertSerialNr));
+            ocspRequestHistoryContainer.ocspRequestHistoryHasEntryForCert(
+                ocspRespUri, tslSeqNr, tslSignerCertSerialNr));
 
-    TestEnvironment.clearOcspResponderConfig(ocspRespUri);
+    if (clearConfigAfterWaiting == ClearConfigAfterWaiting.CLEAR_CONFIG) {
+      TestEnvironment.clearOcspResponderConfig(ocspRespUri);
+    }
 
-    // TODO run in thread coupled to waitForOcspCacheToExpire() from a UseCaseExecution
     log.info(
         "OCSP Request for TSL signer received after {} seconds. Waiting further {} seconds for TSL"
             + " to process",
@@ -178,18 +192,12 @@ public class TslDownload {
   }
 
   public static Callable<Boolean> tslDownloadHistoryHasSpecificEntry(
-      final String tslProvUri, final int sequenceNr) {
-    log.debug("Polling TSL download request history, seqNr {}", sequenceNr);
-    return () -> !TslProviderManager.getTslRequestHistoryPart(tslProvUri, sequenceNr).isEmpty();
-  }
-
-  private Callable<Boolean> ocspRequestHistoryHasEntryForCert(
-      final int seqNr, final BigInteger certSerial) {
-    log.debug("Polling TSL download request history");
-    return () -> {
-      lastOcspRequestHistoryEntries =
-          OcspResponderManager.getOcspHistoryPart(ocspRespUri, seqNr, certSerial);
-      return !lastOcspRequestHistoryEntries.isEmpty();
-    };
+      final String tslProvUri,
+      final int tslSeqNr,
+      final TslDownloadEndpointType tslDownloadEndpointType) {
+    log.debug("Polling TSL download request history, tslSeqNr {}", tslSeqNr);
+    return () ->
+        !TslProviderManager.getTslRequestHistoryPart(tslProvUri, tslSeqNr, tslDownloadEndpointType)
+            .isEmpty();
   }
 }

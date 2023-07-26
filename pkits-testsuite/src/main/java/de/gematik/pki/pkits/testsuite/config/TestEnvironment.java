@@ -17,7 +17,6 @@
 package de.gematik.pki.pkits.testsuite.config;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
-import de.gematik.pki.pkits.common.PkitsConstants.TslDownloadPoint;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
@@ -35,11 +34,10 @@ public final class TestEnvironment {
   public static void configureTslProvider(
       final String tslProvUri,
       final byte[] tslBytes,
-      final TslDownloadPoint tslDownloadPoint,
       final TslProviderEndpointsConfig tslProviderEndpointsConfig) {
 
     final TslProviderConfigDto tslProviderConfigDto =
-        new TslProviderConfigDto(tslBytes, tslDownloadPoint, tslProviderEndpointsConfig);
+        new TslProviderConfigDto(tslBytes, tslProviderEndpointsConfig);
 
     TslProviderManager.configure(tslProvUri, tslProviderConfigDto);
 
@@ -64,7 +62,7 @@ public final class TestEnvironment {
     OcspResponderManager.configure(ocspRespUri, ocspResponderConfig);
 
     log.info(
-        "OcspResponder configured with cert serialNr: {}.:: {}",
+        "OcspResponder configured with certSerialNr {}.:: {}",
         ocspResponderConfig.getEeCert().getSerialNumber(),
         PkitsTestSuiteUtils.getCallerTrace());
   }

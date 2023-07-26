@@ -41,9 +41,4 @@ public final class PkitsConstants {
   public static final String GEMATIK_PKI_EMAIL_URI = "mailto:pki@gematik.de";
   public static final String NOT_CONFIGURED = "not configured";
   public static final int TSL_ID_LENGTH = 19;
-
-  public enum TslDownloadPoint {
-    TSL_DOWNLOAD_POINT_PRIMARY,
-    TSL_DOWNLOAD_POINT_BACKUP,
-  }
 }

@@ -16,9 +16,9 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
+import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
@@ -26,23 +26,23 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALI
 import de.gematik.pki.gemlibpki.tsl.TslConstants;
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsConstants;
-import de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory.OcspRequestExpectationBehaviour;
+import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
+import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.TslOperation;
 import de.gematik.pki.pkits.testsuite.config.Afo;
+import de.gematik.pki.pkits.testsuite.reporting.TestResultLoggerExtension;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -54,6 +54,9 @@ class TslTaApprovalTests extends ApprovalTestsBase {
   private static final String STARTINGSTATUSTIME_ANNOUNCED_TA_MESSAGE =
       "StartingStatusTime of announced trust anchor: {}";
 
+  private static final String ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS =
+      "alternativeFirstTrustAnchorWithAlternativeCAs";
+
   /** gematikId: UE_PKI_TC_0106_001 */
   @Test
   @Afo(
@@ -61,9 +64,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 5")
   @Afo(afoId = "GS-A_4643", description = "TUC_PKI_013: Import TI-Vertrauensanker aus TSL")
   @DisplayName("Test updating trust anchor")
-  void verifyUpdateTrustAnchor(final TestInfo testInfo) {
+  void verifyUpdateTrustAnchor() {
 
-    testCaseMessage(testInfo);
     initialState();
 
     updateTrustStore(
@@ -80,22 +82,22 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs, signed with old (no longer active) trust anchor.",
         "invalidDefaultTrustAnchorWithAlternativeCAs",
         CreateTslTemplate.alternativeTsl(),
-        defaultTslSigner);
+        getDefaultTslSignerP12());
 
     updateTrustStore(
         "Offer a TSL (with alternate test CAs), signed with the new (announced) first alternative"
             + " trust anchor.",
-        newTslGenerator("alternativeFirstTrustAnchorWithAlternativeCAs")
+        newTslGenerator(ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS)
             .getStandardTslDownload(
                 CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
-                TslGenerator.alternativeTslSignerP12Path),
+                getTslSignerP12(TslGenerator.alternativeTslSignerP12Path)),
         OCSP_REQUEST_EXPECT,
         withUseCase(getPathOfAlternativeCertificate(), USECASE_VALID));
 
-    fallBackFromAlternativeToDefaultTrustAnchorAndCheck(TslGenerator.alternativeTslSignerP12Path);
+    fallBackFromFirstAlternativeToDefaultTrustAnchorAndCheck();
   }
 
-  private void fallBackFromAlternativeToDefaultTrustAnchorAndCheck(final Path tslSignerP12Path) {
+  private void fallBackFromFirstAlternativeToDefaultTrustAnchorAndCheck() {
 
     log.info("fallBackFromAlternativeToDefaultTrustAnchorAndCheck - start");
 
@@ -103,7 +105,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         getSwitchMessage(TA_NAME_ALT1, TA_NAME_DEFAULT),
         newTslGenerator("fallbackFromAlternativeFirstTrustAnchorToDefault")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(), tslSignerP12Path),
+                CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(),
+                getTslSignerP12(TslGenerator.alternativeTslSignerP12Path)),
         OCSP_REQUEST_EXPECT,
         withUseCase(getPathOfFirstValidCert(), USECASE_VALID, OCSP_REQUEST_EXPECT));
 
@@ -114,46 +117,31 @@ class TslTaApprovalTests extends ApprovalTestsBase {
       final String description,
       final String tslName,
       final TrustStatusListType tsl,
-      final Path tslSignerP12Path) {
+      final P12Container tslSignerP12) {
 
     log.info("Test if Trust Anchor was erroneously imported");
     log.info("offerTslWithNewTaAndVerifyItWasNotImported - start: tslName {}", tslName);
 
     updateTrustStore(
         description,
-        newTslGenerator(tslName).getStandardTslDownload(tsl, tslSignerP12Path),
+        newTslGenerator(tslName).getStandardTslDownload(tsl, tslSignerP12),
         OCSP_REQUEST_IGNORE,
         WITHOUT_USECASE);
 
-    try {
-      useCaseWithCert(
-          getPathOfAlternativeCertificate(),
-          USECASE_INVALID,
-          OCSP_RESP_WITH_PROVIDED_CERT,
-          OCSP_REQUEST_DO_NOT_EXPECT);
+    TestResultLoggerExtension.stopExecutionOfRemainingTests(
+        "defect trust anchor imported in the test object - a fallback is not implemented yet -> all"
+            + " further tests are inconclusive: "
+            + PkitsTestSuiteUtils.getCallerTrace());
 
-      log.info("offerTslWithNewTaAndVerifyItWasNotImported - finish.\n\n");
+    useCaseWithCert(
+        getPathOfAlternativeCertificate(),
+        USECASE_INVALID,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        OCSP_REQUEST_DO_NOT_EXPECT);
 
-      // TODO make exception more specific, also have a look at useCaseWithCert
-      // TODO think about and implement fallBackToDefaultTrustAnchorAndCheck for the above
-      // useCaseWithCert; also in other new trust anchor import test cases
-    } catch (final Exception e) {
+    TestResultLoggerExtension.allowExecutionOfRemainingTests();
 
-      // fallBackToDefaultTrustAnchorAndCheck(CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(),
-      // tslSignerP12Path);
-      log.error(
-          """
-
-
-
-              defect trust anchor imported in the test object - a fallback is not implemented yet -> all further tests are inconclusive
-
-
-              """);
-
-      // TODO stop test suite -> no further test should be executed
-      throw e;
-    }
+    log.info("offerTslWithNewTaAndVerifyItWasNotImported - finish.\n\n");
   }
 
   /** gematikId: UE_PKI_TC_0106_002 */
@@ -165,9 +153,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4643",
       description = "TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 4")
   @DisplayName("Test updating trust anchor with certificates that have invalid times")
-  void verifyNewTrustAnchorInvalidTime(final TestInfo testInfo) {
+  void verifyNewTrustAnchorInvalidTime() {
 
-    testCaseMessage(testInfo);
     initialState();
 
     // ---------------------------------------------------------------------------------
@@ -176,7 +163,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
     initialStateWithAlternativeTemplate();
 
     updateTrustStore(
-        "Try to import invalid trust anchor: offer a TSL announcing a new trust anchor (but"
+        "Try to import invalid trust anchor: offer a valid TSL announcing a new trust anchor (but"
             + " expired).",
         newTslGenerator("case1AnnounceExpiredTrustAnchor")
             .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeExpiredTsl()),
@@ -189,15 +176,15 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " (but expired).",
         "case1ExpiredTrustAnchorWithAlternativeCAs",
         CreateTslTemplate.invalidAlternativeTrustAnchorExpiredAlternativeCaTsl(),
-        TslGenerator.tslSignerFromExpiredTrustAnchorP12Path);
+        getTslSignerP12(TslGenerator.tslSignerFromExpiredTrustAnchorP12Path));
 
     // ---------------------------------------------------------------------------------
 
     log.info("start case 2: verify new trust anchor not yet valid");
     initialStateWithAlternativeTemplate();
     updateTrustStore(
-        "Try to import invalid trust anchor: offer a TSL announcing a new trust anchor (but not yet"
-            + " valid).",
+        "Try to import invalid trust anchor: offer a valid TSL announcing a new trust anchor (but"
+            + " not yet valid).",
         newTslGenerator("case2AnnounceNotYetValidTrustAnchor")
             .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeNotYetValidTsl()),
         OCSP_REQUEST_EXPECT,
@@ -209,14 +196,14 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " anchor (but not yet valid).",
         "case2NotYetValidTrustAnchorWithAlternativeCAs",
         CreateTslTemplate.invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl(),
-        TslGenerator.tslSignerFromNotYetValidTrustAnchorP12Path);
+        getTslSignerP12(TslGenerator.tslSignerFromNotYetValidTrustAnchorP12Path));
 
     // ---------------------------------------------------------------------------------
-    log.info("case 3: StatusStartingTime is expired");
+    log.info("case 3: TA with begin of StatusStartingTime expired");
     initialStateWithAlternativeTemplate();
     updateTrustStore(
-        "Try to import invalid trust anchor: offer a TSL announcing a new valid trust anchor, that"
-            + " would expire to the time of specified StatusStartingTime.",
+        "Try to import valid trust anchor: offer a valid TSL announcing a new valid trust anchor,"
+            + " that expires with the beginning of the StatusStartingTime.",
         newTslGenerator("case3AnnounceValidTrustAnchorExpiringAtStatusStartingTimeInFuture")
             .getStandardTslDownload(
                 CreateTslTemplate.defectTrustAnchorChangeStartingTimeFutureTsl()),
@@ -243,9 +230,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4643",
       description = "TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 1")
   @DisplayName("Test multiple announced trust anchors in single TSL")
-  void verifyMultipleAnnouncedTrustAnchorsInTsl(final TestInfo testInfo) {
+  void verifyMultipleAnnouncedTrustAnchorsInTsl() {
 
-    testCaseMessage(testInfo);
     initialState();
 
     initialStateWithAlternativeTemplate();
@@ -264,13 +250,13 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs and the first alternative TSL signer certificate.",
         "alternativeFirstTrustAnchor",
         CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
-        TslGenerator.alternativeTslSignerP12Path);
+        getTslSignerP12(TslGenerator.alternativeTslSignerP12Path));
 
     offerTslWithNewTaAndVerifyItWasNotImported(
         "Offer a TSL with alternative CAs and the second alternative TSL signer certificate.",
         "alternativeSecondTrustAnchor",
         CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
-        TslGenerator.alternativeSecondTslSignerP12Path);
+        getTslSignerP12(TslGenerator.alternativeSecondTslSignerP12Path));
 
     // ---------------------------------------------------------------------------------
     useCaseWithCert(
@@ -289,9 +275,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4643",
       description = "TUC_PKI_013: Import TI-Vertrauensanker aus TSL - Schritt 2")
   @DisplayName("Test for an announced broken trust anchor and cannot be extracted")
-  void verifyNewTrustAnchorsIsBroken(final TestInfo testInfo) {
-
-    testCaseMessage(testInfo);
+  void verifyNewTrustAnchorsIsBroken() {
 
     initialStateWithAlternativeTemplate();
 
@@ -306,7 +290,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
 
     updateTrustStore(
         "Offer the default TSL.",
-        newTslGenerator("default").getStandardTslDownload(CreateTslTemplate.defaultTsl()),
+        newTslGenerator(TslGenerator.TSL_NAME_DEFAULT)
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(getPathOfFirstValidCert(), USECASE_VALID));
   }
@@ -324,14 +309,14 @@ class TslTaApprovalTests extends ApprovalTestsBase {
       "Test overwrite behaviour and proper handling of StatusStartingTime of announced trust"
           + " anchors")
   void verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors(
-      final int testOrder, final TestInfo testInfo) {
+      final int testOrder) {
 
     if (testOrder == 1) {
       log.info("execute test case verifyHandlingOfStatusStartingTimeOfAnnouncedTrustAnchor");
-      verifyHandlingOfStatusStartingTimeOfAnnouncedTrustAnchor(testInfo);
+      verifyHandlingOfStatusStartingTimeOfAnnouncedTrustAnchor();
     } else {
-      log.info("execute test case  verifyOverwriteAnnouncedTrustAnchor");
-      verifyOverwriteAnnouncedInactiveTrustAnchor(testInfo);
+      log.info("execute test case verifyOverwriteAnnouncedInactiveTrustAnchor");
+      verifyOverwriteAnnouncedInactiveTrustAnchor();
     }
   }
 
@@ -344,7 +329,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
   }
 
   protected TslOperation newActivationTimeTslOperation(
-      @NonNull final Path tslSignerPath, @NonNull final ZonedDateTime newActivationTime) {
+      @NonNull final P12Container tslSignerP12, @NonNull final ZonedDateTime newActivationTime) {
 
     return tslContainer -> {
       final TrustStatusListType tsl = tslContainer.getAsTsl();
@@ -356,13 +341,12 @@ class TslTaApprovalTests extends ApprovalTestsBase {
           null,
           newActivationTime);
 
-      return newTslGenerator().signTslOperation(tslSignerPath).apply(tsl);
+      return newTslGenerator().signTslOperation(tslSignerP12).apply(tsl);
     };
   }
 
-  private void verifyHandlingOfStatusStartingTimeOfAnnouncedTrustAnchor(final TestInfo testInfo) {
+  private void verifyHandlingOfStatusStartingTimeOfAnnouncedTrustAnchor() {
 
-    testCaseMessage(testInfo);
     initialState();
 
     final long tripleTslDownloadTime = getTripleTslDownloadTime();
@@ -375,7 +359,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " activated after next 3 TSL downloads.",
         newTslGenerator(
                 "announceFirstAlternativeTrustAnchorWithActivationTime3TslDownload",
-                newActivationTimeTslOperation(defaultTslSigner, newActivationTime))
+                newActivationTimeTslOperation(getDefaultTslSignerP12(), newActivationTime))
             .getStandardTslDownload(
                 CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl()),
         OCSP_REQUEST_EXPECT,
@@ -383,26 +367,24 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             getPathOfAlternativeCertificate(), USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
     // ---------------------------------------------------------------------------------
-    try {
-      updateTrustStore(
-          "Try to import invalid trust anchor - too early: Offer a TSL with alternative CAs and the"
-              + " TSL signer certificate from the new trust anchor. Trust anchor is not yet"
-              + " active.",
-          newTslGenerator("alternativeFirstTrustAnchorWithAlternativeCAs")
-              .getStandardTslDownload(
-                  CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
-                  TslGenerator.alternativeTslSignerP12Path),
-          OCSP_REQUEST_IGNORE,
-          withUseCase(getPathOfAlternativeCertificate(), USECASE_INVALID));
-    } catch (final Exception e) {
-      // TODO integrate this fallback into tryToImportAnnouncedInvalidTrustAnchor around
-      //      useCaseWithCert
 
-      fallBackFromAlternativeToDefaultTrustAnchorAndCheck(TslGenerator.alternativeTslSignerP12Path);
-      Assertions.fail(
-          "a trust anchor was unexpectedly imported into the test object - a fallback was performed"
-              + " to switch to the default trust anchor");
-    }
+    TestResultLoggerExtension.stopExecutionOfRemainingTests(
+        "defect trust anchor imported in the test object - a fallback is not implemented yet -> all"
+            + " further tests are inconclusive: "
+            + PkitsTestSuiteUtils.getCallerTrace());
+
+    updateTrustStore(
+        "Try to import invalid trust anchor - too early: Offer a TSL with alternative CAs and the"
+            + " TSL signer certificate from the new trust anchor. Trust anchor is not yet"
+            + " active.",
+        newTslGenerator(ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS)
+            .getStandardTslDownload(
+                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+                getTslSignerP12(TslGenerator.alternativeTslSignerP12Path)),
+        OCSP_REQUEST_IGNORE,
+        withUseCase(getPathOfAlternativeCertificate(), USECASE_INVALID));
+
+    TestResultLoggerExtension.allowExecutionOfRemainingTests();
     // ---------------------------------------------------------------------------------
 
     waitWithExtraSeconds(tripleTslDownloadTime);
@@ -413,24 +395,25 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " space.",
         "defaultTrustAnchorWithAlternativeCAs",
         CreateTslTemplate.alternativeTsl(),
-        defaultTslSigner);
+        getDefaultTslSignerP12());
 
     // ---------------------------------------------------------------------------------
 
     updateTrustStore(
         "Offer a TSL with alternative CAs and TSL signer certificate from the new trust"
             + " anchor. Trust anchor should be active.",
-        newTslGenerator("alternativeFirstTrustAnchorWithAlternativeCAs")
+        newTslGenerator(ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS)
             .getStandardTslDownload(
                 CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
-                TslGenerator.alternativeTslSignerP12Path),
+                getTslSignerP12(TslGenerator.alternativeTslSignerP12Path)),
         OCSP_REQUEST_EXPECT,
         withUseCase(getPathOfAlternativeCertificate(), USECASE_VALID, OCSP_REQUEST_EXPECT));
 
-    fallBackFromAlternativeToDefaultTrustAnchorAndCheck(TslGenerator.alternativeTslSignerP12Path);
+    fallBackFromFirstAlternativeToDefaultTrustAnchorAndCheck();
   }
 
   private static long getTripleTslDownloadTime() {
+    // NOTE in case of timing problems consider to add ocspProcessingTimeSeconds
     long tripleTslDownloadTime =
         3L
             * (testSuiteConfig.getTestObject().getTslDownloadIntervalSeconds()
@@ -450,9 +433,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
     return tripleTslDownloadTime;
   }
 
-  private void verifyOverwriteAnnouncedInactiveTrustAnchor(final TestInfo testInfo) {
+  private void verifyOverwriteAnnouncedInactiveTrustAnchor() {
 
-    testCaseMessage(testInfo);
     initialState();
 
     final ZonedDateTime now = GemLibPkiUtils.now();
@@ -503,9 +485,9 @@ class TslTaApprovalTests extends ApprovalTestsBase {
     offerTslWithNewTaAndVerifyItWasNotImported(
         "Offer a TSL with alternative CAs and TSL signer certificate from the first new trust"
             + " anchor.",
-        "alternativeFirstTrustAnchorWithAlternativeCAs",
+        ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS,
         CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
-        TslGenerator.alternativeTslSignerP12Path);
+        getTslSignerP12(TslGenerator.alternativeTslSignerP12Path));
 
     log.info(
         "Try to use second new trust anchor TA2 (should be in the truststore of the test object)");
@@ -516,7 +498,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         newTslGenerator("alternativeSecondTrustAnchorWithAlternativeCAs")
             .getStandardTslDownload(
                 CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(),
-                TslGenerator.alternativeSecondTslSignerP12Path),
+                getTslSignerP12(TslGenerator.alternativeSecondTslSignerP12Path)),
         OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT,
         withUseCase(getPathOfAlternativeCertificate(), USECASE_VALID, OCSP_REQUEST_EXPECT));
 
@@ -527,26 +509,19 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         newTslGenerator("fallbackFromAlternativeSecondTrustAnchorToDefault")
             .getStandardTslDownload(
                 CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(),
-                TslGenerator.alternativeSecondTslSignerP12Path),
+                getTslSignerP12(TslGenerator.alternativeSecondTslSignerP12Path)),
         OCSP_REQUEST_EXPECT,
         WITHOUT_USECASE);
 
-    try {
-
-      useCaseWithCert(
-          getPathOfFirstValidCert(),
-          USECASE_VALID,
-          OCSP_RESP_WITH_PROVIDED_CERT,
-          OCSP_REQUEST_EXPECT);
-
-    } catch (final Exception e) {
-      log.error(
-          "failed to execute use case: very likely because of wrong trust anchor in test object",
-          e);
-      fallBackFromAlternativeToDefaultTrustAnchorAndCheck(TslGenerator.alternativeTslSignerP12Path);
-      Assertions.fail(
-          "a trust anchor was unexpectedly imported into the test object - a fallback was performed"
-              + " to switch to the default trust anchor");
-    }
+    TestResultLoggerExtension.stopExecutionOfRemainingTests(
+        "defect trust anchor was very likely imported in the test object - a fallback is not"
+            + " implemented yet -> all further tests are inconclusive: "
+            + PkitsTestSuiteUtils.getCallerTrace());
+    useCaseWithCert(
+        getPathOfFirstValidCert(),
+        USECASE_VALID,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        OCSP_REQUEST_EXPECT);
+    TestResultLoggerExtension.allowExecutionOfRemainingTests();
   }
 }

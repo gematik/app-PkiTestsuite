@@ -16,9 +16,14 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import de.gematik.pki.gemlibpki.certificate.CertificateType;
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.pkits.testsuite.common.tsl.generation.exeptions.TslGenerationException;
+import eu.europa.esig.trustedlist.jaxb.tsl.ExtensionType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -42,6 +47,21 @@ class TspServiceGeneratorTest {
 
     final JAXBElement<?> node = (JAXBElement<?>) content.get(elementContentIndex);
     return (String) node.getValue();
+  }
+
+  @Test
+  void testToExtension() {
+    final CertificateType certificateType = CertificateType.CERT_TYPE_SMC_B_AUT;
+    final ExtensionType extensionType = TspServiceGenerator.toExtension(certificateType);
+
+    assertThat(extensionType.isCritical()).isFalse();
+    final List<Object> content = extensionType.getContent();
+
+    final JAXBElement<?> elem1 = ((JAXBElement<?>) content.get(0));
+    assertThat(elem1.getValue()).isEqualTo(certificateType.getOid());
+
+    final JAXBElement<?> elem2 = ((JAXBElement<?>) content.get(1));
+    assertThat(elem2.getValue()).isEqualTo(certificateType.getName());
   }
 
   @Test
@@ -111,6 +131,54 @@ class TspServiceGeneratorTest {
         .isEqualTo(certTypeOid.getOid());
     Assertions.assertThat(getExtensionElementContent(tspService, 1, 1))
         .isEqualTo(certTypeOid.getName());
+  }
+
+  @Test
+  void testGenerateWithCertBytes() {
+
+    final byte[] certBytes = "dummyCertBytes".getBytes();
+
+    final String serviceName = "serviceName1";
+    final String serviceStatus = "serviceStatus1";
+    final String serviceTypeIdentifier = "serviceTypeIdentifier1";
+
+    final ZonedDateTime now = GemLibPkiUtils.now();
+
+    final String oidValue = "oidValue1";
+    final String oidName = "oidName1";
+
+    final CertificateType certTypeOid = CertificateType.CERT_TYPE_SMC_B_AUT;
+
+    final TspServiceGenerator tspServiceGenerator = new TspServiceGenerator();
+    final TSPServiceType tspService =
+        tspServiceGenerator
+            .certificate(certBytes)
+            .serviceName(serviceName)
+            .serviceStatus(serviceStatus)
+            .serviceTypeIdentifier(serviceTypeIdentifier)
+            .statusStartingTime(now)
+            .addServiceInformationExtension(oidValue, oidName)
+            .addServiceInformationExtension(certTypeOid)
+            .generate();
+
+    assertThat(
+            tspService
+                .getServiceInformation()
+                .getServiceDigitalIdentity()
+                .getDigitalId()
+                .get(0)
+                .getX509Certificate())
+        .isEqualTo(certBytes);
+  }
+
+  @Test
+  void testGenerateException() {
+
+    final TspServiceGenerator tspServiceGenerator = new TspServiceGenerator();
+
+    assertThatThrownBy(tspServiceGenerator::generate)
+        .isInstanceOf(TslGenerationException.class)
+        .hasMessage("Certificate is null, but expected to be provided!");
   }
 
   @Test

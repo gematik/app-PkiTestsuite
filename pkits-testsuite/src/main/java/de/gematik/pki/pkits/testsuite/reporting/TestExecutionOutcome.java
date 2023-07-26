@@ -20,6 +20,7 @@ import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import java.time.ZonedDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestIdentifier;
@@ -66,7 +67,15 @@ public class TestExecutionOutcome {
   }
 
   public String getDisplayName() {
-    return testIdentifier.getDisplayName();
+
+    String displayName =
+        getMethodSource().getJavaMethod().getDeclaredAnnotation(DisplayName.class).value();
+
+    // for parameterized tests
+    if (!displayName.equals(testIdentifier.getDisplayName())) {
+      displayName = testIdentifier.getDisplayName() + " -- " + displayName;
+    }
+    return displayName;
   }
 
   public boolean isTest() {

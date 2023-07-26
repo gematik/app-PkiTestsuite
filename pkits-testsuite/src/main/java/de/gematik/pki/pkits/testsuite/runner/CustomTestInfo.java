@@ -23,6 +23,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.junit.jupiter.params.ParameterizedTest;
 
 @AllArgsConstructor
 @Getter
@@ -88,6 +89,10 @@ public class CustomTestInfo implements Comparable<CustomTestInfo> {
 
   boolean sameMethodName(final String methodName) {
     return method.getName().equals(methodName);
+  }
+
+  public boolean isParameterizedTest() {
+    return method.getAnnotation(ParameterizedTest.class) != null;
   }
 
   @Override
