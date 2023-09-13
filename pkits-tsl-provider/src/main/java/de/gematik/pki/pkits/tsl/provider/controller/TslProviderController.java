@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,9 @@ import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
 
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
-import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class TslProviderController {
     return headerValues.stream().anyMatch(v -> v.contains("gzip"));
   }
 
+  @Operation(summary = "Returns TLS according to current configuration of the OCSP Responder.")
   @GetMapping(value = TSL_XML_PRIMARY_ENDPOINT, produces = MEDIA_TYPE_APPLICATION_VND_ETSI_TSL_XML)
   public ResponseEntity<byte[]> getTslXmlPrimary(
       final HttpServletRequest request,
@@ -74,6 +76,10 @@ public class TslProviderController {
     return getResponseEntityWithTsl(true);
   }
 
+  @Operation(
+      summary =
+          "Returns the hash value of the current TLS according to current configuration of the OCSP"
+              + " Responder.")
   @GetMapping(value = TSL_HASH_PRIMARY_ENDPOINT)
   public ResponseEntity<String> getTslHashPrimary(
       final HttpServletRequest request,
@@ -86,6 +92,7 @@ public class TslProviderController {
     return getResponseEntityWithHash();
   }
 
+  @Operation(summary = "Returns TLS according to current configuration of the OCSP Responder.")
   @GetMapping(value = TSL_XML_BACKUP_ENDPOINT, produces = MEDIA_TYPE_APPLICATION_VND_ETSI_TSL_XML)
   public ResponseEntity<byte[]> getTslXmlBackup(
       final HttpServletRequest request,
@@ -98,6 +105,10 @@ public class TslProviderController {
     return getResponseEntityWithTsl(false);
   }
 
+  @Operation(
+      summary =
+          "Returns the hash value of the current TLS according to current configuration of the OCSP"
+              + " Responder.")
   @GetMapping(value = TSL_HASH_BACKUP_ENDPOINT)
   public ResponseEntity<String> getTslHashBackup(
       final HttpServletRequest request,

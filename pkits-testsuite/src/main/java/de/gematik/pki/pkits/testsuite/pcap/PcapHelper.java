@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public final class PcapHelper {
 
   public static void assignDevices(final TestSuiteConfig testSuiteConfig) {
 
-    if (pcapDeviceCommonInfos != null) {
+    if (null != pcapDeviceCommonInfos) {
       log.info("reuse assigned devices");
       return;
     }
@@ -80,7 +80,8 @@ public final class PcapHelper {
             .map(
                 deviceCommonInfo ->
                     "ipAddress: %s (ipAddressOrFqdn: %s)"
-                        .formatted(deviceCommonInfo.ipAddress, deviceCommonInfo.ipAddressOrFqdn))
+                        .formatted(
+                            deviceCommonInfo.getIpAddress(), deviceCommonInfo.getIpAddressOrFqdn()))
             .toList();
 
     log.info("following IP addresses are to sniff {}", message);
@@ -92,7 +93,7 @@ public final class PcapHelper {
 
     log.info(
         "assign devices for the following distinct IP addresses {}",
-        deviceCommonInfos.stream().map(deviceCommonInfo -> deviceCommonInfo.ipAddress).toList());
+        deviceCommonInfos.stream().map(DeviceCommonInfo::getIpAddress).toList());
 
     PcapManager.assignDevicesForIpAddresses(pcapService, deviceCommonInfos);
     pcapDeviceCommonInfos = deviceCommonInfos;

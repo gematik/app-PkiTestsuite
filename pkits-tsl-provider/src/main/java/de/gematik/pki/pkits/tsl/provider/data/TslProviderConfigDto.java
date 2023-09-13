@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,31 +37,16 @@ public class TslProviderConfigDto {
   private TslProviderEndpointsConfig tslProviderEndpointsConfig =
       TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200;
 
-  @Getter
-  public enum TslProviderEndpointsConfig {
-    PRIMARY_200_BACKUP_200(200, 200),
-    PRIMARY_200_BACKUP_404(200, 404),
-    PRIMARY_404_BACKUP_200(404, 200),
-    PRIMARY_404_BACKUP_404(404, 404);
-
-    int primaryStatusCode;
-    int backupStatusCode;
-
-    TslProviderEndpointsConfig(final int primaryStatusCode, final int backupStatusCode) {
-      this.primaryStatusCode = primaryStatusCode;
-      this.backupStatusCode = backupStatusCode;
-    }
-  }
-
   @Override
   public String toString() {
 
     String tslInfo = "ignore: tslId and tslSeqNr: tsl - cannot be parsed";
     try {
-      final TrustStatusListType tsl = TslConverter.bytesToTsl(tslBytes);
+      final TrustStatusListType tslUnsigned = TslConverter.bytesToTslUnsigned(tslBytes);
       tslInfo =
           "tslId: %s tslSeqNr: %s"
-              .formatted(tsl.getId(), tsl.getSchemeInformation().getTSLSequenceNumber());
+              .formatted(
+                  tslUnsigned.getId(), tslUnsigned.getSchemeInformation().getTSLSequenceNumber());
     } catch (final Exception e) {
       log.debug(tslInfo, e);
     }

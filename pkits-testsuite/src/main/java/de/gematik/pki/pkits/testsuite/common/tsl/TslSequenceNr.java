@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,18 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
 @Slf4j
 public final class TslSequenceNr {
 
   // the sequence number of the tsl that is actually active inside the test object
-  @Getter private int currentNrInTestObject = 1;
+  private int currentNrInTestObject = 1;
 
   // the sequence number of the tsl we expect to be active inside the test object
-  @Getter @Setter private int expectedNrInTestObject = 1;
+  @Setter private int expectedNrInTestObject = 1;
 
   // last sequence number of the tsl that was offered for downloaded to the test object
-  @Getter private int lastOfferedTslSeqNr = 0;
+  private int lastOfferedTslSeqNr = 0;
 
   private static TslSequenceNr instance;
 
@@ -71,24 +72,20 @@ public final class TslSequenceNr {
 
   public void setLastOfferedTslSeqNr(final int offeredTslSeqNr) {
     lastOfferedTslSeqNr = offeredTslSeqNr;
-    persistTslSeqNr();
+    persistTslSeqNr(lastOfferedTslSeqNr);
   }
 
-  private void persistTslSeqNr() {
+  private void persistTslSeqNr(final int tslSeqNr) {
     try {
-      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(lastOfferedTslSeqNr));
+      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(tslSeqNr));
     } catch (final IOException e) {
       throw new TestSuiteException("Cannot write sequence number file!", e);
     }
   }
 
   public void saveCurrentTestObjectTslSeqNr(final int tslSeqNr) {
-    try {
-      Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(tslSeqNr));
-      this.currentNrInTestObject = tslSeqNr;
-    } catch (final IOException e) {
-      throw new TestSuiteException("Could not write TslSeqNr to file.", e);
-    }
+    persistTslSeqNr(tslSeqNr);
+    this.currentNrInTestObject = tslSeqNr;
   }
 
   public int getNextTslSeqNr() {

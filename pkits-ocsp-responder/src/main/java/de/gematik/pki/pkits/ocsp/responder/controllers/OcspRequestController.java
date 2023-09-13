@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,15 @@ import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
@@ -41,7 +46,6 @@ import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.isismtt.ocsp.CertHash;
-import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.util.encoders.Hex;
@@ -49,6 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -59,23 +64,50 @@ public class OcspRequestController {
   private final OcspRequestHistory ocspRequestHistory;
   private final OcspResponseConfigHolder ocspResponseConfigHolder;
 
+  @Operation(
+      summary =
+          "Generates OCSP response for the provided sequence number and according to the current"
+              + " configuration of the OCSP Responder.",
+      description =
+          "Example with curl: ```curl -v --request 'POST'  'http://localhost:8083/ocsp/1000000'  -H"
+              + " 'accept: application/ocsp-response'  -H 'Content-Type: application/ocsp-request'"
+              + " --data-binary \"@ocspRequestBytes.bin\"```",
+      parameters = {
+        @Parameter(in = ParameterIn.PATH, name = "seqNr", description = "sequence number from TSL")
+      })
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Generate OCSP response.",
+            content = {@Content(mediaType = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST)}),
+        @ApiResponse(
+            responseCode = "500",
+            description = "OCSP Responder not configured",
+            content = @Content)
+      })
   @PostMapping(
       value = OCSP_SSP_ENDPOINT + "/{seqNr}",
+      consumes = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST,
       produces = OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
   public ResponseEntity<Object> ocspService(
-      @PathVariable("seqNr") final int tslSeqNr, final HttpServletRequest request) {
+      @PathVariable("seqNr") final int tslSeqNr,
+      final HttpServletRequest request,
+      final @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "Binary encoding of the instance of OCSP Request.",
+              required = true) @RequestBody byte[] ocspRequestBytes) {
 
     if (!ocspResponseConfigHolder.isConfigured()) {
       return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
     }
 
-    final OCSPReq ocspReq = createOcspReqFromServletRequest(request);
+    final OCSPReq ocspReq = createOcspReqFromServletRequest(ocspRequestBytes);
     final BigInteger certSerialNr = getCertSerialNrFromRequest(ocspReq);
     if (!ocspResponseConfigHolder.isCertSerialNrConfigured(certSerialNr)) {
       log.error(
           "CertSerialNr {} is not configured. Configured is certSerialNr {}.",
           certSerialNr,
-          ocspResponseConfigHolder.getOcspResponderConfigDto().getEeCert().getSerialNumber());
+          ocspResponseConfigHolder.getOcspResponderConfig().getEeCert().getSerialNumber());
       throw new OcspResponderException("CertSerialNr is not configured");
     }
 
@@ -97,7 +129,7 @@ public class OcspRequestController {
         request.getRemotePort());
 
     final int delayMilliseconds =
-        ocspResponseConfigHolder.getOcspResponderConfigDto().getDelayMilliseconds();
+        ocspResponseConfigHolder.getOcspResponderConfig().getDelayMilliseconds();
 
     if (delayMilliseconds < 0) {
       throw new PkiCommonException("delayMilliseconds is < 0");
@@ -114,33 +146,38 @@ public class OcspRequestController {
   }
 
   private byte[] buildOcspResponseBytes(final OCSPReq ocspReq) {
-    final OcspResponderConfigDto dto = ocspResponseConfigHolder.getOcspResponderConfigDto();
+    final OcspResponderConfig config = ocspResponseConfigHolder.getOcspResponderConfig();
     final ZonedDateTime now = GemLibPkiUtils.now();
 
     ZonedDateTime nextUpdate = null;
-    if (dto.getNextUpdateDeltaMilliseconds() != null) {
-      nextUpdate = now.plus(dto.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
+    if (config.getNextUpdateDeltaMilliseconds() != null) {
+      nextUpdate = now.plus(config.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
     }
 
     final OcspResponseGenerator ocspResponseGenerator =
         OcspResponseGenerator.builder()
-            .signer(dto.getSigner())
-            .withCertHash(dto.isWithCertHash())
-            .validCertHash(dto.isValidCertHash())
-            .validSignature(dto.isValidSignature())
-            .certificateIdGeneration(dto.getCertificateIdGeneration())
-            .responderIdType(dto.getResponderIdType())
-            .respStatus(dto.getRespStatus())
-            .withResponseBytes(dto.isWithResponseBytes())
-            .thisUpdate(now.plus(dto.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
-            .producedAt(now.plus(dto.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .signer(config.getSigner())
+            .withCertHash(config.isWithCertHash())
+            .validCertHash(config.isValidCertHash())
+            .validSignature(config.isValidSignature())
+            .certificateIdGeneration(config.getCertificateIdGeneration())
+            .responderIdType(config.getResponderIdType())
+            .respStatus(config.getRespStatus())
+            .withResponseBytes(config.isWithResponseBytes())
+            .thisUpdate(now.plus(config.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .producedAt(now.plus(config.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
             .nextUpdate(nextUpdate)
-            .withNullParameterHashAlgoOfCertId(dto.isWithNullParameterHashAlgoOfCertId())
+            .withNullParameterHashAlgoOfCertId(config.isWithNullParameterHashAlgoOfCertId())
+            .responseAlgoBehavior(config.getResponseAlgoBehavior())
             .build();
     try {
-      final CertificateStatus certificateStatus = dto.getCertificateStatus();
+
       final OCSPResp ocspResponse =
-          ocspResponseGenerator.generate(ocspReq, dto.getEeCert(), certificateStatus);
+          ocspResponseGenerator.generate(
+              ocspReq,
+              config.getEeCert(),
+              config.getIssuerCert(),
+              config.getOcspCertificateStatus());
       final CertHash asn1CertHash =
           CertHash.getInstance(
               getFirstSingleResp(ocspResponse)
@@ -155,17 +192,10 @@ public class OcspRequestController {
     }
   }
 
-  private OCSPReq createOcspReqFromServletRequest(final HttpServletRequest request) {
+  private OCSPReq createOcspReqFromServletRequest(final byte[] ocspRequestBytes) {
 
     try {
-      final InputStream inputStream = request.getInputStream();
-      if (inputStream != null) {
-        final byte[] ocspRequestBytes = inputStream.readAllBytes();
-        inputStream.close();
-        return new OCSPReq(ocspRequestBytes);
-      } else {
-        throw new OcspResponderException("Could not read InputStream of HttpServletRequest.");
-      }
+      return new OCSPReq(ocspRequestBytes);
     } catch (final IOException e) {
       throw new OcspResponderException("Could not get InputStream of HttpServletRequest.", e);
     }

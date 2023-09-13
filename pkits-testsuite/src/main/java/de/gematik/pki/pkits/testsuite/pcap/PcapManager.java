@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.StreamSupport;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
@@ -77,10 +79,12 @@ public class PcapManager implements Closeable {
   private AsyncObjects asyncObjects;
   private final boolean writeIntoOneFile;
 
+  @Getter
   public static final class DeviceCommonInfo {
-    final String ipAddressOrFqdn;
-    final String ipAddress;
-    Interface device;
+
+    private final String ipAddressOrFqdn;
+    private final String ipAddress;
+    private Interface device;
 
     public static DeviceCommonInfo createForIpAddress(final String ipAddress) {
       return new DeviceCommonInfo(ipAddress, ipAddress);
@@ -94,10 +98,6 @@ public class PcapManager implements Closeable {
     private DeviceCommonInfo(final String ipAddressOrFqdn, final String ipAddress) {
       this.ipAddressOrFqdn = ipAddressOrFqdn;
       this.ipAddress = ipAddress;
-    }
-
-    public String getIpAddress() {
-      return ipAddress;
     }
   }
 
@@ -130,6 +130,7 @@ public class PcapManager implements Closeable {
   }
 
   static class AsyncObjects implements Closeable {
+
     ExecutorService executor;
     Selector selector;
     Map<Pcap, Dumper> pcapDumpersMap;
@@ -211,7 +212,7 @@ public class PcapManager implements Closeable {
     final String timestampStr = PkitsCommonUtils.asTimestampStr(GemLibPkiUtils.now());
     final String postfix = StringUtils.isNotBlank(ipAddress) ? "__" + ipAddress : "";
 
-    final String parameterizedIndex = CurrentTestInfo.getParameterizedIndex(testInfo);
+    final String parameterizedIndex = CurrentTestInfo.getParameterizedIndexStr(testInfo);
     return String.format(
         "%s/%s%s_%s%s.pcap",
         outputDirname,
@@ -225,11 +226,14 @@ public class PcapManager implements Closeable {
       final Interface device,
       final List<DeviceCommonInfo> deviceCommonInfos,
       final Set<String> remainingIpAddresses) {
-    for (final Address address : device.addresses()) {
 
-      if (address.address() == null) {
-        continue;
-      }
+    final List<Address> addresses =
+        StreamSupport.stream(device.addresses().spliterator(), false)
+            .filter(address -> address.address() != null)
+            .toList();
+
+    for (final Address address : addresses) {
+
       log.info(
           "CanonicalHostName: {}; HostAddress: {}; Hostname: {}; Address: {}; Address: {};"
               + " Netmask: {}; Broadcast: {}; Destination: {}",

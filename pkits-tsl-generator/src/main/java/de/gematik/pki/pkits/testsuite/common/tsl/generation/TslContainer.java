@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,18 @@ import org.w3c.dom.Document;
 
 public class TslContainer {
 
-  private TrustStatusListType tsl = null;
+  private TrustStatusListType tslUnsigned = null;
   private Document tslDoc = null;
   private byte[] tslBytes = null;
 
   public TslContainer(@NonNull final TslContainer tslContainer) {
-    this.tsl = tslContainer.tsl;
+    this.tslUnsigned = tslContainer.tslUnsigned;
     this.tslDoc = tslContainer.tslDoc;
     this.tslBytes = tslContainer.tslBytes;
   }
 
-  public TslContainer(@NonNull final TrustStatusListType tsl) {
-    this.tsl = tsl;
+  public TslContainer(@NonNull final TrustStatusListType tslUnsigned) {
+    this.tslUnsigned = tslUnsigned;
   }
 
   public TslContainer(@NonNull final Document tslDoc) {
@@ -45,28 +45,28 @@ public class TslContainer {
     this.tslBytes = tslBytes;
   }
 
-  public TrustStatusListType getAsTsl() {
-    if (tsl != null) {
-      return tsl;
+  public TrustStatusListType getAsTslUnsigned() {
+    if (tslUnsigned != null) {
+      return tslUnsigned;
     } else if (tslBytes != null) {
-      return TslConverter.bytesToTsl(tslBytes);
+      return TslConverter.bytesToTslUnsigned(tslBytes);
     }
 
-    return TslConverter.bytesToTsl(TslConverter.docToBytes(tslDoc));
+    return TslConverter.bytesToTslUnsigned(TslConverter.docToBytes(tslDoc));
   }
 
-  public Document getAsTslDoc() {
-    if (tsl != null) {
-      return TslConverter.tslToDoc(tsl);
+  public Document getAsTslUnsignedDoc() {
+    if (tslUnsigned != null) {
+      return TslConverter.tslToDocUnsigned(tslUnsigned);
     } else if (tslBytes != null) {
       return TslConverter.bytesToDoc(tslBytes);
     }
     return tslDoc;
   }
 
-  public byte[] getAsTslBytes() {
-    if (tsl != null) {
-      return TslConverter.tslToBytes(tsl);
+  public byte[] getAsTslUnsignedBytes() {
+    if (tslUnsigned != null) {
+      return TslConverter.tslUnsignedToBytes(tslUnsigned);
     } else if (tslBytes != null) {
       return tslBytes;
     }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,29 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
+import static de.gematik.pki.pkits.testsuite.common.PkitsCertType.PKITS_CERT_VALID_RSA;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_PRECONFIGURED;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 
 import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
+import de.gematik.pki.pkits.testsuite.common.PkitsCertType;
 import de.gematik.pki.pkits.testsuite.common.VariableSource;
 import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import java.nio.file.Path;
+import java.security.cert.X509Certificate;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -60,39 +60,42 @@ class CertificateApprovalTests extends ApprovalTestsBase {
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_VALID)
   @DisplayName("Test use case with valid certificates")
-  void verifyUseCaseCertsValid(final Path certPath) {
+  void verifyUseCaseCertsValid(final Path eeCertPath, final Path issuerCertPath) {
 
     initialState();
 
-    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_WITH_PROVIDED_CERT, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(
+        eeCertPath,
+        issuerCertPath,
+        USECASE_VALID,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        OCSP_REQUEST_EXPECT);
   }
 
   /** gematikId: UE_PKI_TS_0305_001 */
-  @Test
-  @Afo(afoId = "TODO - GS-A_4357", description = "RSA algorithms - Tab_KRYPT_002")
-  @Afo(afoId = "TODO - GS-A_4384", description = "RSA cipher suites for TLS")
-  @Disabled("Our SUT does not support RSA yet")
-  @DisplayName("NOT IMPLEMENTED YET - Test use case with valid RSA certificate")
-  void verifyUseCaseRsaCertValid() {
+  @ParameterizedTest
+  @Afo(afoId = "GS-A_4357", description = "RSA algorithms - Tab_KRYPT_002")
+  @Afo(afoId = "GS-A_4384", description = "RSA cipher suites for TLS")
+  @DisplayName("Test use case with valid RSA certificate")
+  @ArgumentsSource(CertificateProvider.class)
+  @VariableSource(value = PKITS_CERT_VALID_RSA)
+  void verifyUseCaseRsaCertValid(final Path eeCertPath, final Path issuerCertPath) {
 
-    initialState();
+    initialState(PKITS_CERT_VALID_RSA);
 
-    final Path certPath = Path.of("./testDataTemplates/certificates/valid-rsa/ee_default-rsa.p12");
+    final X509Certificate issuerCert = CertReader.readX509(issuerCertPath);
 
-    final P12Container signer =
-        P12Reader.getContentFromP12(
-            ocspSettings.getKeystorePathOcsp().resolve("ocspSignerRsa.p12"),
-            ocspSettings.getSignerPassword());
-
-    final OcspResponderConfigDto dto =
-        OcspResponderConfigDto.builder()
-            .eeCert(CertReader.getX509FromP12(certPath, clientKeystorePassw))
-            .signer(signer)
+    final OcspResponderConfig config =
+        OcspResponderConfig.builder()
+            .eeCert(CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD))
+            .issuerCert(issuerCert)
+            .signer(PkitsTestDataConstants.OCSP_SIGNER_RSA)
             .build();
 
-    TestEnvironment.configureOcspResponder(ocspRespUri, dto);
+    TestEnvironment.configureOcspResponder(ocspResponderUri, config);
 
-    useCaseWithCert(certPath, USECASE_VALID, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);
+    useCaseWithCert(
+        eeCertPath, issuerCertPath, USECASE_VALID, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);
   }
 
   /** gematikId: UE_PKI_TS_0302_001 */
@@ -111,19 +114,18 @@ class CertificateApprovalTests extends ApprovalTestsBase {
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_VALID_ALTERNATIVE)
   @DisplayName("Test use case with valid certificates with issuer not in trust store")
-  void verifyUseCaseCertsNotInTsl(final Path certPathAlternative) {
+  void verifyUseCaseCertsNotInTsl(final Path eeCertPathAlternative, final Path issuerCertPath) {
 
     initialState();
 
     useCaseWithCert(
-        certPathAlternative,
+        eeCertPathAlternative,
+        issuerCertPath,
         USECASE_INVALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_DO_NOT_EXPECT);
   }
 
-  // TODO UE_PKI_TS_0302_007 ee_invalid-keyusage.p12
-  // TODO UE_PKI_TS_0302_029 ee_invalid-ext-keyusage.p12
   /**
    * gematikId: UE_PKI_TS_0302_003, UE_PKI_TS_0302_005, UE_PKI_TS_0302_006, UE_PKI_TS_0302_040,
    * UE_PKI_TS_0302_010
@@ -140,15 +142,25 @@ class CertificateApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4656",
       description = "TUC_PKI_005: Adresse für Status- und Sperrprüfung ermitteln - Schritt 2b")
   @Afo(afoId = "GS-A_4654", description = "TUC_PKI_003: CA-Zertifikat finden - Schritt 3")
+  @Afo(
+      afoId = "GS-A_4655",
+      description = "TUC_PKI_004: Mathematische Prüfung der Zertifikatssignatur")
+  @Afo(afoId = "GS-A_4661", description = "kritische Erweiterungen in Zertifikaten")
+  @Afo(afoId = "RFC 5280", description = "4.2.1. Certificate Extensions")
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_INVALID)
   @DisplayName("Test use case with invalid certificates")
-  void verifyUseCaseCertsInvalid(final Path certPath) {
+  void verifyUseCaseCertsInvalid(final Path eeCertPath, final Path issuerCertPath) {
 
     initialState();
 
     // NOTE: we ignore OCSP requests, although in some cases the specification defines that OCSP
     // requests are expected or not expected
-    useCaseWithCert(certPath, USECASE_INVALID, OCSP_RESP_WITH_PROVIDED_CERT, OCSP_REQUEST_IGNORE);
+    useCaseWithCert(
+        eeCertPath,
+        issuerCertPath,
+        USECASE_INVALID,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        OCSP_REQUEST_IGNORE);
   }
 }

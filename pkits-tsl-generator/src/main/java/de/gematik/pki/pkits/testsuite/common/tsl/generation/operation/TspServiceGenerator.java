@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.OCSP_SIGNER_RSA;
+
 import de.gematik.pki.gemlibpki.certificate.CertificateType;
 import de.gematik.pki.gemlibpki.tsl.TslConstants;
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.exeptions.TslGenerationException;
 import eu.europa.esig.trustedlist.jaxb.tsl.AttributedNonEmptyURIType;
 import eu.europa.esig.trustedlist.jaxb.tsl.DigitalIdentityListType;
@@ -33,7 +35,6 @@ import eu.europa.esig.trustedlist.jaxb.tsl.MultiLangNormStringType;
 import eu.europa.esig.trustedlist.jaxb.tsl.ServiceSupplyPointsType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceInformationType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
-import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -43,52 +44,6 @@ import javax.xml.namespace.QName;
 import lombok.AllArgsConstructor;
 
 public class TspServiceGenerator {
-
-  public static final String keystorePassword = "00"; // NOSONAR
-
-  public static final Path trustStoreDir =
-      Path.of("./testDataTemplates/certificates/ecc/trustStore/");
-  public static final Path trustStoreDirRsa =
-      Path.of("./testDataTemplates/certificates/rsa/trustStore/");
-  public static final Path ocspKeystoreDir =
-      Path.of("./testDataTemplates/certificates/ecc/ocspKeystore/");
-  public static final Path ocspKeystoreDirRsa =
-      Path.of("./testDataTemplates/certificates/rsa/ocspKeystore/");
-  public static final Path trustAnchorCertsDir =
-      Path.of("./testDataTemplates/certificates/ecc/trustAnchor/");
-
-  public static final X509Certificate CERT_KOMP_CA_DEFAULT =
-      CertReader.readX509(trustStoreDir.resolve("GEM.KOMP-CA11_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_KOMP_CA_ALTERNATIVE =
-      CertReader.readX509(trustStoreDir.resolve("GEM.KOMP-CA33_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_KOMP_CA_RSA =
-      CertReader.readX509(trustStoreDirRsa.resolve("GEM.KOMP-CA40_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_SMCB_CA_DEFAULT =
-      CertReader.readX509(trustStoreDir.resolve("GEM.SMCB-CA10_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_SMCB_CA_ALTERNATIVE =
-      CertReader.readX509(trustStoreDir.resolve("GEM.SMCB-CA33_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_SMCB_CA_RSA =
-      CertReader.readX509(trustStoreDirRsa.resolve("GEM.SMCB-CA40_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_TA_DEFAULT =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA8_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_TA_FIRST_ALTERNATIVE =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA9_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_TA_SECOND_ALTERNATIVE =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA16_TEST-ONLY.pem"));
-  public static final X509Certificate CERT_TA_EXPIRED =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA17_TEST-ONLY_expired.pem"));
-  public static final X509Certificate CERT_TA_NOT_YET_VALID =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA18_TEST-ONLY_not-yet-valid.pem"));
-  public static final X509Certificate CERT_OCSP_SIGNER =
-      P12Reader.getContentFromP12(
-              ocspKeystoreDir.resolve("OCSP_Signer_09_ecc_TEST-ONLY.p12"), keystorePassword)
-          .getCertificate();
-  public static final X509Certificate CERT_OCSP_SIGNER_RSA =
-      P12Reader.getContentFromP12(
-              ocspKeystoreDirRsa.resolve("OCSP_Signer_02_TEST-ONLY.p12"), keystorePassword)
-          .getCertificate();
-  public static final X509Certificate CERT_UNSPECIFIED_STI =
-      CertReader.readX509(trustStoreDir.resolve("SGD1_TEST-ONLY.pem"));
 
   private String serviceTypeIdentifier;
   private String serviceName;
@@ -101,15 +56,15 @@ public class TspServiceGenerator {
   private List<ServiceInformationExtension> serviceInformationExtensions;
 
   static ExtensionType toExtension(final CertificateType oid) {
-    return toExtension(oid.getOid(), oid.getName());
+    return toExtension(oid.getOid(), oid.getOidReference());
   }
 
-  static ExtensionType toExtension(final String oid, final String oidName) {
+  static ExtensionType toExtension(final String oid, final String oidValue) {
     final ExtensionType extension = new ExtensionType();
     extension.setCritical(false);
 
     final JAXBElement<?> extensionOidElem = createElem("ExtensionOID", oid);
-    final JAXBElement<?> extensionValueElem = createElem("ExtensionValue", oidName);
+    final JAXBElement<?> extensionValueElem = createElem("ExtensionValue", oidValue);
 
     extension.getContent().add(extensionOidElem);
     extension.getContent().add(extensionValueElem);
@@ -120,10 +75,10 @@ public class TspServiceGenerator {
   @AllArgsConstructor
   private static class ServiceInformationExtension {
     String oid;
-    String name;
+    String reference;
 
     ExtensionType toExtension() {
-      return TspServiceGenerator.toExtension(oid, name);
+      return TspServiceGenerator.toExtension(oid, reference);
     }
   }
 
@@ -166,16 +121,16 @@ public class TspServiceGenerator {
   }
 
   public TspServiceGenerator addServiceInformationExtension(final CertificateType oid) {
-    addServiceInformationExtension(oid.getOid(), oid.getName());
+    addServiceInformationExtension(oid.getOid(), oid.getOidReference());
     return this;
   }
 
   public TspServiceGenerator addServiceInformationExtension(
-      final String oidValue, final String oidName) {
+      final String oidValue, final String oidReference) {
     if (this.serviceInformationExtensions == null) {
       this.serviceInformationExtensions = new ArrayList<>();
     }
-    this.serviceInformationExtensions.add(new ServiceInformationExtension(oidValue, oidName));
+    this.serviceInformationExtensions.add(new ServiceInformationExtension(oidValue, oidReference));
     return this;
   }
 
@@ -257,41 +212,41 @@ public class TspServiceGenerator {
   }
 
   public static TSPServiceType getTspServiceKompCa() {
-    return getTspServiceKomp(CERT_KOMP_CA_DEFAULT);
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA));
   }
 
   public static TSPServiceType getTspServiceKompCaAlt() {
-    return getTspServiceKomp(CERT_KOMP_CA_ALTERNATIVE);
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA));
   }
 
   public static TSPServiceType getTspServiceKompCaRsa() {
-    return getTspServiceKomp(CERT_KOMP_CA_RSA);
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA));
   }
 
   // OCSPSimulator-Signer-ecc.xml
   public static TSPServiceType getTspServiceOcspSigner() {
-    return getTspServiceOcspSigner(CERT_OCSP_SIGNER);
+    return getTspServiceOcspSigner(PkitsTestDataConstants.DEFAULT_OCSP_SIGNER.getCertificate());
   }
 
   // OCSPSimulator-Signer.xml
   public static TSPServiceType getTspServiceOcspSignerRsa() {
-    return getTspServiceOcspSigner(CERT_OCSP_SIGNER_RSA);
+    return getTspServiceOcspSigner(OCSP_SIGNER_RSA.getCertificate());
   }
 
   public static TSPServiceType getTspServiceSmcbCa() {
-    return getTspServiceSmcb(CERT_SMCB_CA_DEFAULT);
+    return getTspServiceSmcb(CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA));
   }
 
   public static TSPServiceType getTspServiceSmcbCaAlt() {
-    return getTspServiceSmcb(CERT_SMCB_CA_ALTERNATIVE);
+    return getTspServiceSmcb(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_SMCB_CA));
   }
 
   public static TSPServiceType getTspServiceSmcbCaRsa() {
-    return getTspServiceSmcb(CERT_SMCB_CA_RSA);
+    return getTspServiceSmcb(CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA));
   }
 
   public static TSPServiceType getTspServiceTslTrustAnchorCa() {
-    return getStandardPkcTspServiceGenerator(CERT_TA_DEFAULT)
+    return getStandardPkcTspServiceGenerator(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
         .addServiceInformationExtension(CertificateType.TSL_FIELD_TSL_PLACEHOLDER)
         .generate();
   }
@@ -351,7 +306,7 @@ public class TspServiceGenerator {
 
     tspServiceGenerator
         .serviceTypeIdentifier(TslConstants.STI_UNSPECIFIED)
-        .certificate(CERT_UNSPECIFIED_STI)
+        .certificate(PkitsTestDataConstants.CERT_UNSPECIFIED_STI)
         .serviceStatus(TslConstants.SVCSTATUS_INACCORD)
         .statusStartingTime(GemLibPkiUtils.now())
         .serviceSupplyPoint("http://ocsp00.gematik.invalid/not-used")

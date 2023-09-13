@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.apache.http.HttpStatus;
 @Slf4j
 final class TslDownloadResults {
 
-  boolean failed;
+  final boolean failed;
   String hashValue = null;
   byte[] tslBytes = null;
 

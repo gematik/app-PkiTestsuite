@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TSL_CERT_TSL_CA28_SHA256;
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TSL_OCSP_SIGNER_10_CERT_SHA256;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
-import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.AVARTO_TSL_CERT_TSL_CA28_SHA256;
-import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.AVARTO_TSL_OCSP_SIGNER_10_CERT_SHA256;
-import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.AVARTO_TSL_OCSP_SIGNER_8_CERT_SHA256;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.deleteInitialTspServices;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,24 +46,19 @@ class CreateTslTemplateTest {
 
   @BeforeEach
   void setUp() {
-    tslContainer = new TslContainer(TslReader.getTsl(ARVATO_TU_TSL));
+    tslContainer = new TslContainer(TslReader.getTslUnsigned(ARVATO_TU_TSL));
   }
 
   @Test
   void verifyDeleteInitialTspServices() {
 
-    final int oldTslBytes = tslContainer.getAsTslBytes().length;
-    final int newTslBytes = deleteInitialTspServices(tslContainer).getAsTslBytes().length;
+    final int oldTslBytes = tslContainer.getAsTslUnsignedBytes().length;
+    final int newTslBytes = deleteInitialTspServices(tslContainer).getAsTslUnsignedBytes().length;
     assertThat(newTslBytes).isLessThan(oldTslBytes);
   }
 
   @ParameterizedTest
-  @ValueSource(
-      strings = {
-        AVARTO_TSL_CERT_TSL_CA28_SHA256,
-        AVARTO_TSL_OCSP_SIGNER_8_CERT_SHA256,
-        AVARTO_TSL_OCSP_SIGNER_10_CERT_SHA256
-      })
+  @ValueSource(strings = {ARVATO_TSL_CERT_TSL_CA28_SHA256, ARVATO_TSL_OCSP_SIGNER_10_CERT_SHA256})
   void verifyToRemoveCertExists(final String certhash) {
     assertThat(new DeleteTspServiceForCertShaTslOperation(certhash).count(tslContainer))
         .isEqualTo(1);

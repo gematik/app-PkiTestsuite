@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,9 +86,9 @@ public class TslProcurer {
     if (currentTsl != null) {
       log.info(
           "Current TSL ID: {}, ({} bytes)",
-          currentTsl.trustStatusListType.getId(),
+          currentTsl.tslUnsigned.getId(),
           currentTsl.tslBytes.length);
-      return new TslInformationProvider(TslConverter.bytesToTsl(currentTsl.tslBytes));
+      return new TslInformationProvider(TslConverter.bytesToTslUnsigned(currentTsl.tslBytes));
     } else {
       throw new TosException("No tsl data available (yet).");
     }
@@ -138,7 +138,11 @@ public class TslProcurer {
   private TslDownloadResults downloadTsl(final String tslUrl, final String additionalInfo) {
     log.info("{}: downloading TSL at: {}", additionalInfo, tslUrl);
     try {
-      final HttpResponse<byte[]> bytesResponse = Unirest.get(tslUrl).asBytes();
+      final HttpResponse<byte[]> bytesResponse =
+          Unirest.get(tslUrl)
+              .connectTimeout(tslProcurerConfig.getTimeoutMilliseconds())
+              .socketTimeout(tslProcurerConfig.getTimeoutMilliseconds())
+              .asBytes();
       return TslDownloadResults.forTslBytes(bytesResponse);
     } catch (final UnirestException e) {
       log.info("Downloading TSL failed. {}", e.getMessage());
@@ -245,7 +249,7 @@ public class TslProcurer {
       TucPki001Verifier.verifyTslValidity(
           GemLibPkiUtils.now(),
           tslProcurerConfig.getTslGracePeriodDays(),
-          currentTsl.trustStatusListType,
+          currentTsl.tslUnsigned,
           PRODUCT_TYPE);
     } catch (final GemPkiException e) {
       invalidateTrustStore();
@@ -260,7 +264,7 @@ public class TslProcurer {
 
   private Optional<String> getPrimaryTslUrl() {
     try {
-      return Optional.of(TslReader.getTslDownloadUrlPrimary(currentTsl.trustStatusListType));
+      return Optional.of(TslReader.getTslDownloadUrlPrimary(currentTsl.tslUnsigned));
     } catch (final GemPkiRuntimeException e) {
       log.warn("cannot extract primary tsl url: {}", e.getMessage());
       return Optional.empty();
@@ -270,7 +274,7 @@ public class TslProcurer {
   private Optional<String> getTslBackupUrl() {
 
     try {
-      return Optional.of(TslReader.getTslDownloadUrlBackup(currentTsl.trustStatusListType));
+      return Optional.of(TslReader.getTslDownloadUrlBackup(currentTsl.tslUnsigned));
 
     } catch (final GemPkiRuntimeException e) {
       log.warn("cannot extract backup tsl url: {}", e.getMessage());
@@ -285,7 +289,11 @@ public class TslProcurer {
   private TslDownloadResults downloadTslHash(@NonNull final String hashUrl) {
 
     try {
-      final HttpResponse<String> stringHttpResponse = Unirest.get(hashUrl).asString();
+      final HttpResponse<String> stringHttpResponse =
+          Unirest.get(hashUrl)
+              .connectTimeout(tslProcurerConfig.getTimeoutMilliseconds())
+              .socketTimeout(tslProcurerConfig.getTimeoutMilliseconds())
+              .asString();
       return TslDownloadResults.forHash(stringHttpResponse);
     } catch (final UnirestException e) {
       log.info("Downloading TSL HASH failed. {}", e.getMessage());
@@ -302,11 +310,11 @@ public class TslProcurer {
   }
 
   private void processReceivedTsl(
-      @NonNull final String rxTslHash, @NonNull final byte[] rxTslBytes) {
+      @NonNull final String rxTslHash, final byte @NonNull [] rxTslBytes) {
 
     log.info(
         "before processReceivedTsl - current tsl TSL ID: {}, ({} bytes)",
-        currentTsl.trustStatusListType.getId(),
+        currentTsl.tslUnsigned.getId(),
         currentTsl.tslBytes.length);
 
     log.info("Downloaded TSL has hash {}", rxTslHash);
@@ -364,23 +372,23 @@ public class TslProcurer {
     if (currentTsl != null) {
       log.info(
           "current tsl TSL ID: {}, ({} bytes)",
-          currentTsl.trustStatusListType.getId(),
+          currentTsl.tslUnsigned.getId(),
           currentTsl.tslBytes.length);
     }
   }
 
   private Optional<TucPki001Verifier> initTucPki001Verifier(
-      @NonNull final byte[] rxTslBytes, final TspService tspServiceTrustAnchor) {
+      final byte @NonNull [] rxTslBytes, final TspService tspServiceTrustAnchor) {
 
-    final String currentTslId = currentTsl.trustStatusListType.getId();
+    final String currentTslId = currentTsl.tslUnsigned.getId();
     final BigInteger currentTslSeqNr =
-        currentTsl.trustStatusListType.getSchemeInformation().getTSLSequenceNumber();
+        currentTsl.tslUnsigned.getSchemeInformation().getTSLSequenceNumber();
 
     final List<TspService> tspServices = new ArrayList<>();
     tspServices.add(tspServiceTrustAnchor);
 
     final TslInformationProvider tslInformationProvider =
-        new TslInformationProvider(currentTsl.trustStatusListType);
+        new TslInformationProvider(currentTsl.tslUnsigned);
     final List<TspService> tspServicesFiltered =
         tslInformationProvider.getFilteredTspServices(List.of(TslConstants.STI_OCSP));
 
@@ -437,7 +445,7 @@ public class TslProcurer {
     }
 
     currentTsl = new Tsl(tslHash, tslBytes);
-    tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
+    tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.tslUnsigned);
     isInitialized = true;
 
     log.info(
@@ -449,7 +457,7 @@ public class TslProcurer {
   private synchronized void updateTruststore(final Tsl newTsl) {
     currentTsl = newTsl;
     // in fact, we should handle the trust anchor separately and not as a typical CA cert
-    tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.trustStatusListType);
+    tspServiceTrustAnchor = getIssuerTspServiceForTslSigner(currentTsl.tslUnsigned);
     log.info("New TSL with tslSeqNr {} and hash {} assigned.", newTsl.tslSeqNr, newTsl.tslHash);
   }
 

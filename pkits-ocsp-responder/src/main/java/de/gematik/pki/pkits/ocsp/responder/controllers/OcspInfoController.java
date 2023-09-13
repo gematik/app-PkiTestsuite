@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspInfoRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -38,18 +36,14 @@ public class OcspInfoController {
 
   private final OcspRequestHistory ocspRequestHistory;
 
-  private final ObjectReader reader = new ObjectMapper().readerFor(OcspInfoRequestDto.class);
-
   /**
-   * @param request InfoRequest
+   * @param ocspInfoRequest OcspInfoRequestDto
    * @return An excerpt of the history of requests
-   * @throws IOException in case of ServletInputStream problem
    */
+  @Operation(summary = "Get history entries according to the provided info request.")
   @PostMapping(value = PkitsConstants.OCSP_WEBSERVER_INFO_ENDPOINT)
-  public List<OcspRequestHistoryEntryDto> info(final HttpServletRequest request)
-      throws IOException {
-
-    final OcspInfoRequestDto ocspInfoRequest = reader.readValue(request.getInputStream());
+  public List<OcspRequestHistoryEntryDto> info(
+      final @RequestBody OcspInfoRequestDto ocspInfoRequest) {
 
     log.info("received ocspInfoRequest: {}", ocspInfoRequest);
 
@@ -94,6 +88,8 @@ public class OcspInfoController {
             ocspInfoRequestDto.getTslSeqNr(),
             ocspInfoRequestDto.getCertSerialNr());
       }
+
+        // HistoryDeleteOption.DELETE_NOTHING
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }
   }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.testsuite.reporting;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.testsuite.config.ParameterDescription;
+import de.gematik.pki.pkits.testsuite.config.TestObjectType;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.reporting.ListApprovalTestsAndAfos.ExecutionMode;
 import java.lang.reflect.Field;
@@ -129,7 +130,8 @@ public class ListParameters {
     return fieldClazz.isPrimitive()
         || fieldClazz.equals(String.class)
         || fieldClazz.equals(Path.class)
-        || fieldClazz.equals(Integer.class);
+        || fieldClazz.equals(Integer.class)
+        || fieldClazz.equals(TestObjectType.class);
   }
 
   public static int getNumberOfAllFields(final Class<?> clazz) {

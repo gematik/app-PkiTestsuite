@@ -1,12 +1,6 @@
-client:
-  keystorePathValidCerts: "client.keystorePathValidCerts"
-  keystorePathAlternativeCerts: "client.keystorePathAlternativeCerts"
-  keystorePathInvalidCerts: "client.keystorePathInvalidCerts"
-  keystorePassword: "client.keystorePassword"
-
 testObject:
   name: "testObject.name"
-  type: "testObject.type"
+  testObjectType: "IdpFachdienst"
   ipAddressOrFqdn: "testObject.ipAddressOrFqdn"
   port: -99
   tslDownloadIntervalSeconds: -100
@@ -56,12 +50,5 @@ testSuiteParameter:
   captureInterfaces: "testSuiteParameter.captureInterfaces"
 
   ocspSettings:
-    keystorePathOcsp: "testSuiteParameter.ocspSettings.keystorePathOcsp"
-    signerPassword: "testSuiteParameter.ocspSettings.signerPassword"
     timeoutDeltaMilliseconds: -3000
     gracePeriodExtraDelay: -1000
-
-  tslSettings:
-    initialStateTslImport: false
-    signer: "testSuiteParameter.tslSettings.signer"
-    signerPassword: "testSuiteParameter.tslSettings.signerPassword"

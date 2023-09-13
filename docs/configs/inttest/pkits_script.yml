@@ -1,14 +1,11 @@
-client:
-  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/valid"
-  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/invalid"
-
 testObject:
   name: "Server 0815"
-  type: "Script"
-  scriptPath: "./docs/sample_script.cmd"
+  testObjectType: "IdpFachdienst"
   ocspGracePeriodSeconds: 0
   tslDownloadIntervalSeconds: 5
   tslProcessingTimeSeconds: 3
+  scriptUseCase:
+    scriptPath: "./docs/sample_script.cmd"
 
 ocspResponder:
   ipAddressOrFqdn: "127.0.0.1"

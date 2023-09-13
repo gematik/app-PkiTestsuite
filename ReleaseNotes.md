@@ -2,6 +2,34 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.1.0
+
+- API CHANGE: introduce test object type. Instead of choosing the right certificate path for a test
+  object, it is now possible to use a parameter (`testObjectType`) instead. (one of:
+  IntermediaerServer, KimFachdienst, VsdmFachdienst, VpnKonzentrator, VpnRegServer, IdpFachdienst) (
+  see section [configuration](./README.md#configuration) in readme)
+- change behaviour of test case `verifyExpiredTslInSystem()` to allow test object to invalidate the
+  trust store immediately after expiration of the TSL
+- NEW test case: `verifyUseCaseRsaCertValid()` which uses a RSA certificate for the use case
+- NEW test cases: check hash algorithm in OCSP context
+- BUGFIX: correct extension oid in TSL services
+- BUGFIX: prevent possibility to write unsigned TSL to out directory
+- change communication between test suite and simulators to json (instead of java serialization)
+- remove config parameter `tslSettings.initialStateTslImport`
+- remove unused test data for checks of keyUsage and extendedKeyUsage; we do not check for these
+  errors
+- correct and update AFO annotations
+- establish swagger api documentation in server simulators at: `http://server:port/api-docs`
+- javadoc is not generated anymore
+- change OCSP responder to actualy calculate issuerCertHash and issuerKeyHash instead of mirroring
+  the request
+- optimize execution time of parameterized tests by skipping initial state for the non-first test
+  cases
+- add gematik security policy
+- refactor code for better readability and consolidate certificate constants
+- increase code coverage
+- update dependencies
+
 ## Release 2.0.0 - Beryllium
 
 - API CHANGE: rename some test cases, so old and new [allTests.txt](./allTests.txt) are incompatible

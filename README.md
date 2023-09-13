@@ -21,11 +21,11 @@ Registrierungsdienst and Konzentrator , IDP Fachdienst, KIM Fachdienst. More are
 
 ```bash 
 # Download release zip file from https://github.com/gematik/app-PkiTestsuite/releases and extract it
-cp <UserDefinedConfigfile>.yml ./config/pkits.yml (examples: /docs/config/inttest/)
-./initialTslAndTa.sh (generates trust anchor and TSL in ./out for import in test object)
+cp <UserDefinedConfigfile>.yml ./config/pkits.yml # examples: /docs/config/inttest/
+./initialTslAndTa.sh # generates trust anchor and TSL in ./out for import in test object
 # The test object has to be started and accessible from now on.
-./checkInitialState.sh (acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case)
-./startApprovalTest.sh (chose tests that shall be executed from allTests.txt)
+./checkInitialState.sh # acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case
+./startApprovalTest.sh # chose tests that shall be executed from allTests.txt
 # Testreport can be found in ./out directory.
 ```
 
@@ -92,8 +92,9 @@ from gemSpec_Krypt with following parameter:
 * TLS Version: 1.2
 * cipher suites used: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 or
   TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-* The used elliptic curves are taken from the test data delivered with the testsuite (i.e.
-  brainpoolP256r1)
+* for the test of RSA functionality we use the following cipher suites:
+  TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+* for ECDHE either NIST P-256 or P-384 is used
 
 #### Script
 
@@ -113,37 +114,52 @@ copied to the remote location and back. As wells as the IP and port of the remot
 
 ## Configuration
 
-All configuration is done in one file: [/config/pkits.yml](./config/pkits.yml). You can find
-examples in [/docs/config/inttest/](./docs/configs/inttest/).
-The most important parameters are how to reach the test object and where to find the test data as
-well as where the test object can reach the TSL- and OCSP- simulators provided by this test suite.
+The configuration is done in one file: [/config/pkits.yml](./config/pkits.yml). You can find
+examples in [/docs/config/inttest/](./docs/configs/inttest/). The most important parameters are:
+
+* what is the type of the test object (e.g. KimFachdienst, IntermediaerServer, etc.)
+* how to reach the test object, i.e. ipAddress and port
+
+Example:
+
+```yaml
+testObject:
+  name: "Server 0815"
+  testObjectType: "IntermediaerServer"
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8443
+```
+
+Furthermore, the test object must be able to reach the TSL- and OCSP- simulators provided by this
+test suite.
+
 Paths in the `pkits.yml` are relative to the base directory. Absolute paths can be used as well.
 All available parameters including a short description can be found
-in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml).
-As this is a YAML file remember to strictly follow the syntax.
+in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml). As this is a YAML file remember to
+strictly follow the syntax.
 
 ```text 
-Remember: A change of parameters that will change the TSL (i.e.OCSP responder adress and port or 
-TSL provider adress an port) require a new generation of the initial TSL and import to the test 
+Remember: A change of parameters that will change the TSL (i.e. OCSP responder address and port or 
+TSL provider address an port) require a new generation of the initial TSL and import to the test 
 object.
 ``` 
 
 ### Test Data
 
 We deliver some test data in the directory `./testDataTemplates`. Currently, these test data support
-tests for the following TI product:
+tests for the following TI products:
 
-| Test data directory | Corresponding test object               |
-|---------------------|-----------------------------------------|
-| fachmodulClient     | Intermediär Server and VpnZuD RegServer |
-| intermediaerClient  | VSDM Fachdienst                         |
-| kimClientModul      | KIM Fachdienst                          |
-| netzkonnektorClient | VPN-ZugD Konzentrator                   |
+| Test data directory | Corresponding test object               | testObjectType in pkits.yml        |
+|---------------------|-----------------------------------------|------------------------------------|
+| fachmodulClient     | Intermediär Server and VpnZuD RegServer | IntermediaerServer or VpnRegServer |
+| intermediaerClient  | VSDM Fachdienst                         | VsdmFachdienst                     |
+| kimClientModul      | KIM Fachdienst                          | KimFachdienst                      |
+| netzkonnektorClient | VPN-ZugD Konzentrator                   | VpnKonzentrator                    |
 
 These test data are for our own integration tests and can be used for approval tests as well.
-The test data form an own PKI, hence it is not easy to create them by yourself. In later releases
-it is planned to generate test data on the fly. If you use your own test data make sure that issuing
-certificates are added in the [tsl template](./testDataTemplates/tsl/) as well.
+The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own
+test data make sure that issuing certificates are added in
+the [tsl template](./testDataTemplates/tsl/ECC-RSA_TSL-test.xml) as well.
 
 ### Initial TSL and Trust Anchor
 
@@ -167,7 +183,7 @@ generated in the `./out/testreport` directory.
 ### Smoke Test
 
 In oder to make a quick check if everything is set up correctly, the test object can be reach by the
-test suite, and to initialize the test suite with the tsl sequence number set in the test object, we
+test suite, and to initialize the test suite with the TSL sequence number set in the test object, we
 implemented a script that runs an initial test: `./checkInitialState.sh`. Within a TSL download by
 the test object is exacted and afterward a use case is triggered with a valid certificate. OCSP
 requests are expected and answered correctly as well. Therefor a configured test object has to be up
@@ -190,6 +206,32 @@ execution, except those marked with `+`.
 All failed or aborted tests are saved into file `./allFailedOrAborted.txt` (default name).
 This file then can be used to run all or selected of the failed or aborted tests.
 Run `java -jar ./bin/pkits-testsuite-exec.jar --help` for more information.
+
+## Testing methodology
+
+Our concept of testing incorporates the following principles:
+
+* An OCSP responder is simulated and the test object is configured to use this instead (over the
+  TSL).
+* A TSL provider is simulated and the test object is configured to use this instead (over the TSL).
+* A use case is triggered that provokes the check of an end-entity certificate.
+
+Both simulators are configured for each test case and each used certificate individually and
+reset afterward. This means that only during the test execution the simulators answer requests
+with a useful response. In between tests, requests are answered with a http 500 error code.
+
+Every request the test object does to one of the simulators contains the sequence number of the last
+correctly processed TSL. This serves as a sanity check to evaluate the trust store in the test
+object.
+
+Mainly we use two different kinds of test data
+
+1. A default end-entity certificates to trigger a use case for the corresponding test object (e.g. a
+   TLS handshake) signed by a SUB-CA.
+2. An alternative end-entity certificates signed by another SUB-CA. This alternative SUB-CA
+   certificate is not every time in the TSL.
+
+This way it can be checked if the trust store changed and if a TSL was processed as expected.
 
 ## Running PKITS Components in Docker Containers
 
@@ -246,12 +288,33 @@ Cryptographic private keys used in this project are solely used in test resource
 (unit) tests. We are fully aware of the content and meaning of the test data. We never publish
 productive data.
 
+## Know issues
+
+- we do not test invalid keyUsages
+- we do not test invalid extended keyUsages
+
 ## License
 
-Apache License Version 2.0
+Copyright 2023 gematik GmbH
 
-See [LICENSE](./LICENSE).
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+compliance with the License.
 
-## Todo
+See the [LICENSE](./LICENSE) for the specific language governing permissions and limitations under
+the License.
 
-- add generation of certificates on the fly
+Unless required by applicable law the software is provided "as is" without warranty of any kind,
+either express or implied, including, but not limited to, the warranties of fitness for a particular
+purpose, merchantability, and/or non-infringement. The authors or copyright holders shall not be
+liable in any manner whatsoever for any damages or other claims arising from, out of or in
+connection with the software or the use or other dealings with the software, whether in an action of
+contract, tort, or otherwise.
+
+The software is the result of research and development activities, therefore not necessarily quality
+assured and without the character of a liable product. For this reason, gematik does not provide any
+support or other user assistance (unless otherwise stated in individual cases and without
+justification of a legal obligation). Furthermore, there is no claim to further development and
+adaptation of the results to a more current state of the art.
+
+Gematik may remove published results temporarily or permanently from the place of publication at any
+time without prior notice or justification.

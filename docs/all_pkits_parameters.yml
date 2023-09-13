@@ -1,13 +1,7 @@
 
-client:
-  keystorePathValidCerts: "HasToBeDefined_keystorePathValidCerts"                          # Absolute or relative path to valid key store end-entity files in p12 format for the tests.
-  keystorePathAlternativeCerts: "HasToBeDefined_keystorePathAlternativeCerts"              # Absolute or relative path to valid key store end-entity files of an alternative CA in p12 format for the tests.
-  keystorePathInvalidCerts: "HasToBeDefined_keystorePathInvalidCerts"                      # Absolute or relative path to invalid key store end-entity files in p12 format for the tests.
-  keystorePassword: "00"                                                                   # Password used for all p12 key store files of the test certificates.
-
 testObject:
   name: "HasToBeDefined_name"                                                              # Name of the test object, for better identification in logs and configuration files.
-  type: "HasToBeDefined_type"                                                              # Test object type (TlsServer|Script|ScriptOverSsh).
+  testObjectType: HasToBeDefined_testObjectType                                            # one of: IdpFachdienst, IntermediaerServer, KimFachdienst, VsdmFachdienst, VpnKonzentrator, VpnRegServer
   ipAddressOrFqdn: "HasToBeDefined_ipAddressOrFqdn"                                        # FQDN or IP address to connect to the test object.
   port: HasToBeDefined_port                                                                # Port where the test object listens on.
   ocspGracePeriodSeconds: 30                                                               # OCSP grace period in seconds configured in the test object.
@@ -59,12 +53,5 @@ testSuiteParameter:
   captureInterfaces: "HasToBeDefined_captureInterfaces"                                    # Comma separated list of IP addresses for interfaces to sniff communication with the test object from.
 
   ocspSettings:
-    keystorePathOcsp: "./testDataTemplates/certificates/ecc/ocspKeystore"                  # Absolute or relative path to key store files in p12 format to sign OCSP requests. with.
-    signerPassword: "00"                                                                   # Password used for the OCSP signer key store.
     timeoutDeltaMilliseconds: 1500                                                         # Amount of milliseconds to add/subtract from OCSP timeout during the test to get a result inside/outside the timeout.
     gracePeriodExtraDelay: 5                                                               # Amount of seconds to add to the OCSP grace period as a buffer.
-
-  tslSettings:
-    initialStateTslImport: true                                                            # Import a new TSL during initial state in each use case.
-    signer: "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12" # Absolute or relative path to key store in p12 format to sign TSLs with.
-    signerPassword: "00"                                                                   # Password used for the TSL signer key store.

@@ -1,11 +1,18 @@
 A_17124
   CertificateApprovalTests.verifyUseCaseCertsValid
 
+A_17688
+  TslApprovalTests.verifyUpdateTrustStoreInTestObject
+
 A_17700
   TslApprovalTests.verifyForUnspecifiedServiceTypeIdentifierOfTSPService
 
 GS-A_4357
   CertificateApprovalTests.verifyUseCaseCertsValid
+  CertificateApprovalTests.verifyUseCaseRsaCertValid
+
+GS-A_4384
+  CertificateApprovalTests.verifyUseCaseRsaCertValid
 
 GS-A_4642
   TslApprovalExtraTests.verifyExpiredTslInSystem
@@ -50,6 +57,9 @@ GS-A_4643
   TslTaApprovalTests.verifyNewTrustAnchorInvalidTime
   TslTaApprovalTests.verifyNewTrustAnchorsIsBroken
   TslTaApprovalTests.verifyUpdateTrustAnchor
+
+GS-A_4646
+  TslApprovalTests.verifyForTslWithInvalidOidDownloadAddresses
 
 GS-A_4647
   TslApprovalTests.verifyForTslWithInvalidOidDownloadAddresses
@@ -99,6 +109,10 @@ GS-A_4654
   CertificateApprovalTests.verifyUseCaseCertsInvalid
   CertificateApprovalTests.verifyUseCaseCertsNotInTsl
 
+GS-A_4655
+  CertificateApprovalTests.verifyUseCaseCertsInvalid
+  TslSignerApprovalTests.verifyForInvalidSignatureOfTslSigner
+
 GS-A_4656
   CertificateApprovalTests.verifyUseCaseCertsInvalid
   CertificateApprovalTests.verifyUseCaseCertsNotInTsl
@@ -108,6 +122,9 @@ GS-A_4657
   CertificateApprovalTests.verifyUseCaseCertsInvalid
   CertificateApprovalTests.verifyUseCaseCertsNotInTsl
   OcspApprovalTests.verifyForCaCertificateWithoutServiceSupplyPoint
+  OcspApprovalTests.verifyHashAlgorithmsInOcspSha1
+  OcspApprovalTests.verifyHashAlgorithmsInOcspSha2
+  OcspApprovalTests.verifyHashAlgorithmsInOcspShaVersion
   OcspApprovalTests.verifyInvalidCerIdInOcspResponse
   OcspApprovalTests.verifyInvalidCertHashInOcspResponse
   OcspApprovalTests.verifyInvalidSignatureInOcspResponse
@@ -145,37 +162,67 @@ GS-A_4657
   TslSignerApprovalTests.verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes
   TslSignerApprovalTests.verifyOcspResponseWithInvalidSignatureForTslSignerCert
 
+GS-A_4661
+  CertificateApprovalTests.verifyUseCaseCertsInvalid
+
 GS-A_4663
   CertificateApprovalTests.verifyUseCaseCertsInvalid
   CertificateApprovalTests.verifyUseCaseCertsNotInTsl
   CertificateApprovalTests.verifyUseCaseCertsValid
 
 GS-A_4674
+  OcspApprovalTests.verifyHashAlgorithmsInOcspSha2
+  OcspApprovalTests.verifyHashAlgorithmsInOcspShaVersion
   OcspApprovalTests.verifyOcspRequestStructure
 
 GS-A_4749
   TslApprovalTests.verifyForWrongServiceInfoExtCertificateOfTSPService
 
+GS-A_4898
+  TslApprovalExtraTests.verifyExpiredTslInSystem
+
+GS-A_5215
+  OcspApprovalTests.verifyOcspResponseMissingNextUpdate
+  OcspApprovalTests.verifyOcspResponseNextUpdatePastOutOfTolerance
+  OcspApprovalTests.verifyOcspResponseNextUpdatePastWithinTolerance
+  OcspApprovalTests.verifyOcspResponseProducedAtFutureOutOfTolerance
+  OcspApprovalTests.verifyOcspResponseProducedAtFutureWithinTolerance
+  OcspApprovalTests.verifyOcspResponseProducedAtPastOutOfTolerance
+  OcspApprovalTests.verifyOcspResponseProducedAtPastWithinTolerance
+  OcspApprovalTests.verifyOcspResponseThisUpdateFutureOutOfTolerance
+  OcspApprovalTests.verifyOcspResponseThisUpdateFutureWithinTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertMissingNextUpdate
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance
+  TslSignerApprovalTests.verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance
+
+GS-A_5336
+  TslApprovalExtraTests.verifyExpiredTslInSystem
+
+RFC 5019
+  OcspApprovalTests.verifyOcspRequestStructure
+
 RFC 5280
+  CertificateApprovalTests.verifyUseCaseCertsInvalid
   OcspApprovalTests.verifyOcspResponseWithNullParameterInCertId
   TslSignerApprovalTests.verifyOcspResponseTslSignerCertWithNullParameterInCertId
 
+RFC 5754
+  OcspApprovalTests.verifyHashAlgorithmsInOcspSha2
+
 RFC 6960
+  OcspApprovalTests.verifyHashAlgorithmsInOcspSha1
+  OcspApprovalTests.verifyHashAlgorithmsInOcspSha2
+  OcspApprovalTests.verifyHashAlgorithmsInOcspShaVersion
+  OcspApprovalTests.verifyOcspRequestStructure
   OcspApprovalTests.verifyOcspResponseResponderIdByName
   OcspApprovalTests.verifyOcspResponseWithNullParameterInCertId
   TslSignerApprovalTests.verifyOcspResponseTslSignerCertResponderIdByName
 
-RFC5019
-  OcspApprovalTests.verifyOcspRequestStructure
-
-RFC6960
-  OcspApprovalTests.verifyOcspRequestStructure
-
 TIP1-A_5120
   TslApprovalTests.verifyTslDownloadCompression
-
-TODO - GS-A_4357
-  CertificateApprovalTests.verifyUseCaseRsaCertValid
-
-TODO - GS-A_4384
-  CertificateApprovalTests.verifyUseCaseRsaCertValid

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import lombok.Setter;
 @Setter
 public class TestSuiteConfig {
 
-  private ClientConfig client = new ClientConfig();
-
   private TestObjectConfig testObject = new TestObjectConfig();
 
   private SshConfig sshConfig = new SshConfig();
@@ -56,10 +54,6 @@ public class TestSuiteConfig {
 
       if (testSuiteConfig.getTestSuiteParameter().getOcspSettings() == null) {
         testSuiteConfig.getTestSuiteParameter().setOcspSettings(new OcspSettings());
-      }
-
-      if (testSuiteConfig.getTestSuiteParameter().getTslSettings() == null) {
-        testSuiteConfig.getTestSuiteParameter().setTslSettings(new TslSettings());
       }
 
       if (testSuiteConfig.getSshConfig() == null) {

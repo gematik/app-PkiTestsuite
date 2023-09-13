@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package de.gematik.pki.pkits.testsuite.ssh;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase;
 import de.gematik.pki.pkits.testsuite.config.ScriptUseCase;
 import de.gematik.pki.pkits.testsuite.config.SshConfig;
 import de.gematik.pki.pkits.testsuite.config.SshUseCaseParameters;
 import de.gematik.pki.pkits.testsuite.config.TestObjectConfig;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
-import de.gematik.pki.pkits.testsuite.exceptions.DebugListener;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class SshUseCaseApplication {
     this.sshConfig = testSuiteConfig.getSshConfig();
     this.sshUseCaseParameters = testSuiteConfig.getSshConfig().getSshUseCaseParameters();
 
-    this.clientKeystorePassword = testSuiteConfig.getClient().getKeystorePassword();
+    this.clientKeystorePassword = PkitsTestDataConstants.KEYSTORE_PASSWORD; // NOSONAR
 
     this.certPath = certPath;
   }
@@ -190,20 +190,6 @@ public class SshUseCaseApplication {
 
       scp.upload(content, remoteFilename, permissions, timestampDetails);
       log.info("finished upload of byte content to remote file {}", remoteFilename);
-    }
-  }
-
-  public void uploadSingleFileToDirectory(final String localFile, final String remoteTargetDir)
-      throws IOException {
-    try (final CloseableScpClient scp = createCloseableScpClient()) {
-      log.info("start upload of local file {} to remote directory {}", localFile, remoteTargetDir);
-      scp.upload(
-          localFile,
-          remoteTargetDir,
-          ScpClient.Option.TargetIsDirectory,
-          ScpClient.Option.PreserveAttributes);
-      log.info(
-          "finished upload of local file {} to remote directory {}", localFile, remoteTargetDir);
     }
   }
 

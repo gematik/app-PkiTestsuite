@@ -4,17 +4,18 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>2.0.0</version>
+  <version>2.1.0</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
   <properties>
     <sonar.coverage.exclusions>**/de/gematik/pki/pkits/testsuite/approval/**,
-      **/de/gematik/pki/pkits/testsuite/common/**,
+      **/de/gematik/pki/pkits/testsuite/common/ocsp/**,
+      **/de/gematik/pki/pkits/testsuite/common/tsl/**,
       **/de/gematik/pki/pkits/testsuite/pcap/**,
       **/de/gematik/pki/pkits/testsuite/reporting/**,
       **/de/gematik/pki/pkits/testsuite/runner/**,
@@ -23,21 +24,34 @@
       **/de/gematik/pki/pkits/testsuite/usecases/**</sonar.coverage.exclusions>
 
     <testReportDirectory>${project.basedir}/../out/testreport</testReportDirectory>
-    <!-- dependencies -->
 
-    <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
-    <version.junit-platform-launcher>1.9.3</version.junit-platform-launcher>
-    <version.itextpdf>5.5.13.3</version.itextpdf>
-    <version.itextpdf.html2pdf>5.0.0</version.itextpdf.html2pdf>
-    <version.picocli>4.7.4</version.picocli>
+    <!-- dependencies -->
     <version.apache.sshd>2.10.0</version.apache.sshd>
+    <version.itextpdf>5.5.13.3</version.itextpdf>
+    <version.itextpdf.html2pdf>5.0.1</version.itextpdf.html2pdf>
+    <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
+    <version.mockito>5.5.0</version.mockito>
+    <version.picocli>4.7.5</version.picocli>
+
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
     <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
+
     <tsl-procurer.initialTslPrimaryDownloadUrl>http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000</tsl-procurer.initialTslPrimaryDownloadUrl>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-commons</artifactId>
+      <version>${version.junit-platform-launcher}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-engine</artifactId>
+      <scope>compile</scope>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
@@ -179,6 +193,13 @@
     <dependency>
       <groupId>com.github.dtmo.jfiglet</groupId>
       <artifactId>jfiglet</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${version.mockito}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

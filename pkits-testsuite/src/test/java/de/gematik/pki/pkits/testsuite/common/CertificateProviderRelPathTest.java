@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package de.gematik.pki.pkits.testsuite.common;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
 import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.TestInstance;
@@ -33,16 +32,18 @@ class CertificateProviderRelPathTest {
   @ParameterizedTest
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_VALID)
-  void testRelPathArgumentsSourceValidCerts(final Path certPath) {
-    log.info("\n\n Test with certificate \"{}\"\n", certPath);
-    assertThat(certPath.toString()).contains(".p12");
+  void testRelPathArgumentsSourceValidCerts(final Path eeCertPath, final Path issuerCertPath) {
+    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
+    assertThat(eeCertPath.toString()).contains(".p12");
+    assertThat(issuerCertPath.toString()).endsWith(".pem");
   }
 
   @ParameterizedTest
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_INVALID)
-  void testRelPathArgumentsSourceInvalidCerts(final Path certPath) {
-    log.info("\n\n Test with certificate \"{}\"\n", certPath);
-    assertThat(certPath.toString()).contains(".p12");
+  void testRelPathArgumentsSourceInvalidCerts(final Path eeCertPath, final Path issuerCertPath) {
+    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
+    assertThat(eeCertPath.toString()).contains(".p12");
+    assertThat(issuerCertPath.toString()).endsWith(".pem");
   }
 }

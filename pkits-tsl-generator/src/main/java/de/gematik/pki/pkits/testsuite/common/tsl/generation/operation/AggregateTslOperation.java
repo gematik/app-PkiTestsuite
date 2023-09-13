@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 
+@Getter
 public class AggregateTslOperation implements TslOperation {
+
+  private final List<TslOperation> tslOperations = new ArrayList<>();
 
   public static AggregateTslOperationBuilder builder() {
     return new AggregateTslOperationBuilder();
@@ -41,8 +44,6 @@ public class AggregateTslOperation implements TslOperation {
       return aggregateTslOperation;
     }
   }
-
-  @Getter private final List<TslOperation> tslOperations = new ArrayList<>();
 
   public AggregateTslOperation(final List<TslOperation> tslOperations) {
     tslOperations.forEach(this::add);

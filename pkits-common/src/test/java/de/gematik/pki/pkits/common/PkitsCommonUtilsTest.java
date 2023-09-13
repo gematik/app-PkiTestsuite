@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package de.gematik.pki.pkits.common;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.getFirstSubStringByPattern;
-import static de.gematik.pki.pkits.common.PkitsCommonUtils.getHttpAdressString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils.GitProperties;
 import java.nio.charset.StandardCharsets;
@@ -33,21 +31,13 @@ class PkitsCommonUtilsTest {
 
   @Test
   void verifyGetUrl() {
-    assertThat(getHttpAdressString("1", 2)).isEqualTo("http://1:2");
+    assertThat(PkitsCommonUtils.getHttpAddressString("1", 2)).isEqualTo("http://1:2");
   }
 
   @Test
   void testIsExternalStartUp() {
     assertThat(PkitsCommonUtils.isExternalStartup("/sample/app/path/ect")).isFalse();
     assertThat(PkitsCommonUtils.isExternalStartup("externalStartup")).isTrue();
-  }
-
-  @Test
-  void testBytesToObject() {
-    final byte[] bytes = "dummy".getBytes();
-    assertThatThrownBy(() -> PkitsCommonUtils.bytesToObject(bytes))
-        .isInstanceOf(PkiCommonException.class)
-        .hasMessage("Error deserializing byte[] to Object");
   }
 
   @Test

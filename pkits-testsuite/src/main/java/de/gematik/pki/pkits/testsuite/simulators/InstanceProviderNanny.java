@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package de.gematik.pki.pkits.testsuite.simulators;
 
-import static de.gematik.pki.pkits.common.PkitsCommonUtils.getHttpAdressString;
 import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_HEALTH_ENDPOINT;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
@@ -129,27 +128,35 @@ public abstract class InstanceProviderNanny {
   public String waitUntilWebServerIsUp(final int timeoutSecs) {
 
     if (PkitsCommonUtils.isExternalStartup(appPath)) {
-      log.info("Web server <{}> is started externally and should be up", serverId);
+      log.info(
+          "Web server <{}> is started externally and should be up, running on {}",
+          serverId,
+          getServerUri());
     } else if (isProcessRunning()) {
       final Callable<Boolean> webServerIsUp = new WebServerHealthOk();
       PkitsTestSuiteUtils.waitForEvent(serverId, timeoutSecs, webServerIsUp);
-      log.info("Web server <{}> should be up now", serverId);
+
+      log.info("Web server <{}> should be up now, running on {}", serverId, getServerUri());
     } else {
       processIsAlreadyUp = false;
       throw new PkiCommonException("Web server <" + serverId + "> is down");
     }
 
-    return getHttpAdressString(ipAddressOrFqdn, port);
+    return getServerUri();
   }
 
   protected boolean isProcessRunning() {
     return getProcessExitValue(process).isEmpty();
   }
 
+  private String getServerUri() {
+    return PkitsCommonUtils.getHttpAddressString(ipAddressOrFqdn, port);
+  }
+
   protected boolean webServerHealthOk() {
     final HttpResponse<String> response;
     try {
-      final String uri = "http://" + ipAddressOrFqdn + ":" + port + WEBSERVER_HEALTH_ENDPOINT;
+      final String uri = getServerUri() + WEBSERVER_HEALTH_ENDPOINT;
       log.info("Try to connect uri: {}", uri);
       response = Unirest.get(uri).asString();
       if (response.getStatus() == (HttpStatus.SC_OK)) {

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,48 @@ import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JsonTransceiver {
 
+  private static PkiCommonException sendFailed(final int status) {
+    return new PkiCommonException("Send failed with HttpStatus: " + status);
+  }
+
+  private static PkiCommonException generationFailed(final UnirestException e) {
+    return new PkiCommonException("Generation of request failed.", e);
+  }
+
   public static void sendJsonViaHttp(
       final String uri, final String jsonContent, final boolean successOnly) {
     try {
-      final HttpResponse<String> response = Unirest.post(uri).body(jsonContent).asString();
+
+      final HttpResponse<String> response =
+          Unirest.post(uri)
+              .header(HttpHeaders.CONTENT_TYPE, "application/json")
+              .body(jsonContent)
+              .asString();
+
       if (successOnly && (response.getStatus() != HttpStatus.SC_OK)) {
-        throw new PkiCommonException("Send failed with HttpStatus: " + response.getStatus());
+        throw sendFailed(response.getStatus());
       }
     } catch (final UnirestException e) {
-      throw new PkiCommonException("Generation of request failed.", e);
+      throw generationFailed(e);
+    }
+  }
+
+  public static void deleteViaHttp(final String uri, final boolean successOnly) {
+    try {
+
+      final HttpResponse<String> response = Unirest.delete(uri).asString();
+
+      if (successOnly && (response.getStatus() != HttpStatus.SC_OK)) {
+        throw sendFailed(response.getStatus());
+      }
+    } catch (final UnirestException e) {
+      throw generationFailed(e);
     }
   }
 
@@ -53,13 +81,14 @@ public final class JsonTransceiver {
   public static String txRxJsonViaHttp(final String uri, final String jsonContent) {
     try {
       final HttpRequestWithBody request = Unirest.post(uri);
-      final HttpResponse<String> response = request.body(jsonContent).asString();
+      final HttpResponse<String> response =
+          request.body(jsonContent).header(HttpHeaders.CONTENT_TYPE, "application/json").asString();
       if (response.getStatus() != HttpStatus.SC_OK) {
-        throw new PkiCommonException("Send failed with HttpStatus: " + response.getStatus());
+        throw sendFailed(response.getStatus());
       }
       return response.getBody();
     } catch (final UnirestException e) {
-      throw new PkiCommonException("Generation of request failed.", e);
+      throw generationFailed(e);
     }
   }
 }

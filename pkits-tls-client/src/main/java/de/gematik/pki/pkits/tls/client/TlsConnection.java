@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,13 +97,14 @@ public class TlsConnection {
     final String[] ciphersSuites;
     if ("EC".equalsIgnoreCase(algorithm)) {
       System.setProperty(
-          "jdk.tls.namedGroups", "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1");
+          "jdk.tls.namedGroups",
+          "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, secp256r1, secp384r1");
       ciphersSuites = tlsSettings.getEcCiphersSuites();
       kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
 
     } else if ("RSA".equalsIgnoreCase(algorithm)) {
       ciphersSuites = tlsSettings.getRsaCiphersSuites();
-      System.setProperty("jdk.tls.namedGroups", "ffdhe2048");
+      System.setProperty("jdk.tls.namedGroups", "secp256r1, secp384r1");
       kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
     } else {
       throw new TlsClientException("Algorithm %s is not supported.".formatted(algorithm));
@@ -138,7 +139,7 @@ public class TlsConnection {
       sslParameters.setCipherSuites(ciphersSuites);
       clientSSLSocket.setSSLParameters(sslParameters);
       clientSSLSocket.setEnabledProtocols(tlsSettings.getEnabledProtocols());
-      // clientSSLSocket.setSoTimeout(tlsSettings.getSocketTimeoutMsec());
+
       clientSSLSocket.setUseClientMode(true);
       clientSSLSocket.addHandshakeCompletedListener(new TlsHandshakeCompletedListener());
       clientSSLSocket.connect(
@@ -148,12 +149,11 @@ public class TlsConnection {
           "Handshake started. To send application data implement:"
               + " clientSSLSocket.getOutputStream().write()");
       log.info("Socket we connect from: {}", clientSSLSocket.getLocalSocketAddress());
-
     } catch (final TlsFatalAlertReceived e) {
       log.info("No ssl connection established: {}", e.getMessage());
       throw new TlsConnectionException("No ssl connection established.", e);
-    } catch (SocketTimeoutException e) {
-      log.info("No ssl connection tiomeout: {}", e.getMessage());
+    } catch (final SocketTimeoutException e) {
+      log.info("No ssl connection timeout: {}", e.getMessage());
       throw new TlsConnectionException("No ssl connection timeout.", e);
     } catch (final IOException e) {
       throw new TlsClientException("Problems creating or using client SSL socket.", e);

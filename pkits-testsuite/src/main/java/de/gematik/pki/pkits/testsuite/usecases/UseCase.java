@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package de.gematik.pki.pkits.testsuite.usecases;
 
-import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.config.TestObjectConfig;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
@@ -34,20 +34,19 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UseCase {
 
-  public static int exec(final Path certPath, final TestSuiteConfig testSuiteConfig) {
+  public static int exec(final Path eeCertPath, final TestSuiteConfig testSuiteConfig) {
 
     final TestObjectConfig testObjectConfig = testSuiteConfig.getTestObject();
 
-    return switch (testObjectConfig.getType()) {
-      case "TlsServer" -> TlsClientApplication.connectTls(
+    return switch (testObjectConfig.getTestObjectType().getConnectionType()) {
+      case TLS_SERVER -> TlsClientApplication.connectTls(
           testObjectConfig.getIpAddressOrFqdn(),
           testObjectConfig.getPort(),
-          certPath,
-          TestConfigManager.getTestSuiteConfig().getClient().getKeystorePassword(),
+          eeCertPath,
+          PkitsTestDataConstants.KEYSTORE_PASSWORD,
           testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
-      case "Script" -> connectScript(certPath, testSuiteConfig);
-      case "ScriptOverSsh" -> new SshUseCaseApplication(certPath, testSuiteConfig).execute();
-      default -> throw new TestSuiteException("Unknown test object type.");
+      case SCRIPT -> connectScript(eeCertPath, testSuiteConfig);
+      case SCRIPT_OVER_SSH -> new SshUseCaseApplication(eeCertPath, testSuiteConfig).execute();
     };
   }
 
@@ -87,7 +86,7 @@ public final class UseCase {
         new ProcessBuilder(
             filename,
             certPath.toString(),
-            testSuiteConfig.getClient().getKeystorePassword(),
+            PkitsTestDataConstants.KEYSTORE_PASSWORD,
             String.valueOf(testSuiteConfig.getTestObject().getOcspTimeoutSeconds()));
 
     log.info("Run script {}", filename);

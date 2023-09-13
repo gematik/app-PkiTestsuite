@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,17 +51,21 @@ public class DeleteTspServiceForCertShaTslOperation implements TslOperation {
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
 
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
+    final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
 
-    for (final TSPType tsp : tsl.getTrustServiceProviderList().getTrustServiceProvider()) {
+    for (final TSPType tsp : tslUnsigned.getTrustServiceProviderList().getTrustServiceProvider()) {
       tsp.getTSPServices().getTSPService().removeIf(this::sameSha256);
     }
 
-    return new TslContainer(tsl);
+    return new TslContainer(tslUnsigned);
   }
 
   public long count(final TslContainer tslContainer) {
-    return tslContainer.getAsTsl().getTrustServiceProviderList().getTrustServiceProvider().stream()
+    return tslContainer
+        .getAsTslUnsigned()
+        .getTrustServiceProviderList()
+        .getTrustServiceProvider()
+        .stream()
         .flatMap(tsp -> tsp.getTSPServices().getTSPService().stream())
         .filter(this::sameSha256)
         .count();

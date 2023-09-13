@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,13 @@ class TestSuiteConfigTest {
   @Test
   void readStringFromConfig() {
     final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
-    assertThat(testSuiteConfig.getClient().getKeystorePathValidCerts()).contains("valid");
+    assertThat(
+            testSuiteConfig
+                .getTestObject()
+                .getTestObjectType()
+                .getClientKeystorePathValidCerts()
+                .toString())
+        .contains("valid");
   }
 
   @Test
@@ -71,9 +77,6 @@ class TestSuiteConfigTest {
 
     // for better readability, we use underscores
 
-    // definition of default parameters
-    final String client_keystorePassword = "00";
-
     final String testObject_scriptPath = "unused by default";
     final int testObject_ocspGracePeriodSeconds = 30;
     final int testObject_tslProcessingTimeSeconds = 3;
@@ -92,19 +95,8 @@ class TestSuiteConfigTest {
 
     final boolean testSuiteParameter_performInitialState = true;
     final boolean testSuiteParameter_captureNetworkTraffic = false;
-    final Path testSuiteParameter_ocspSettings_keystorePathOcsp =
-        Path.of("./testDataTemplates/certificates/ecc/ocspKeystore");
-    final String testSuiteParameter_ocspSettings_signerPassword = "00";
     final int testSuiteParameter_ocspSettings_timeoutDeltaMilliseconds = 1500;
     final int testSuiteParameter_ocspSettings_gracePeriodeExtraDelay = 5;
-
-    final boolean testSuiteParameter_tslSettings_initialStateTslImport = true;
-    final Path testSuiteParameter_tslSettings_signer =
-        Path.of(
-            "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
-    final String testSuiteParameter_tslSettings_signerPassword = "00";
-
-    ca.assertEquals(client_keystorePassword, testSuiteConfig.getClient().getKeystorePassword());
 
     ca.assertEquals(
         testObject_scriptPath, testSuiteConfig.getTestObject().getScriptUseCase().getScriptPath());
@@ -144,28 +136,11 @@ class TestSuiteConfigTest {
         testSuiteConfig.getTestSuiteParameter().isCaptureNetworkTraffic());
 
     ca.assertEquals(
-        testSuiteParameter_ocspSettings_keystorePathOcsp,
-        testSuiteConfig.getTestSuiteParameter().getOcspSettings().getKeystorePathOcsp());
-    ca.assertEquals(
-        testSuiteParameter_ocspSettings_signerPassword,
-        testSuiteConfig.getTestSuiteParameter().getOcspSettings().getSignerPassword());
-    ca.assertEquals(
         testSuiteParameter_ocspSettings_timeoutDeltaMilliseconds,
         testSuiteConfig.getTestSuiteParameter().getOcspSettings().getTimeoutDeltaMilliseconds());
     ca.assertEquals(
         testSuiteParameter_ocspSettings_gracePeriodeExtraDelay,
         testSuiteConfig.getTestSuiteParameter().getOcspSettings().getGracePeriodExtraDelay());
-
-    ca.assertEquals(
-        testSuiteParameter_tslSettings_initialStateTslImport,
-        testSuiteConfig.getTestSuiteParameter().getTslSettings().isInitialStateTslImport());
-
-    ca.assertEquals(
-        testSuiteParameter_tslSettings_signer,
-        testSuiteConfig.getTestSuiteParameter().getTslSettings().getSigner());
-    ca.assertEquals(
-        testSuiteParameter_tslSettings_signerPassword,
-        testSuiteConfig.getTestSuiteParameter().getTslSettings().getSignerPassword());
   }
 
   void testNonDefaultsInSshConfig(final CustomAsserter ca, final SshConfig sshConfig) {
@@ -228,16 +203,9 @@ class TestSuiteConfigTest {
     // these parameters are optional and without defaults: they are not set in the tscMinimal
     final String testSuiteParameter_captureNetworkTraffic = "9.9.9.9";
 
-    final String client_keystorePathValidCerts =
-        "./testDataTemplates/certificates/ecc/fachmodulClient/valid";
-    final String client_keystorePathAlternativeCerts =
-        "./testDataTemplates/certificates/ecc/fachmodulClient/valid-alternative";
-    final String client_keystorePathInvalidCerts =
-        "./testDataTemplates/certificates/ecc/fachmodulClient/invalid";
-
     // definition of parameters without defaults
     final String testObject_name = "Server 0815";
-    final String testObject_type = "TlsServer";
+    final TestObjectType testObject_testObjectType = TestObjectType.INTERMEDIAER_SERVER;
     final String testObject_ipAddressOrFqdn = "127.0.0.1";
     final int testObject_port = 8443;
 
@@ -270,15 +238,8 @@ class TestSuiteConfigTest {
 
     final CustomAsserter ca = new CustomAsserter();
 
-    ca.assertEquals(
-        client_keystorePathInvalidCerts, tscMinimal.getClient().getKeystorePathInvalidCerts());
-    ca.assertEquals(
-        client_keystorePathValidCerts, tscMinimal.getClient().getKeystorePathValidCerts());
-    ca.assertEquals(
-        client_keystorePathAlternativeCerts,
-        tscMinimal.getClient().getKeystorePathAlternativeCerts());
     ca.assertEquals(testObject_name, tscMinimal.getTestObject().getName());
-    ca.assertEquals(testObject_type, tscMinimal.getTestObject().getType());
+    ca.assertEquals(testObject_testObjectType, tscMinimal.getTestObject().getTestObjectType());
     ca.assertEquals(testObject_ipAddressOrFqdn, tscMinimal.getTestObject().getIpAddressOrFqdn());
     ca.assertEquals(testObject_port, tscMinimal.getTestObject().getPort());
     ca.assertEquals(
@@ -299,7 +260,7 @@ class TestSuiteConfigTest {
 
     testNonDefaultsInSshConfig(ca, tscMinimal.getSshConfig());
 
-    assertThat(ca.counter).as("23 parameters without defaults").isEqualTo(23);
+    assertThat(ca.counter).as("20 parameters without defaults").isEqualTo(20);
 
     testDefaults(ca, tscMinimal);
 
@@ -308,19 +269,6 @@ class TestSuiteConfigTest {
 
     final CustomAsserter caDefaults = new CustomAsserter();
     testDefaults(caDefaults, tscBlank);
-  }
-
-  private void testAllFieldsAsNonDefaultClient(
-      final CustomAsserter ca, final ClientConfig clientConfig) {
-    final String keystorePathValidCerts = "client.keystorePathValidCerts";
-    final String keystorePathAlternativeCerts = "client.keystorePathAlternativeCerts";
-    final String keystorePathInvalidCerts = "client.keystorePathInvalidCerts";
-    final String keystorePassword = "client.keystorePassword";
-
-    ca.assertEquals(keystorePathValidCerts, clientConfig.getKeystorePathValidCerts());
-    ca.assertEquals(keystorePathAlternativeCerts, clientConfig.getKeystorePathAlternativeCerts());
-    ca.assertEquals(keystorePathInvalidCerts, clientConfig.getKeystorePathInvalidCerts());
-    ca.assertEquals(keystorePassword, clientConfig.getKeystorePassword());
   }
 
   private void testAllFieldsAsNonDefaultOcspResponderAndTslProvider(
@@ -354,45 +302,26 @@ class TestSuiteConfigTest {
     final boolean captureNetworkTraffic = true;
     final String captureInterfaces = "testSuiteParameter.captureInterfaces";
 
-    final Path ocspSettings_keystorePathOcsp =
-        Path.of("testSuiteParameter.ocspSettings.keystorePathOcsp");
-    final String ocspSettings_signerPassword = "testSuiteParameter.ocspSettings.signerPassword";
     final int ocspSettings_timeoutDeltaMilliseconds = -3000;
     final int ocspSettings_gracePeriodExtraDelay = -1000;
-
-    final boolean tslSettings_initialStateTslImport = false;
-    final Path tslSettings_signer = Path.of("testSuiteParameter.tslSettings.signer");
-    final String tslSettings_signerPassword = "testSuiteParameter.tslSettings.signerPassword";
 
     ca.assertEquals(performInitialState, testSuiteParameter.isPerformInitialState());
     ca.assertEquals(captureNetworkTraffic, testSuiteParameter.isCaptureNetworkTraffic());
     ca.assertEquals(captureInterfaces, testSuiteParameter.getCaptureInterfaces());
 
     ca.assertEquals(
-        ocspSettings_keystorePathOcsp, testSuiteParameter.getOcspSettings().getKeystorePathOcsp());
-    ca.assertEquals(
-        ocspSettings_signerPassword, testSuiteParameter.getOcspSettings().getSignerPassword());
-    ca.assertEquals(
         ocspSettings_timeoutDeltaMilliseconds,
         testSuiteParameter.getOcspSettings().getTimeoutDeltaMilliseconds());
     ca.assertEquals(
         ocspSettings_gracePeriodExtraDelay,
         testSuiteParameter.getOcspSettings().getGracePeriodExtraDelay());
-
-    ca.assertEquals(
-        tslSettings_initialStateTslImport,
-        testSuiteParameter.getTslSettings().isInitialStateTslImport());
-
-    ca.assertEquals(tslSettings_signer, testSuiteParameter.getTslSettings().getSigner());
-    ca.assertEquals(
-        tslSettings_signerPassword, testSuiteParameter.getTslSettings().getSignerPassword());
   }
 
   private void testAllFieldsAsNonDefaultTestObject(
       final CustomAsserter ca, final TestObjectConfig testObject) {
 
     final String name = "testObject.name";
-    final String type = "testObject.type";
+    final TestObjectType testObjectType = TestObjectType.IDP_FACHDIENST;
     final String ipAddressOrFqdn = "testObject.ipAddressOrFqdn";
     final int port = -99;
     final int tslDownloadIntervalSeconds = -100;
@@ -409,7 +338,7 @@ class TestSuiteConfigTest {
     final String scriptUseCase_cryptMethod = "testObject.scriptUseCase.cryptMethod";
 
     ca.assertEquals(name, testObject.getName());
-    ca.assertEquals(type, testObject.getType());
+    ca.assertEquals(testObjectType, testObject.getTestObjectType());
     ca.assertEquals(ipAddressOrFqdn, testObject.getIpAddressOrFqdn());
     ca.assertEquals(port, testObject.getPort());
     ca.assertEquals(scriptUseCase_scriptPath, testObject.getScriptUseCase().getScriptPath());
@@ -482,7 +411,6 @@ class TestSuiteConfigTest {
 
     final CustomAsserter ca = new CustomAsserter();
 
-    testAllFieldsAsNonDefaultClient(ca, tsc.getClient());
     testAllFieldsAsNonDefaultTestObject(ca, tsc.getTestObject());
     testAllFieldsAsNonDefaultSshConfig(ca, tsc.getSshConfig());
     testAllFieldsAsNonDefaultOcspResponderAndTslProvider(ca, tsc);

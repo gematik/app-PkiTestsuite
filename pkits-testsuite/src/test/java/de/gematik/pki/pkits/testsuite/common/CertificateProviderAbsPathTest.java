@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package de.gematik.pki.pkits.testsuite.common;
 import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CFG_FILE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,23 +55,43 @@ class CertificateProviderAbsPathTest {
   @ParameterizedTest
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_VALID)
-  void testAbsPathArgumentsSourceValidCerts(final Path certPath) {
-    log.info("\n\n Test with certificate \"{}\"\n", certPath);
-    assertThat(certPath.toString()).contains(".p12");
+  void testAbsPathArgumentsSourceValidCerts(final Path eeCertPath, final Path issuerCertPath) {
+    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
+    assertThat(eeCertPath.toString()).endsWith(".p12");
+    assertThat(issuerCertPath.toString()).endsWith(".pem");
   }
 
   @ParameterizedTest
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_INVALID)
-  void testAbsPathArgumentsSourceInvalidCerts(final Path certPath) {
-    log.info("\n\n Test with certificate \"{}\"\n", certPath);
-    assertThat(certPath.toString()).contains(".p12");
+  void testAbsPathArgumentsSourceInvalidCerts(final Path eeCertPath, final Path issuerCertPath) {
+    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
+    assertThat(eeCertPath.toString()).endsWith(".p12");
+    assertThat(issuerCertPath.toString()).endsWith(".pem");
+  }
+
+  @ParameterizedTest
+  @ArgumentsSource(CertificateProvider.class)
+  @VariableSource(value = PkitsCertType.PKITS_CERT_VALID_ALTERNATIVE)
+  void testAbsPathArgumentsSourceValidAlternativeCerts(
+      final Path eeCertPath, final Path issuerCertPath) {
+    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
+    assertThat(eeCertPath.toString()).contains(".p12");
+    assertThat(issuerCertPath.toString()).contains(".pem");
+  }
+
+  @ParameterizedTest
+  @ArgumentsSource(CertificateProvider.class)
+  @VariableSource(value = PkitsCertType.PKITS_CERT_VALID_RSA)
+  void testAbsPathArgumentsSourceValidRsaCerts(final Path eeCertPath, final Path issuerCertPath) {
+    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
+    assertThat(eeCertPath.toString()).contains(".p12");
+    assertThat(issuerCertPath.toString()).contains(".pem");
   }
 
   private void createConfigFileWithAbsolutePathsToCerts() throws IOException {
-    final Path configFilePathSrc = Path.of("./docs/configs/inttest/pkits.yml");
 
-    final String fileContent = Files.readString(configFilePathSrc);
+    final String fileContent = Files.readString(configFileInttestTemplatePath);
 
     Files.writeString(PKITS_CFG_FILE_PATH, fileContent);
   }

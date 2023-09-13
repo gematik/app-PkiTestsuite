@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigJsonDto;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -39,25 +37,30 @@ public class OcspConfigController {
   private final OcspResponseConfigHolder ocspResponseConfigHolder;
   private final OcspRequestHistory ocspRequestHistory;
 
-  private final ObjectReader reader = new ObjectMapper().readerFor(byte[].class);
-
-  @PostMapping(value = WEBSERVER_CONFIG_ENDPOINT)
-  public void ocspConfig(final HttpServletRequest request) throws IOException {
+  @Operation(summary = "Configure the OCSP Responder.")
+  @PostMapping(path = PkitsConstants.OCSP_WEBSERVER_CONFIG_ENDPOINT)
+  public void ocspConfig(final @RequestBody OcspResponderConfigJsonDto jsonDto) {
     log.info("Ocsp ConfigurationRequest received");
-    final byte[] ocspConfigRequestByte = reader.readValue(request.getInputStream());
-    final OcspResponderConfigDto ocspResponderConfigDto = bytesToDto(ocspConfigRequestByte);
-    processConfigurationRequest(ocspResponderConfigDto);
+
+    final OcspResponderConfig ocspResponderConfig = jsonDto.toConfig();
+
+    processConfigurationRequest(ocspResponderConfig);
+
     log.info("Ocsp ConfigurationRequest processed (and history cleared).");
   }
 
-  private void processConfigurationRequest(final OcspResponderConfigDto ocspResponderConfigDto) {
-    log.info("ConfigurationRequest: {}", ocspResponderConfigDto);
-
-    ocspResponseConfigHolder.setOcspResponderConfigDto(ocspResponderConfigDto);
-    ocspRequestHistory.deleteAll();
+  @Operation(summary = "Clear configuration of the OCSP Responder.")
+  @DeleteMapping(path = PkitsConstants.OCSP_WEBSERVER_CLEAR_ENDPOINT)
+  public void ocspClear() {
+    log.info("Ocsp ClearRequest received");
+    processConfigurationRequest(null);
+    log.info("Ocsp ClearRequest processed (and history cleared).");
   }
 
-  public static OcspResponderConfigDto bytesToDto(final byte[] bytes) {
-    return (OcspResponderConfigDto) PkitsCommonUtils.bytesToObject(bytes);
+  private void processConfigurationRequest(final OcspResponderConfig ocspResponderConfig) {
+    log.info("ConfigurationRequest: {}", ocspResponderConfig);
+
+    ocspResponseConfigHolder.setOcspResponderConfig(ocspResponderConfig);
+    ocspRequestHistory.deleteAll();
   }
 }

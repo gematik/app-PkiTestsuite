@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ public class SignTslOperation implements TslOperation {
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
 
-    final Document tslDoc = tslContainer.getAsTslDoc();
+    final Document tslUnsignedDoc = tslContainer.getAsTslUnsignedDoc();
 
     final TslSigner tslSigner =
         TslSigner.builder()
-            .tslToSign(tslDoc)
+            .tslToSign(tslUnsignedDoc)
             .tslSignerP12(tslSignerP12)
             .checkSignerKeyUsage(signerKeyUsageCheck)
             .checkSignerValidity(signerValidityCheck)
@@ -52,6 +52,6 @@ public class SignTslOperation implements TslOperation {
 
     tslSigner.sign();
 
-    return new TslContainer(tslDoc);
+    return new TslContainer(tslUnsignedDoc);
   }
 }

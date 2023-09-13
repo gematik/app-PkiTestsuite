@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,15 @@ public class ModifyIssueDateAndRelatedNextUpdateTslOperation implements TslOpera
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
 
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
+    final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
 
     if (nextUpdate == null) {
-      TslModifier.modifyIssueDateAndRelatedNextUpdate(tsl, issueDate, daysUntilNextUpdate);
+      TslModifier.modifyIssueDateAndRelatedNextUpdate(tslUnsigned, issueDate, daysUntilNextUpdate);
     } else {
-      TslModifier.modifyIssueDate(tsl, issueDate);
-      TslModifier.modifyNextUpdate(tsl, nextUpdate);
+      TslModifier.modifyIssueDate(tslUnsigned, issueDate);
+      TslModifier.modifyNextUpdate(tslUnsigned, nextUpdate);
     }
 
-    return new TslContainer(tsl);
+    return new TslContainer(tslUnsigned);
   }
 }

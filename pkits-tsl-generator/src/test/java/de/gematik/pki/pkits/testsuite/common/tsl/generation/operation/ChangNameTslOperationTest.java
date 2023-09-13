@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import de.gematik.pki.gemlibpki.tsl.TslConverter;
 import de.gematik.pki.pkits.common.PkitsConstants;
@@ -31,7 +30,8 @@ class ChangNameTslOperationTest {
   @Test
   void testChangNameTslOperation() {
     final TrustStatusListType tsl = CreateTslTemplate.defaultTsl();
-    final String tslStr = new String(TslConverter.tslToBytes(tsl), StandardCharsets.UTF_8);
+    final String tslStrUnsigned =
+        new String(TslConverter.tslUnsignedToBytes(tsl), StandardCharsets.UTF_8);
 
     final String substrFormat =
         "<TSPInformation><TSPName><Name xml:lang=\"DE\">%s</Name></TSPName><TSPTradeName>"
@@ -44,12 +44,13 @@ class ChangNameTslOperationTest {
     final String newSubstr =
         substrFormat.formatted(PkitsConstants.GEMATIK_TEST_TSP, newTspTradeName);
 
-    assertThat(tslStr).containsOnlyOnce(originalSubstr).doesNotContain(newSubstr);
+    assertThat(tslStrUnsigned).containsOnlyOnce(originalSubstr).doesNotContain(newSubstr);
 
     final TslOperation tslOperation = new ChangNameTslOperation(newTspTradeName);
     final TslContainer tslContainer = tslOperation.apply(tsl);
 
-    final String newTslStr = new String(tslContainer.getAsTslBytes(), StandardCharsets.UTF_8);
+    final String newTslStr =
+        new String(tslContainer.getAsTslUnsignedBytes(), StandardCharsets.UTF_8);
 
     assertThat(newTslStr).doesNotContain(originalSubstr).containsOnlyOnce(newSubstr);
   }

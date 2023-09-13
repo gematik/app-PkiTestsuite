@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.sut.server.sim.webserverconfigs;
 
+import de.gematik.pki.pkits.sut.server.sim.exceptions.TosException;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.net.SSLHostConfig;
@@ -47,7 +48,9 @@ public class TomcatServletCustomizer
       factory.addConnectorCustomizers(
           connector -> {
             final SSLHostConfig sslHostConfig =
-                Arrays.stream(connector.getProtocolHandler().findSslHostConfigs()).findAny().get();
+                Arrays.stream(connector.getProtocolHandler().findSslHostConfigs())
+                    .findAny()
+                    .orElseThrow(() -> new TosException("no ssl host config found"));
             sslHostConfig.setTrustManagerClassName(HandshakeInterceptor.class.getCanonicalName());
             sslHostConfig.setSslProtocol(sslprotocol);
             sslHostConfig.setCiphers(sslciphers);

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,11 @@ import lombok.NoArgsConstructor;
 public final class PkitsConstants {
 
   public static final String EXTERNAL_STARTUP = "externalStartup";
-  public static final String WEBSERVER_CONFIG_ENDPOINT = "/config";
+  public static final String OCSP_WEBSERVER_CONFIG_ENDPOINT = "/config";
+  public static final String TSL_WEBSERVER_CONFIG_ENDPOINT = OCSP_WEBSERVER_CONFIG_ENDPOINT;
+
+  public static final String OCSP_WEBSERVER_CLEAR_ENDPOINT = "/clear";
+  public static final String TSL_WEBSERVER_CLEAR_ENDPOINT = OCSP_WEBSERVER_CLEAR_ENDPOINT;
   public static final String OCSP_WEBSERVER_INFO_ENDPOINT = "/info";
   public static final String TSL_WEBSERVER_INFO_ENDPOINT = OCSP_WEBSERVER_INFO_ENDPOINT;
 

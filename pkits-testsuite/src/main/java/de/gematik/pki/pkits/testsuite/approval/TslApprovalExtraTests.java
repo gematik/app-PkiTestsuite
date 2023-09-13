@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.DEFAULT_CLIENT_CERTS_CONFIG;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
-import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
@@ -35,7 +36,6 @@ import de.gematik.pki.pkits.testsuite.reporting.TestResultLoggerExtension;
 import de.gematik.pki.pkits.tsl.provider.api.TslDownloadEndpointType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assumptions;
@@ -51,22 +51,28 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
   final BiFunction<ZonedDateTime, ZonedDateTime, TslOperation> rewriteIssueDateAndNextUpdate =
       (newIssueDate, newNextUpdate) ->
           tslContainer -> {
-            final TrustStatusListType tsl = tslContainer.getAsTsl();
+            final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
 
-            tsl.getSchemeInformation()
+            tslUnsigned
+                .getSchemeInformation()
                 .setListIssueDateTime(TslModifier.getXmlGregorianCalendar(newIssueDate));
 
-            tsl.getSchemeInformation()
+            tslUnsigned
+                .getSchemeInformation()
                 .getNextUpdate()
                 .setDateTime(TslModifier.getXmlGregorianCalendar(newNextUpdate));
 
-            return newTslGenerator().signTslOperation(getDefaultTslSignerP12()).apply(tsl);
+            return newTslDownloadGenerator()
+                .signTslOperation(DEFAULT_TSL_SIGNER)
+                .apply(tslUnsigned);
           };
 
   /** gematikId: UE_PKI_TC_0103_002 */
   @Test
   @Afo(afoId = "GS-A_4642", description = "TUC_PKI_001: Prüfung der Aktualität der TSL - Schritt 2")
   @Afo(afoId = "GS-A_4648", description = "TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 7")
+  @Afo(afoId = "GS-A_4898", description = "TSL-Grace-Period einer TSL")
+  @Afo(afoId = "GS-A_5336", description = "Zertifikatsprüfung nach Ablauf TSL-Graceperiod")
   @DisplayName(
       "Expired TSL in system (NextUpdate is outside the TSL Grace Period). WARNING: After the"
           + " test a TSL must then be manually inserted into the system.")
@@ -85,17 +91,15 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
     final int timeForTslUpdateAndUseCaseMinutes = 1;
 
     final ZonedDateTime newIssueDate =
-        GemLibPkiUtils.now()
-            .minus(30, ChronoUnit.DAYS)
-            .plus(timeForTslUpdateAndUseCaseMinutes, ChronoUnit.MINUTES);
+        GemLibPkiUtils.now().minusDays(30).plusMinutes(timeForTslUpdateAndUseCaseMinutes);
 
     final ZonedDateTime newNextUpdate =
         GemLibPkiUtils.now()
-            .minus(tslGracePeriodDays, ChronoUnit.DAYS)
-            .plus(timeForTslUpdateAndUseCaseMinutes, ChronoUnit.MINUTES);
+            .minusDays(tslGracePeriodDays)
+            .plusMinutes(timeForTslUpdateAndUseCaseMinutes);
 
     final TslDownload tslDownload =
-        newTslGenerator(
+        newTslDownloadGenerator(
                 "nextUpdateInPastOutsideGracePeriod",
                 rewriteIssueDateAndNextUpdate.apply(newIssueDate, newNextUpdate))
             .getStandardTslDownload(CreateTslTemplate.defaultTsl());
@@ -115,7 +119,7 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
             + " minutes.",
         tslDownload,
         OCSP_REQUEST_EXPECT,
-        withUseCase(getPathOfFirstValidCert(), USECASE_VALID, OCSP_REQUEST_EXPECT));
+        WITHOUT_USECASE);
 
     log.info(
         "wait for the TSL guaranteed to expire: {} minutes", timeForTslUpdateAndUseCaseMinutes);
@@ -136,7 +140,7 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
     tslDownload.waitUntilOcspRequestForSignerOptional();
 
     useCaseWithCert(
-        getPathOfFirstValidCert(),
+        DEFAULT_CLIENT_CERTS_CONFIG,
         USECASE_INVALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_DO_NOT_EXPECT);

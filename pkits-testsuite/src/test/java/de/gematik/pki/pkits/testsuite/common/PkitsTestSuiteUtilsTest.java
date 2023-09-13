@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -74,5 +75,28 @@ class PkitsTestSuiteUtilsTest {
       eventCounter++;
       return eventCounter > number;
     };
+  }
+
+  @Test
+  void testBuildAbsolutePath() {
+    assertDoesNotThrow(() -> PkitsTestSuiteUtils.buildAbsolutePathForDir(Path.of(".")));
+  }
+
+  @Test
+  void testBuildAbsolutePathException() {
+    assertThatThrownBy(() -> PkitsTestSuiteUtils.buildAbsolutePathForDir(Path.of("pom.xml")))
+        .isInstanceOf(TestSuiteException.class)
+        .hasMessageEndingWith("pom.xml is not valid");
+  }
+
+  @Test
+  void testGetShortenedStackTrace() {
+    assertDoesNotThrow(() -> PkitsTestSuiteUtils.getShortenedStackTrace(new RuntimeException()));
+  }
+
+  @Test
+  void testProvideOcspResponseVariousStatusAndResponseBytes() {
+    assertThat(PkitsTestSuiteUtils.provideOcspResponseVariousStatusAndResponseBytes().count())
+        .isEqualTo(10);
   }
 }

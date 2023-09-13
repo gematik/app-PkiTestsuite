@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ public class ModifyBackupUrlTslOperation implements TslOperation {
 
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
+    final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
 
-    TslModifier.modifyTslDownloadUrlBackup(tsl, tslDownloadUrlBackup);
+    TslModifier.modifyTslDownloadUrlBackup(tslUnsigned, tslDownloadUrlBackup);
 
-    return new TslContainer(tsl);
+    return new TslContainer(tslUnsigned);
   }
 }

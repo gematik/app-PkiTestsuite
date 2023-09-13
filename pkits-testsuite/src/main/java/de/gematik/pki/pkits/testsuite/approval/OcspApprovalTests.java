@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_OCSP_SIGNER;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.ALTERNATIVE_CLIENT_CERTS_CONFIG;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.DEFAULT_CLIENT_CERTS_CONFIG;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_PRECONFIGURED;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
@@ -28,6 +33,8 @@ import de.gematik.pki.gemlibpki.exception.GemPkiException;
 import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
+import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
+import de.gematik.pki.gemlibpki.ocsp.OcspUtils;
 import de.gematik.pki.gemlibpki.tsl.TslConstants;
 import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
@@ -36,18 +43,16 @@ import de.gematik.pki.gemlibpki.tsl.TspService;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusType;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.OcspResponderConfigDtoBuilder;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.DtoDateConfigOption;
-import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusType;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig.OcspResponderConfigBuilder;
+import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
-import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerator;
+import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.TslOperation;
 import de.gematik.pki.pkits.testsuite.config.Afo;
@@ -58,16 +63,22 @@ import de.gematik.pki.pkits.testsuite.usecases.UseCaseResult;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.CertificateID;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.Req;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -83,36 +94,44 @@ class OcspApprovalTests extends ApprovalTestsBase {
   private static final boolean SKIP_INITIAL_STATE = false;
 
   void verifyWithConfiguredOcspResponder(
-      final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep,
+      final Consumer<OcspResponderConfigBuilder> configBuilderStep,
       final UseCaseResult useCaseResult) {
 
-    verifyWithConfiguredOcspResponder(true, dtoBuilderStep, useCaseResult, OCSP_REQUEST_EXPECT);
+    verifyWithConfiguredOcspResponder(true, configBuilderStep, useCaseResult);
+  }
+
+  void configureOcspResponder(final Consumer<OcspResponderConfigBuilder> configBuilderStep) {
+
+    final Path eeCertPath = getPathOfDefaultClientCert();
+
+    final OcspResponderConfigBuilder configBuilder =
+        OcspResponderConfig.builder()
+            .eeCert(CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD))
+            .issuerCert(
+                CertReader.readX509(
+                    DEFAULT_CLIENT_CERTS_CONFIG.getIssuerCertPathFunc().apply(this)))
+            .signer(DEFAULT_OCSP_SIGNER);
+
+    configBuilderStep.accept(configBuilder);
+
+    final OcspResponderConfig config = configBuilder.build();
+
+    TestEnvironment.configureOcspResponder(ocspResponderUri, config);
   }
 
   void verifyWithConfiguredOcspResponder(
       final boolean executeInitialState,
-      final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep,
-      final UseCaseResult useCaseResult,
-      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour) {
+      final Consumer<OcspResponderConfigBuilder> configBuilderStep,
+      final UseCaseResult useCaseResult) {
 
     if (executeInitialState) {
       initialState();
     }
 
-    final Path certPath = getPathOfFirstValidCert();
+    configureOcspResponder(configBuilderStep);
 
-    final OcspResponderConfigDtoBuilder dtoBuilder =
-        OcspResponderConfigDto.builder()
-            .eeCert(CertReader.getX509FromP12(certPath, clientKeystorePassw))
-            .signer(defaultOcspSigner);
-
-    dtoBuilderStep.accept(dtoBuilder);
-
-    final OcspResponderConfigDto dto = dtoBuilder.build();
-
-    TestEnvironment.configureOcspResponder(ocspRespUri, dto);
     useCaseWithCert(
-        certPath, useCaseResult, OCSP_RESP_PRECONFIGURED, ocspRequestExpectationBehaviour);
+        DEFAULT_CLIENT_CERTS_CONFIG, useCaseResult, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);
   }
 
   /** gematikId: UE_PKI_TS_0302_024 */
@@ -125,8 +144,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
         dtoBuilder -> dtoBuilder.certificateStatus(CustomCertificateStatusDto.createUnknown()),
         USECASE_INVALID);
 
-    verifyWithConfiguredOcspResponder(
-        SKIP_INITIAL_STATE, dtoBuilder -> {}, USECASE_VALID, OCSP_REQUEST_EXPECT);
+    verifyWithConfiguredOcspResponder(SKIP_INITIAL_STATE, dtoBuilder -> {}, USECASE_VALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_017 */
@@ -145,8 +163,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     verifyWithConfiguredOcspResponder(
         SKIP_INITIAL_STATE,
         dtoBuilder -> dtoBuilder.delayMilliseconds(longDelayMilliseconds),
-        USECASE_INVALID,
-        OCSP_REQUEST_EXPECT);
+        USECASE_INVALID);
 
     PkitsCommonUtils.waitMilliseconds(
         longDelayMilliseconds
@@ -158,20 +175,9 @@ class OcspApprovalTests extends ApprovalTestsBase {
   @ParameterizedTest
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5a")
   @DisplayName("Test missing OCSP signer in TSL")
-  @ValueSource(
-      strings = {
-        TestSuiteConstants.OCSP_SIGNER_NOT_IN_TSL_FILENAME,
-        TestSuiteConstants.OCSP_SIGNER_DIFFERENT_KEY
-      })
-  void verifyMissingOcspSignerInTslForUseCaseCertificate(final String signerFilename) {
-
-    initialState();
-
-    final P12Container ocspSigner =
-        P12Reader.getContentFromP12(
-            ocspSettings.getKeystorePathOcsp().resolve(signerFilename),
-            ocspSettings.getSignerPassword());
-
+  @MethodSource(
+      "de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils#provideForMissingOcspSigner")
+  void verifyMissingOcspSignerInTslForUseCaseCertificate(final P12Container ocspSigner) {
     verifyWithConfiguredOcspResponder(dtoBuilder -> dtoBuilder.signer(ocspSigner), USECASE_INVALID);
   }
 
@@ -188,6 +194,9 @@ class OcspApprovalTests extends ApprovalTestsBase {
   /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with producedAt in past within tolerance")
   void verifyOcspResponseProducedAtPastWithinTolerance() {
 
@@ -195,15 +204,18 @@ class OcspApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with producedAt in past out of tolerance")
   void verifyOcspResponseProducedAtPastOutOfTolerance() {
 
@@ -211,25 +223,28 @@ class OcspApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with producedAt in future within tolerance")
   void verifyOcspResponseProducedAtFutureWithinTolerance() {
 
     final int producedAtDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -245,16 +260,19 @@ class OcspApprovalTests extends ApprovalTestsBase {
   /** gematikId: UE_PKI_TS_0302_021 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with producedAt in future out of tolerance")
   void verifyOcspResponseProducedAtFutureOutOfTolerance() {
 
     final int producedAtDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -270,16 +288,19 @@ class OcspApprovalTests extends ApprovalTestsBase {
   /** gematikId: UE_PKI_TS_0302_022 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with thisUpdate in future within tolerance")
   void verifyOcspResponseThisUpdateFutureWithinTolerance() {
 
     final int thisUpdateDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -295,16 +316,19 @@ class OcspApprovalTests extends ApprovalTestsBase {
   /** gematikId: UE_PKI_TS_0302_022 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with thisUpdate in future out of tolerance")
   void verifyOcspResponseThisUpdateFutureOutOfTolerance() {
 
     final int thisUpdateDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -320,6 +344,9 @@ class OcspApprovalTests extends ApprovalTestsBase {
   /** gematikId: UE_PKI_TS_0302_032 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with nextUpdate in past within tolerance")
   void verifyOcspResponseNextUpdatePastWithinTolerance() {
 
@@ -327,15 +354,18 @@ class OcspApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_032 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with nextUpdate in past out of tolerance")
   void verifyOcspResponseNextUpdatePastOutOfTolerance() {
 
@@ -343,17 +373,21 @@ class OcspApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep =
-        getDtoDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds);
+    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(dtoBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_031 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response with missing nextUpdate")
   void verifyOcspResponseMissingNextUpdate() {
+
     verifyWithConfiguredOcspResponder(
         dtoBuilder -> dtoBuilder.nextUpdateDeltaMilliseconds(null), USECASE_VALID);
   }
@@ -362,7 +396,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
   @ParameterizedTest
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6a")
   @MethodSource(
-      "de.gematik.pki.pkits.testsuite.common.TestSuiteConstants#provideOcspResponseVariousStatusAndResponseBytes")
+      "de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils#provideOcspResponseVariousStatusAndResponseBytes")
   @DisplayName("Test various status of OCSP responses with and without response bytes")
   void verifyOcspResponseVariousStatusAndResponseBytes(
       final OCSPRespStatus ocspRespStatus, final boolean withResponseBytes) {
@@ -436,27 +470,29 @@ class OcspApprovalTests extends ApprovalTestsBase {
 
     final TslOperation deleteSsps =
         tslContainer -> {
-          final byte[] tslBytes = tslContainer.getAsTslBytes();
+          final byte[] tslBytesUnsigned = tslContainer.getAsTslUnsignedBytes();
 
           final X509Certificate cert =
-              CertReader.getX509FromP12(getPathOfAlternativeCertificate(), clientKeystorePassw);
+              CertReader.getX509FromP12(getPathOfAlternativeClientCert(), KEYSTORE_PASSWORD);
           try {
-            final byte[] newTslBytes =
-                TslModifier.deleteSspsForCAsOfEndEntity(tslBytes, cert, "PkiTestSuite");
+            final byte[] newTslUnsignedBytes =
+                TslModifier.deleteSspsForCAsOfEndEntity(tslBytesUnsigned, cert, "PkiTestSuite");
 
-            return newTslGenerator().signTslOperation(getDefaultTslSignerP12()).apply(newTslBytes);
+            return newTslDownloadGenerator()
+                .signTslOperation(DEFAULT_TSL_SIGNER)
+                .apply(newTslUnsignedBytes);
 
           } catch (final GemPkiException e) {
             throw new TestSuiteException(e);
           }
         };
+
     updateTrustStore(
         "Offer a TSL with alternative CAs without ServiceSupplyPoints.",
-        newTslGenerator("noServiceSupplyPoints", deleteSsps)
+        newTslDownloadGenerator("noServiceSupplyPoints", deleteSsps)
             .getStandardTslDownload(CreateTslTemplate.alternativeTsl()),
         OCSP_REQUEST_EXPECT,
-        withUseCase(
-            getPathOfAlternativeCertificate(), USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
+        withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }
@@ -502,9 +538,14 @@ class OcspApprovalTests extends ApprovalTestsBase {
     final CertificateID reqCertId = singleReq.getCertID();
     final String hashAlgoId = reqCertId.getHashAlgOID().getId();
 
-    final String shaAlgoId = CertificateID.HASH_SHA1.getAlgorithm().getId();
+    final String sha1AlgoId = OIWObjectIdentifiers.idSHA1.getId();
+    final String sha256AlgoId = NISTObjectIdentifiers.id_sha256.getId();
 
-    assertThat(hashAlgoId).as("Hash algorithm of ocspReq is not SHA-1!").isEqualTo(shaAlgoId);
+    final List<String> allowedHashes = List.of(sha1AlgoId, sha256AlgoId);
+
+    assertThat(allowedHashes.toArray())
+        .as("Hash algorithm of ocspReq is not SHA1 or SHA256!")
+        .contains(hashAlgoId);
 
     // ---------------------------
 
@@ -548,7 +589,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     final int offeredTslSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
     final TslDownload tslDownload =
-        newTslGenerator(TslGenerator.TSL_NAME_DEFAULT)
+        newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_DEFAULT)
             .getStandardTslDownload(CreateTslTemplate.defaultTsl());
 
     tslDownload.configureOcspResponderForTslSigner();
@@ -582,7 +623,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     final OCSPReq ocspReq = new OCSPReq(ocspReqBytes);
 
     final X509Certificate eeCert = tslDownload.getTslSignerCert();
-    final X509Certificate eeIssuerCert = getIssuerCert(eeCert, tslDownload.getTsl());
+    final X509Certificate eeIssuerCert = getIssuerCert(eeCert, tslDownload.getTslUnsigned());
 
     verifyOcspReq(ocspReq, eeCert, eeIssuerCert);
   }
@@ -590,41 +631,38 @@ class OcspApprovalTests extends ApprovalTestsBase {
   void verifyOcspRequestStructureFromUseCase(final TslDownload tslDownload)
       throws IOException, GemPkiException, CertificateEncodingException {
 
-    final Path certPath = getPathOfFirstValidCert();
+    final X509Certificate eeCert =
+        CertReader.getX509FromP12(getPathOfDefaultClientCert(), KEYSTORE_PASSWORD);
+    final X509Certificate issuerCert =
+        CertReader.readX509(DEFAULT_CLIENT_CERTS_CONFIG.getIssuerCertPathFunc().apply(this));
 
-    configureOcspResponder(certPath);
+    configureOcspResponder(eeCert, issuerCert);
     waitForOcspCacheToExpire();
-    assertThat(UseCase.exec(certPath, testSuiteConfig))
+    assertThat(UseCase.exec(getPathOfDefaultClientCert(), testSuiteConfig))
         .as(USECASE_VALID.getMessage())
         .isEqualTo(USECASE_VALID.getExpectedReturnCode());
-    final X509Certificate cert = CertReader.getX509FromP12(certPath, clientKeystorePassw);
 
     final byte[] ocspReqBytes =
         OcspResponderManager.getOcspHistoryPart(
-                ocspRespUri, tslSequenceNr.getExpectedNrInTestObject(), cert.getSerialNumber())
+                ocspResponderUri,
+                tslSequenceNr.getExpectedNrInTestObject(),
+                eeCert.getSerialNumber())
             .get(0)
             .getOcspReqBytes();
 
     final OCSPReq ocspReq = new OCSPReq(ocspReqBytes);
 
-    final X509Certificate eeIssuerCert = getIssuerCert(cert, tslDownload.getTsl());
+    final X509Certificate eeIssuerCert = getIssuerCert(eeCert, tslDownload.getTslUnsigned());
 
-    verifyOcspReq(ocspReq, cert, eeIssuerCert);
+    verifyOcspReq(ocspReq, eeCert, eeIssuerCert);
   }
 
   /** gematikId: UE_PKI_TC_0105_032, UE_PKI_TS_0302_028 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Anmerkungen")
   @Afo(afoId = "GS-A_4674", description = "OCSP-Requests gemäß Standards")
-  @Afo(
-      afoId = "RFC6960",
-      description =
-          "X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP")
-  @Afo(
-      afoId = "RFC5019",
-      description =
-          "The Lightweight Online Certificate Status Protocol (OCSP) Profile for High-Volume"
-              + " Environments - 2.1.1. OCSPRequest Structure")
+  @Afo(afoId = "RFC 6960", description = "4.1.1. ASN.1 Specification of the OCSP Request")
+  @Afo(afoId = "RFC 5019", description = "2.1.1. OCSPRequest Structure")
   @DisplayName("Test OCSP request structure")
   void verifyOcspRequestStructure()
       throws IOException, GemPkiException, CertificateEncodingException {
@@ -640,9 +678,91 @@ class OcspApprovalTests extends ApprovalTestsBase {
     // NOTE: to be sure the TSL is imported correctly and current and expected tslSeqNr are handled
     // internally
     useCaseWithCert(
-        getPathOfFirstValidCert(),
+        ClientCertsConfig.DEFAULT_CLIENT_CERTS_CONFIG,
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
+  }
+
+  private void executeValidUseCase() {
+
+    waitForOcspCacheToExpire();
+
+    configureOcspResponder(
+        dtoBuilder -> dtoBuilder.responseAlgoBehavior(ResponseAlgoBehavior.MIRRORING));
+
+    final UseCaseResult useCaseResult = USECASE_VALID;
+    final String message = "\"%s\" for %s%n".formatted(useCaseResult.getMessage(), currentTestInfo);
+
+    final int useCaseReturnCode = UseCase.exec(getPathOfDefaultClientCert(), testSuiteConfig);
+    assertThat(useCaseReturnCode).as(message).isEqualTo(useCaseResult.getExpectedReturnCode());
+  }
+
+  @Test
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage")
+  @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
+  @DisplayName("Test OCSP response with SHA1 used for the certId.")
+  void verifyHashAlgorithmsInOcspSha1() {
+
+    verifyWithConfiguredOcspResponder(
+        dtoBuilder -> dtoBuilder.responseAlgoBehavior(ResponseAlgoBehavior.SHA1), USECASE_VALID);
+  }
+
+  @Test
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage")
+  @Afo(afoId = "GS-A_4674", description = "OCSP-Requests gemäß Standards")
+  @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
+  @Afo(afoId = "RFC 5754", description = "2.2. SHA-256")
+  @DisplayName("Test OCSP Responses with SHA1 used for the certId.")
+  @Disabled(
+      "will be activated after the specification is updated to use SHA256 as default algorithm")
+  void verifyHashAlgorithmsInOcspSha2() {
+
+    verifyWithConfiguredOcspResponder(
+        dtoBuilder -> dtoBuilder.responseAlgoBehavior(ResponseAlgoBehavior.SHA2), USECASE_VALID);
+  }
+
+  /** gematikId: UE_PKI_TS_0302_028 */
+  @Test
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage")
+  @Afo(afoId = "GS-A_4674", description = "OCSP-Requests gemäß Standards")
+  @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
+  @DisplayName(
+      "Test that the test object understands OCSP responses with the same hash algorithm it uses"
+          + " for its requests in the certId.")
+  void verifyHashAlgorithmsInOcspShaVersion() throws IOException {
+
+    initialState();
+
+    executeValidUseCase();
+
+    final BigInteger certSerial =
+        CertReader.getX509FromP12(getPathOfDefaultClientCert(), KEYSTORE_PASSWORD)
+            .getSerialNumber();
+
+    final List<OcspRequestHistoryEntryDto> historyEntries =
+        OcspResponderManager.getOcspHistoryPart(
+            ocspResponderUri, tslSequenceNr.getExpectedNrInTestObject(), certSerial);
+
+    assertThat(historyEntries).isNotEmpty();
+    final OcspRequestHistoryEntryDto historyEntry = historyEntries.get(0);
+
+    final OCSPReq ocspReq = new OCSPReq(historyEntry.getOcspReqBytes());
+    final Req singleReq = OcspUtils.getFirstSingleReq(ocspReq);
+    final ASN1ObjectIdentifier algoId = singleReq.getCertID().getHashAlgOID();
+
+    if (OIWObjectIdentifiers.idSHA1.equals(algoId)) {
+      return;
+    }
+
+    if (NISTObjectIdentifiers.id_sha256.equals(algoId)) {
+      return;
+    }
+
+    Assertions.fail(
+        "Only SHA1 (%s) and SHA2 (%s) algorithms are allowed in OCSP request, but %s was used.",
+        OIWObjectIdentifiers.idSHA1.getId(),
+        NISTObjectIdentifiers.id_sha256.getId(),
+        algoId.getId());
   }
 }

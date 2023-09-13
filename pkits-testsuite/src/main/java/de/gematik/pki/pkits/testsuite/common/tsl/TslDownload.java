@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestHistoryContainer;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.tsl.provider.api.TslDownloadEndpointType;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
-import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistoryEntryDto;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.math.BigInteger;
@@ -63,18 +63,19 @@ public class TslDownload {
   @NonNull private final String ocspRespUri;
 
   @NonNull private X509Certificate tslSignerCert;
+  @NonNull private X509Certificate trustAnchor;
   @NonNull private final P12Container ocspSigner;
   private final OcspRequestHistoryContainer ocspRequestHistoryContainer =
       new OcspRequestHistoryContainer();
 
-  public TrustStatusListType getTsl() {
-    return TslConverter.bytesToTsl(tslBytes);
+  public TrustStatusListType getTslUnsigned() {
+    return TslConverter.bytesToTslUnsigned(tslBytes);
   }
 
-  public void waitUntilTslDownloadCompleted(final int tslSeqNr, final int ocspSeqNr) {
+  public void waitUntilTslDownloadCompleted(final int tslSeqNr, final int tslSeqNrFromOcspRequest) {
     configureOcspResponderForTslSigner();
     waitForTslDownload(tslSeqNr);
-    waitUntilOcspRequestForTslSigner(ocspSeqNr);
+    waitUntilOcspRequestForTslSigner(tslSeqNrFromOcspRequest);
   }
 
   public void waitUntilTslDownloadCompletedOptional(final int tslSeqNr) {
@@ -85,19 +86,22 @@ public class TslDownload {
 
   public void configureOcspResponderForTslSigner() {
     try {
-      final OcspResponderConfigDto dto =
-          OcspResponderConfigDto.builder().eeCert(tslSignerCert).signer(ocspSigner).build();
+      final OcspResponderConfig ocspResponderConfig =
+          OcspResponderConfig.builder()
+              .eeCert(tslSignerCert)
+              .issuerCert(trustAnchor)
+              .signer(ocspSigner)
+              .build();
 
-      TestEnvironment.configureOcspResponder(ocspRespUri, dto);
+      TestEnvironment.configureOcspResponder(ocspRespUri, ocspResponderConfig);
     } catch (final OcspResponderException e) {
       throw new PkiCommonException("Could not configure OcspResponder", e);
     }
   }
 
-  public void configureOcspResponderForTslSigner(
-      final OcspResponderConfigDto.OcspResponderConfigDtoBuilder builder) {
+  public void configureOcspResponderForTslSigner(final OcspResponderConfig ocspResponderConfig) {
     try {
-      TestEnvironment.configureOcspResponder(ocspRespUri, builder.build());
+      TestEnvironment.configureOcspResponder(ocspRespUri, ocspResponderConfig);
     } catch (final OcspResponderException e) {
       throw new PkiCommonException("Could not configure OcspResponder", e);
     }
@@ -161,8 +165,8 @@ public class TslDownload {
     waitUntilOcspRequestForTslSigner(IGNORE_SEQUENCE_NUMBER);
   }
 
-  public void waitUntilOcspRequestForTslSigner(final int ocspSeqNr) {
-    waitUntilOcspRequestForTslSigner(ocspSeqNr, ClearConfigAfterWaiting.CLEAR_CONFIG);
+  public void waitUntilOcspRequestForTslSigner(final int tslSeqNrFromOcspRequest) {
+    waitUntilOcspRequestForTslSigner(tslSeqNrFromOcspRequest, ClearConfigAfterWaiting.CLEAR_CONFIG);
   }
 
   public void waitUntilOcspRequestForTslSigner(
@@ -172,7 +176,7 @@ public class TslDownload {
     log.info("Waiting {} seconds for ocsp request for tsl signer.", tslProcessingTimeSeconds);
     final long ocsRequestWaitingTimeSeconds =
         PkitsTestSuiteUtils.waitForEvent(
-            "OcspRequestHistoryHasEntry for tslSeqNr %s and TSL signer cert %s"
+            "OcspRequest received from tsl with sequence nr %s and TSL signer cert %s"
                 .formatted(tslSeqNr, tslSignerCertSerialNr),
             tslProcessingTimeSeconds,
             ocspRequestHistoryContainer.ocspRequestHistoryHasEntryForCert(

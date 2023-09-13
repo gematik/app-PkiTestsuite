@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,42 +16,19 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl;
 
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
 import static de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory.IGNORE_SEQUENCE_NUMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.common.PkiCommonException;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
-import de.gematik.pki.pkits.testsuite.config.OcspSettings;
-import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
-import de.gematik.pki.pkits.testsuite.config.TslSettings;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class TslDownloadTest {
-
-  private static final TslSettings tslSettings =
-      TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().getTslSettings();
-  private static final Path tslSigner = tslSettings.getSigner();
-  private static final String tslSignerPassword = tslSettings.getSignerPassword();
-
-  private static final P12Container ocspSigner;
-
-  static {
-    final OcspSettings ocspSettings =
-        TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().getOcspSettings();
-
-    ocspSigner =
-        P12Reader.getContentFromP12(
-            ocspSettings.getKeystorePathOcsp().resolve(TestSuiteConstants.OCSP_SIGNER_FILENAME),
-            ocspSettings.getSignerPassword());
-  }
 
   private static final TslDownload tslDownload =
       TslDownload.builder()
@@ -61,8 +38,9 @@ class TslDownloadTest {
           .ocspProcessingTimeSeconds(1)
           .tslProvUri("http://tsl...")
           .ocspRespUri("http://ocsp...")
-          .tslSignerCert(readTslSignerCert())
-          .ocspSigner(ocspSigner)
+          .tslSignerCert(DEFAULT_TSL_SIGNER.getCertificate())
+          .trustAnchor(DEFAULT_TRUST_ANCHOR)
+          .ocspSigner(PkitsTestDataConstants.DEFAULT_OCSP_SIGNER)
           .build();
 
   @Test
@@ -72,8 +50,9 @@ class TslDownloadTest {
             .tslBytes("my little TSL :-)".getBytes(StandardCharsets.UTF_8))
             .tslProvUri("http://tsl...")
             .ocspRespUri("http://ocsp...")
-            .tslSignerCert(readTslSignerCert())
-            .ocspSigner(ocspSigner)
+            .tslSignerCert(DEFAULT_TSL_SIGNER.getCertificate())
+            .trustAnchor(DEFAULT_TRUST_ANCHOR)
+            .ocspSigner(PkitsTestDataConstants.DEFAULT_OCSP_SIGNER)
             .build();
     assertThat(tslDownload.getTslDownloadIntervalSeconds()).isEqualTo(1);
     assertThat(tslDownload.getTslProcessingTimeSeconds()).isEqualTo(3);
@@ -81,7 +60,7 @@ class TslDownloadTest {
   }
 
   @Test
-  void waitUntilTslDownloadCompleted() {
+  void testWaitUntilTslDownloadCompleted() {
     assertThatThrownBy(
             () ->
                 tslDownload.waitUntilTslDownloadCompleted(
@@ -102,8 +81,9 @@ class TslDownloadTest {
             .tslBytes("my little TSL :-)".getBytes(StandardCharsets.UTF_8))
             .tslProvUri("http://tsl...")
             .ocspRespUri("http://ocsp...")
-            .tslSignerCert(readTslSignerCert())
-            .ocspSigner(ocspSigner)
+            .tslSignerCert(DEFAULT_TSL_SIGNER.getCertificate())
+            .trustAnchor(DEFAULT_TRUST_ANCHOR)
+            .ocspSigner(PkitsTestDataConstants.DEFAULT_OCSP_SIGNER)
             .build();
 
     final String tslStrBefore = new String(tslDownload.getTslBytes(), StandardCharsets.UTF_8);
@@ -113,9 +93,5 @@ class TslDownloadTest {
 
     final String tslStrAfter = new String(tslBytes, StandardCharsets.UTF_8);
     assertThat(tslStrBefore).isEqualTo(tslStrAfter);
-  }
-
-  private static X509Certificate readTslSignerCert() {
-    return CertReader.getX509FromP12(tslSigner, tslSignerPassword);
   }
 }

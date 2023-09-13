@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.testsuite.exceptions;
+package de.gematik.pki.pkits.testsuite.ssh;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collection;
@@ -76,8 +75,7 @@ public class DebugListener implements ScpTransferEventListener {
       final Path file,
       final long length,
       final java.util.Set<PosixFilePermission> perms,
-      final ScpAckInfo ackInfo)
-      throws IOException {
+      final ScpAckInfo ackInfo) {
     logEvent("ackInfo(" + ackInfo + ")", session, op, file, true, length, perms, null);
   }
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ public class BreakSignerTslOperation implements TslOperation {
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
 
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
-    final X509Certificate signerCert = TslUtils.getFirstTslSignerCertificate(tsl);
+    final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
+    final X509Certificate signerCert = TslUtils.getFirstTslSignerCertificate(tslUnsigned);
 
     final byte[] signerCertBrokenBytes = GemLibPkiUtils.certToBytes(signerCert);
     GemLibPkiUtils.change4Bytes(signerCertBrokenBytes, 20);
 
-    TslModifier.modifySignerCert(tsl, signerCertBrokenBytes);
+    TslModifier.modifySignerCert(tslUnsigned, signerCertBrokenBytes);
 
-    return new TslContainer(tsl);
+    return new TslContainer(tslUnsigned);
   }
 }
