@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package de.gematik.pki.pkits.tsl.provider.common;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
-import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import org.apache.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 public class TslConfigurator {
 
@@ -37,8 +39,9 @@ public class TslConfigurator {
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfigDto);
 
     final HttpResponse<String> response =
-        Unirest.post("http://localhost:" + tslPort + WEBSERVER_CONFIG_ENDPOINT)
+        Unirest.post("http://localhost:" + tslPort + PkitsConstants.TSL_WEBSERVER_CONFIG_ENDPOINT)
             .body(jsonContent)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .asString();
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
   }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ class Tsl {
 
   final String tslHash;
   final byte[] tslBytes;
-  final TrustStatusListType trustStatusListType;
+  final TrustStatusListType tslUnsigned;
 
   final BigInteger tslSeqNr;
 
   public Tsl(final String tslHash, final byte[] tslBytes) {
     this.tslHash = tslHash;
     this.tslBytes = tslBytes;
-    this.trustStatusListType = TslConverter.bytesToTsl(tslBytes);
-    this.tslSeqNr = TslReader.getTslSeqNr(trustStatusListType);
+    this.tslUnsigned = TslConverter.bytesToTslUnsigned(tslBytes);
+    this.tslSeqNr = TslReader.getTslSeqNr(tslUnsigned);
   }
 }

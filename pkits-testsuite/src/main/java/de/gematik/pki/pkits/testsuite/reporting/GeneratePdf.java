@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class GeneratePdf {
 
   @Getter @Setter private static boolean noHtml = false;
 
-  public static final String htmlDocPrefix() {
+  public static String htmlDocPrefix() {
     return noHtml
         ? ""
         : """
@@ -59,7 +59,7 @@ public class GeneratePdf {
         """;
   }
 
-  public static final String htmlDocPostfix() {
+  public static String htmlDocPostfix() {
     return noHtml ? "" : "</body></html>";
   }
 

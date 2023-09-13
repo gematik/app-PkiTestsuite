@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,12 @@
 
 package de.gematik.pki.pkits.testsuite.config;
 
-import java.nio.file.Path;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class OcspSettings {
-
-  @ParameterDescription(
-      withDefault = true,
-      description =
-          "Absolute or relative path to key store files in p12 format to sign OCSP requests."
-              + " with.")
-  Path keystorePathOcsp = Path.of("./testDataTemplates/certificates/ecc/ocspKeystore");
-
-  @ParameterDescription(
-      withDefault = true,
-      description = "Password used for the OCSP signer key store.")
-  String signerPassword = "00"; // NOSONAR
 
   @ParameterDescription(
       withDefault = true,

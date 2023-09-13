@@ -2,10 +2,13 @@
 	verifyUseCaseCertsInvalid   Test use case with invalid certificates (multiple data variants)
 	verifyUseCaseCertsNotInTsl  Test use case with valid certificates with issuer not in trust store (multiple data variants)
 	verifyUseCaseCertsValid     Test use case with valid certificates (multiple data variants)
-	verifyUseCaseRsaCertValid   NOT IMPLEMENTED YET - Test use case with valid RSA certificate
+	verifyUseCaseRsaCertValid   Test use case with valid RSA certificate (multiple data variants)
 
 +	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
 	verifyForCaCertificateWithoutServiceSupplyPoint    CA certificate in TSL without ServiceSupplyPoint
+	verifyHashAlgorithmsInOcspSha1                     Test OCSP response with SHA1 used for the certId.
+	verifyHashAlgorithmsInOcspSha2                     (DISABLED) Test OCSP Responses with SHA1 used for the certId.
+	verifyHashAlgorithmsInOcspShaVersion               Test that the test object understands OCSP responses with the same hash algorithm it uses for its requests in the certId.
 	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response (multiple data variants)
 	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP response
 	verifyInvalidSignatureInOcspResponse               Test invalid signature in OCSP response

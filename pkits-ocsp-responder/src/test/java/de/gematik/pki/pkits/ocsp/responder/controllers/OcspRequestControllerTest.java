@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
+import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST;
 import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import de.gematik.pki.gemlibpki.ocsp.OcspRequestGenerator;
-import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.pkits.common.PkitsCommonUtils;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -77,18 +75,9 @@ class OcspRequestControllerTest {
 
   @BeforeAll
   public static void setup() {
-    VALID_X509_EE_CERT =
-        CertReader.readX509(
-            Path.of("src/test/resources/certificates/GEM.SMCB-CA10/valid/DrMedGunther.pem"));
-    VALID_X509_ISSUER_CERT =
-        CertReader.readX509(
-            Path.of("src/test/resources/certificates/GEM.SMCB-CA10/GEM.SMCB-CA10_TEST-ONLY.pem"));
-    final X509Certificate VALID_X509_ISSUER_CERT =
-        CertReader.readX509(Path.of("src/test/resources/certificates/GEM.RCA1_TEST-ONLY.pem"));
-    signer =
-        P12Reader.getContentFromP12(
-            PkitsCommonUtils.readContent("src/test/resources/certificates/eccOcspSigner.p12"),
-            "00");
+    VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert();
+    VALID_X509_ISSUER_CERT = OcspResponderTestUtils.getValidIssuerCert();
+    signer = OcspResponderTestUtils.getSigner();
     ocspReq =
         OcspRequestGenerator.generateSingleOcspRequest(VALID_X509_EE_CERT, VALID_X509_ISSUER_CERT);
   }
@@ -103,14 +92,22 @@ class OcspRequestControllerTest {
     ocspServiceUrlSeqNr31 = ocspServiceUrl + "/310000";
     delayMilliseconds = 0;
     OcspResponderTestUtils.configure(
-        getLocalhostEndpoint(""), VALID_X509_EE_CERT, CERT_STATUS_GOOD, signer, delayMilliseconds);
+        getLocalhostEndpoint(""),
+        VALID_X509_EE_CERT,
+        VALID_X509_ISSUER_CERT,
+        CERT_STATUS_GOOD,
+        signer,
+        delayMilliseconds);
     log.info("OCSP Request TX: {}", ocspReq.getRequestList()[0].getCertID().getSerialNumber());
   }
 
   @Test
   void checkHttpStatusOk() throws IOException {
     final HttpResponse<byte[]> response =
-        Unirest.post(ocspServiceUrlSeqNr31).body(ocspReq.getEncoded()).asBytes();
+        Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
+            .body(ocspReq.getEncoded())
+            .asBytes();
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
   }
 
@@ -119,6 +116,7 @@ class OcspRequestControllerTest {
   void checkHttpStatus400(final String str) throws IOException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrl + str)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -130,6 +128,7 @@ class OcspRequestControllerTest {
   void checkHttpStatus404(final String str) throws IOException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrl + str)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -140,6 +139,7 @@ class OcspRequestControllerTest {
   void checkHttpContentTypeOk() throws IOException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -150,6 +150,7 @@ class OcspRequestControllerTest {
   void checkHttpContentTypeNotAcceptable() throws IOException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -160,6 +161,7 @@ class OcspRequestControllerTest {
   void checkOcspResponseStatusOk() throws IOException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -172,6 +174,7 @@ class OcspRequestControllerTest {
   void checkOcspSingleResponseCertStatusGood() throws IOException, OCSPException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -185,6 +188,7 @@ class OcspRequestControllerTest {
   void checkOcspSingleResponseCertSerialNumber() throws IOException, OCSPException {
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -202,6 +206,7 @@ class OcspRequestControllerTest {
     final int histSize = ocspRequestHistory.size();
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
@@ -214,17 +219,22 @@ class OcspRequestControllerTest {
 
   @Test
   void certSerialNrNotConfigured() throws IOException {
+
     OcspResponderTestUtils.configure(
         getLocalhostEndpoint(""),
+        VALID_X509_ISSUER_CERT,
         VALID_X509_ISSUER_CERT,
         CERT_STATUS_GOOD,
         signer,
         delayMilliseconds);
+
     final HttpResponse<byte[]> response =
         Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body(ocspReq.getEncoded())
             .asBytes();
+
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
@@ -235,11 +245,13 @@ class OcspRequestControllerTest {
     OcspResponderTestUtils.configure(
         getLocalhostEndpoint(""),
         VALID_X509_EE_CERT,
+        VALID_X509_ISSUER_CERT,
         CERT_STATUS_GOOD,
         signer,
         customDelayMilliseconds);
 
     Unirest.post(ocspServiceUrlSeqNr31)
+        .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
         .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
         .body(ocspReq.getEncoded())
         .asBytes();

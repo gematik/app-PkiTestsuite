@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 
 @AllArgsConstructor
@@ -93,6 +94,10 @@ public class CustomTestInfo implements Comparable<CustomTestInfo> {
 
   public boolean isParameterizedTest() {
     return method.getAnnotation(ParameterizedTest.class) != null;
+  }
+
+  public boolean isDisabled() {
+    return method.getAnnotation(Disabled.class) != null;
   }
 
   @Override

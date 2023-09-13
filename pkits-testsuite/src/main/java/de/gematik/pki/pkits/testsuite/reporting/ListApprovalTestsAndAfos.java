@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,6 +242,28 @@ public class ListApprovalTestsAndAfos {
     saveOrVerify(TEST_TO_AFOS_FILE, generatedContent, executionMode);
   }
 
+  static String customTestInfoToLine(
+      final CustomTestInfo customTestInfo, final boolean skipWholeClass, final int padN) {
+    String sign = "";
+
+    final boolean skipMethod = isToSkipTestMethodOrClass(customTestInfo.getMethodName());
+    if (skipWholeClass || skipMethod) {
+      sign = "-";
+    }
+
+    final String methodNamePadded = padRight(customTestInfo.getMethodName(), padN);
+    final String additionalInfo1 = customTestInfo.isDisabled() ? "(DISABLED) " : "";
+    final String additionalInfo2 =
+        customTestInfo.isParameterizedTest() ? " (multiple data variants)" : "";
+    return "%s\t%s%s%s%s"
+        .formatted(
+            sign,
+            methodNamePadded,
+            additionalInfo1,
+            StringUtils.defaultString(customTestInfo.getDisplayName()),
+            additionalInfo2);
+  }
+
   static String generateContentForAllTests(final Map<String, Set<CustomTestInfo>> classTestMap) {
 
     final List<String> lines = new ArrayList<>();
@@ -254,11 +276,10 @@ public class ListApprovalTestsAndAfos {
       final String className = entry.getKey();
       final boolean skipWholeClass = isToSkipTestMethodOrClass(className);
 
-      if (skipWholeClass) {
-        lines.add("-\t" + className);
-      } else {
-        lines.add("+\t" + className);
-      }
+      final String classLineSign = skipWholeClass ? "-" : "+";
+      final String classLine = classLineSign + "\t" + className;
+
+      lines.add(classLine);
 
       final Optional<Integer> maxMethodNameLengthOpt =
           entry.getValue().stream()
@@ -269,28 +290,8 @@ public class ListApprovalTestsAndAfos {
 
       entry.getValue().stream()
           .filter(relevantCustomTestInfoPredicate)
-          .forEach(
-              customTestInfo -> {
-                String sign = "";
-
-                final boolean skipMethod =
-                    isToSkipTestMethodOrClass(customTestInfo.getMethodName());
-                if (skipWholeClass || skipMethod) {
-                  sign = "-";
-                }
-
-                final String methodNamePadded = padRight(customTestInfo.getMethodName(), padN);
-                final String additionalInfo =
-                    customTestInfo.isParameterizedTest() ? " (multiple data variants)" : "";
-                final String line =
-                    "%s\t%s%s%s"
-                        .formatted(
-                            sign,
-                            methodNamePadded,
-                            StringUtils.defaultString(customTestInfo.getDisplayName()),
-                            additionalInfo);
-                lines.add(line);
-              });
+          .map(customTestInfo -> customTestInfoToLine(customTestInfo, skipWholeClass, padN))
+          .forEach(lines::add);
     }
 
     return lines.stream().map(line -> line + "\n").collect(Collectors.joining());

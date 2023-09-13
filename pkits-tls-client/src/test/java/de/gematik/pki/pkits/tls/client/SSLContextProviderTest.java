@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.tls.client;
 
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import de.gematik.pki.gemlibpki.utils.ResourceReader;
@@ -31,14 +32,14 @@ class SSLContextProviderTest {
 
   static final TlsSettings TLS_SETTINGS = PluginConfig.getInstance().getTlsSettings();
 
+  final Path clientKeystorePath =
+      ResourceReader.getFilePathFromResources("certificates/rsa/valid/ee_default.p12", getClass());
+
   @Test
   void createSSLContext() {
-    final Path clientKeystorePath =
-        ResourceReader.getFilePathFromResources(
-            "certificates/rsa/valid/ee_default.p12", getClass());
 
     final SSLContext sslContext =
-        new SSLContextProvider().createSSLContext(clientKeystorePath, "00");
+        new SSLContextProvider().createSSLContext(clientKeystorePath, KEYSTORE_PASSWORD);
 
     Assertions.assertThat(sslContext).isNotNull();
   }
@@ -47,13 +48,9 @@ class SSLContextProviderTest {
   @Test
   void connectRsa() throws UnknownHostException {
 
-    final Path clientKeystorePath =
-        ResourceReader.getFilePathFromResources(
-            "certificates/rsa/valid/ee_default.p12", getClass());
-
     final TlsConnection connection =
         TlsConnection.builder()
-            .clientKeystorePassw("00")
+            .clientKeystorePassw(KEYSTORE_PASSWORD)
             .serverAddress(InetAddress.getByName("127.0.0.1"))
             .sutServerPort(8443)
             .tlsSettings(TLS_SETTINGS)
@@ -73,7 +70,7 @@ class SSLContextProviderTest {
 
     final TlsConnection connection =
         TlsConnection.builder()
-            .clientKeystorePassw("00")
+            .clientKeystorePassw(KEYSTORE_PASSWORD)
             .serverAddress(InetAddress.getByName("127.0.0.1"))
             .sutServerPort(8443)
             .tlsSettings(TLS_SETTINGS)

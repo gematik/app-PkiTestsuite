@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,7 @@ class StatefulTrustAnchorUpdate {
       final Tsl rxTsl, final Optional<TrustAnchorUpdate> newTrustAnchorUpdateOpt) {
 
     if (newTrustAnchorUpdateOpt.isPresent()) {
-      final TSPServiceType tspServiceType =
-          getTspServiceTSLServiceCertChange(rxTsl.trustStatusListType);
+      final TSPServiceType tspServiceType = getTspServiceTSLServiceCertChange(rxTsl.tslUnsigned);
 
       final TspService tspServiceNewTrustAnchor = new TspService(tspServiceType);
       makeSaved(newTrustAnchorUpdateOpt.get(), tspServiceNewTrustAnchor);

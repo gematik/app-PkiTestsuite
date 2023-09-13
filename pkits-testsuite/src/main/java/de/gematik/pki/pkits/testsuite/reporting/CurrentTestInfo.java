@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.TestInfo;
 
+@Getter
 public class CurrentTestInfo {
 
-  @Getter TestInfo testInfo;
+  private TestInfo testInfo;
 
-  @Getter int tslCounter = 1;
+  private int tslCounter = 1;
 
   public CurrentTestInfo(final TestInfo testInfo) {
     this.testInfo = testInfo;
@@ -39,20 +40,27 @@ public class CurrentTestInfo {
     ++tslCounter;
   }
 
-  public static String getParameterizedIndex(final TestInfo testInfo) {
+  public static Integer getParameterizedIndex(final TestInfo testInfo) {
 
     final String displayName = testInfo.getDisplayName();
 
     if (!StringUtils.startsWith(displayName, "[")) {
-      return "";
+      return null;
     }
 
-    final String index = StringUtils.substringBefore(displayName, "]").replace("[", "");
-    return "_p" + index;
+    return Integer.valueOf(StringUtils.substringBefore(displayName, "]").replace("[", ""));
   }
 
-  public String getParameterizedIndex() {
-    return getParameterizedIndex(testInfo);
+  public String getParameterizedIndexStr() {
+    return getParameterizedIndexStr(testInfo);
+  }
+
+  public static String getParameterizedIndexStr(final TestInfo testInfo) {
+    final Integer index = getParameterizedIndex(testInfo);
+    if (index == null) {
+      return "";
+    }
+    return "_p" + index;
   }
 
   @Override

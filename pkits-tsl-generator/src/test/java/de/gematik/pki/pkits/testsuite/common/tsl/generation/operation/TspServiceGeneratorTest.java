@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.gematik.pki.gemlibpki.certificate.CertificateType;
 import de.gematik.pki.gemlibpki.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.exeptions.TslGenerationException;
 import eu.europa.esig.trustedlist.jaxb.tsl.ExtensionType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
@@ -61,13 +63,14 @@ class TspServiceGeneratorTest {
     assertThat(elem1.getValue()).isEqualTo(certificateType.getOid());
 
     final JAXBElement<?> elem2 = ((JAXBElement<?>) content.get(1));
-    assertThat(elem2.getValue()).isEqualTo(certificateType.getName());
+    assertThat(elem2.getValue()).isEqualTo(certificateType.getOidReference());
   }
 
   @Test
   void testGenerate() throws CertificateEncodingException {
 
-    final X509Certificate certificate = TspServiceGenerator.CERT_KOMP_CA_ALTERNATIVE;
+    final X509Certificate certificate =
+        CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA);
 
     final String serviceName = "serviceName1";
     final String serviceStatus = "serviceStatus1";
@@ -130,7 +133,7 @@ class TspServiceGeneratorTest {
     Assertions.assertThat(getExtensionElementContent(tspService, 1, 0))
         .isEqualTo(certTypeOid.getOid());
     Assertions.assertThat(getExtensionElementContent(tspService, 1, 1))
-        .isEqualTo(certTypeOid.getName());
+        .isEqualTo(certTypeOid.getOidReference());
   }
 
   @Test
@@ -184,7 +187,8 @@ class TspServiceGeneratorTest {
   @Test
   void testGenerateServiceName() {
 
-    final X509Certificate certificate = TspServiceGenerator.CERT_KOMP_CA_ALTERNATIVE;
+    final X509Certificate certificate =
+        CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA);
 
     final TspServiceGenerator tspServiceGenerator = new TspServiceGenerator();
     final TSPServiceType tspService = tspServiceGenerator.certificate(certificate).generate();

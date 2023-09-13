@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class ChangNameTslOperation implements TslOperation {
-  private String newTspTradeName = null;
+  private String newTspTradeName;
 
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
 
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
+    final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
 
     TslModifier.modifyTspTradeName(
-        tsl,
+        tslUnsigned,
         PkitsConstants.GEMATIK_TEST_TSP,
         PkitsConstants.GEMATIK_TEST_TSP_TRADENAME,
         newTspTradeName);
 
-    return new TslContainer(tsl);
+    return new TslContainer(tslUnsigned);
   }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package de.gematik.pki.pkits.ocsp.responder;
 
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import java.math.BigInteger;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +27,15 @@ import org.springframework.stereotype.Component;
 @Data
 public class OcspResponseConfigHolder {
 
-  private OcspResponderConfigDto ocspResponderConfigDto;
+  private OcspResponderConfig ocspResponderConfig;
 
   public boolean isConfigured() {
-    return ocspResponderConfigDto != null;
+    return ocspResponderConfig != null;
   }
 
   public boolean isCertSerialNrConfigured(final BigInteger certSerialNr) {
     log.debug("Requested  certSerialNr: {}", certSerialNr);
-    log.debug("Configured certSerialNr: {}", ocspResponderConfigDto.getEeCert().getSerialNumber());
-    return ocspResponderConfigDto.getEeCert().getSerialNumber().equals(certSerialNr);
+    log.debug("Configured certSerialNr: {}", ocspResponderConfig.getEeCert().getSerialNumber());
+    return ocspResponderConfig.getEeCert().getSerialNumber().equals(certSerialNr);
   }
 }

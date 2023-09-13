@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 
 package de.gematik.pki.pkits.tsl.provider.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.data.TslInfoRequestDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistoryEntryDto;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -37,17 +35,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class TslInfoController {
   private final TslRequestHistory tslRequestHistory;
 
-  private final ObjectReader reader = new ObjectMapper().readerFor(TslInfoRequestDto.class);
-
   /**
-   * @param request InfoRequest
+   * @param tslInfoRequest TslInfoRequestDto
    * @return An excerpt of the history of requests
-   * @throws IOException in case of ServletInputStream problem
    */
+  @Operation(summary = "Get history entries according to the provided info request.")
   @PostMapping(value = PkitsConstants.TSL_WEBSERVER_INFO_ENDPOINT)
-  public List<TslRequestHistoryEntryDto> info(final HttpServletRequest request) throws IOException {
-
-    final TslInfoRequestDto tslInfoRequest = reader.readValue(request.getInputStream());
+  public List<TslRequestHistoryEntryDto> info(final @RequestBody TslInfoRequestDto tslInfoRequest) {
 
     log.debug("InfoRequest for tslSeqNr {} received.", tslInfoRequest.getTslSeqNr());
     final List<TslRequestHistoryEntryDto> list =
@@ -69,6 +63,7 @@ public class TslInfoController {
         tslRequestHistory.deleteEntries(tslInfoRequestDto.getTslSeqNr());
         log.debug("TSLProvider history: cleared tslSeqNr {}", tslInfoRequestDto.getTslSeqNr());
       }
+        // HistoryDeleteOption.DELETE_NOTHING
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }
   }

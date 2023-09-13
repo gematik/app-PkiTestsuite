@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package de.gematik.pki.pkits.testsuite.common;
 
-import de.gematik.pki.pkits.common.PkiCommonException;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PkitsCertType;
-import de.gematik.pki.pkits.testsuite.config.ClientConfig;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
+import de.gematik.pki.pkits.testsuite.config.TestObjectType;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -37,13 +35,14 @@ import org.junit.jupiter.params.support.AnnotationConsumer;
 
 public class CertificateProvider implements ArgumentsProvider, AnnotationConsumer<VariableSource> {
 
-  private String certDir;
+  private Path eeCertsDir;
+  private Path issuerCert;
 
-  public static Stream<Path> getFilesFromDir(final String directory) {
+  public static Stream<Path> getFilesFromDir(final Path directory) {
     final List<Path> fileList = new ArrayList<>();
     try {
       Files.walkFileTree(
-          Path.of(directory).normalize(),
+          directory.normalize(),
           new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
@@ -62,19 +61,35 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
 
   @Override
   public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
-    return getFilesFromDir(Path.of(certDir).toString()).map(Arguments::of);
+    final Stream<Path> eeCertFiles = getFilesFromDir(eeCertsDir);
+    return eeCertFiles.map(eeCertFile -> Arguments.arguments(eeCertFile, issuerCert));
   }
 
   @Override
   public void accept(final VariableSource variableSource) {
     final PkitsCertType pkitsCertType = variableSource.value();
-    final ClientConfig clientConfig = TestConfigManager.getTestSuiteConfig().getClient();
+    final TestObjectType testObjectType =
+        TestConfigManager.getTestSuiteConfig().getTestObject().getTestObjectType();
+
     switch (pkitsCertType) {
-      case PKITS_CERT_VALID -> certDir = clientConfig.getKeystorePathValidCerts();
-      case PKITS_CERT_VALID_ALTERNATIVE -> certDir = clientConfig.getKeystorePathAlternativeCerts();
-      case PKITS_CERT_INVALID -> certDir = clientConfig.getKeystorePathInvalidCerts();
-      default -> throw new PkiCommonException("Unknown PkitsCertType");
+      case PKITS_CERT_VALID -> {
+        eeCertsDir = testObjectType.getClientKeystorePathValidCerts();
+        issuerCert = testObjectType.getClientDefaultIssuerCertPath();
+      }
+      case PKITS_CERT_VALID_ALTERNATIVE -> {
+        eeCertsDir = testObjectType.getClientKeystorePathAlternativeCerts();
+        issuerCert = testObjectType.getClientAlternativeIssuerCertPath();
+      }
+      case PKITS_CERT_INVALID -> {
+        eeCertsDir = testObjectType.getClientKeystorePathInvalidCerts();
+        issuerCert = testObjectType.getClientDefaultIssuerCertPath();
+      }
+      default -> { // PkitsCertType.PKITS_CERT_VALID_RSA
+        eeCertsDir = testObjectType.getClientKeystorePathRsaCerts();
+        issuerCert = testObjectType.getClientDefaultIssuerRsaCertPath();
+      }
     }
-    certDir = PkitsTestSuiteUtils.buildAbsolutePath(certDir).toString();
+    eeCertsDir = PkitsTestSuiteUtils.buildAbsolutePathForDir(eeCertsDir);
+    issuerCert = PkitsTestSuiteUtils.buildAbsolutePath(issuerCert);
   }
 }

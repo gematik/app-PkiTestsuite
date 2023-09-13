@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
-import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import java.nio.charset.StandardCharsets;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package de.gematik.pki.pkits.tsl.provider.controller;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
+import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -38,14 +36,20 @@ public class TslConfigController {
   private final TslConfigHolder tslConfigHolder;
   private final TslRequestHistory tslRequestHistory;
 
-  private final ObjectReader reader = new ObjectMapper().readerFor(TslProviderConfigDto.class);
-
-  @PostMapping(value = WEBSERVER_CONFIG_ENDPOINT)
-  public void tslConfig(final HttpServletRequest request) throws IOException {
+  @Operation(summary = "Configure the TSL Provider.")
+  @PostMapping(value = PkitsConstants.TSL_WEBSERVER_CONFIG_ENDPOINT)
+  public void tslConfig(final @RequestBody TslProviderConfigDto tslProviderConfigDto) {
     log.info("Tsl ConfigurationRequest received");
-    final TslProviderConfigDto tslProviderConfigDto = reader.readValue(request.getInputStream());
     processConfigurationRequest(tslProviderConfigDto);
     log.info("TSL ConfigurationRequest processed (and history cleared).");
+  }
+
+  @Operation(summary = "Clear configuration of the TSL Provider.")
+  @DeleteMapping(value = PkitsConstants.TSL_WEBSERVER_CLEAR_ENDPOINT)
+  public void tslClear() {
+    log.info("Tsl ClearRequest received");
+    processConfigurationRequest(null);
+    log.info("TSL ClearRequest processed (and history cleared).");
   }
 
   private void processConfigurationRequest(final TslProviderConfigDto tslProviderConfigDto) {

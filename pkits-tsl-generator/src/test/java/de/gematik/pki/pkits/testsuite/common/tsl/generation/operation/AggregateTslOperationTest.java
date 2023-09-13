@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,8 @@ class AggregateTslOperationTest {
         (power) ->
             tslContainer -> {
               final byte elem = (byte) (Math.pow(2, power));
-              final byte[] updatedBytes = ArrayUtils.add(tslContainer.getAsTslBytes(), elem);
+              final byte[] updatedBytes =
+                  ArrayUtils.add(tslContainer.getAsTslUnsignedBytes(), elem);
               return new TslContainer(updatedBytes);
             };
 
@@ -120,6 +121,6 @@ class AggregateTslOperationTest {
     final byte[] initialBytes = {-99};
     final byte[] expectedBytes = {-99, 1, 2, 4, 8, 16, 1};
     final TslContainer tslContainer = aggregateTslOperation.apply(initialBytes);
-    assertThat(tslContainer.getAsTslBytes()).isEqualTo(expectedBytes);
+    assertThat(tslContainer.getAsTslUnsignedBytes()).isEqualTo(expectedBytes);
   }
 }

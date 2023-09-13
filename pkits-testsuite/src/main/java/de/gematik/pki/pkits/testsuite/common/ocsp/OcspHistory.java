@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslSequenceNr;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
+import de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory;
 import java.math.BigInteger;
 import java.util.List;
@@ -123,7 +124,7 @@ public final class OcspHistory {
    * Find maximum Tsl sequence number in requested ocsp history and set this number as current in
    * test object.
    *
-   * @param history
+   * @param history to get the seq number from
    * @return optional largest tslSeqNr for the history
    */
   public static Optional<Integer> getCurrentTslSeqNr(

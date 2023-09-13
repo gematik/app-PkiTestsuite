@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.testsuite.common.ocsp;
+package de.gematik.pki.pkits.testsuite.common;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
-public enum OcspRequestExpectationBehaviour {
-  OCSP_REQUEST_EXPECT(1),
-  OCSP_REQUEST_DO_NOT_EXPECT(0),
-  OCSP_REQUEST_IGNORE(-1);
-
-  private final int expectedRequestAmount;
+public enum DtoDateConfigOption {
+  THIS_UPDATE,
+  PRODUCED_AT,
+  NEXT_UPDATE
 }

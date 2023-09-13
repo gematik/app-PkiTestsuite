@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package de.gematik.pki.pkits.testsuite.common;
 import static org.awaitility.Awaitility.await;
 
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
+import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.lang.StackWalker.StackFrame;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -40,6 +42,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.awaitility.core.ConditionTimeoutException;
+import org.junit.jupiter.params.provider.Arguments;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -80,15 +83,21 @@ public final class PkitsTestSuiteUtils {
     return waitingTime;
   }
 
-  public static Path buildAbsolutePath(@NonNull final String aPath) {
-    Path p = Paths.get(aPath);
-    if (!p.isAbsolute()) {
-      p = Paths.get(System.getProperty("user.dir") + "/" + aPath);
+  public static Path buildAbsolutePath(@NonNull Path path) {
+
+    if (!path.isAbsolute()) {
+      path = Path.of(System.getProperty("user.dir"), path.toString());
     }
-    if (Files.isDirectory(p)) {
-      return p;
+    return path;
+  }
+
+  public static Path buildAbsolutePathForDir(@NonNull Path path) {
+    path = buildAbsolutePath(path);
+
+    if (Files.isDirectory(path)) {
+      return path;
     } else {
-      throw new TestSuiteException("Path: " + aPath + " is not valid");
+      throw new TestSuiteException("Path: " + path + " is not valid");
     }
   }
 
@@ -144,5 +153,27 @@ public final class PkitsTestSuiteUtils {
     }
 
     return String.join(" --> ", parts);
+  }
+
+  public static Stream<Arguments> provideForMissingOcspSigner() {
+    return Stream.of(
+        Arguments.of(PkitsTestDataConstants.OCSP_SIGNER_NOT_IN_TSL),
+        Arguments.of(PkitsTestDataConstants.OCSP_SIGNER_DIFFERENT_KEY));
+  }
+
+  public static Stream<Arguments> provideOcspResponseVariousStatusAndResponseBytes() {
+    final List<Arguments> argumentsList = new ArrayList<>();
+    for (final OCSPRespStatus ocspRespStatus :
+        List.of(
+            OCSPRespStatus.INTERNAL_ERROR,
+            OCSPRespStatus.MALFORMED_REQUEST,
+            OCSPRespStatus.SIG_REQUIRED,
+            OCSPRespStatus.TRY_LATER,
+            OCSPRespStatus.UNAUTHORIZED)) {
+      for (final boolean withResponseBytes : List.of(true, false)) {
+        argumentsList.add(Arguments.of(ocspRespStatus, withResponseBytes));
+      }
+    }
+    return argumentsList.stream();
   }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import de.gematik.pki.gemlibpki.tsl.TslReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.StandardTslOperation.StandardTslOperationConfig;
 import java.io.IOException;
@@ -41,7 +41,7 @@ class StandardTslOperationTest {
   void createTslFromFile() throws IOException {
     final Path destFilePath = Path.of("pkits-tsl-generator/target/unittest_createTslFromFile.xml");
     final String newSsp = "http://my.new-cool-service-supply-point:5544/ocsp";
-    final int modifiedSspAmountExpected = 135;
+    final int modifiedSspAmountExpected = 138;
     final ZonedDateTime now = GemLibPkiUtils.now();
     final int COMPARE_LEN = "yyyy-mm-ddThh:mm".length();
 
@@ -57,14 +57,10 @@ class StandardTslOperationTest {
             .daysUntilNextUpdate(30)
             .build();
 
-    final Path tslSignerPath =
-        Path.of(
-            "./testDataTemplates/certificates/ecc/trustAnchor/TSL-Signing-Unit-8-TEST-ONLY.p12");
-
     final TslOperation standardTslOperation = new StandardTslOperation(standardTslOperationConfig);
     final TslOperation signTslOperation =
         new SignTslOperation(
-            P12Reader.getContentFromP12(tslSignerPath, "00"),
+            PkitsTestDataConstants.DEFAULT_TSL_SIGNER,
             SIGNER_KEY_USAGE_CHECK_ENABLED,
             SIGNER_VALIDITY_CHECK_ENABLED);
 
@@ -73,12 +69,14 @@ class StandardTslOperationTest {
 
     final TslContainer tslContainer = aggregateTslOperation.apply(CreateTslTemplate.defaultTsl());
 
-    final byte[] tslBytes = tslContainer.getAsTslBytes();
+    final byte[] tslBytes = tslContainer.getAsTslUnsignedBytes();
     Files.write(destFilePath, tslBytes);
 
     assertThat(countStringInFile(destFilePath, newSsp)).isEqualTo(modifiedSspAmountExpected);
     final String dateTimeWithoutSeconds =
-        TslReader.getIssueDate(TslReader.getTsl(destFilePath)).toString().substring(0, COMPARE_LEN);
+        TslReader.getIssueDate(TslReader.getTslUnsigned(destFilePath))
+            .toString()
+            .substring(0, COMPARE_LEN);
     assertThat(now.toString()).contains(dateTimeWithoutSeconds);
   }
 

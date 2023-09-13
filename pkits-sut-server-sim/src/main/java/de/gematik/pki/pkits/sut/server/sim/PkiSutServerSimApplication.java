@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class PkiSutServerSimApplication implements SecurityFilterChain {
 
   static {
+    /** {@link sun.security.ssl.NamedGroup#SECP192_R1} */
     System.setProperty(
-        "jdk.tls.namedGroups", "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, ffdhe2048");
+        "jdk.tls.namedGroups",
+        "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, secp256r1, secp384r1");
 
     Security.setProperty("ssl.KeyManagerFactory.algorithm", "PKIX");
     Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -69,7 +71,10 @@ public class PkiSutServerSimApplication implements SecurityFilterChain {
 
   @EventListener(ApplicationReadyEvent.class)
   public void init() {
-    log.info("\n{}\n", PkitsCommonUtils.getBannerStr(PkiSutServerSimApplication.class));
+    log.info(
+        "\n{}\n",
+        PkitsCommonUtils.getBannerStr(
+            PkiSutServerSimApplication.class, "bannerFormatSutServer.txt"));
   }
 
   public static void main(final String[] args) {

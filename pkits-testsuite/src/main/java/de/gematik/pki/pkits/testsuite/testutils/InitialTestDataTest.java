@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,16 @@
 
 package de.gematik.pki.pkits.testsuite.testutils;
 
-import static de.gematik.pki.pkits.common.PkitsCommonUtils.getHttpAdressString;
+import static de.gematik.pki.pkits.common.PkitsCommonUtils.getHttpAddressString;
 
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
-import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerator;
+import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.config.OcspResponderConfig;
-import de.gematik.pki.pkits.testsuite.config.OcspSettings;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
 import de.gematik.pki.pkits.testsuite.config.TslProviderConfig;
-import de.gematik.pki.pkits.testsuite.config.TslSettings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,35 +40,26 @@ public class InitialTestDataTest {
 
     final int tslSeqNr = 1;
 
-    final TslSettings tslSettings =
-        TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().getTslSettings();
     final TslProviderConfig tslProvider = TestConfigManager.getTestSuiteConfig().getTslProvider();
-    final P12Container defaultTslSigner =
-        P12Reader.getContentFromP12(tslSettings.getSigner(), tslSettings.getSignerPassword());
 
-    final OcspSettings ocspSettings =
-        TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().getOcspSettings();
-    final OcspResponderConfig ocspResponder =
+    final OcspResponderConfig ocspResponderConfig =
         TestConfigManager.getTestSuiteConfig().getOcspResponder();
-    final P12Container defaultOcspSigner =
-        P12Reader.getContentFromP12(
-            ocspSettings.getKeystorePathOcsp().resolve(TestSuiteConstants.OCSP_SIGNER_FILENAME),
-            ocspSettings.getSignerPassword());
 
-    final TslGenerator tslGenerator =
-        TslGenerator.builder()
+    final TslDownloadGenerator tslDownloadGenerator =
+        TslDownloadGenerator.builder()
             .tslSeqNr(tslSeqNr)
             .tslName("initialTsl")
-            .tslSigner(defaultTslSigner)
-            .tslProvUri(
-                getHttpAdressString(tslProvider.getIpAddressOrFqdn(), tslProvider.getPort()))
-            .ocspRespUri(
-                getHttpAdressString(ocspResponder.getIpAddressOrFqdn(), ocspResponder.getPort()))
-            .ocspSigner(defaultOcspSigner)
+            .tslSigner(PkitsTestDataConstants.DEFAULT_TSL_SIGNER)
+            .tslProviderUri(
+                getHttpAddressString(tslProvider.getIpAddressOrFqdn(), tslProvider.getPort()))
+            .ocspResponderUri(
+                getHttpAddressString(
+                    ocspResponderConfig.getIpAddressOrFqdn(), ocspResponderConfig.getPort()))
+            .ocspSigner(PkitsTestDataConstants.DEFAULT_OCSP_SIGNER)
             .build();
 
     final TslDownload tslDownload =
-        tslGenerator.getStandardTslDownload(CreateTslTemplate.defaultTsl());
+        tslDownloadGenerator.getStandardTslDownload(CreateTslTemplate.defaultTsl());
 
     final Path initialTslPath = Path.of("./out/initialTsl.xml");
     log.info("copying initial Tsl to: {}", initialTslPath);
@@ -81,7 +68,6 @@ public class InitialTestDataTest {
     final Path initialTaPath = Path.of("./out/initialTrustAnchor.pem");
     log.info("copying initial trustAnchor to: {}", initialTaPath);
     Files.write(
-        initialTaPath,
-        GemLibPkiUtils.readContent(TestSuiteConstants.VALID_ISSUER_CERT_TSL_CA8_PATH));
+        initialTaPath, GemLibPkiUtils.certToBytes(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR));
   }
 }

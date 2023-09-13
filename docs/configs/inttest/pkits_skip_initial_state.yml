@@ -1,0 +1,19 @@
+testObject:
+  name: "Server 0815"
+  testObjectType: "IntermediaerServer"
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8443
+  ocspGracePeriodSeconds: 0
+  tslDownloadIntervalSeconds: 2
+  tslProcessingTimeSeconds: 3
+
+ocspResponder:
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8083
+
+tslProvider:
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8084
+
+testSuiteParameter:
+  performInitialState: false

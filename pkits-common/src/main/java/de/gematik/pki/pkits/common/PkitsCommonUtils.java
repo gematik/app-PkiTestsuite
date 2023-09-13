@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,16 @@
 
 package de.gematik.pki.pkits.common;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_HEALTH_ENDPOINT;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.ResourceReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -69,8 +62,8 @@ public final class PkitsCommonUtils {
     return dateTime.format(dateTimeFormatter);
   }
 
-  public static String getHttpAdressString(final String ipAdressOrFqdn, final int port) {
-    return "http://" + ipAdressOrFqdn + ":" + port;
+  public static String getHttpAddressString(final String ipAddressOrFqdn, final int port) {
+    return "http://" + ipAddressOrFqdn + ":" + port;
   }
 
   public static boolean isExternalStartup(final String appPath) {
@@ -80,10 +73,6 @@ public final class PkitsCommonUtils {
   public static String calculateSha256Hex(final byte[] byteArray) {
     final byte[] hash = GemLibPkiUtils.calculateSha256(byteArray);
     return new String(Hex.encode(hash), StandardCharsets.UTF_8);
-  }
-
-  public static byte[] readContent(final String path) {
-    return GemLibPkiUtils.readContent(Path.of(path));
   }
 
   public static void waitSeconds(final long seconds) {
@@ -104,7 +93,7 @@ public final class PkitsCommonUtils {
 
   public static String createJsonContent(final Object infoReq) {
     try {
-      return new ObjectMapper().writeValueAsString(infoReq);
+      return new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(infoReq);
     } catch (final JsonProcessingException e) {
       throw new PkiCommonException("Generation of JsonContent failed.", e);
     }
@@ -122,31 +111,11 @@ public final class PkitsCommonUtils {
     }
   }
 
-  public static Object bytesToObject(final byte[] bytes) {
-    try (final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        final ObjectInputStream ois = new ObjectInputStream(bais)) {
-      return ois.readObject();
-    } catch (final IOException | ClassNotFoundException e) {
-      throw new PkiCommonException("Error deserializing byte[] to Object", e);
-    }
-  }
-
-  public static byte[] objectToBytes(final Serializable obj) {
-    try (final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final ObjectOutputStream os = new ObjectOutputStream(baos)) {
-      os.flush();
-      os.writeObject(obj);
-      baos.flush();
-      return baos.toByteArray();
-    } catch (final IOException e) {
-      throw new PkiCommonException("Error serializing object to byte[]", e);
-    }
-  }
-
   public static void checkHealth(
       final Logger log, final String serviceNameForMessage, final String uri) {
     try {
-      final HttpResponse<String> response = Unirest.get(uri + WEBSERVER_HEALTH_ENDPOINT).asString();
+      final HttpResponse<String> response =
+          Unirest.get(uri + PkitsConstants.WEBSERVER_HEALTH_ENDPOINT).asString();
       final int responseHttpStatus = response.getStatus();
       if (responseHttpStatus != HttpStatus.SC_OK) {
         throw new PkiCommonException(
@@ -173,6 +142,7 @@ public final class PkitsCommonUtils {
   @Getter
   @ToString
   public static class GitProperties {
+
     private String commitIdShort = "not-defined";
     private String commitIdFull = "not-defined";
 
@@ -215,11 +185,10 @@ public final class PkitsCommonUtils {
     }
   }
 
-  public static String getBannerStr(final Class<?> clazz) {
+  public static String getBannerStr(final Class<?> clazz, final String filename) {
     final Attributes attributes = PkitsCommonUtils.readManifestAttributes(clazz);
 
-    final String bannerFormat =
-        ResourceReader.getFileFromResourceAsString("bannerFormat.txt", clazz);
+    final String bannerFormat = ResourceReader.getFileFromResourceAsString(filename, clazz);
     final String title = attributes.getValue(Name.IMPLEMENTATION_TITLE);
     final String version = attributes.getValue(Name.IMPLEMENTATION_VERSION);
     final String springBootVersion = attributes.getValue("Spring-Boot-Version");

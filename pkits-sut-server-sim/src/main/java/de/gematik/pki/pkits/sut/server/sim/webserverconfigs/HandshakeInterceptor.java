@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public final class HandshakeInterceptor implements X509TrustManager {
             "TUC_PKI_018, Ocsp enabled: {}, certSerialNr: {}",
             OCSP_ENABLED,
             chain[0].getSerialNumber());
-        final Admission admission = tucPki18Verifier.performTucPki18Checks(chain[0]);
+        final Admission admission = tucPki18Verifier.performTucPki018Checks(chain[0]);
         log.info("TUC_PKI_018 endend with success, role(s): {}", admission.getProfessionItems());
       } catch (final GemPkiException e) {
         log.info(e.getMessage());

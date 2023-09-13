@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ public class ModifyTslSeqNrTslOperation implements TslOperation {
 
   @Override
   public TslContainer apply(final TslContainer tslContainer) {
-    final TrustStatusListType tsl = tslContainer.getAsTsl();
-    TslModifier.modifySequenceNr(tsl, tslSeqNr);
-    return new TslContainer(tsl);
+    final TrustStatusListType tslUnsigned = tslContainer.getAsTslUnsigned();
+    TslModifier.modifySequenceNr(tslUnsigned, tslSeqNr);
+    return new TslContainer(tslUnsigned);
   }
 }

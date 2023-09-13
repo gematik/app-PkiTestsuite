@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package de.gematik.pki.pkits.ocsp.responder.api;
 
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
-
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspInfoRequestDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
@@ -39,22 +37,22 @@ public final class OcspResponderManager {
   public static final BigInteger IGNORE_CERT_SERIAL_NUMBER = BigInteger.valueOf(-1);
 
   public static void configure(
-      final String ocspRespUri, final OcspResponderConfigDto ocspResponderConfig) {
-    final String configUri = ocspRespUri + WEBSERVER_CONFIG_ENDPOINT;
+      final String ocspRespUri, final OcspResponderConfig ocspResponderConfig) {
 
-    final String jsonContent =
-        PkitsCommonUtils.createJsonContent(PkitsCommonUtils.objectToBytes(ocspResponderConfig));
+    final String jsonContent = PkitsCommonUtils.createJsonContent(ocspResponderConfig.toJsonDto());
 
     PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
-    /*
+
+    /**
      * received by {@link
      * de.gematik.pki.pkits.ocsp.responder.controllers.OcspConfigController#ocspConfig}
      */
-    JsonTransceiver.sendJsonViaHttp(configUri, jsonContent);
+    JsonTransceiver.sendJsonViaHttp(
+        ocspRespUri + PkitsConstants.OCSP_WEBSERVER_CONFIG_ENDPOINT, jsonContent);
   }
 
   public static void clear(final String uri) {
-    configure(uri, null);
+    JsonTransceiver.deleteViaHttp(uri + PkitsConstants.OCSP_WEBSERVER_CLEAR_ENDPOINT, true);
   }
 
   /**

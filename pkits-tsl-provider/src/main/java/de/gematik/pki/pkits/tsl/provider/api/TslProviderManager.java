@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package de.gematik.pki.pkits.tsl.provider.api;
-
-import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_CONFIG_ENDPOINT;
 
 import de.gematik.pki.pkits.common.JsonTransceiver;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
@@ -46,7 +44,7 @@ public final class TslProviderManager {
 
   public static void configure(
       @NonNull final String tslProvUri, final TslProviderConfigDto tslProviderConfigDto) {
-    final String configUri = tslProvUri + WEBSERVER_CONFIG_ENDPOINT;
+    final String configUri = tslProvUri + PkitsConstants.TSL_WEBSERVER_CONFIG_ENDPOINT;
 
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfigDto);
     PkitsCommonUtils.checkHealth(log, "TslProvider", tslProvUri);
@@ -58,7 +56,7 @@ public final class TslProviderManager {
   }
 
   public static void clear(@NonNull final String uri) {
-    configure(uri, null);
+    JsonTransceiver.deleteViaHttp(uri + PkitsConstants.TSL_WEBSERVER_CLEAR_ENDPOINT, true);
   }
 
   public static List<TslRequestHistoryEntryDto> getTslRequestHistoryPart(

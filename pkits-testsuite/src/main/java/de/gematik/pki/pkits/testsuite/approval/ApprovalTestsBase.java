@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,44 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.gemlibpki.utils.P12Reader.getContentFromP12;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.waitSeconds;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
-import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerator.NO_TSL_MODIFICATIONS;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_OCSP_SIGNER;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.ALTERNATIVE_CLIENT_CERTS_CONFIG;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.DEFAULT_CLIENT_CERTS_CONFIG;
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator.NO_TSL_MODIFICATIONS;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 import static de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory.IGNORE_SEQUENCE_NUMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
 
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.OcspResponderConfigDtoBuilder;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig.OcspResponderConfigBuilder;
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
+import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
+import de.gematik.pki.pkits.testsuite.common.PkitsCertType;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.common.ocsp.OcspHistory;
-import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslSequenceNr;
-import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerator;
+import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.TslOperation;
 import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.OcspSettings;
 import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
+import de.gematik.pki.pkits.testsuite.config.TestObjectType;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
-import de.gematik.pki.pkits.testsuite.config.TslSettings;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.pcap.PcapHelper;
 import de.gematik.pki.pkits.testsuite.pcap.PcapManager;
@@ -62,6 +65,7 @@ import de.gematik.pki.pkits.testsuite.simulators.TslProviderInstance;
 import de.gematik.pki.pkits.testsuite.testutils.InitialStateTest;
 import de.gematik.pki.pkits.testsuite.testutils.InitialTestDataTest;
 import de.gematik.pki.pkits.testsuite.testutils.TslTaSwitchUtils;
+import de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.usecases.OcspResponderType;
 import de.gematik.pki.pkits.testsuite.usecases.UseCase;
 import de.gematik.pki.pkits.testsuite.usecases.UseCaseResult;
@@ -77,6 +81,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -91,6 +96,7 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
 
 @Slf4j
 @DisplayName("Base class for all PKI approval tests.")
@@ -112,36 +118,27 @@ public abstract class ApprovalTestsBase {
 
   protected static final UseCaseConfig WITHOUT_USECASE = null;
 
+  protected static final String OFFER_DEFAULT_TSL_MESSAGE = "Offer the default TSL.";
   protected static final String OFFERING_TSL_WITH_SEQNR_MESSAGE =
       "Offering TSL with tslSeqNr {} for download.";
 
+  protected static final String TA_NAME_DEFAULT = "default";
+  protected static final String TA_NAME_ALT1 = "first alternative";
+  protected static final String TA_NAME_ALT2 = "second alternative";
   public static final String OUT_LOGS_DIRNAME = "./out/logs/";
-  protected static String clientKeystorePassw;
-  protected static String ocspRespUri;
-  protected static String tslProvUri;
-  protected static OcspSettings ocspSettings;
-  protected static TslSettings tslSettings;
-
-  protected static Path defaultTslSigner;
-  protected static String tslSignerKeystorePassw;
-
-  protected static P12Container defaultOcspSigner;
 
   protected static final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
   private static final int WEB_SERVER_START_TIMEOUT_SECS = 30;
+
+  protected static String ocspResponderUri;
+  protected static String tslProviderUri;
+  protected static OcspSettings ocspSettings;
+
   protected static TslSequenceNr tslSequenceNr;
 
   private PcapManager pcapManager = null;
 
   protected CurrentTestInfo currentTestInfo;
-
-  void failNotImplemented() {
-    fail("not implemented");
-  }
-
-  protected static final String TA_NAME_DEFAULT = "default";
-  protected static final String TA_NAME_ALT1 = "first alternative";
-  protected static final String TA_NAME_ALT2 = "second alternative";
 
   protected static String getSwitchMessage(final String anchorType1, final String anchorType2) {
     return "Offer a TSL to switch from the %s trust anchor to the %s trust anchor."
@@ -156,28 +153,18 @@ public abstract class ApprovalTestsBase {
     final int sutServerPort =
         getSutServerPortFromEnvironment().orElse(testSuiteConfig.getTestObject().getPort());
     testSuiteConfig.getTestObject().setPort(sutServerPort);
-    clientKeystorePassw = testSuiteConfig.getClient().getKeystorePassword();
 
     OcspResponderInstance.getInstance().startServer();
     TslProviderInstance.getInstance().startServer();
 
-    ocspRespUri =
+    ocspResponderUri =
         OcspResponderInstance.getInstance().waitUntilWebServerIsUp(WEB_SERVER_START_TIMEOUT_SECS);
-    log.info("OcspResponderInstance: {}", ocspRespUri);
-    tslProvUri =
+    log.info("OcspResponderInstance: {}", ocspResponderUri);
+    tslProviderUri =
         TslProviderInstance.getInstance().waitUntilWebServerIsUp(WEB_SERVER_START_TIMEOUT_SECS);
-    log.info("TslProviderInstance: {}", tslProvUri);
+    log.info("TslProviderInstance: {}", tslProviderUri);
 
     ocspSettings = testSuiteConfig.getTestSuiteParameter().getOcspSettings();
-
-    tslSettings = testSuiteConfig.getTestSuiteParameter().getTslSettings();
-    defaultTslSigner = tslSettings.getSigner();
-    tslSignerKeystorePassw = tslSettings.getSignerPassword();
-
-    defaultOcspSigner =
-        getContentFromP12(
-            ocspSettings.getKeystorePathOcsp().resolve(TestSuiteConstants.OCSP_SIGNER_FILENAME),
-            ocspSettings.getSignerPassword());
 
     log.info(
         "TestObject: {}:{}", testSuiteConfig.getTestObject().getIpAddressOrFqdn(), sutServerPort);
@@ -260,6 +247,26 @@ public abstract class ApprovalTestsBase {
     log.debug("ApprovalTest(s) finished.");
   }
 
+  boolean isParameterizedNonFirst() {
+    final boolean isParameterizedTest =
+        Arrays.stream(
+                currentTestInfo
+                    .getTestInfo()
+                    .getTestMethod()
+                    .orElseThrow()
+                    .getDeclaredAnnotations())
+            .findAny()
+            .toString()
+            .contains(ParameterizedTest.class.getCanonicalName());
+
+    if (isParameterizedTest) {
+      final Integer dataVariantIndex =
+          CurrentTestInfo.getParameterizedIndex(currentTestInfo.getTestInfo());
+      return (dataVariantIndex != null) && (dataVariantIndex != 1);
+    }
+    return false;
+  }
+
   protected void testCaseMessage() {
     log.info(
         """
@@ -303,7 +310,7 @@ public abstract class ApprovalTestsBase {
               config.getTestObject().getOcspTimeoutSeconds() * 1000
                   + config.getTestSuiteParameter().getOcspSettings().getTimeoutDeltaMilliseconds());
 
-  public static Consumer<OcspResponderConfigDtoBuilder> getDtoDateConfigStep(
+  public static Consumer<OcspResponderConfigBuilder> getDateConfigStep(
       final DtoDateConfigOption dateConfigOption, final int deltaMilliseconds) {
 
     return switch (dateConfigOption) {
@@ -314,68 +321,89 @@ public abstract class ApprovalTestsBase {
   }
 
   protected void establishDefaultTrustStoreAndExecuteUseCase() {
-    if (testSuiteConfig.getTestSuiteParameter().isPerformInitialState()
-        && !tslSettings.isInitialStateTslImport()) {
+    if (!testSuiteConfig.getTestSuiteParameter().isPerformInitialState()) {
+
       updateTrustStore(
-          "Offer the default TSL.",
-          newTslGenerator("defaultTsl").getStandardTslDownload(CreateTslTemplate.defaultTsl()),
+          OFFER_DEFAULT_TSL_MESSAGE,
+          newTslDownloadGenerator("defaultTsl")
+              .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
           OCSP_REQUEST_EXPECT,
           WITHOUT_USECASE);
     }
 
     useCaseWithCert(
-        getPathOfFirstValidCert(),
+        DEFAULT_CLIENT_CERTS_CONFIG,
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
   }
 
   protected void initialState() {
+    initialState(PkitsCertType.PKITS_CERT_VALID);
+  }
+
+  protected void initialState(final PkitsCertType certType) {
+
+    if (isParameterizedNonFirst()) {
+      log.info(
+          "\n\n===> Initial state use case skipped for the parameterize non-first test. - {}\n",
+          currentTestInfo);
+      return;
+    }
 
     if (!testSuiteConfig.getTestSuiteParameter().isPerformInitialState()) {
+      tslSequenceNr.setExpectedNrInTestObject(tslSequenceNr.getCurrentNrInTestObject());
+      log.info("updated expectedNrInTestObject: {}", tslSequenceNr);
       log.info("\n\n===> Initial state use case skipped by user request. - {}\n", currentTestInfo);
       return;
     }
 
-    if (tslSettings.isInitialStateTslImport()) {
-      log.info("\n\n===> Establishing initial state... - {}\n", currentTestInfo);
-      initialTslDownloadByTestObject();
+    log.info("\n\n===> Establishing initial state... - {}\n", currentTestInfo);
+    initialTslDownloadByTestObject();
 
-      useCaseWithCert(
-          true,
-          getPathOfFirstValidCert(),
-          USECASE_VALID,
-          OCSP_RESP_WITH_PROVIDED_CERT,
-          OCSP_REQUEST_EXPECT);
+    final Path clientCertPath;
+    final Path issuerCertPath;
 
-      log.info("\n\n===> Initial state successful! - {}\n\n", currentTestInfo);
-
+    if (certType == PkitsCertType.PKITS_CERT_VALID_RSA) {
+      clientCertPath = getPathOfDefaultClientRsaCert();
+      issuerCertPath = getPathOfDefaultIssuerRsaCert();
     } else {
-      tslSequenceNr.setExpectedNrInTestObject(tslSequenceNr.getCurrentNrInTestObject());
-      log.info("updated expectedNrInTestObject: {}", tslSequenceNr);
-      log.info("\n===> Initial state TSL import skipped by user request. - {}\n", currentTestInfo);
+      clientCertPath = getPathOfDefaultClientCert();
+      issuerCertPath = getPathOfDefaultIssuerCert();
     }
+
+    useCaseWithCert(
+        true,
+        clientCertPath,
+        issuerCertPath,
+        USECASE_VALID,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        OCSP_REQUEST_EXPECT);
+
+    log.info("\n\n===> Initial state successful! - {}\n\n", currentTestInfo);
   }
 
-  protected TslGenerator newTslGenerator() {
-    return newTslGenerator("", NO_TSL_MODIFICATIONS);
+  protected TslDownloadGenerator newTslDownloadGenerator() {
+    return newTslDownloadGenerator("", NO_TSL_MODIFICATIONS);
   }
 
-  protected TslGenerator newTslGenerator(final String tslName) {
-    return newTslGenerator(tslName, NO_TSL_MODIFICATIONS);
+  protected TslDownloadGenerator newTslDownloadGenerator(final String tslName) {
+    return newTslDownloadGenerator(tslName, NO_TSL_MODIFICATIONS);
   }
 
-  protected TslGenerator newTslGenerator(final String tslName, final TslOperation modifyTsl) {
-    return TslGenerator.builder()
+  protected TslDownloadGenerator newTslDownloadGenerator(
+      final String tslName, final TslOperation modifyTsl) {
+    return TslDownloadGenerator.builder()
         .currentTestInfo(currentTestInfo)
         .tslName(tslName)
-        .tslSigner(getDefaultTslSignerP12())
-        .ocspSigner(defaultOcspSigner)
+        .tslSigner(DEFAULT_TSL_SIGNER)
+        .trustAnchor(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
+        .ocspSigner(DEFAULT_OCSP_SIGNER)
         .tslDownloadIntervalSeconds(getTslDownloadIntervalWithExtraTimeSeconds())
         .tslProcessingTimeSeconds(testSuiteConfig.getTestObject().getTslProcessingTimeSeconds())
         .ocspProcessingTimeSeconds(testSuiteConfig.getTestObject().getOcspProcessingTimeSeconds())
-        .tslProvUri(tslProvUri)
-        .ocspRespUri(ocspRespUri)
+        .tslProviderUri(tslProviderUri)
+        .ocspResponderUri(ocspResponderUri)
         .tslSeqNr(tslSequenceNr.getNextTslSeqNr())
         .modifyTsl(modifyTsl)
         .build();
@@ -389,7 +417,8 @@ public abstract class ApprovalTestsBase {
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
 
     log.info("Start initial TSL download: tslName {}, tslSeqNr {}.", tslName, offeredTslSeqNr);
-    final TslDownload tslDownload = newTslGenerator(tslName).getStandardTslDownload(tslTemplate);
+    final TslDownload tslDownload =
+        newTslDownloadGenerator(tslName).getStandardTslDownload(tslTemplate);
 
     tslSequenceNr.setLastOfferedTslSeqNr(offeredTslSeqNr);
     tslDownload.waitUntilTslDownloadCompleted(IGNORE_SEQUENCE_NUMBER, IGNORE_SEQUENCE_NUMBER);
@@ -410,32 +439,53 @@ public abstract class ApprovalTestsBase {
         "initialStateWithAlternativeTemplate", CreateTslTemplate.alternativeTsl());
 
     useCaseWithCert(
-        getPathOfAlternativeCertificate(),
+        ALTERNATIVE_CLIENT_CERTS_CONFIG,
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
   }
 
   @AllArgsConstructor
-  static class UseCaseConfig {
+  protected static class UseCaseConfig {
 
-    Path useCaseCertPath;
+    Path useCaseEeCertPath;
+    Path useCaseIssuerCertPath;
     UseCaseResult useCaseResult;
     OcspResponderType ocspResponderType;
     OcspRequestExpectationBehaviour ocspRequestExpectationBehaviourForUseCase;
   }
 
-  protected UseCaseConfig withUseCase(
-      final Path useCaseCertPath, final UseCaseResult useCaseResult) {
-    return new UseCaseConfig(useCaseCertPath, useCaseResult, OCSP_RESP_WITH_PROVIDED_CERT, null);
+  @AllArgsConstructor
+  @Getter
+  public enum ClientCertsConfig {
+    DEFAULT_CLIENT_CERTS_CONFIG(
+        ApprovalTestsBase::getPathOfDefaultClientCert,
+        ApprovalTestsBase::getPathOfDefaultIssuerCert),
+    ALTERNATIVE_CLIENT_CERTS_CONFIG(
+        ApprovalTestsBase::getPathOfAlternativeClientCert,
+        ApprovalTestsBase::getPathOfAlternativeIssuerCert);
+
+    private final Function<ApprovalTestsBase, Path> eeCertPathFunc;
+    private final Function<ApprovalTestsBase, Path> issuerCertPathFunc;
   }
 
   protected UseCaseConfig withUseCase(
-      final Path useCaseCertPath,
+      final ClientCertsConfig clientCertsConfig, final UseCaseResult useCaseResult) {
+    return new UseCaseConfig(
+        clientCertsConfig.eeCertPathFunc.apply(this),
+        clientCertsConfig.issuerCertPathFunc.apply(this),
+        useCaseResult,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        null);
+  }
+
+  protected UseCaseConfig withUseCase(
+      final ClientCertsConfig clientCertsConfig,
       final UseCaseResult useCaseResult,
       final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviourForUseCase) {
     return new UseCaseConfig(
-        useCaseCertPath,
+        clientCertsConfig.eeCertPathFunc.apply(this),
+        clientCertsConfig.issuerCertPathFunc.apply(this),
         useCaseResult,
         OCSP_RESP_WITH_PROVIDED_CERT,
         ocspRequestExpectationBehaviourForUseCase);
@@ -506,73 +556,102 @@ public abstract class ApprovalTestsBase {
     }
 
     useCaseWithCert(
-        useCaseConfig.useCaseCertPath,
+        useCaseConfig.useCaseEeCertPath,
+        useCaseConfig.useCaseIssuerCertPath,
         useCaseConfig.useCaseResult,
         useCaseConfig.ocspResponderType,
         ocspRequestExpectation);
   }
 
+  protected void useCaseWithCert(
+      @NonNull final ClientCertsConfig clientCertsConfig,
+      final UseCaseResult useCaseResult,
+      final OcspResponderType ocspResponderType,
+      final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour) {
+    useCaseWithCert(
+        false,
+        clientCertsConfig.eeCertPathFunc.apply(this),
+        clientCertsConfig.issuerCertPathFunc.apply(this),
+        useCaseResult,
+        ocspResponderType,
+        ocspRequestExpectationBehaviour);
+  }
+
   /**
-   * @param certPath path to the certificate to use
+   * @param eeCertPath path to the certificate to use
    * @param useCaseResult expected result for the use case
    * @param ocspResponderType configuration of ocsp responder
    * @param ocspRequestExpectationBehaviour expect ocsp request
    */
   protected void useCaseWithCert(
-      @NonNull final Path certPath,
+      @NonNull final Path eeCertPath,
+      @NonNull final Path issuerCertPath,
       final UseCaseResult useCaseResult,
       final OcspResponderType ocspResponderType,
       final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour) {
     useCaseWithCert(
-        false, certPath, useCaseResult, ocspResponderType, ocspRequestExpectationBehaviour);
+        false,
+        eeCertPath,
+        issuerCertPath,
+        useCaseResult,
+        ocspResponderType,
+        ocspRequestExpectationBehaviour);
   }
 
-  void configureOcspResponder(@NonNull final Path certPath) {
-    final OcspResponderConfigDto dto =
-        OcspResponderConfigDto.builder()
-            .eeCert(CertReader.getX509FromP12(certPath, clientKeystorePassw))
-            .signer(defaultOcspSigner)
+  void configureOcspResponder(
+      @NonNull final X509Certificate eeCert, @NonNull final X509Certificate issuerCert) {
+    final OcspResponderConfig config =
+        OcspResponderConfig.builder()
+            .eeCert(eeCert)
+            .issuerCert(issuerCert)
+            .signer(DEFAULT_OCSP_SIGNER)
             .build();
 
-    TestEnvironment.configureOcspResponder(ocspRespUri, dto);
+    TestEnvironment.configureOcspResponder(ocspResponderUri, config);
   }
 
   /**
    * @param isInitialState is true, if the method called as a part of initial state before the
    *     actual test execution
-   * @param certPath path to the certificate to use
+   * @param eeCertPath path to the certificate to use
    * @param useCaseResult expected result for the use case
    * @param ocspResponderType configuration of ocsp responder
    * @param ocspRequestExpectationBehaviour expect ocsp request
    */
   private void useCaseWithCert(
       final boolean isInitialState,
-      @NonNull final Path certPath,
+      @NonNull final Path eeCertPath,
+      @NonNull final Path issuerCertPath,
       final UseCaseResult useCaseResult,
       final OcspResponderType ocspResponderType,
       final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour) {
 
+    String commonMessage = null;
     if (!isInitialState) {
-      log.info(
+      commonMessage =
           """
-              ----->
-              START - useCaseWithCert for
-                {}
-                {} with parameters
-                certPath {},
-                {},  {},  {}
+            {}
+              {} useCaseWithCert for
+                %s
+                %s with parameters
+                eeCertPath %s,
+                %s,  %s,  %s
 
-              """,
-          currentTestInfo,
-          PkitsTestSuiteUtils.getCallerTrace(),
-          certPath,
-          useCaseResult,
-          ocspResponderType,
-          ocspRequestExpectationBehaviour);
+              """
+              .formatted(
+                  currentTestInfo,
+                  PkitsTestSuiteUtils.getCallerTrace(),
+                  eeCertPath,
+                  useCaseResult,
+                  ocspResponderType,
+                  ocspRequestExpectationBehaviour);
+      log.info(commonMessage, "----->", "START");
     }
 
     if (ocspResponderType == OCSP_RESP_WITH_PROVIDED_CERT) {
-      configureOcspResponder(certPath);
+      configureOcspResponder(
+          CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD),
+          CertReader.readX509(issuerCertPath));
     }
 
     waitForOcspCacheToExpire();
@@ -586,14 +665,14 @@ public abstract class ApprovalTestsBase {
                 ocspResponderType,
                 ocspRequestExpectationBehaviour);
 
-    assertThat(UseCase.exec(certPath, testSuiteConfig))
+    assertThat(UseCase.exec(eeCertPath, testSuiteConfig))
         .as(message)
         .isEqualTo(useCaseResult.getExpectedReturnCode());
 
     log.info("{}", tslSequenceNr);
     final Optional<Integer> rxMaxTslSeqNr =
         checkOcspHistory(
-            CertReader.getX509FromP12(certPath, clientKeystorePassw).getSerialNumber(),
+            CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD).getSerialNumber(),
             tslSequenceNr,
             ocspRequestExpectationBehaviour);
 
@@ -601,29 +680,14 @@ public abstract class ApprovalTestsBase {
 
     log.info("{}", tslSequenceNr);
     if (!isInitialState) {
-
-      log.info(
-          """
-              <-----
-              SUCCESSFULLY completed useCaseWithCert for
-                {}
-                {} with parameters
-                certPath {},
-                {},  {},  {}
-
-              """,
-          currentTestInfo,
-          PkitsTestSuiteUtils.getCallerTrace(),
-          certPath,
-          useCaseResult,
-          ocspResponderType,
-          ocspRequestExpectationBehaviour);
+      log.info(commonMessage, "<-----", "SUCCESSFULLY completed");
     }
   }
 
   protected void assertNoOcspRequest(final TslDownload tslDownload) {
+
     final String expectedMessagePrefix =
-        "Timeout for event \"OcspRequestHistoryHasEntry for tslSeqNr -1 and TSL signer cert %s\""
+        "Timeout for event \"OcspRequest received from tsl with sequence nr -1 and TSL signer cert %s\""
             .formatted(tslDownload.getTslSignerCert().getSerialNumber());
 
     assertThatThrownBy(tslDownload::waitUntilOcspRequestForTslSigner)
@@ -631,9 +695,9 @@ public abstract class ApprovalTestsBase {
         .hasMessageStartingWith(expectedMessagePrefix)
         .cause()
         .isInstanceOf(ConditionTimeoutException.class)
-        .hasMessage(
-            "Condition with de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestHistoryContainer was not fulfilled within %s seconds."
-                .formatted(testSuiteConfig.getTestObject().getTslProcessingTimeSeconds()));
+        .hasMessageStartingWith(
+            "Condition with de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestHistoryContainer"
+                + " was not fulfilled within ");
 
     log.info(
         "As expected, observed an TestSuiteException with message <{}>", expectedMessagePrefix);
@@ -650,18 +714,40 @@ public abstract class ApprovalTestsBase {
     waitSeconds(seconds);
   }
 
-  protected Path getPathOfFirstValidCert() {
-    return getPathOfCert(testSuiteConfig.getClient().getKeystorePathValidCerts());
+  protected Path getPathOfDefaultClientCert() {
+    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
+    return getPathOfCert(testObjectType.getClientKeystorePathValidCerts());
   }
 
-  protected Path getPathOfAlternativeCertificate() {
-    return getPathOfCert(testSuiteConfig.getClient().getKeystorePathAlternativeCerts());
+  protected Path getPathOfDefaultClientRsaCert() {
+    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
+    return getPathOfCert(testObjectType.getClientKeystorePathRsaCerts());
   }
 
-  private Path getPathOfCert(final String keystoreValidCertsPath) {
+  protected Path getPathOfAlternativeClientCert() {
+    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
+    return getPathOfCert(testObjectType.getClientKeystorePathAlternativeCerts());
+  }
+
+  protected Path getPathOfDefaultIssuerCert() {
+    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
+    return testObjectType.getClientDefaultIssuerCertPath();
+  }
+
+  protected Path getPathOfDefaultIssuerRsaCert() {
+    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
+    return testObjectType.getClientDefaultIssuerRsaCertPath();
+  }
+
+  protected Path getPathOfAlternativeIssuerCert() {
+    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
+    return testObjectType.getClientAlternativeIssuerCertPath();
+  }
+
+  private Path getPathOfCert(final Path keystoreValidCertsPath) {
     final Path certPath =
         CertificateProvider.getFilesFromDir(
-                PkitsTestSuiteUtils.buildAbsolutePath(keystoreValidCertsPath).toString())
+                PkitsTestSuiteUtils.buildAbsolutePathForDir(keystoreValidCertsPath))
             .sorted()
             .findFirst()
             .orElseThrow();
@@ -674,23 +760,15 @@ public abstract class ApprovalTestsBase {
       final TslSequenceNr tslSequenceNr,
       final OcspRequestExpectationBehaviour ocspRequestExpectationBehaviour) {
     return OcspHistory.check(
-        ocspRespUri,
+        ocspResponderUri,
         certSerialNr,
         tslSequenceNr,
         testSuiteConfig.getTestObject().getOcspProcessingTimeSeconds(),
         ocspRequestExpectationBehaviour);
   }
 
-  protected static X509Certificate getDefaultTslSignerCert() {
-    return CertReader.getX509FromP12(defaultTslSigner, tslSignerKeystorePassw);
-  }
-
-  protected static P12Container getDefaultTslSignerP12() {
-    return P12Reader.getContentFromP12(defaultTslSigner, tslSignerKeystorePassw);
-  }
-
   protected static P12Container getTslSignerP12(final Path tslSignerPath) {
-    return P12Reader.getContentFromP12(tslSignerPath, tslSignerKeystorePassw);
+    return P12Reader.getContentFromP12(tslSignerPath, KEYSTORE_PASSWORD);
   }
 
   private static Optional<Integer> getSutServerPortFromEnvironment() {
@@ -714,10 +792,10 @@ public abstract class ApprovalTestsBase {
         "TslDownloadHistoryHasEntry for tslSeqNr " + IGNORE_SEQUENCE_NUMBER,
         tslDownloadIntervalSeconds,
         TslDownload.tslDownloadHistoryHasSpecificEntry(
-            tslProvUri, IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.XML_ENDPOINTS));
+            tslProviderUri, IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.XML_ENDPOINTS));
     log.info("Retrieve last known tslSeqNr in history");
     final Integer tslSeqNrOfLastTslDownload =
-        TslDownload.getTslSeqNrOfLastTslDownloadRequest(tslProvUri, IGNORE_SEQUENCE_NUMBER);
+        TslDownload.getTslSeqNrOfLastTslDownloadRequest(tslProviderUri, IGNORE_SEQUENCE_NUMBER);
 
     if (tslSeqNrOfLastTslDownload == null) {
       throw new TestSuiteException("cannot retrieve last TSL download (or hash) tslSeqNr");

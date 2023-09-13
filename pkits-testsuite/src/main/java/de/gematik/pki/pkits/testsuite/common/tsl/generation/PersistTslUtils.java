@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
+package de.gematik.pki.pkits.testsuite.common.tsl.generation;
 
 import de.gematik.pki.gemlibpki.tsl.TslReader;
 import de.gematik.pki.gemlibpki.tsl.TslUtils;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.reporting.CurrentTestInfo;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -31,6 +35,7 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PersistTslUtils {
 
@@ -68,7 +73,7 @@ public final class PersistTslUtils {
               .formatted(
                   tsl.getId(),
                   currentTestInfo.getMethodName(),
-                  currentTestInfo.getParameterizedIndex(),
+                  currentTestInfo.getParameterizedIndexStr(),
                   currentTestInfo.getTslCounter(),
                   tslNameToUse,
                   trustAnchorIssuerCn);
@@ -82,5 +87,18 @@ public final class PersistTslUtils {
         TSL_DIRNAME,
         "%s%04d_%s.xml"
             .formatted(TSL_FILENAME_PREFIX, TslReader.getTslSeqNr(tsl), extendedPostfix));
+  }
+
+  public static void saveBytes(final Path tslFilePathToUse, final byte[] tslBytes) {
+
+    try {
+      if (Files.notExists(tslFilePathToUse.getParent())) {
+        Files.createDirectories(tslFilePathToUse.getParent());
+      }
+      Files.write(tslFilePathToUse, tslBytes);
+      log.info("saved TSL to file: {}", tslFilePathToUse);
+    } catch (final IOException e) {
+      throw new TestSuiteException("cannot save TSL to file", e);
+    }
   }
 }

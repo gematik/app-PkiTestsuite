@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.extension.TestWatcher;
 @Slf4j
 public class TestResultLoggerExtension implements TestWatcher {
 
-  private static String stopExecutionOfRemainingTestsReason;
+  @Getter private static String stopExecutionOfRemainingTestsReason;
 
   public static void stopExecutionOfRemainingTests(final String reasonMessage) {
     stopExecutionOfRemainingTestsReason = reasonMessage;
@@ -43,10 +44,6 @@ public class TestResultLoggerExtension implements TestWatcher {
 
   public static void allowExecutionOfRemainingTests() {
     stopExecutionOfRemainingTestsReason = null;
-  }
-
-  public static String getStopExecutionOfRemainingTestsReason() {
-    return stopExecutionOfRemainingTestsReason;
   }
 
   public static boolean canContinueExecutionOfRemainingTests() {
@@ -67,7 +64,7 @@ public class TestResultLoggerExtension implements TestWatcher {
 
   private static class TestResultInfo {
 
-    final TestResultStatus testResultStatus;
+    @Getter final TestResultStatus testResultStatus;
     final String className;
     final String methodName;
     final String displayName;
@@ -81,10 +78,6 @@ public class TestResultLoggerExtension implements TestWatcher {
       this.className = className;
       this.methodName = methodName;
       this.displayName = displayName;
-    }
-
-    public TestResultStatus getTestResultStatus() {
-      return testResultStatus;
     }
 
     @Override

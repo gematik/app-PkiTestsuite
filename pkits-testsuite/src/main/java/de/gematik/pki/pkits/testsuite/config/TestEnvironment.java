@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package de.gematik.pki.pkits.testsuite.config;
 
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.tsl.provider.api.TslProviderManager;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
-import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto.TslProviderEndpointsConfig;
+import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public final class TestEnvironment {
   }
 
   public static void configureOcspResponder(
-      final String ocspRespUri, final OcspResponderConfigDto ocspResponderConfig) {
+      final String ocspRespUri, final OcspResponderConfig ocspResponderConfig) {
 
     OcspResponderManager.configure(ocspRespUri, ocspResponderConfig);
 

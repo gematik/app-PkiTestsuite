@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ public class PkitsTestsuiteRunner {
                   + testExecutionOutcome.getFurtherInfo());
         });
 
-    final String separator = "\n" + StringUtils.repeat("=", 120) + "\n\n\n";
+    final String separator = "\n" + StringUtils.repeat("=", 120) + StringUtils.repeat("\n", 3);
     final String testResults = String.join(separator, parts);
 
     final String header =

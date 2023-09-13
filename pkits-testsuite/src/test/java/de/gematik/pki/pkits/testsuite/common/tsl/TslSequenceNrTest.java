@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,16 @@ package de.gematik.pki.pkits.testsuite.common.tsl;
 
 import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.TSL_SEQNR_FILE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import java.io.IOException;
 import java.nio.file.Files;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class TslSequenceNrTest {
 
@@ -52,5 +57,74 @@ class TslSequenceNrTest {
     final int tslSeqNrFromFile = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
 
     assertThat(tslSeqNr).isEqualTo(tslSeqNrFromFile);
+  }
+
+  @Test
+  void testSetLastOfferedTslSeqNr() throws IOException {
+    final int tslSeqNr = 420000;
+    Files.writeString(TSL_SEQNR_FILE_PATH, String.valueOf(tslSeqNr));
+    final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+
+    final int newTslSeqNr = -2 * 420000;
+
+    tslSequenceNr.setLastOfferedTslSeqNr(newTslSeqNr);
+
+    assertThat(tslSequenceNr.getLastOfferedTslSeqNr()).isEqualTo(newTslSeqNr);
+    final int tslSeqNrFromFile = Integer.parseInt(Files.readString(TSL_SEQNR_FILE_PATH));
+    assertThat(tslSeqNrFromFile).isEqualTo(newTslSeqNr);
+  }
+
+  @Test
+  void testSaveCurrentTestObjectTslSeqNrException() {
+    final int tslSeqNr = 420000;
+    final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+
+    try (final MockedStatic<Files> filesMockedStatic =
+        Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
+
+      filesMockedStatic
+          .when(() -> Files.writeString(Mockito.any(), Mockito.any()))
+          .thenThrow(new IOException());
+
+      assertThatThrownBy(() -> tslSequenceNr.saveCurrentTestObjectTslSeqNr(tslSeqNr))
+          .isInstanceOf(TestSuiteException.class)
+          .hasMessage("Cannot write sequence number file!")
+          .cause()
+          .isInstanceOf(IOException.class);
+    }
+  }
+
+  @Test
+  void testInitializeCurrentTslSeqNrException() throws IOException {
+
+    Files.writeString(TSL_SEQNR_FILE_PATH, "badTslSeqNr");
+    final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+
+    assertThatThrownBy(tslSequenceNr::initializeCurrentTslSeqNr)
+        .isInstanceOf(TestSuiteException.class)
+        .hasMessage("Cannot not read TslSeqNr from file: " + TSL_SEQNR_FILE_PATH)
+        .cause()
+        .isInstanceOf(NumberFormatException.class);
+  }
+
+  @Test
+  void testGetNextTslSeqNr() {
+    final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+
+    final int tslSeqNr = 420000;
+    tslSequenceNr.setLastOfferedTslSeqNr(tslSeqNr);
+
+    assertThat(tslSequenceNr.getNextTslSeqNr())
+        .isEqualTo(tslSequenceNr.getLastOfferedTslSeqNr() + 1);
+
+    tslSequenceNr.setLastOfferedTslSeqNr(0);
+    tslSequenceNr.saveCurrentTestObjectTslSeqNr(1000);
+    assertThat(tslSequenceNr.getNextTslSeqNr()).isEqualTo(1001);
+  }
+
+  @Test
+  void testToString() {
+    final TslSequenceNr tslSequenceNr = TslSequenceNr.getInstance();
+    assertDoesNotThrow(tslSequenceNr::toString);
   }
 }

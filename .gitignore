@@ -8,6 +8,8 @@ bin/
 
 **/sampleAllTests.txt
 
+/allFailedOrAborted.txt
+
 docs/configs/tuTestObjects/
 docs/configs/inttest/pkits_ltu_run.yml
 docs/dev/
@@ -15,8 +17,9 @@ docker-compose-baseSut.yml
 docker-compose-deployHot.yml
 docker-compose-deployLTU_DEV.yml
 Pipeline.CI.Jenkinsfile
+Pipeline.CodeCheck.Jenkinsfile
 Pipeline.DeployGitHub.Jenkinsfile
 Pipeline.InternalRelease.Jenkinsfile
-Pipeline.CodeCheck.Jenkinsfile
 Pipeline.LTU_DEV.Jenkinsfile
+Pipeline.TestDataCheck.Jenkinsfile
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import java.util.concurrent.Callable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
 @Slf4j
 public class OcspRequestHistoryContainer {
 
-  @Getter private List<OcspRequestHistoryEntryDto> historyEntries = List.of();
+  private List<OcspRequestHistoryEntryDto> historyEntries = List.of();
 
   public void reset() {
     historyEntries = List.of();
@@ -35,7 +36,7 @@ public class OcspRequestHistoryContainer {
 
   public Callable<Boolean> ocspRequestHistoryHasEntryForCert(
       final String ocspRespUri, final int tslSeqNr, final BigInteger certSerial) {
-    log.debug("Polling TSL download request history");
+    log.debug("Polling OCSP request history");
     return () -> {
       historyEntries = OcspResponderManager.getOcspHistoryPart(ocspRespUri, tslSeqNr, certSerial);
       return !historyEntries.isEmpty();

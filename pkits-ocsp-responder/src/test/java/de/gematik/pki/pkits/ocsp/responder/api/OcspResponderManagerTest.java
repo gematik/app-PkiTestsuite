@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package de.gematik.pki.pkits.ocsp.responder.api;
 
+import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST;
 import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
-import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static de.gematik.pki.pkits.ocsp.responder.controllers.OcspResponderTestUtils.getEntry;
 import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -284,11 +284,11 @@ class OcspResponderManagerTest {
 
     final HttpResponse<byte[]> response =
         Unirest.post(ocspRespUri + OCSP_SSP_ENDPOINT + "/310000")
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
             .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
             .body("")
             .asBytes();
 
-    assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    assertThat(new String(response.getBody(), StandardCharsets.UTF_8)).isEqualTo(NOT_CONFIGURED);
+    assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_BAD_REQUEST);
   }
 }

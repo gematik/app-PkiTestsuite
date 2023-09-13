@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,21 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_OCSP_SIGNER;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.ALTERNATIVE_CLIENT_CERTS_CONFIG;
+import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.DEFAULT_CLIENT_CERTS_CONFIG;
 import static de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests.TslUpdateExpectation.TSL_UPDATE_EXPECTED;
 import static de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests.TslUpdateExpectation.TSL_UPDATE_NOT_EXPECTED;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
-import static de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_DISABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_DISABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
+import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
@@ -36,23 +42,23 @@ import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGenerati
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.CustomCertificateStatusType;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigDto.OcspResponderConfigDtoBuilder;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusType;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig.OcspResponderConfigBuilder;
+import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
-import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.DtoDateConfigOption;
-import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
-import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerator;
+import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.BreakSignerTslOperation;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.config.Afo;
+import de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.usecases.UseCaseResult;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.nio.file.Path;
+import java.security.cert.X509Certificate;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -73,29 +79,29 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     TSL_UPDATE_NOT_EXPECTED
   }
 
-  private void updateTrustStoreUsingOcspResponderConfig(
-      final TrustStatusListType tsl,
-      final Consumer<OcspResponderConfigDtoBuilder> dtoBuilderStep,
+  private void updateTrustStoreWithAlternativeCerts(
+      final Consumer<OcspResponderConfigBuilder> configBuilderStep,
       final TslUpdateExpectation tslUpdateExpected,
-      final Path certPath,
       final UseCaseResult useCaseResult) {
 
-    final OcspResponderConfigDtoBuilder dtoBuilder =
-        OcspResponderConfigDto.builder()
-            .eeCert(getDefaultTslSignerCert())
-            .signer(defaultOcspSigner);
+    final OcspResponderConfigBuilder configBuilder =
+        OcspResponderConfig.builder()
+            .eeCert(DEFAULT_TSL_SIGNER.getCertificate())
+            .issuerCert(DEFAULT_TRUST_ANCHOR)
+            .signer(DEFAULT_OCSP_SIGNER);
 
-    dtoBuilderStep.accept(dtoBuilder);
+    configBuilderStep.accept(configBuilder);
 
     log.info(
-        "START updateTrustStoreUsingOcspResponderConfig - {}",
-        PkitsTestSuiteUtils.getCallerTrace());
+        "START updateTrustStoreWithAlternativeCerts - {}", PkitsTestSuiteUtils.getCallerTrace());
     final int offeredTslSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
-    final TslDownload tslDownload =
-        newTslGenerator("updateTrustStoreUsingOcspResponderConfig").getStandardTslDownload(tsl);
 
-    tslDownload.configureOcspResponderForTslSigner(dtoBuilder);
+    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl();
+    final TslDownload tslDownload =
+        newTslDownloadGenerator("updateTrustStoreWithAlternativeCerts").getStandardTslDownload(tsl);
+
+    tslDownload.configureOcspResponderForTslSigner(configBuilder.build());
     tslSequenceNr.setLastOfferedTslSeqNr(offeredTslSeqNr);
     tslDownload.waitForTslDownload(tslSequenceNr.getExpectedNrInTestObject());
     tslDownload.waitUntilOcspRequestForTslSigner(tslSequenceNr.getExpectedNrInTestObject());
@@ -112,9 +118,12 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     }
 
     useCaseWithCert(
-        certPath, useCaseResult, OCSP_RESP_WITH_PROVIDED_CERT, ocspRequestExpectationBehaviour);
-    log.info(
-        "END updateTrustStoreUsingOcspResponderConfig - {}", PkitsTestSuiteUtils.getCallerTrace());
+        getPathOfAlternativeClientCert(),
+        getPathOfAlternativeIssuerCert(),
+        useCaseResult,
+        OCSP_RESP_WITH_PROVIDED_CERT,
+        ocspRequestExpectationBehaviour);
+    log.info("END updateTrustStoreWithAlternativeCerts - {}", PkitsTestSuiteUtils.getCallerTrace());
   }
 
   /** gematikId: UE_PKI_TC_0105_018 */
@@ -124,26 +133,14 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5a")
   @DisplayName("Test missing OCSP signer in TSL for TSL signer certificate")
-  @ValueSource(
-      strings = {
-        TestSuiteConstants.OCSP_SIGNER_NOT_IN_TSL_FILENAME,
-        TestSuiteConstants.OCSP_SIGNER_DIFFERENT_KEY
-      })
-  void verifyMissingOcspSignerInTslForTslSignerCert(final String ocspSignerFilename) {
+  @MethodSource(
+      "de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils#provideForMissingOcspSigner")
+  void verifyMissingOcspSignerInTslForTslSignerCert(final P12Container ocspSigner) {
 
     initialState();
 
-    final P12Container ocspSigner =
-        P12Reader.getContentFromP12(
-            ocspSettings.getKeystorePathOcsp().resolve(ocspSignerFilename),
-            ocspSettings.getSignerPassword());
-
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        dtoBuilder -> dtoBuilder.signer(ocspSigner),
-        TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
-        USECASE_INVALID);
+    updateTrustStoreWithAlternativeCerts(
+        dtoBuilder -> dtoBuilder.signer(ocspSigner), TSL_UPDATE_NOT_EXPECTED, USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }
@@ -159,12 +156,8 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        dtoBuilder -> dtoBuilder.validSignature(false),
-        TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
-        USECASE_INVALID);
+    updateTrustStoreWithAlternativeCerts(
+        dtoBuilder -> dtoBuilder.validSignature(false), TSL_UPDATE_NOT_EXPECTED, USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }
@@ -175,6 +168,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in past within tolerance")
   void verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance() {
@@ -185,11 +181,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -201,6 +195,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in past out of tolerance")
   void verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance() {
@@ -211,11 +208,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -227,6 +222,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in future within tolerance")
   void verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance() {
@@ -236,11 +234,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     final int producedAtDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     waitForOcspCacheToExpire(
@@ -256,6 +252,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in future out of tolerance")
   void verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance() {
@@ -267,11 +266,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
             + ocspSettings.getTimeoutDeltaMilliseconds()
             + 1000 * testSuiteConfig.getTestObject().getOcspGracePeriodSeconds();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     waitForOcspCacheToExpire(
@@ -287,6 +284,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with thisUpdate in future within tolerance")
   void verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance() {
@@ -296,11 +296,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     final int thisUpdateDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     waitForOcspCacheToExpire(
@@ -316,6 +314,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with thisUpdate in future out of tolerance")
   void verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance() {
@@ -325,11 +326,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     final int thisUpdateDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     waitForOcspCacheToExpire(
@@ -345,6 +344,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with nextUpdate in past within tolerance")
   void verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance() {
@@ -355,11 +357,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -371,6 +371,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with nextUpdate in past out of tolerance")
   void verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance() {
@@ -381,11 +384,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        getDtoDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds),
+    updateTrustStoreWithAlternativeCerts(
+        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -397,16 +398,17 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
+  @Afo(
+      afoId = "GS-A_5215",
+      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
   @DisplayName("Test OCSP response of TSL signer certificate with missing nextUpdate")
   void verifyOcspResponseTslSignerCertMissingNextUpdate() {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
+    updateTrustStoreWithAlternativeCerts(
         dtoBuilder -> dtoBuilder.nextUpdateDeltaMilliseconds(null),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -419,7 +421,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6a")
   @MethodSource(
-      "de.gematik.pki.pkits.testsuite.common.TestSuiteConstants#provideOcspResponseVariousStatusAndResponseBytes")
+      "de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils#provideOcspResponseVariousStatusAndResponseBytes")
   @DisplayName(
       "Test various status of OCSP responses of TSL signer certificate with and without response"
           + " bytes")
@@ -428,11 +430,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
+    updateTrustStoreWithAlternativeCerts(
         dtoBuilder -> dtoBuilder.respStatus(ocspRespStatus).withResponseBytes(withResponseBytes),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -449,12 +449,8 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        dtoBuilder -> dtoBuilder.withCertHash(false),
-        TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
-        USECASE_INVALID);
+    updateTrustStoreWithAlternativeCerts(
+        dtoBuilder -> dtoBuilder.withCertHash(false), TSL_UPDATE_NOT_EXPECTED, USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }
@@ -470,12 +466,8 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
-        dtoBuilder -> dtoBuilder.validCertHash(false),
-        TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
-        USECASE_INVALID);
+    updateTrustStoreWithAlternativeCerts(
+        dtoBuilder -> dtoBuilder.validCertHash(false), TSL_UPDATE_NOT_EXPECTED, USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }
@@ -495,13 +487,11 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
+    updateTrustStoreWithAlternativeCerts(
         dtoBuilder ->
             dtoBuilder.certificateStatus(
                 CustomCertificateStatusDto.create(customCertificateStatusType)),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -518,11 +508,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
+    updateTrustStoreWithAlternativeCerts(
         dtoBuilder -> dtoBuilder.responderIdType(ResponderIdType.BY_NAME),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -541,12 +529,10 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
+    updateTrustStoreWithAlternativeCerts(
         dtoBuilder ->
             dtoBuilder.withNullParameterHashAlgoOfCertId(withNullParameterHashAlgoOfCertId),
         TSL_UPDATE_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_VALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -557,7 +543,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP check - step 4c")
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 4c")
   @DisplayName("Test OCSP response TSL signer certificate with timeout and delay")
   void verifyOcspResponseTslSignerCertTimeoutAndDelay() {
 
@@ -580,21 +566,17 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
       log.info(
           "Starting data variant 1: long delayed ocsp response. Outside of specified value: {}ms.",
           longDelayMilliseconds);
-      updateTrustStoreUsingOcspResponderConfig(
-          CreateTslTemplate.alternativeTsl(),
+      updateTrustStoreWithAlternativeCerts(
           dtoBuilder -> dtoBuilder.delayMilliseconds(longDelayMilliseconds),
           TSL_UPDATE_NOT_EXPECTED,
-          getPathOfAlternativeCertificate(),
           USECASE_INVALID);
 
       log.info(
           "Starting data variant 2: short delayed ocsp response. Inside specified value: {}ms.",
           shortDelayMilliseconds);
-      updateTrustStoreUsingOcspResponderConfig(
-          CreateTslTemplate.alternativeTsl(),
+      updateTrustStoreWithAlternativeCerts(
           dtoBuilder -> dtoBuilder.delayMilliseconds(shortDelayMilliseconds),
           TSL_UPDATE_EXPECTED,
-          getPathOfAlternativeCertificate(),
           USECASE_VALID);
     } catch (final Exception e) {
       testSuiteConfig.getTestObject().setTslProcessingTimeSeconds(tslProcessingTimeSeconds);
@@ -612,18 +594,16 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP check - step 6b")
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6b")
   @DisplayName("Test invalid cert id in OCSP response for TSL signer cert")
   void verifyOcspResponseTslSignerCertInvalidCertId(
       final CertificateIdGeneration certificateIdGeneration) {
 
     initialState();
 
-    updateTrustStoreUsingOcspResponderConfig(
-        CreateTslTemplate.alternativeTsl(),
+    updateTrustStoreWithAlternativeCerts(
         dtoBuilder -> dtoBuilder.certificateIdGeneration(certificateIdGeneration),
         TSL_UPDATE_NOT_EXPECTED,
-        getPathOfAlternativeCertificate(),
         USECASE_INVALID);
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -645,12 +625,13 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     initialState();
 
     verifyForBadCertificateFromTrustAnchors(
-        TslGenerator.tslSignerNotYetValid,
+        TslDownloadGenerator.tslSignerNotYetValid,
+        DEFAULT_TRUST_ANCHOR,
         SIGNER_KEY_USAGE_CHECK_ENABLED,
         SIGNER_VALIDITY_CHECK_DISABLED);
 
     useCaseWithCert(
-        getPathOfFirstValidCert(),
+        DEFAULT_CLIENT_CERTS_CONFIG,
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
@@ -672,12 +653,13 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     initialState();
 
     verifyForBadCertificateFromTrustAnchors(
-        TslGenerator.tslSignerExpired,
+        TslDownloadGenerator.tslSignerExpired,
+        DEFAULT_TRUST_ANCHOR,
         SIGNER_KEY_USAGE_CHECK_ENABLED,
         SIGNER_VALIDITY_CHECK_DISABLED);
 
     useCaseWithCert(
-        getPathOfFirstValidCert(),
+        DEFAULT_CLIENT_CERTS_CONFIG,
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
@@ -696,46 +678,49 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with alternative CAs (the TSL signer certificate contains an invalid ASN1"
             + " structure).",
-        newTslGenerator("altCaAndTslSignerBrokenAsn1", new BreakSignerTslOperation())
+        newTslDownloadGenerator("altCaAndTslSignerBrokenAsn1", new BreakSignerTslOperation())
             .getStandardTslDownload(CreateTslTemplate.alternativeTsl()),
         OCSP_REQUEST_DO_NOT_EXPECT,
-        withUseCase(
-            getPathOfAlternativeCertificate(), USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
+        withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }
 
   private void verifyForBadCertificateFromTrustAnchors(
       final Path tslBadSignerP12Path,
+      final X509Certificate trustAnchor,
       final boolean signerKeyUsageCheck,
       final boolean signerValidityCheck) {
 
     final P12Container p12ContainerBad =
-        P12Reader.getContentFromP12(tslBadSignerP12Path, tslSignerKeystorePassw);
+        P12Reader.getContentFromP12(tslBadSignerP12Path, KEYSTORE_PASSWORD);
 
     final int offeredTslSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
     final TslDownload tslDownload =
-        newTslGenerator()
+        newTslDownloadGenerator()
             .getTslDownloadWithTemplateAndSigner(
                 offeredTslSeqNr,
                 CreateTslTemplate.alternativeTsl(),
                 p12ContainerBad,
+                trustAnchor,
                 signerKeyUsageCheck,
                 signerValidityCheck);
 
-    final OcspResponderConfigDtoBuilder dtoBuilder =
-        OcspResponderConfigDto.builder()
+    final OcspResponderConfig ocspResponderConfig =
+        OcspResponderConfig.builder()
             .eeCert(p12ContainerBad.getCertificate())
-            .signer(defaultOcspSigner);
+            .issuerCert(trustAnchor)
+            .signer(DEFAULT_OCSP_SIGNER)
+            .build();
 
-    tslDownload.configureOcspResponderForTslSigner(dtoBuilder);
+    tslDownload.configureOcspResponderForTslSigner(ocspResponderConfig);
     tslSequenceNr.setLastOfferedTslSeqNr(offeredTslSeqNr);
     tslDownload.waitForTslDownload(tslSequenceNr.getExpectedNrInTestObject());
     tslDownload.waitUntilOcspRequestForSignerOptional();
 
     useCaseWithCert(
-        getPathOfAlternativeCertificate(),
+        ALTERNATIVE_CLIENT_CERTS_CONFIG,
         USECASE_INVALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_DO_NOT_EXPECT);
@@ -756,17 +741,19 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     initialState();
 
     verifyForBadCertificateFromTrustAnchors(
-        TslGenerator.tslSignerInvalidExtendedKeyusage,
+        TslDownloadGenerator.tslSignerInvalidExtendedKeyusage,
+        DEFAULT_TRUST_ANCHOR,
         SIGNER_KEY_USAGE_CHECK_ENABLED,
         SIGNER_VALIDITY_CHECK_ENABLED);
 
     verifyForBadCertificateFromTrustAnchors(
-        TslGenerator.tslSignerInvalidKeyusage,
+        TslDownloadGenerator.tslSignerInvalidKeyusage,
+        DEFAULT_TRUST_ANCHOR,
         SIGNER_KEY_USAGE_CHECK_DISABLED,
         SIGNER_VALIDITY_CHECK_ENABLED);
 
     useCaseWithCert(
-        getPathOfFirstValidCert(),
+        DEFAULT_CLIENT_CERTS_CONFIG,
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
@@ -781,6 +768,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_4650",
       description = "TUC_PKI_011: Prüfung des TSL-Signer-Zertifikates - Schritt 5")
+  @Afo(
+      afoId = "GS-A_4655",
+      description = "TUC_PKI_004: Mathematische Prüfung der Zertifikatssignatur")
   @DisplayName("Invalid signature of the TSL signer certificate.")
   void verifyForInvalidSignatureOfTslSigner() {
 
@@ -788,15 +778,16 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
 
     final P12Container p12ContainerInvalidSig =
         P12Reader.getContentFromP12(
-            TslGenerator.invalideSignatureSignerPath, tslSignerKeystorePassw);
+            TslDownloadGenerator.invalideSignatureSignerPath, KEYSTORE_PASSWORD);
 
     /* TSLTypeID 522 */
     updateTrustStore(
         "Offer a TSL with alternate CAs.",
-        newTslGenerator("invalidSignerSignatureAlternativeCA")
-            .getStandardTslDownload(CreateTslTemplate.alternativeTsl(), p12ContainerInvalidSig),
+        newTslDownloadGenerator("invalidSignerSignatureAlternativeCA")
+            .getStandardTslDownload(
+                CreateTslTemplate.alternativeTsl(), p12ContainerInvalidSig, DEFAULT_TRUST_ANCHOR),
         OCSP_REQUEST_IGNORE,
-        withUseCase(getPathOfAlternativeCertificate(), USECASE_INVALID));
+        withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 
     establishDefaultTrustStoreAndExecuteUseCase();
   }

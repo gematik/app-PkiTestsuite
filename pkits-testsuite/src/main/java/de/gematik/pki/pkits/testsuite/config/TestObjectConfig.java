@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,11 @@ public class TestObjectConfig {
           "Name of the test object, for better identification in logs and configuration files.")
   String name;
 
-  @ParameterDescription(description = "Test object type (TlsServer|Script|ScriptOverSsh).")
-  String type;
+  @ParameterDescription(
+      description =
+          "one of: IdpFachdienst, IntermediaerServer, KimFachdienst, VsdmFachdienst,"
+              + " VpnKonzentrator, VpnRegServer")
+  TestObjectType testObjectType;
 
   @ParameterDescription(description = "FQDN or IP address to connect to the test object.")
   String ipAddressOrFqdn;

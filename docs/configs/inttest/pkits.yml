@@ -1,17 +1,6 @@
-client:
-  # Example test data for tests of an KIM Fachdienst
-  #keystorePathValidCerts: "./testDataTemplates/certificates/ecc/kimClientModul/valid"
-  #keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/kimClientModul/valid-alternative"
-  #keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/kimClientModul/invalid"
-
-  # Example test data for tests of an Intermediär Server or VPNZugD RegServer
-  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid"
-  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid-alternative"
-  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/invalid"
-
 testObject:
   name: "Server 0815"
-  type: "TlsServer"
+  testObjectType: "IntermediaerServer" # one of (IntermediaerServer, KimFachdienst, VsdmFachdienst, VpnKonzentrator, VpnRegServer, IdpFachdienst)
   ipAddressOrFqdn: "127.0.0.1"
   port: 8443
   ocspGracePeriodSeconds: 0

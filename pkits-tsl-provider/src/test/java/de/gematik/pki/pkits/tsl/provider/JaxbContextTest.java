@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class JaxbContextTest {
   void convertTsl() {
     final byte[] tslBytes =
         ResourceReader.getFileFromResourceAsBytes(TSL_FILEPATH, this.getClass());
-    final TrustStatusListType tsl = TslConverter.bytesToTsl(tslBytes);
-    assertThat(tsl.getId()).hasSize(TSL_ID_LENGTH);
+    final TrustStatusListType tslUnsigned = TslConverter.bytesToTslUnsigned(tslBytes);
+    assertThat(tslUnsigned.getId()).hasSize(TSL_ID_LENGTH);
   }
 }

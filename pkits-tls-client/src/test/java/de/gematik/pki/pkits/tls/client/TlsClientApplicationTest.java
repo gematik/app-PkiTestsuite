@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.tls.client;
 
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.gemlibpki.utils.ResourceReader;
@@ -38,7 +39,7 @@ class TlsClientApplicationTest {
   void verifyMainNoServerAvailable() {
 
     final int exitCode =
-        TlsClientApplication.connectTls("unknown", 8443, clientKeystorePath, "00", 0);
+        TlsClientApplication.connectTls("unknown", 8443, clientKeystorePath, KEYSTORE_PASSWORD, 0);
     assertThat(exitCode).isEqualTo(2);
   }
 
@@ -46,7 +47,8 @@ class TlsClientApplicationTest {
   void verifyMainWithoutOcsp() {
 
     final int exitCode =
-        TlsClientApplication.connectTls("localhost", 8443, clientKeystorePath, "00", 0);
+        TlsClientApplication.connectTls(
+            "localhost", 8443, clientKeystorePath, KEYSTORE_PASSWORD, 0);
     assertThat(exitCode).isEqualTo(2);
   }
 }

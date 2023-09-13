@@ -1,5 +1,5 @@
 /*
- *  Copyright 2023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.w3c.dom.Document;
 
 class TslOperationTest {
 
-  TrustStatusListType tsl;
+  TrustStatusListType tslUnsigned;
   Document tslDoc;
   byte[] tslBytes;
 
   @BeforeEach
   void init() {
-    tsl = TslReader.getTsl(ARVATO_TU_TSL);
+    tslUnsigned = TslReader.getTslUnsigned(ARVATO_TU_TSL);
     tslDoc = TslReader.getTslAsDoc(ARVATO_TU_TSL);
     tslBytes = GemLibPkiUtils.readContent(ARVATO_TU_TSL);
   }
@@ -45,13 +45,15 @@ class TslOperationTest {
   void testApply() {
     final TslOperation tslOperation = tslContainer -> tslContainer;
 
-    final TslContainer tc1 = tslOperation.apply(tsl);
-    assertThat(TslGenerationTestUtils.documentsAreEqual(tc1.getAsTslDoc(), tslDoc)).isTrue();
+    final TslContainer tc1 = tslOperation.apply(tslUnsigned);
+    assertThat(TslGenerationTestUtils.documentsAreEqual(tc1.getAsTslUnsignedDoc(), tslDoc))
+        .isTrue();
 
     final TslContainer tc2 = tslOperation.apply(tslDoc);
-    assertThat(TslGenerationTestUtils.documentsAreEqual(tc2.getAsTslDoc(), tslDoc)).isTrue();
+    assertThat(TslGenerationTestUtils.documentsAreEqual(tc2.getAsTslUnsignedDoc(), tslDoc))
+        .isTrue();
 
     final TslContainer tc3 = tslOperation.apply(tslBytes);
-    assertThat(Arrays.equals(tc3.getAsTslBytes(), tslBytes)).isTrue();
+    assertThat(Arrays.equals(tc3.getAsTslUnsignedBytes(), tslBytes)).isTrue();
   }
 }

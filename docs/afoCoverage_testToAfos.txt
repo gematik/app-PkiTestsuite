@@ -1,11 +1,14 @@
 de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-  verifyUseCaseCertsInvalid   GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
+  verifyUseCaseCertsInvalid   GS-A_4652, GS-A_4654, GS-A_4655, GS-A_4656, GS-A_4657, GS-A_4661, GS-A_4663, RFC 5280
   verifyUseCaseCertsNotInTsl  GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
   verifyUseCaseCertsValid     A_17124, GS-A_4357, GS-A_4652, GS-A_4663
-  verifyUseCaseRsaCertValid   TODO - GS-A_4357, TODO - GS-A_4384
+  verifyUseCaseRsaCertValid   GS-A_4357, GS-A_4384
 
 de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
   verifyForCaCertificateWithoutServiceSupplyPoint    GS-A_4656, GS-A_4657
+  verifyHashAlgorithmsInOcspSha1                     GS-A_4657, RFC 6960
+  verifyHashAlgorithmsInOcspSha2                     GS-A_4657, GS-A_4674, RFC 5754, RFC 6960
+  verifyHashAlgorithmsInOcspShaVersion               GS-A_4657, GS-A_4674, RFC 6960
   verifyInvalidCerIdInOcspResponse                   GS-A_4657
   verifyInvalidCertHashInOcspResponse                GS-A_4657
   verifyInvalidSignatureInOcspResponse               GS-A_4657
@@ -13,29 +16,29 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
   verifyMissingOcspSignerInTslForUseCaseCertificate  GS-A_4657
   verifyOcspCertificateStatusRevokedAndUnknown       GS-A_4657
   verifyOcspGracePeriod                              GS-A_4657
-  verifyOcspRequestStructure                         GS-A_4657, GS-A_4674, RFC5019, RFC6960
-  verifyOcspResponseMissingNextUpdate                GS-A_4657
-  verifyOcspResponseNextUpdatePastOutOfTolerance     GS-A_4657
-  verifyOcspResponseNextUpdatePastWithinTolerance    GS-A_4657
-  verifyOcspResponseProducedAtFutureOutOfTolerance   GS-A_4657
-  verifyOcspResponseProducedAtFutureWithinTolerance  GS-A_4657
-  verifyOcspResponseProducedAtPastOutOfTolerance     GS-A_4657
-  verifyOcspResponseProducedAtPastWithinTolerance    GS-A_4657
+  verifyOcspRequestStructure                         GS-A_4657, GS-A_4674, RFC 5019, RFC 6960
+  verifyOcspResponseMissingNextUpdate                GS-A_4657, GS-A_5215
+  verifyOcspResponseNextUpdatePastOutOfTolerance     GS-A_4657, GS-A_5215
+  verifyOcspResponseNextUpdatePastWithinTolerance    GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtFutureOutOfTolerance   GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtFutureWithinTolerance  GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtPastOutOfTolerance     GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtPastWithinTolerance    GS-A_4657, GS-A_5215
   verifyOcspResponseResponderIdByName                RFC 6960
-  verifyOcspResponseThisUpdateFutureOutOfTolerance   GS-A_4657
-  verifyOcspResponseThisUpdateFutureWithinTolerance  GS-A_4657
+  verifyOcspResponseThisUpdateFutureOutOfTolerance   GS-A_4657, GS-A_5215
+  verifyOcspResponseThisUpdateFutureWithinTolerance  GS-A_4657, GS-A_5215
   verifyOcspResponseTimeoutAndDelay                  GS-A_4657
   verifyOcspResponseVariousStatusAndResponseBytes    GS-A_4657
   verifyOcspResponseWithNullParameterInCertId        RFC 5280, RFC 6960
 
 de.gematik.pki.pkits.testsuite.approval.TslApprovalExtraTests
-  verifyExpiredTslInSystem  GS-A_4642, GS-A_4648
+  verifyExpiredTslInSystem  GS-A_4642, GS-A_4648, GS-A_4898, GS-A_5336
 
 de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
   verifyForBadCertificateOfTSPService                    GS-A_4642
   verifyForTslInvalidXmlSchemaOrNonCompliantElement      GS-A_4642, GS-A_4648, GS-A_4649
   verifyForTslNotWellFormedXmlStructure                  GS-A_4642, GS-A_4648, GS-A_4649
-  verifyForTslWithInvalidOidDownloadAddresses            GS-A_4647, GS-A_4648
+  verifyForTslWithInvalidOidDownloadAddresses            GS-A_4646, GS-A_4647, GS-A_4648
   verifyForUnspecifiedServiceTypeIdentifierOfTSPService  A_17700
   verifyForWrongServiceInfoExtCertificateOfTSPService    GS-A_4749
   verifyIrregularDifferencesBetweenCurrentAndNewTsls     GS-A_4648
@@ -44,26 +47,26 @@ de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
   verifyRevokedCaCertificateInTslLater                   GS-A_4652
   verifyTslDownloadCompression                           TIP1-A_5120
   verifyTslSignatureInvalid                              GS-A_4648, GS-A_4651
-  verifyUpdateTrustStoreInTestObject                     GS-A_4649
+  verifyUpdateTrustStoreInTestObject                     A_17688, GS-A_4649
   verifyUseBackupTslDownload                             GS-A_4642, GS-A_4647, GS-A_4648
 
 de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
-  verifyForInvalidSignatureOfTslSigner                            GS-A_4642, GS-A_4648, GS-A_4650
+  verifyForInvalidSignatureOfTslSigner                            GS-A_4642, GS-A_4648, GS-A_4650, GS-A_4655
   verifyMissingOcspSignerInTslForTslSignerCert                    GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertInvalidCertHash                  GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertInvalidCertId                    GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertMissingCertHash                  GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertMissingNextUpdate                GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance     GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance    GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance   GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance  GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    GS-A_4642, GS-A_4657
+  verifyOcspResponseTslSignerCertMissingNextUpdate                GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance     GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance    GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance   GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance  GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    GS-A_4642, GS-A_4657, GS-A_5215
   verifyOcspResponseTslSignerCertResponderIdByName                GS-A_4642, RFC 6960
   verifyOcspResponseTslSignerCertStatusRevokedAndUnknown          GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance   GS-A_4642, GS-A_4657
-  verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance  GS-A_4642, GS-A_4657
+  verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance   GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance  GS-A_4642, GS-A_4657, GS-A_5215
   verifyOcspResponseTslSignerCertTimeoutAndDelay                  GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes    GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertWithNullParameterInCertId        GS-A_4642, RFC 5280

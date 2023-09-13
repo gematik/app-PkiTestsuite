@@ -1,11 +1,6 @@
-client:
-  keystorePathValidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid"
-  keystorePathAlternativeCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/valid-alternative"
-  keystorePathInvalidCerts: "./testDataTemplates/certificates/ecc/fachmodulClient/invalid"
-
 testObject:
   name: "Server 0815"
-  type: "TlsServer"
+  testObjectType: "IntermediaerServer"
   ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
   port: 8443
   ocspGracePeriodSeconds: 0
