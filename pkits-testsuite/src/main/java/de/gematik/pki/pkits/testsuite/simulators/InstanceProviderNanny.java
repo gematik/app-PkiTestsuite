@@ -71,7 +71,7 @@ public abstract class InstanceProviderNanny {
   }
 
   public void stopServer() {
-    if (PkitsCommonUtils.isExternalStartup(appPath)) {
+    if (process == null || PkitsCommonUtils.isExternalStartup(appPath)) {
       return;
     }
 

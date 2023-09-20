@@ -13,7 +13,7 @@ approval tests of every PKI related aspect. It is a re-development of our test s
 development is still ongoing [see Todo section](./README.md#todo)
 
 Products tested by this test suite are: Intermediär, VSDM Fachdienst, VPN Zugangsdienst:
-Registrierungsdienst and Konzentrator , IDP Fachdienst, KIM Fachdienst. More are coming.
+Registrierungsdienst and Konzentrator, IDP Fachdienst, KIM Fachdienst. More are coming.
 
 ---
 
@@ -26,7 +26,7 @@ cp <UserDefinedConfigfile>.yml ./config/pkits.yml # examples: /docs/config/intte
 # The test object has to be started and accessible from now on.
 ./checkInitialState.sh # acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case
 ./startApprovalTest.sh # chose tests that shall be executed from allTests.txt
-# Testreport can be found in ./out directory.
+# Test artefacts (i.e. logs and report) can be found in ./out directory.
 ```
 
 ## Technical Functionality
@@ -36,8 +36,8 @@ implemented as maven modules and can be used independently or in conjunction wit
 
 ### Requirements
 
-To execute the test suite you need at least Java 17. We are
-using [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
+To execute the test suite you need at least Java 17. The test suite ist build and testet
+with [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
 
 ### 1. PKI Test Suite
 
@@ -48,51 +48,74 @@ all approval tests. The test suite calls a use case
 (see [Use Case Modules](./README.md#4-use-case-modules)) and expects it to either pass or fail,
 depending on the test data used. If the expectation is fulfilled, the test case is passed.
 
+The test suite has a couple of convenience options:
+
+```bash
+java -jar ./bin/pkits-testsuite-exec.jar --help
+```
+
+```text
+Usage: <main class> [-h] [-np] [-faf=<failedTestCases>] [-p=NUMBER]
+                    [-tf=<testCasesFile>] [-tn=<testCasesNames>]
+      -faf, --failed-and-aborted-file=<failedTestCases>
+                             Save all failed or aborted tests to this file. The
+                               file can be used as parameter for theCLI option
+                               --tests-file.
+                               Default: ./allFailedOrAborted.txt
+  -h, --help                 Display this help message.
+      -np, --no-pdf-report   Do not generate report as PDF.
+  -p, --percent=NUMBER       Execute only proportion of randomly selected tests
+                               from all tests that were passed via --tests-file
+                               or --tests-names). It is a number from 1 to 100.
+                               At least 1 test from passed will be selected.
+                               Default: 100
+      -tf, --tests-file=<testCasesFile>
+                             The file with tests to run.
+                               Default: ./allTests.txt
+      -tn, --tests-names=<testCasesNames>
+                             Comma separated list of names to run, for example:
+                               "verifyUseCaseCertsValid, TslApprovalTestsIT,
+                               TslSignerApprovalTestsIT#checkInitialState".
+```
+
 ### 2. TSL Provider
 
 The TSL provider is a service that delivers TSLs to the test object.
-The behaviour of this service, such as the content of a TSL offered to the test object, is
+The behavior of this service, such as the content of a TSL offered to the test object, is
 configured automatically during the test execution over a REST interface.
 The TSL provider is implemented as a spring boot tomcat web server and runs as its own process.
-It can be started independently or by the test suite. To start it independently one has to
+It can be started independently or by the test suite. To start it independently, one has to
 set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to the jar
 via `--server.port=[port]` and `--server.address=[IpOrFqdn]`
 
 ### 3. OCSP Responder
 
 The OCSP responder is a service to generate responses to OCSP requests sent by the test object.
-The behaviour of this service is configured over a REST interface and transparent to the user.
-Depending on the tests it can be configured to deliver unsigned OCSP responses, wrong cert
+The behavior of this service is configured over a REST interface and transparent to the user.
+Depending on the tests, it can be configured to deliver unsigned OCSP responses, wrong cert
 hashes and so on.
 Similar to the TSL provider, it is implemented as a spring boot tomcat web server and runs as its
-own process. It can be started independently or by the test suite. To start it independently one has
-to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to the
-jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`
+own process. It can be started independently or by the test suite. To start it independently, one
+has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to
+the jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`.
 
 ### 4. Use Case Modules
 
-At the moment there are two ways of communicating with a test object. In all scenarios the test
-object has to be a server. This means, the PKI test suite acts like a client during PKI tests.
+At the moment, there are two ways of communicating with a test object. In all scenarios, the test
+object has to be a server. This means the PKI test suite acts like a client during PKI tests.
 
 #### TLS Client
 
-For tests against a TSL Server, the PKI testsuite has to be configured as follows:
-
-```yaml
-  testObject:
-    type: "TlsServer"
-```
-
-This configuration will use a TSL client implementation bundled with the test suite.
-It establishes a TLS handshake to a test object with a given certificate (
-see [test data section](./README.md#test-data)).
-Corresponding to AFOs: GS-A_4385 and A_17127-01 the TLS handshake will follow the specifications
-from gemSpec_Krypt with following parameter:
+For test objects that are more or less a TLS Server, a TSL client implementation is bundled with the
+test suite. It establishes a TLS handshake to a test object with a given certificate
+(see [configuration](./README.md#configuration)).
+Corresponding to AFOs: `GS-A_4385-01` and `A_17127-01` the TLS handshake will follow the
+specifications from gemSpec_Krypt with the following parameters:
 
 * TLS Version: 1.2
 * cipher suites used: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 or
   TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-* for the test of RSA functionality we use the following cipher suites:
+* for the test of RSA functionality, we use the following cipher suites:
   TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
 * for ECDHE either NIST P-256 or P-384 is used
 
@@ -117,8 +140,8 @@ copied to the remote location and back. As wells as the IP and port of the remot
 The configuration is done in one file: [/config/pkits.yml](./config/pkits.yml). You can find
 examples in [/docs/config/inttest/](./docs/configs/inttest/). The most important parameters are:
 
-* what is the type of the test object (e.g. KimFachdienst, IntermediaerServer, etc.)
-* how to reach the test object, i.e. ipAddress and port
+* What is the type of the test object (e.g., KimFachdienst, IntermediaerServer, etc.)?
+* How to reach the test object (i.e., ipAddress and port)?
 
 Example:
 
@@ -130,7 +153,7 @@ testObject:
   port: 8443
 ```
 
-Furthermore, the test object must be able to reach the TSL- and OCSP- simulators provided by this
+Furthermore, the test object must be able to reach the TSL- and OCSP-simulators provided by this
 test suite.
 
 Paths in the `pkits.yml` are relative to the base directory. Absolute paths can be used as well.
@@ -149,26 +172,31 @@ object.
 We deliver some test data in the directory `./testDataTemplates`. Currently, these test data support
 tests for the following TI products:
 
-| Test data directory | Corresponding test object               | testObjectType in pkits.yml        |
-|---------------------|-----------------------------------------|------------------------------------|
-| fachmodulClient     | Intermediär Server and VpnZuD RegServer | IntermediaerServer or VpnRegServer |
-| intermediaerClient  | VSDM Fachdienst                         | VsdmFachdienst                     |
-| kimClientModul      | KIM Fachdienst                          | KimFachdienst                      |
-| netzkonnektorClient | VPN-ZugD Konzentrator                   | VpnKonzentrator                    |
+| Test object           | testObjectType in pkits.yml | Test data directory         |
+|-----------------------|-----------------------------|-----------------------------|
+| Intermediär Server    | IntermediaerServer          | fachmodulClientIntermediaer |
+| VpnZuD RegServer      | VpnRegServer                | fachmodulClient             |
+| central/SmartCard IDP | IdpFachdienst               | fachmodulClient             |
+| VSDM Fachdienst       | VsdmFachdienst              | intermediaerClient          |
+| KIM Fachdienst        | KimFachdienst               | kimClientModul              |
+| VPN-ZugD Konzentrator | VpnKonzentrator             | netzkonnektorClient         |
+| ePA Aktensystem       | coming soon                 | coming soon                 |
 
 These test data are for our own integration tests and can be used for approval tests as well.
 The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own
-test data make sure that issuing certificates are added in
+test data, make sure that issuing certificates are added in
 the [tsl template](./testDataTemplates/tsl/ECC-RSA_TSL-test.xml) as well.
 
 ### Initial TSL and Trust Anchor
 
-For the configuration of the test object it is necessary to initialize it with a trust space
-compatible to the test suite.
+For the configuration of the test object, it is necessary to initialize it with a trust space
+compatible with the test suite.
 For this, a convenient script is provided by the test suite:
 By executing `./initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
-the `./out` directory for import into the test object. This TSL contains the TU trust store as well,
-this means, that the test object can be used during the pki tests by other services as well.
+the `./out` directory for import into the test object.
+
+This TSL contains the TU trust store as well; this means that the test object can be used during the
+pki tests by other services as well.
 
 ## Test Execution
 
@@ -182,12 +210,13 @@ generated in the `./out/testreport` directory.
 
 ### Smoke Test
 
-In oder to make a quick check if everything is set up correctly, the test object can be reach by the
-test suite, and to initialize the test suite with the TSL sequence number set in the test object, we
+In order to make a quick check if everything is set up correctly, the test object can be reach by
+the
+test suite, and to initialize the test suite with the TSL sequence number set in the test object; we
 implemented a script that runs an initial test: `./checkInitialState.sh`. Within a TSL download by
-the test object is exacted and afterward a use case is triggered with a valid certificate. OCSP
-requests are expected and answered correctly as well. Therefor a configured test object has to be up
-and running and accessible by the testsuite and its components.
+the test object is expected, and afterward, a use case is triggered with a valid certificate. OCSP
+requests are expected and answered correctly as well. Therefore, a configured test object has to be
+up and running and accessible by the testsuite and its components.
 
 ### Selecting Specific Tests
 
@@ -217,21 +246,25 @@ Our concept of testing incorporates the following principles:
 * A use case is triggered that provokes the check of an end-entity certificate.
 
 Both simulators are configured for each test case and each used certificate individually and
-reset afterward. This means that only during the test execution the simulators answer requests
+reset afterward. This means that only during the test execution, the simulators answer requests
 with a useful response. In between tests, requests are answered with a http 500 error code.
 
 Every request the test object does to one of the simulators contains the sequence number of the last
-correctly processed TSL. This serves as a sanity check to evaluate the trust store in the test
-object.
+correctly processed TSL. This serves as a check to evaluate the trust store in the test object.
 
-Mainly we use two different kinds of test data
+Mainly, we use two different kinds of test data
 
-1. A default end-entity certificates to trigger a use case for the corresponding test object (e.g. a
+1. A default end-entity certificate to trigger a use case for the corresponding test object (e.g., a
    TLS handshake) signed by a SUB-CA.
-2. An alternative end-entity certificates signed by another SUB-CA. This alternative SUB-CA
+2. An alternative end-entity certificate signed by another SUB-CA. This alternative SUB-CA
    certificate is not every time in the TSL.
 
-This way it can be checked if the trust store changed and if a TSL was processed as expected.
+This way it can be checked if the trust store changed, and if a TSL was processed as expected.
+
+Every test is independent and all tests can be executed in any order. However, there is one test
+that is expected to disable the PKI functionality of the test object by importing a TSL which
+expires a few moments after generation: `verifyExpiredTslInSystem()`. This is why the test suite
+executes this test case always at the end.
 
 ## Running PKITS Components in Docker Containers
 
@@ -272,15 +305,16 @@ You can find the zip package in the directory `./out/pkitestsuite-x.x.x.zip`.
 
 ## Contact
 
-For question or issues, feel free to open a
+For questions or issues, feel free to open a
 ticket: https://service.gematik.de/servicedesk/customer/portal/36
+If you are not a registered user yet, you can use the contact formular
 
 ## Versioning
 
-Versions below 1.0.0 are considered incomplete. For every version beyond 1.0.0 every major Version
+Versions below 1.0.0 are considered incomplete. For every version beyond 1.0.0, every major Version
 will have a code name naming a chemical element in alphabetical order. If more than one element
 exists with the corresponding letter, the element with lower atomic number is chosen. So the first
-1.0.0 release will be called Aluminium.
+1.0.0 release will be called Aluminum.
 
 ## Remark
 
@@ -290,8 +324,8 @@ productive data.
 
 ## Know issues
 
-- we do not test invalid keyUsages
-- we do not test invalid extended keyUsages
+- there are no tests for an invalid keyUsages for the UseCase certificate
+- there are no tests for an invalid extended keyUsages the UseCase certificate
 
 ## License
 

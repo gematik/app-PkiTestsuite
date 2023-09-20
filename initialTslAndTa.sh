@@ -22,5 +22,9 @@ fi
 customFileNamePostfix=-Dlog4j2.customFileNamePostfix=_`date "+%Y%m%d_%H%M%S"`
 
 java  $customFileNamePostfix  $pkitsConfig  -jar ./bin/pkits-testsuite-exec.jar --tests-names "InitialTestDataTest#buildInitialTslAndTa"
-
-printf "...done!"
+if [ $? -eq 0 ]; then
+  printf "...done!"
+  exit 0
+else
+  exit 1
+fi

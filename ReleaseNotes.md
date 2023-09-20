@@ -2,26 +2,34 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.2.0
+
+- add tests for admission and profession oid's for test object types that have to evaluate roles
+- BUGFIX: prevent checkInitialState from passing when performInitialState is not true
+- BUGFIX: initialTslAndTa.sh from failing
+- change shell skripts to return correct error code
+- update dependencies
+
 ## Release 2.1.0
 
 - API CHANGE: introduce test object type. Instead of choosing the right certificate path for a test
   object, it is now possible to use a parameter (`testObjectType`) instead. (one of:
   IntermediaerServer, KimFachdienst, VsdmFachdienst, VpnKonzentrator, VpnRegServer, IdpFachdienst) (
   see section [configuration](./README.md#configuration) in readme)
-- change behaviour of test case `verifyExpiredTslInSystem()` to allow test object to invalidate the
-  trust store immediately after expiration of the TSL
+- change behaviour of test case `verifyExpiredTslInSystem()` to allow a test object to invalidate
+  the trust store immediately after expiration of the TSL
 - NEW test case: `verifyUseCaseRsaCertValid()` which uses a RSA certificate for the use case
 - NEW test cases: check hash algorithm in OCSP context
 - BUGFIX: correct extension oid in TSL services
 - BUGFIX: prevent possibility to write unsigned TSL to out directory
 - change communication between test suite and simulators to json (instead of java serialization)
-- remove config parameter `tslSettings.initialStateTslImport`
+- remove config parameter: `tslSettings.initialStateTslImport`
 - remove unused test data for checks of keyUsage and extendedKeyUsage; we do not check for these
   errors
 - correct and update AFO annotations
 - establish swagger api documentation in server simulators at: `http://server:port/api-docs`
 - javadoc is not generated anymore
-- change OCSP responder to actualy calculate issuerCertHash and issuerKeyHash instead of mirroring
+- change OCSP responder to actually calculate issuerCertHash and issuerKeyHash instead of mirroring
   the request
 - optimize execution time of parameterized tests by skipping initial state for the non-first test
   cases
@@ -49,9 +57,9 @@
 - prevent startup of PcapManager, OCSP and TSL simulators during initalTslandTa execution
 - restructure the order of topics in the test report
 - OCPS Responder and TSL Provider are started only once for each run
-- update docker files for use with latest docker version
+- update docker files for use with the latest docker version
 - add possibility to change log level over *.sh scripts
-- stabilise some test cases with rare race conditions (i.e. verifyUseBackupTslDownload,
+- stabilise some test cases with rare race conditions (i.e., verifyUseBackupTslDownload,
   verifyRetryFailingTslDownload, verifyIrregularDifferencesBetweenCurrentAndNewTsls)
 - increase code coverage
 - restructure code for better readability
@@ -84,7 +92,7 @@
 
 ## Release 1.0.1
 
-- migrate from maven based execution of approval tests to binary (jar) based
+- migrate from maven-based execution of approval tests to binary (jar) based
 - enable building docker images for OCSP Responder and TSL Provider
 - add verification of expected sequence number in OCSP responses
 
@@ -95,7 +103,7 @@
 ## Release 0.4.1
 
 - add test cases checking number of retries for primary and backend endpoints for TSL download
-- add test cases in the context of Trust Anchor Change verification - the tests are set to run as
+- add test cases in the context of Trust Anchor Change verification—the tests are set to run as
   the last
 - add test cases in the context of TSL signer certificate verification
 - add test cases in the context of TSL approval verification
@@ -116,7 +124,7 @@
 
 ## Release 0.3.0
 
-- add test cases in context of tsl signer certificate ocsp status verification
+- add test cases in the context of tsl signer certificate ocsp status verification
 - separate test cases in own classes by context (ocsp tests, tsl tests, tsl signer tests,
   certificate tests)
 - add network sniffing to pcap files
@@ -144,7 +152,7 @@
 
 ## Release 0.1.1
 
-- bug fixes in build pipeline
+- bug fixes in a build pipeline
 
 ## Release 0.1.0
 

@@ -30,12 +30,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class InitialTestDataTest {
 
   @Test
+  @DisplayName("Build initial TSL and trust anchor")
   void buildInitialTslAndTa() throws IOException {
 
     final int tslSeqNr = 1;
@@ -50,6 +52,7 @@ public class InitialTestDataTest {
             .tslSeqNr(tslSeqNr)
             .tslName("initialTsl")
             .tslSigner(PkitsTestDataConstants.DEFAULT_TSL_SIGNER)
+            .trustAnchor(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
             .tslProviderUri(
                 getHttpAddressString(tslProvider.getIpAddressOrFqdn(), tslProvider.getPort()))
             .ocspResponderUri(

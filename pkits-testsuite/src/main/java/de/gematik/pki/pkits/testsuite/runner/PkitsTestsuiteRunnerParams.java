@@ -19,23 +19,23 @@ package de.gematik.pki.pkits.testsuite.runner;
 import de.gematik.pki.pkits.testsuite.reporting.ListApprovalTestsAndAfos;
 import java.nio.file.Path;
 import lombok.Getter;
-import picocli.CommandLine;
 import picocli.CommandLine.Help.Visibility;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Spec;
 
 @Getter
 class PkitsTestsuiteRunnerParams {
 
-  @CommandLine.Option(
+  @Option(
       names = {"-tf", "--tests-file"},
-      description = "the file with tests to run",
+      description = "The file with tests to run.",
       defaultValue = ListApprovalTestsAndAfos.ALL_TESTCASES_FILENAME,
       showDefaultValue = Visibility.ALWAYS)
   Path testCasesFile;
 
-  @CommandLine.Option(
+  @Option(
       names = {"-faf", "--failed-and-aborted-file"},
       description =
           "Save all failed or aborted tests to this file. The file can be used as parameter for the"
@@ -44,17 +44,17 @@ class PkitsTestsuiteRunnerParams {
       showDefaultValue = Visibility.ALWAYS)
   Path failedTestCases;
 
-  @CommandLine.Option(
+  @Option(
       names = {"-tn", "--tests-names"},
       description =
-          "comma separated list of names to run, for example"
-              + " \"verifyUseCaseCertsValid,TslApprovalTestsIT,TslSignerApprovalTestsIT#checkInitialState\"")
+          "Comma separated list of names to run, for example: \"verifyUseCaseCertsValid,"
+              + " TslApprovalTestsIT, TslSignerApprovalTestsIT#checkInitialState\".")
   String testCasesNames;
 
   int percent;
   @Spec CommandSpec spec;
 
-  @CommandLine.Option(
+  @Option(
       names = {"-p", "--percent"},
       paramLabel = "NUMBER",
       description =
@@ -76,14 +76,14 @@ class PkitsTestsuiteRunnerParams {
     this.percent = value;
   }
 
-  @CommandLine.Option(
+  @Option(
       names = {"-h", "--help"},
       usageHelp = true,
-      description = "display a help message")
+      description = "Display this help message.")
   boolean helpRequested = false;
 
-  @CommandLine.Option(
-      names = {"--no-pdf-report"},
-      description = "Do not generate report as PDF")
+  @Option(
+      names = {"-np", "--no-pdf-report"},
+      description = "Do not generate report as PDF.")
   boolean skipPdfReport = false;
 }
