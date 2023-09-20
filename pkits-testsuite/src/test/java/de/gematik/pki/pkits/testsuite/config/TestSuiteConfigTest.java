@@ -16,23 +16,26 @@
 
 package de.gematik.pki.pkits.testsuite.config;
 
+import static de.gematik.pki.pkits.testsuite.TestConstants.CONFIG_FILE_INTTEST_TEMPLATE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import de.gematik.pki.pkits.testsuite.reporting.ListParameters;
 import java.nio.file.Path;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class TestSuiteConfigTest {
 
-  @Test
-  void getTestSuiteConfig() {
-    assertDoesNotThrow(TestConfigManager::getTestSuiteConfig);
+  static TestSuiteConfig testSuiteConfig;
+
+  @BeforeAll
+  static void setUp() {
+    testSuiteConfig = TestSuiteConfig.fromYaml(CONFIG_FILE_INTTEST_TEMPLATE_PATH);
   }
 
   @Test
   void readStringFromConfig() {
-    final TestSuiteConfig testSuiteConfig = TestConfigManager.getTestSuiteConfig();
+
     assertThat(
             testSuiteConfig
                 .getTestObject()
@@ -44,8 +47,7 @@ class TestSuiteConfigTest {
 
   @Test
   void readBooleanFromConfig() {
-    assertThat(
-            TestConfigManager.getTestSuiteConfig().getTestSuiteParameter().isPerformInitialState())
+    assertThat(testSuiteConfig.getTestSuiteParameter().isPerformInitialState())
         .isInstanceOf(Boolean.class);
   }
 
@@ -220,49 +222,48 @@ class TestSuiteConfigTest {
     final String testObject_scriptUseCase__appDataHttpFwdSocket =
         "HasToBeDefined_appDataHttpFwdSocket";
 
-    final Path yamlMinimal = Path.of("./docs/configs/inttest/pkits.yml");
-
     final TestSuiteConfig tscBlank = new TestSuiteConfig();
-    final TestSuiteConfig tscMinimal = TestSuiteConfig.fromYaml(yamlMinimal);
 
     // overwrite with the default value
-    tscMinimal
+    testSuiteConfig
         .getTestObject()
         .setOcspGracePeriodSeconds(tscBlank.getTestObject().getOcspGracePeriodSeconds());
-    tscMinimal
+    testSuiteConfig
         .getTestObject()
         .setTslProcessingTimeSeconds(tscBlank.getTestObject().getTslProcessingTimeSeconds());
-    tscMinimal.getTestSuiteParameter().setCaptureInterfaces("9.9.9.9");
+    testSuiteConfig.getTestSuiteParameter().setCaptureInterfaces("9.9.9.9");
 
-    setNonDefaultValues(tscMinimal);
+    setNonDefaultValues(testSuiteConfig);
 
     final CustomAsserter ca = new CustomAsserter();
 
-    ca.assertEquals(testObject_name, tscMinimal.getTestObject().getName());
-    ca.assertEquals(testObject_testObjectType, tscMinimal.getTestObject().getTestObjectType());
-    ca.assertEquals(testObject_ipAddressOrFqdn, tscMinimal.getTestObject().getIpAddressOrFqdn());
-    ca.assertEquals(testObject_port, tscMinimal.getTestObject().getPort());
+    ca.assertEquals(testObject_name, testSuiteConfig.getTestObject().getName());
+    ca.assertEquals(testObject_testObjectType, testSuiteConfig.getTestObject().getTestObjectType());
+    ca.assertEquals(
+        testObject_ipAddressOrFqdn, testSuiteConfig.getTestObject().getIpAddressOrFqdn());
+    ca.assertEquals(testObject_port, testSuiteConfig.getTestObject().getPort());
     ca.assertEquals(
         testObject_tslDownloadIntervalSeconds,
-        tscMinimal.getTestObject().getTslDownloadIntervalSeconds());
+        testSuiteConfig.getTestObject().getTslDownloadIntervalSeconds());
 
     ca.assertEquals(
-        ocspResponder_ipAddressOrFqdn, tscMinimal.getOcspResponder().getIpAddressOrFqdn());
-    ca.assertEquals(ocspResponder_port, tscMinimal.getOcspResponder().getPort());
-    ca.assertEquals(tslProvider_ipAddressOrFqdn, tscMinimal.getTslProvider().getIpAddressOrFqdn());
-    ca.assertEquals(tslProvider_port, tscMinimal.getTslProvider().getPort());
+        ocspResponder_ipAddressOrFqdn, testSuiteConfig.getOcspResponder().getIpAddressOrFqdn());
+    ca.assertEquals(ocspResponder_port, testSuiteConfig.getOcspResponder().getPort());
+    ca.assertEquals(
+        tslProvider_ipAddressOrFqdn, testSuiteConfig.getTslProvider().getIpAddressOrFqdn());
+    ca.assertEquals(tslProvider_port, testSuiteConfig.getTslProvider().getPort());
     ca.assertEquals(
         testSuiteParameter_captureNetworkTraffic,
-        tscMinimal.getTestSuiteParameter().getCaptureInterfaces());
+        testSuiteConfig.getTestSuiteParameter().getCaptureInterfaces());
     ca.assertEquals(
         testObject_scriptUseCase__appDataHttpFwdSocket,
-        tscMinimal.getTestObject().getScriptUseCase().getAppDataHttpFwdSocket());
+        testSuiteConfig.getTestObject().getScriptUseCase().getAppDataHttpFwdSocket());
 
-    testNonDefaultsInSshConfig(ca, tscMinimal.getSshConfig());
+    testNonDefaultsInSshConfig(ca, testSuiteConfig.getSshConfig());
 
     assertThat(ca.counter).as("20 parameters without defaults").isEqualTo(20);
 
-    testDefaults(ca, tscMinimal);
+    testDefaults(ca, testSuiteConfig);
 
     final int numberOfAllFields = ListParameters.getNumberOfAllFields(TestSuiteConfig.class);
     assertThat(ca.counter).isEqualTo(numberOfAllFields);

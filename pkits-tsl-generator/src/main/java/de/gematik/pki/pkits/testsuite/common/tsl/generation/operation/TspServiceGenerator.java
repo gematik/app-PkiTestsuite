@@ -272,7 +272,7 @@ public class TspServiceGenerator {
         .addServiceInformationExtension(CertificateType.CERT_TYPE_ZD_TLS_S)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_FD_TLS_C)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_FD_TLS_S)
-        .addServiceInformationExtension(CertificateType.CERT_TYPE_CM_TLS_C)
+        .addServiceInformationExtension(CertificateType.CERT_TYPE_CM_TLS_CS)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_FD_ENC)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_FD_SIG)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_SGD_HSM_AUT)

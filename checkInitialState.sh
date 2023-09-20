@@ -26,5 +26,9 @@ logLevelOcsp=-Dlog4j2.rootLogLevelOcspResponder=info
 logLevelTsl=-Dlog4j2.rootLogLevelTslProvider=info
 
 java $logLevelPkiTs $logLevelOcsp $logLevelTsl $customFileNamePostfix  $pkitsConfig  -jar ./bin/pkits-testsuite-exec.jar --tests-names "InitialStateTest#checkInitialState"
-
-printf "...done!"
+if [ $? -eq 0 ]; then
+  printf "...done!"
+  exit 0
+else
+  exit 1
+fi

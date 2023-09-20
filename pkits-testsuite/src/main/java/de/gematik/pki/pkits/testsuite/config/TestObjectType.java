@@ -29,11 +29,17 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum TestObjectType {
-  IDP_FACHDIENST("IdpFachdienst", null, UseCaseConnectionType.SCRIPT, null, null, null),
+  IDP_FACHDIENST(
+      "IdpFachdienst",
+      "fachmodulClient",
+      UseCaseConnectionType.SCRIPT,
+      PkitsTestDataConstants.DEFAULT_SMCB_CA,
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+      PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA),
 
   INTERMEDIAER_SERVER(
       "IntermediaerServer",
-      "fachmodulClient",
+      "fachmodulClientIntermediaer",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
       PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,

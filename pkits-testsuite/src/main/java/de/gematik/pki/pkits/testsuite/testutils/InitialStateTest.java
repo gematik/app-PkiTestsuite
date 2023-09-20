@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.testsuite.testutils;
 
 import de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,11 @@ public class InitialStateTest extends ApprovalTestsBase {
   void checkInitialState() {
 
     retrieveCurrentTslSeqNrInTestObject();
+
+    Assumptions.assumeTrue(
+        testSuiteConfig.getTestSuiteParameter().isPerformInitialState(),
+        "performInitialState is set to false, this test is aborted");
+
     initialState();
   }
 }

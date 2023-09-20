@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.testsuite.config;
 
+import static de.gematik.pki.pkits.testsuite.TestConstants.CONFIG_FILE_INTTEST_DIR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -38,7 +39,7 @@ class TestObjectTypeTest {
   void readExistingConfigFiles() throws IOException {
 
     final List<Path> ymlFiles;
-    try (final Stream<Path> ymlFilesStream = Files.list(Path.of("./docs/configs/inttest/"))) {
+    try (final Stream<Path> ymlFilesStream = Files.list(CONFIG_FILE_INTTEST_DIR)) {
       ymlFiles = ymlFilesStream.filter(path -> path.toString().endsWith("yml")).toList();
     }
 

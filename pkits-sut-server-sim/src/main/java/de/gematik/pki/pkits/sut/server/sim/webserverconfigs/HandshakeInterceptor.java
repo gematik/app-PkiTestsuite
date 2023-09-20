@@ -16,6 +16,15 @@
 
 package de.gematik.pki.pkits.sut.server.sim.webserverconfigs;
 
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_BUNDESWEHRAPOTHEKE;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_KOSTENTRAEGER;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_KRANKENHAUS;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_KRANKENHAUSAPOTHEKE;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_MOBILE_EINRICHTUNG_RETTUNGSDIENST;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_OEFFENTLICHE_APOTHEKE;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_PRAXIS_ARZT;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_PRAXIS_PSYCHOTHERAPEUT;
+import static de.gematik.pki.gemlibpki.certificate.Role.OID_ZAHNARZTPRAXIS;
 import static de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication.PRODUCT_TYPE;
 
 import de.gematik.pki.gemlibpki.certificate.Admission;
@@ -30,6 +39,7 @@ import de.gematik.pki.pkits.sut.server.sim.tsl.TslProcurer;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Set;
 import javax.net.ssl.X509TrustManager;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -126,7 +136,30 @@ public final class HandshakeInterceptor implements X509TrustManager {
             OCSP_ENABLED,
             chain[0].getSerialNumber());
         final Admission admission = tucPki18Verifier.performTucPki018Checks(chain[0]);
-        log.info("TUC_PKI_018 endend with success, role(s): {}", admission.getProfessionItems());
+
+        // NOTE: The following OIDs are the allowed OIDs for an VSDM Intermediär.
+        // Our SUT simulates an IM
+        final Set<String> allowedProfOids =
+            Set.of(
+                OID_PRAXIS_ARZT.getProfessionOid(),
+                OID_ZAHNARZTPRAXIS.getProfessionOid(),
+                OID_PRAXIS_PSYCHOTHERAPEUT.getProfessionOid(),
+                OID_KRANKENHAUS.getProfessionOid(),
+                OID_OEFFENTLICHE_APOTHEKE.getProfessionOid(),
+                OID_KRANKENHAUSAPOTHEKE.getProfessionOid(),
+                OID_BUNDESWEHRAPOTHEKE.getProfessionOid(),
+                OID_MOBILE_EINRICHTUNG_RETTUNGSDIENST.getProfessionOid(),
+                OID_KOSTENTRAEGER.getProfessionOid());
+        if (!TucPki018Verifier.checkAllowedProfessionOids(admission, allowedProfOids)) {
+          throw new TosException(
+              "Certificate not valid, profession not allowed. Expected: %s but got %s"
+                  .formatted(allowedProfOids, admission.getProfessionOids()));
+        }
+
+        log.info(
+            "TUC_PKI_018 endend with success, role(s): {} [{}]",
+            admission.getProfessionItems(),
+            admission.getProfessionOids());
       } catch (final GemPkiException e) {
         log.info(e.getMessage());
         throw new CertificateException("TUC_PKI_018 check unsuccessful.", e);

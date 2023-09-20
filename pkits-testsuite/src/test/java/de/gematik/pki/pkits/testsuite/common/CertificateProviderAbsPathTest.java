@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.testsuite.common;
 
+import static de.gematik.pki.pkits.testsuite.TestConstants.CONFIG_FILE_INTTEST_TEMPLATE_PATH;
 import static de.gematik.pki.pkits.testsuite.common.TestSuiteConstants.PKITS_CFG_FILE_PATH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -38,18 +39,28 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CertificateProviderAbsPathTest {
 
-  static final Path configFileInttestTemplatePath = Path.of("./docs/configs/inttest/pkits.yml");
+  static final Path BACKUP_CFG_FILE_PATH = Path.of(PKITS_CFG_FILE_PATH + "_backup");
 
   @BeforeAll
   public void setup() throws IOException {
-    createConfigFileWithAbsolutePathsToCerts();
+    // save org config if existing
+    if (Files.exists(PKITS_CFG_FILE_PATH)) {
+      Files.copy(PKITS_CFG_FILE_PATH, BACKUP_CFG_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
+    }
+    // use inttest config for tests
+    final String fileContent = Files.readString(CONFIG_FILE_INTTEST_TEMPLATE_PATH);
+    Files.writeString(PKITS_CFG_FILE_PATH, fileContent);
   }
 
   @AfterAll
   static void tearDown() throws IOException {
-    // restore config file (maven might have copied it)
-    Files.copy(
-        configFileInttestTemplatePath, PKITS_CFG_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
+    // restore org config
+    if (Files.exists(BACKUP_CFG_FILE_PATH)) {
+      Files.copy(BACKUP_CFG_FILE_PATH, PKITS_CFG_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
+      Files.delete(BACKUP_CFG_FILE_PATH);
+    } else {
+      Files.delete(PKITS_CFG_FILE_PATH);
+    }
   }
 
   @ParameterizedTest
@@ -87,12 +98,5 @@ class CertificateProviderAbsPathTest {
     log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
     assertThat(eeCertPath.toString()).contains(".p12");
     assertThat(issuerCertPath.toString()).contains(".pem");
-  }
-
-  private void createConfigFileWithAbsolutePathsToCerts() throws IOException {
-
-    final String fileContent = Files.readString(configFileInttestTemplatePath);
-
-    Files.writeString(PKITS_CFG_FILE_PATH, fileContent);
   }
 }
