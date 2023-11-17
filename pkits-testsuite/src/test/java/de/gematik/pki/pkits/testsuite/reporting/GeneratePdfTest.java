@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package de.gematik.pki.pkits.tsl.provider;
+package de.gematik.pki.pkits.testsuite.reporting;
 
-import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import static org.junit.jupiter.api.Assertions.*;
 
-@Slf4j
-@Component
-@Data
-public class TslConfigHolder {
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import org.junit.jupiter.api.Test;
 
-  private TslProviderConfigDto tslProviderConfigDto;
+class GeneratePdfTest {
 
-  public boolean isNotConfigured() {
-    return tslProviderConfigDto == null;
+  @Test
+  void testHtmlGeneration() {
+    assertDoesNotThrow(() -> GeneratePdf.toHtml("test"));
+  }
+
+  @Test
+  void testSaveHtmlAndPdf() throws URISyntaxException {
+    final Path path =
+        Path.of(GeneratePdfTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+    assertDoesNotThrow(() -> GeneratePdf.saveHtmlAndPdf("test", path.resolve("test"), true));
   }
 }

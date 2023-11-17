@@ -1,12 +1,12 @@
 # Submit a pull request
 
-Thank you for submitting a pull request! To speed up the review process, please ensure that everything below
-is true:
+Thank you for submitting a pull request! To speed up the review process, please ensure that
+everything below is true:
 
 1. This is not a duplicate of an existing pull request.
 2. No existing features have been broken without good reason.
 3. Your commit messages are detailed
-4. The [contribution rules][1] have bee carefully read an followed.
+4. The [contribution rules][1] have be carefully read and followed.
 5. Documentation has been updated to reflect your changes.
 6. Tests have been added or updated to reflect your changes.
 7. All tests pass.
@@ -39,4 +39,4 @@ Provide any other important details below.
 
 :question:
 
-[1]: https://github.com/gematik/github-templates/blob/main/.github/CONTRIBUTING.md
+[1]: ./CONTRIBUTING.md

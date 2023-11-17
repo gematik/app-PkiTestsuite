@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -137,8 +138,7 @@ public class GeneratePdf {
     final String defaultLogFilename =
         Path.of(ApprovalTestsBase.OUT_LOGS_DIRNAME, "pkits-testsuite-test.log").toString();
 
-    final String logFilename =
-        StringUtils.defaultString(ArrayUtils.get(args, 0), defaultLogFilename);
+    final String logFilename = Objects.toString(ArrayUtils.get(args, 0), defaultLogFilename);
 
     final Path logFile = Path.of(logFilename);
     final Path baseFilename = prepareReportDirAndGetBaseFilename(logFile);

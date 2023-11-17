@@ -24,7 +24,7 @@ import org.junit.jupiter.api.TestInfo;
 @Getter
 public class CurrentTestInfo {
 
-  private TestInfo testInfo;
+  private final TestInfo testInfo;
 
   private int tslCounter = 1;
 

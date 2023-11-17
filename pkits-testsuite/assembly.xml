@@ -17,7 +17,7 @@
       </unpackOptions>
     </dependencySet>
   </dependencySets>
-  <!-- to fix problem with log4j2.xml taken from pkits-common, see PKITS-236 -->
+  <!-- to fix a problem with log4j2.xml taken from pkits-common, see PKITS-236 -->
   <fileSets>
     <fileSet>
       <directory>${project.build.outputDirectory}</directory>

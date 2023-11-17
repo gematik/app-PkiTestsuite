@@ -124,7 +124,7 @@ public class TslProviderController {
 
   private ResponseEntity<byte[]> getResponseEntityWithTsl(final boolean isPrimaryEndpoint) {
 
-    if (!tslConfigHolder.isConfigured()) {
+    if (tslConfigHolder.isNotConfigured()) {
       log.info(
           "Tsl provider not configured -> response with status code {}",
           HttpStatus.INTERNAL_SERVER_ERROR);
@@ -161,7 +161,7 @@ public class TslProviderController {
 
   private ResponseEntity<String> getResponseEntityWithHash() {
 
-    if (!tslConfigHolder.isConfigured()) {
+    if (tslConfigHolder.isNotConfigured()) {
       return ResponseEntity.internalServerError().body(NOT_CONFIGURED);
     }
 

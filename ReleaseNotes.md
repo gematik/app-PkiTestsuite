@@ -2,12 +2,23 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.3.0
+
+-
+- extend validity of default TSL Signer certificate
+- add example scripts for independent usage of the OCSP
+  responder [ocspResponderExample](docs%2FocspResponderExample)
+- remove tests (certificates) of wrong admissions because they are too academical
+- change mechanism of zip-package creation by using a dedicated maven module
+- update dependencies
+- code optimizations
+
 ## Release 2.2.0
 
 - add tests for admission and profession oid's for test object types that have to evaluate roles
 - BUGFIX: prevent checkInitialState from passing when performInitialState is not true
 - BUGFIX: initialTslAndTa.sh from failing
-- change shell skripts to return correct error code
+- change shell scripts to return correct error code
 - update dependencies
 
 ## Release 2.1.0
