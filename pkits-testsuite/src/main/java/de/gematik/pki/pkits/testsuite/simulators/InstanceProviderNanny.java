@@ -21,6 +21,9 @@ import static de.gematik.pki.pkits.common.PkitsConstants.WEBSERVER_HEALTH_ENDPOI
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import kong.unirest.HttpResponse;
@@ -107,6 +110,11 @@ public abstract class InstanceProviderNanny {
   }
 
   protected void startServerProcess() {
+    if (Files.notExists(Path.of(appPath))) {
+      throw new PkiCommonException(
+          "Could not find jar file to start server process <" + serverId + ">: " + appPath);
+    }
+
     final ProcessBuilder processBuilder =
         new ProcessBuilder(
             "java", // NOSONAR java:S4036
@@ -120,7 +128,7 @@ public abstract class InstanceProviderNanny {
       log.info("Start web server process <{}> at {}:{}", serverId, ipAddressOrFqdn, port);
       process = processBuilder.start();
       log.debug("Web server process <{}> started, PID:{}", serverId, process.pid());
-    } catch (final Exception e) {
+    } catch (final IOException e) {
       throw new PkiCommonException("Could not start server <" + serverId + ">", e);
     }
   }

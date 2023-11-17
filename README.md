@@ -9,8 +9,7 @@ This test suite is used to verify a telematic infrastructure (TI) product server
 health care system against gematik gemSpec_PKI specifications available
 at [gematik Fachportal](https://fachportal.gematik.de/). Especially TUC_PKI_001 (TSL validation),
 TUC_PKI_018 (certificate validation) and TUC_PKI_006 (OCSP response validation). It is used for
-approval tests of every PKI related aspect. It is a re-development of our test suite from 2016. The
-development is still ongoing [see Todo section](./README.md#todo)
+approval tests of every PKI related aspect. It is a re-development of our test suite from 2016.
 
 Products tested by this test suite are: Intermediär, VSDM Fachdienst, VPN Zugangsdienst:
 Registrierungsdienst and Konzentrator, IDP Fachdienst, KIM Fachdienst. More are coming.
@@ -84,20 +83,49 @@ The TSL provider is a service that delivers TSLs to the test object.
 The behavior of this service, such as the content of a TSL offered to the test object, is
 configured automatically during the test execution over a REST interface.
 The TSL provider is implemented as a spring boot tomcat web server and runs as its own process.
-It can be started independently or by the test suite. To start it independently, one has to
-set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to the jar
-via `--server.port=[port]` and `--server.address=[IpOrFqdn]`
+
+The socket that is runs on is configured as followed:
+
+```yaml
+tslProvider:
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8084
+```
+
+This configuration is also written to every tsl as the download points in `PointersToOtherTSL`. For
+this reason it is crucial to configure it correctly before generating the initial TSL for the test
+object (see [Initial TSL and Trust Anchor](./README.md#initial-tsl-and-trust-anchor)).
+
+The TSL provider is started automatically at the configured socket, but in can be started
+independently. To do so, one has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address
+and port can be passed to the jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`. This
+way it is possible to run the TSL provider in a different environment as the test suite.
 
 ### 3. OCSP Responder
 
 The OCSP responder is a service to generate responses to OCSP requests sent by the test object.
 The behavior of this service is configured over a REST interface and transparent to the user.
-Depending on the tests, it can be configured to deliver unsigned OCSP responses, wrong cert
+Depending on the tests, the test suite configures it to deliver unsigned OCSP responses, wrong cert
 hashes and so on.
 Similar to the TSL provider, it is implemented as a spring boot tomcat web server and runs as its
-own process. It can be started independently or by the test suite. To start it independently, one
-has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address and port can be passed to
-the jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`.
+own process.
+
+The socket that is runs on is configured as followed:
+
+```yaml
+ocspResponder:
+  ipAddressOrFqdn: "127.0.0.1"
+  port: 8083
+```
+
+This configuration is also written to every tsl as the service supply point of each trust service.
+For this reason it is crucial to configure it correctly before generating the initial TSL for the
+test object (see [Initial TSL and Trust Anchor](./README.md#initial-tsl-and-trust-anchor)).
+
+The OCSP responder is started automatically at the configured socket, but in can be started
+independently. To do so, one has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address
+and port can be passed to the jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`. This
+way it is possible to run the OCSP responder in a different environment as the test suite.
 
 ### 4. Use Case Modules
 
@@ -193,7 +221,11 @@ For the configuration of the test object, it is necessary to initialize it with 
 compatible with the test suite.
 For this, a convenient script is provided by the test suite:
 By executing `./initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
-the `./out` directory for import into the test object.
+the `./out` directory for manual import into the test object.
+
+Before generating this TSL it is crucial to configure the sockets for
+the [TSL provider](./README.md#2-tsl-provider) and [OCSP responder](./README.md#3-ocsp-responder)
+correctly.
 
 This TSL contains the TU trust store as well; this means that the test object can be used during the
 pki tests by other services as well.
@@ -297,8 +329,7 @@ The following commands will build the sources and generate a zip package like th
 release.
 
 ```bash
-mvn clean package
-mvn install --non-recursive --activate-profiles final-zip  
+mvn clean package 
 ```
 
 You can find the zip package in the directory `./out/pkitestsuite-x.x.x.zip`.
@@ -307,7 +338,8 @@ You can find the zip package in the directory `./out/pkitestsuite-x.x.x.zip`.
 
 For questions or issues, feel free to open a
 ticket: https://service.gematik.de/servicedesk/customer/portal/36
-If you are not a registered user yet, you can use the contact formular
+If you are not a registered user yet, you can use the following contact
+formular: https://www.gematik.de/kontakt/kontaktformular
 
 ## Versioning
 

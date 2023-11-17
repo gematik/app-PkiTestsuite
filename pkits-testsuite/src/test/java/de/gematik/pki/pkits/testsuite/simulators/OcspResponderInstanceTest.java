@@ -16,8 +16,11 @@
 
 package de.gematik.pki.pkits.testsuite.simulators;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import de.gematik.pki.pkits.common.PkiCommonException;
+import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
 import org.junit.jupiter.api.Test;
 
 class OcspResponderInstanceTest {
@@ -25,8 +28,19 @@ class OcspResponderInstanceTest {
   @Test
   void testOcspResponderInstance() {
     final OcspResponderInstance ocspResponderInstance = OcspResponderInstance.getInstance();
+    ocspResponderInstance.setAppPath(
+        TestConfigManager.getTestSuiteConfig().getOcspResponder().getAppPath());
     assertDoesNotThrow(ocspResponderInstance::startServer);
     assertDoesNotThrow(() -> ocspResponderInstance.waitUntilWebServerIsUp(30));
     assertDoesNotThrow(ocspResponderInstance::stopServer);
+  }
+
+  @Test
+  void testOcspResponderJarMissing() {
+    final OcspResponderInstance ocspResp = OcspResponderInstance.getInstance();
+    ocspResp.setAppPath("notValid");
+    assertThatThrownBy(ocspResp::startServer)
+        .isInstanceOf(PkiCommonException.class)
+        .hasMessageStartingWith("Could not find jar file to start server process");
   }
 }

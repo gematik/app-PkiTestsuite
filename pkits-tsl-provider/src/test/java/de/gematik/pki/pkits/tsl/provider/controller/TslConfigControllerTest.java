@@ -69,7 +69,6 @@ class TslConfigControllerTest {
 
     log.info("new TslProviderConfig: {}", tslProviderConfig);
     final String jsonContent = PkitsCommonUtils.createJsonContent(tslProviderConfig);
-    System.out.println("jsonContent:\n" + jsonContent);
 
     final HttpResponse<String> response =
         Unirest.post(WEBSERVER_CONFIG_URL)

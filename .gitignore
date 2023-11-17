@@ -5,9 +5,7 @@
 out/
 bin/
 /pid.file
-
 **/sampleAllTests.txt
-
 /allFailedOrAborted.txt
 
 docs/configs/tuTestObjects/

@@ -1,5 +1,4 @@
-<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.1 https://maven.apache.org/xsd/assembly-2.1.1.xsd">
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.1 https://maven.apache.org/xsd/assembly-2.1.1.xsd">
   <id>zip</id>
   <formats>
     <format>zip</format>
@@ -8,12 +7,12 @@
   <fileSets>
 
     <fileSet>
-      <directory>${project.basedir}/testDataTemplates/</directory>
+      <directory>${project.basedir}/../testDataTemplates/</directory>
       <outputDirectory>./testDataTemplates/</outputDirectory>
     </fileSet>
 
     <fileSet>
-      <directory>${project.basedir}/</directory>
+      <directory>${project.basedir}/..</directory>
       <outputDirectory>.</outputDirectory>
       <includes>
         <include>allTests.txt</include>
