@@ -2,9 +2,15 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.3.1
+
+- update TSL template to latest revision
+- raise verbosity output of tls connection phase
+- raise stability
+- update dependencies
+
 ## Release 2.3.0
 
--
 - extend validity of default TSL Signer certificate
 - add example scripts for independent usage of the OCSP
   responder [ocspResponderExample](docs%2FocspResponderExample)

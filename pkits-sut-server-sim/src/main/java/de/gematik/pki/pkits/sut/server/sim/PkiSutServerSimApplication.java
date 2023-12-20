@@ -40,7 +40,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class PkiSutServerSimApplication implements SecurityFilterChain {
 
   static {
-    /** {@link sun.security.ssl.NamedGroup#SECP192_R1} */
+    /* {@link sun.security.ssl.NamedGroup#SECP192_R1} */
     System.setProperty(
         "jdk.tls.namedGroups",
         "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, secp256r1, secp384r1");

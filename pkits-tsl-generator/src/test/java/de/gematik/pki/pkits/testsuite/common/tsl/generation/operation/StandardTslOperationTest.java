@@ -18,8 +18,11 @@ package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import de.gematik.pki.gemlibpki.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
 import de.gematik.pki.gemlibpki.tsl.TslReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
@@ -41,7 +44,12 @@ class StandardTslOperationTest {
   void createTslFromFile() throws IOException {
     final Path destFilePath = Path.of("pkits-tsl-generator/target/unittest_createTslFromFile.xml");
     final String newSsp = "http://my.new-cool-service-supply-point:5544/ocsp";
-    final int modifiedSspAmountExpected = 138;
+
+    final int minModifiedSspAmountExpected =
+        new TslInformationProvider(TslReader.getTslUnsigned(ARVATO_TU_TSL))
+            .getFilteredTspServices(TslConstants.STI_CA_LIST)
+            .size();
+
     final ZonedDateTime now = GemLibPkiUtils.now();
     final int COMPARE_LEN = "yyyy-mm-ddThh:mm".length();
 
@@ -72,7 +80,7 @@ class StandardTslOperationTest {
     final byte[] tslBytes = tslContainer.getAsTslUnsignedBytes();
     Files.write(destFilePath, tslBytes);
 
-    assertThat(countStringInFile(destFilePath, newSsp)).isEqualTo(modifiedSspAmountExpected);
+    assertThat(countStringInFile(destFilePath, newSsp)).isGreaterThan(minModifiedSspAmountExpected);
     final String dateTimeWithoutSeconds =
         TslReader.getIssueDate(TslReader.getTslUnsigned(destFilePath))
             .toString()

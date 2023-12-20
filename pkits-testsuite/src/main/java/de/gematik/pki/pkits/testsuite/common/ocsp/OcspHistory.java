@@ -100,7 +100,7 @@ public final class OcspHistory {
           .hasSize(ocspRequestExpectationBehaviour.getExpectedRequestAmount());
     }
 
-    // TODO clarify what if there are multiple entries in history and
+    // NOTE: clarify what if there are multiple entries in history and
     //      ocspRequestExpectationBehaviour.getExpectedRequestAmount() > 1
     //      we change OcspRequestExpectationBehaviour when necessary
     for (int i = 0; i < ocspRequestExpectationBehaviour.getExpectedRequestAmount(); i++) {

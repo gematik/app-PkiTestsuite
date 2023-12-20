@@ -618,8 +618,13 @@ class OcspApprovalTests extends ApprovalTestsBase {
   private void verifyOcspRequestStructureFromTslUpdate(final TslDownload tslDownload)
       throws IOException, GemPkiException, CertificateEncodingException {
 
-    final byte[] ocspReqBytes =
-        tslDownload.getOcspRequestHistoryContainer().getHistoryEntries().get(0).getOcspReqBytes();
+    final List<OcspRequestHistoryEntryDto> historyEntries =
+        tslDownload.getOcspRequestHistoryContainer().getHistoryEntries();
+    if (historyEntries.isEmpty()) {
+      throw new TestSuiteException(
+          "Problem analyzing OCSP request. No request found in OCSP responder history.");
+    }
+    final byte[] ocspReqBytes = historyEntries.get(0).getOcspReqBytes();
     final OCSPReq ocspReq = new OCSPReq(ocspReqBytes);
 
     final X509Certificate eeCert = tslDownload.getTslSignerCert();
@@ -642,13 +647,15 @@ class OcspApprovalTests extends ApprovalTestsBase {
         .as(USECASE_VALID.getMessage())
         .isEqualTo(USECASE_VALID.getExpectedReturnCode());
 
-    final byte[] ocspReqBytes =
+    final List<OcspRequestHistoryEntryDto> ocspHistoryPart =
         OcspResponderManager.getOcspHistoryPart(
-                ocspResponderUri,
-                tslSequenceNr.getExpectedNrInTestObject(),
-                eeCert.getSerialNumber())
-            .get(0)
-            .getOcspReqBytes();
+            ocspResponderUri, tslSequenceNr.getExpectedNrInTestObject(), eeCert.getSerialNumber());
+    if (ocspHistoryPart.isEmpty()) {
+      throw new TestSuiteException(
+          "Problem analyzing OCSP request. No request found in OCSP responder history.");
+    }
+
+    final byte[] ocspReqBytes = ocspHistoryPart.get(0).getOcspReqBytes();
 
     final OCSPReq ocspReq = new OCSPReq(ocspReqBytes);
 

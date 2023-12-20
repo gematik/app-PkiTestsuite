@@ -45,17 +45,25 @@ public class TestExecutionOutcome {
   }
 
   public String getStatus() {
+
     if (isSkipped()) {
       return "SKIPPED";
+    }
+
+    if (testExecutionResult == null) {
+      return "";
     }
 
     return String.valueOf(testExecutionResult.getStatus());
   }
 
   public String getFurtherInfo() {
-
     if (isSkipped()) {
       return skippedReason;
+    }
+
+    if (testExecutionResult == null) {
+      return "";
     }
 
     if (testExecutionResult.getThrowable().isEmpty()) {

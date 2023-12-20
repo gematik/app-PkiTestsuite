@@ -85,6 +85,7 @@ public final class PkitsCommonUtils {
       log.info("Waiting for {} milliseconds.", milliseconds);
       final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
       executorService.schedule(() -> 0, milliseconds, TimeUnit.MILLISECONDS).get();
+      executorService.shutdown();
     } catch (final InterruptedException | ExecutionException e) {
       Thread.currentThread().interrupt();
       throw new PkiCommonException("Problems in waitMilliseconds", e);
@@ -157,12 +158,11 @@ public final class PkitsCommonUtils {
   public static GitProperties readGitProperties(final Class<?> clazz) {
     final Properties props = new Properties();
     final String gitPropsFilename = "git.properties";
-    try {
+    try (final InputStream propFileResource =
+        clazz.getClassLoader().getResourceAsStream(gitPropsFilename)) {
       // load a properties file from class path, inside static method
-      props.load(clazz.getClassLoader().getResourceAsStream(gitPropsFilename));
-
+      props.load(propFileResource);
       return new GitProperties(props);
-
     } catch (final NullPointerException | IOException e) {
       log.warn("continue: cannot read {} - {}", gitPropsFilename, e.getMessage());
       return new GitProperties();

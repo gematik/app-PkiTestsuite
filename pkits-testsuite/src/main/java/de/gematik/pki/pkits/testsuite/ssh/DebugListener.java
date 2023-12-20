@@ -96,6 +96,8 @@ public class DebugListener implements ScpTransferEventListener {
     if (t != null) {
       sb.append(" ERROR=%s: %s".formatted(t.getClass().getSimpleName(), t.getMessage()));
     }
-    log.debug(sb.toString());
+    if (log.isDebugEnabled()) {
+      log.debug(sb.toString());
+    }
   }
 }

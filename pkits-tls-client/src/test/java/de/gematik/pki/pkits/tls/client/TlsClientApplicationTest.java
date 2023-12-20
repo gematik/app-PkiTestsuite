@@ -36,19 +36,58 @@ class TlsClientApplicationTest {
   }
 
   @Test
-  void verifyMainNoServerAvailable() {
+  void verifyMain() {
+    assertThat(
+            TlsClientApplication.mainWrapper(
+                new String[] {
+                  "unknown",
+                  String.valueOf(8443),
+                  String.valueOf(clientKeystorePath),
+                  KEYSTORE_PASSWORD,
+                  String.valueOf(0)
+                }))
+        .isEqualTo(2);
+  }
 
+  @Test
+  void verifyNoServerAvailable() {
+    final int exitCode =
+        TlsClientApplication.connectTls(
+            "localhost", 8443, clientKeystorePath, KEYSTORE_PASSWORD, 0);
+    assertThat(exitCode).isEqualTo(2);
+  }
+
+  @Test
+  void verifyServerUnknownAvailable() {
     final int exitCode =
         TlsClientApplication.connectTls("unknown", 8443, clientKeystorePath, KEYSTORE_PASSWORD, 0);
     assertThat(exitCode).isEqualTo(2);
   }
 
   @Test
-  void verifyMainWithoutOcsp() {
-
+  void verifyBadClientCert() {
+    final Path badCert =
+        ResourceReader.getFilePathFromResources(
+            "certificates/empty.p12", TlsClientApplicationTest.class);
     final int exitCode =
-        TlsClientApplication.connectTls(
-            "localhost", 8443, clientKeystorePath, KEYSTORE_PASSWORD, 0);
+        TlsClientApplication.connectTls("localhost", 8443, badCert, KEYSTORE_PASSWORD, 0);
+    assertThat(exitCode).isEqualTo(2);
+  }
+
+  @Test
+  void verifyWrongAlgo() {
+    final Path wrongAlgoCert =
+        ResourceReader.getFilePathFromResources(
+            "certificates/dsaCert.p12", TlsClientApplicationTest.class);
+    final int exitCode =
+        TlsClientApplication.connectTls("localhost", 8443, wrongAlgoCert, KEYSTORE_PASSWORD, 0);
+    assertThat(exitCode).isEqualTo(2);
+  }
+
+  @Test
+  void verifyWrongPassw() {
+    final int exitCode =
+        TlsClientApplication.connectTls("localhost", 8443, clientKeystorePath, "01", 0);
     assertThat(exitCode).isEqualTo(2);
   }
 }
