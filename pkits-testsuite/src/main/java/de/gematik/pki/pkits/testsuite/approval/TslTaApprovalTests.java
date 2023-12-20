@@ -470,7 +470,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
 
     final long tripleTslDownloadTimeM10 = tripleTslDownloadTime - 10;
     if (tripleTslDownloadTimeM10 < 0) {
-      // TODO implement fallback
+      // Race condition, be careful here
       log.error("activation of new trust anchor is in the past (too early)");
     }
     final ZonedDateTime newActivationTime2 = now.plusSeconds(tripleTslDownloadTimeM10);

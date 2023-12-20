@@ -15,7 +15,7 @@ fi
 SEARCH_FOLDER=$1
 expTslFound=0;
 now=$(date -d 'now')
-validityDays=180;
+validityDays=90;
 
 if [[ -z $SEARCH_FOLDER ]]; then
         SEARCH_FOLDER="."

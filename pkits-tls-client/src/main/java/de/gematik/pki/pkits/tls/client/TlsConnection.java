@@ -88,9 +88,15 @@ public class TlsConnection {
           TlsClientException,
           TlsConnectionException {
 
-    final P12Container p12Container =
-        P12Reader.getContentFromP12(clientKeystorePath, clientKeystorePassw);
-
+    final P12Container p12Container;
+    try {
+      p12Container = P12Reader.getContentFromP12(clientKeystorePath, clientKeystorePassw);
+    } catch (final Exception e) {
+      throw new TlsClientException("Cannot read certificate: " + clientKeystorePath);
+    }
+    if (p12Container == null) {
+      throw new TlsClientException("Cannot read certificate: " + clientKeystorePath);
+    }
     final String algorithm = p12Container.getCertificate().getPublicKey().getAlgorithm();
 
     final String kfAlgorithm;
@@ -109,9 +115,7 @@ public class TlsConnection {
     } else {
       throw new TlsClientException("Algorithm %s is not supported.".formatted(algorithm));
     }
-
     final KeyManagerFactory kmf = KeyManagerFactory.getInstance(kfAlgorithm);
-
     final KeyStore ks = KeyStore.getInstance("PKCS12");
 
     final InputStream keystoreIs = Files.newInputStream(clientKeystorePath);
@@ -129,11 +133,7 @@ public class TlsConnection {
 
     try (final SSLSocket clientSSLSocket =
         (SSLSocket) sslContextClient.getSocketFactory().createSocket()) {
-      log.info(
-          "try to connect with cert \"{}\" to {}:{} ",
-          clientKeystorePath,
-          serverAddress,
-          serverPort);
+      log.info("Try to connect with cert \"{}\"", clientKeystorePath);
 
       final SSLParameters sslParameters = clientSSLSocket.getSSLParameters();
       sslParameters.setCipherSuites(ciphersSuites);
@@ -142,19 +142,25 @@ public class TlsConnection {
 
       clientSSLSocket.setUseClientMode(true);
       clientSSLSocket.addHandshakeCompletedListener(new TlsHandshakeCompletedListener());
+      log.info(
+          "Try to connect to socket: {}:{} and timeout {}s...",
+          serverAddress,
+          serverPort,
+          ocspDelaySeconds);
       clientSSLSocket.connect(
           new InetSocketAddress(serverAddress, serverPort), ocspDelaySeconds * 1000);
+      log.info("...connection successful.");
+      log.info(
+          "Starting handshake from: {} to remote server socket: {}...",
+          clientSSLSocket.getLocalSocketAddress(),
+          clientSSLSocket.getRemoteSocketAddress());
       clientSSLSocket.startHandshake();
       log.info(
-          "Handshake started. To send application data implement:"
+          "...handshake successfully started. To send application data implement:"
               + " clientSSLSocket.getOutputStream().write()");
-      log.info("Socket we connect from: {}", clientSSLSocket.getLocalSocketAddress());
-    } catch (final TlsFatalAlertReceived e) {
+    } catch (final TlsFatalAlertReceived | SocketTimeoutException e) {
       log.info("No ssl connection established: {}", e.getMessage());
       throw new TlsConnectionException("No ssl connection established.", e);
-    } catch (final SocketTimeoutException e) {
-      log.info("No ssl connection timeout: {}", e.getMessage());
-      throw new TlsConnectionException("No ssl connection timeout.", e);
     } catch (final IOException e) {
       throw new TlsClientException("Problems creating or using client SSL socket.", e);
     }

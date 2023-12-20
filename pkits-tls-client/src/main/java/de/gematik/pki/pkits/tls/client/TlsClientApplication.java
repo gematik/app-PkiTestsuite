@@ -50,10 +50,9 @@ public class TlsClientApplication {
               .ocspDelaySeconds(ocspDelaySeconds)
               .build();
 
-      log.info("TLS connection: start");
+      log.info("TLS connection: start...");
       connection.tlsConnectCerts(certPath);
-      log.info("TLS connected.");
-
+      log.info("...TLS connected successfully.");
     } catch (final TlsConnectionException e) {
       log.info("No ssl connection established.");
       return 1;
@@ -63,16 +62,13 @@ public class TlsClientApplication {
     } catch (final UnknownHostException e) {
       log.info("Host unknown: {}", ipAddressOrFqdn);
       return 2;
-    } catch (final UnrecoverableKeyException e) {
-      log.info("Error with certificate key: {}", certPath);
-      return 2;
-    } catch (final CertificateException e) {
+    } catch (final IOException
+        | UnrecoverableKeyException
+        | CertificateException
+        | NoSuchAlgorithmException
+        | KeyStoreException
+        | KeyManagementException e) {
       log.info("Error with certificate: {}", certPath);
-      return 2;
-    } catch (final NoSuchAlgorithmException e) {
-      log.error("Algorithm problem in cert:" + certPath, e);
-      return 2;
-    } catch (final IOException | KeyStoreException | KeyManagementException e) {
       return 2;
     }
 
@@ -80,7 +76,10 @@ public class TlsClientApplication {
   }
 
   public static void main(final String[] args) {
+    System.exit(mainWrapper(args));
+  }
 
+  public static int mainWrapper(final String[] args) {
     log.info("TLS args: {}", StringUtils.joinWith(" | ", (Object[]) args));
 
     final String ipAddressOrFqdn = args[0];
@@ -89,9 +88,6 @@ public class TlsClientApplication {
     final String clientKeystorePassw = args[3];
     final int ocspDelaySeconds = Integer.parseUnsignedInt(args[4]);
 
-    final int returnCode =
-        connectTls(ipAddressOrFqdn, serverPort, certPath, clientKeystorePassw, ocspDelaySeconds);
-
-    System.exit(returnCode);
+    return connectTls(ipAddressOrFqdn, serverPort, certPath, clientKeystorePassw, ocspDelaySeconds);
   }
 }

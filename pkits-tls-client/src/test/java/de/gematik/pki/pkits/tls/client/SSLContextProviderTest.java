@@ -58,7 +58,7 @@ class SSLContextProviderTest {
 
     assertDoesNotThrow(
         () -> connection.tlsConnectCerts(clientKeystorePath),
-        String.format("Exception with cert: " + clientKeystorePath));
+        String.format("Exception with cert: %s", clientKeystorePath));
   }
 
   @Disabled("Development only")
@@ -78,6 +78,6 @@ class SSLContextProviderTest {
 
     assertDoesNotThrow(
         () -> connection.tlsConnectCerts(clientKeystorePath),
-        String.format("Exception with cert: " + clientKeystorePath));
+        String.format("Exception with cert: %s", clientKeystorePath));
   }
 }

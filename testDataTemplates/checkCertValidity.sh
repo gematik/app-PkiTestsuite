@@ -2,12 +2,12 @@
 #set -x
 
 # desc: checks common certificate types if they are valid for at least xxx days
-# param1: directory to recursevely check files in, if not given current directory is set
+# param1: directory to recursively check files in, if not given current directory is set
 # known issues: files witch contain p12.pem are not checked
 # copyright: 2023 gematik
 
 SEARCH_FOLDER=$1
-validitySeconds=3888000; # 90 day = 7776000; 180 days = 15552000;
+validitySeconds=3888000; # 45 days == 3888000; 90 day = 7776000; 180 days = 15552000;
 expCertFound=0;
 now=$(date -d 'now')
 

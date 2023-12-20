@@ -38,6 +38,14 @@ implemented as maven modules and can be used independently or in conjunction wit
 To execute the test suite you need at least Java 17. The test suite ist build and testet
 with [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
 
+For capturing network traffic via the integrated pcap interface Libpcap for Unix or Npcap for
+Windows (Install Npcap in "Winpcap Compatible Mode") are required. Under linux you have to allow the
+java binary to access the interface:
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip $PATH_TO_YOUR_JDK/bin/java
+```
+
 ### 1. PKI Test Suite
 
 This is the test suite itself. It is used to start all following modules, configure them and read
@@ -98,8 +106,11 @@ object (see [Initial TSL and Trust Anchor](./README.md#initial-tsl-and-trust-anc
 
 The TSL provider is started automatically at the configured socket, but in can be started
 independently. To do so, one has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address
-and port can be passed to the jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`. This
-way it is possible to run the TSL provider in a different environment as the test suite.
+and port can be passed to the jar via `--server.port=[port]`
+and `--server.address=[ipAddressOrFqdn]`. This way it is possible to run the TSL provider in a
+different environment as the test suite.
+
+The TSL provider has an open-api interface for documentation at `<socket>/api-docs`.
 
 ### 3. OCSP Responder
 
@@ -124,8 +135,13 @@ test object (see [Initial TSL and Trust Anchor](./README.md#initial-tsl-and-trus
 
 The OCSP responder is started automatically at the configured socket, but in can be started
 independently. To do so, one has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address
-and port can be passed to the jar via `--server.port=[port]` and `--server.address=[IpOrFqdn]`. This
-way it is possible to run the OCSP responder in a different environment as the test suite.
+and port can be passed to the jar via `--server.port=[port]`
+and `--server.address=[ipAddressOrFqdn]`. This way it is possible to run the OCSP responder in a
+different environment as the test suite.
+
+Example scripts on how to run the OCSP responder independently for other tasks can be found in the
+documentation directory: [ocspResponderExample](docs%2FocspResponderExample) or via the open-api
+interface: `<socket>/api-docs`.
 
 ### 4. Use Case Modules
 
@@ -200,15 +216,14 @@ object.
 We deliver some test data in the directory `./testDataTemplates`. Currently, these test data support
 tests for the following TI products:
 
-| Test object           | testObjectType in pkits.yml | Test data directory         |
-|-----------------------|-----------------------------|-----------------------------|
-| Intermediär Server    | IntermediaerServer          | fachmodulClientIntermediaer |
-| VpnZuD RegServer      | VpnRegServer                | fachmodulClient             |
-| central/SmartCard IDP | IdpFachdienst               | fachmodulClient             |
-| VSDM Fachdienst       | VsdmFachdienst              | intermediaerClient          |
-| KIM Fachdienst        | KimFachdienst               | kimClientModul              |
-| VPN-ZugD Konzentrator | VpnKonzentrator             | netzkonnektorClient         |
-| ePA Aktensystem       | coming soon                 | coming soon                 |
+| Test object             | testObjectType in pkits.yml | Test data directory         |
+|-------------------------|-----------------------------|-----------------------------|
+| KIM Fachdienst          | KimFachdienst               | kimClientModul              |
+| VPN-ZugD Konzentrator   | VpnKonzentrator             | netzkonnektorClient         |
+| VPN-ZugD RegServer      | VpnRegServer                | fachmodulClient             |
+| VSDM Fachdienst         | VsdmFachdienst              | intermediaerClient          |
+| VSDM Intermediär Server | IntermediaerServer          | fachmodulClientIntermediaer |
+| Zentraler/SmartCard IDP | IdpFachdienst               | fachmodulClient             |
 
 These test data are for our own integration tests and can be used for approval tests as well.
 The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own
@@ -332,7 +347,7 @@ release.
 mvn clean package 
 ```
 
-You can find the zip package in the directory `./out/pkitestsuite-x.x.x.zip`.
+You can find the zip package in the directory `./out/pki-testsuite-x.x.x.zip`.
 
 ## Contact
 
