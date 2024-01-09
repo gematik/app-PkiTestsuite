@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.0</version>
+    <version>3.2.1</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>2.3.1</version>
+  <version>2.4.0</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -85,23 +85,19 @@
 
     <!-- dependencies -->
     <version.ardikars.pcap>1.5.1</version.ardikars.pcap>
-    <version.assertj-core>3.24.2</version.assertj-core>
+    <version.assertj-core>3.25.1</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
     <version.bouncycastle>1.77</version.bouncycastle>
     <version.commons-compress>1.25.0</version.commons-compress>
     <version.commons-io>2.15.1</version.commons-io>
     <version.commons-text>1.11.0</version.commons-text>
     <version.jfiglet>1.0.1</version.jfiglet>
-    <version.gemLibPki>2.0.3</version.gemLibPki>
-    <version.jackson>2.16.0</version.jackson>
-    <version.jakarta.activation-api>2.1.2</version.jakarta.activation-api>
-    <version.jakarta.validation-api>3.0.2</version.jakarta.validation-api>
-    <version.jakarta.xml.bind-api>4.0.1</version.jakarta.xml.bind-api>
-    <version.jaxb-api>2.4.0-b180830.0359</version.jaxb-api>
-    <version.jaxb-impl>2.3.6</version.jaxb-impl>
+    <version.gemLibPki>2.1.0</version.gemLibPki>
+    <version.jackson>2.16.1</version.jackson>
+    <version.jakarta.annotation-api>3.0.0-M1</version.jakarta.annotation-api>
     <version.junit-jupiter>5.10.1</version.junit-jupiter>
     <version.junit-platform-launcher>1.10.1</version.junit-platform-launcher>
-    <version.log4j2>2.22.0</version.log4j2>
+    <version.log4j2>2.22.1</version.log4j2>
     <version.lombok>1.18.30</version.lombok>
     <version.openapi>2.3.0</version.openapi>
     <version.unirest-java>3.14.5</version.unirest-java>
@@ -114,7 +110,7 @@
     <version.jacoco-maven-plugin>0.8.11</version.jacoco-maven-plugin>
     <version.maven-assembly-plugin>3.6.0</version.maven-assembly-plugin>
     <version.maven-clean-plugin>3.3.2</version.maven-clean-plugin>
-    <version.maven-compiler-plugin>3.11.0</version.maven-compiler-plugin>
+    <version.maven-compiler-plugin>3.12.1</version.maven-compiler-plugin>
     <version.maven-deploy-plugin>3.1.1</version.maven-deploy-plugin>
     <version.maven-enforcer-plugin>3.4.1</version.maven-enforcer-plugin>
     <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
@@ -143,13 +139,6 @@
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         <version>${version.openapi}</version>
-      </dependency>
-
-      <!-- NOTE check regularly: it is an upgraded version of a dependency of xades4j->guice remove it when xades4j is upgraded -->
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>32.1.3-jre</version>
       </dependency>
 
       <dependency>
@@ -210,21 +199,11 @@
         <artifactId>jackson-datatype-jsr310</artifactId>
         <version>${version.jackson}</version>
       </dependency>
+
       <dependency>
-        <groupId>jakarta.validation</groupId>
-        <artifactId>jakarta.validation-api</artifactId>
-        <version>${version.jakarta.validation-api}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>${version.jaxb-api}</version>
-      </dependency>
-      <!-- old JAXB implementation for non jakarta binding -->
-      <dependency>
-        <groupId>com.sun.xml.bind</groupId>
-        <artifactId>jaxb-impl</artifactId>
-        <version>${version.jaxb-impl}</version>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>${version.jakarta.annotation-api}</version>
       </dependency>
 
       <dependency>
@@ -342,17 +321,6 @@
         <version>${version.ardikars.pcap}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>${version.jakarta.xml.bind-api}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.activation</groupId>
-        <artifactId>jakarta.activation-api</artifactId>
-        <version>${version.jakarta.activation-api}</version>
       </dependency>
 
       <dependency>

@@ -2,6 +2,12 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.4.0
+
+- change the order of the elements in the subjectDN of the ocsp responder id
+- allow brainpool curves in RSA during ECDH according to GS-A_4384-01
+- update dependencies
+
 ## Release 2.3.1
 
 - update TSL template to latest revision

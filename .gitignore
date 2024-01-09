@@ -14,10 +14,5 @@ docs/dev/
 docker-compose-baseSut.yml
 docker-compose-deployHot.yml
 docker-compose-deployLTU_DEV.yml
-Pipeline.CI.Jenkinsfile
-Pipeline.CodeCheck.Jenkinsfile
-Pipeline.DeployGitHub.Jenkinsfile
-Pipeline.InternalRelease.Jenkinsfile
-Pipeline.LTU_DEV.Jenkinsfile
-Pipeline.TestDataCheck.Jenkinsfile
+*.Jenkinsfile
 

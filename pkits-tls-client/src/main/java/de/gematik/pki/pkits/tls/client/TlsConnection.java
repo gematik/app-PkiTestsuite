@@ -88,6 +88,10 @@ public class TlsConnection {
           TlsClientException,
           TlsConnectionException {
 
+    System.setProperty(
+        "jdk.tls.namedGroups",
+        "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, secp256r1, secp384r1");
+
     final P12Container p12Container;
     try {
       p12Container = P12Reader.getContentFromP12(clientKeystorePath, clientKeystorePassw);
@@ -102,15 +106,11 @@ public class TlsConnection {
     final String kfAlgorithm;
     final String[] ciphersSuites;
     if ("EC".equalsIgnoreCase(algorithm)) {
-      System.setProperty(
-          "jdk.tls.namedGroups",
-          "brainpoolP256r1, brainpoolP384r1, brainpoolP512r1, secp256r1, secp384r1");
       ciphersSuites = tlsSettings.getEcCiphersSuites();
       kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
 
     } else if ("RSA".equalsIgnoreCase(algorithm)) {
       ciphersSuites = tlsSettings.getRsaCiphersSuites();
-      System.setProperty("jdk.tls.namedGroups", "secp256r1, secp384r1");
       kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
     } else {
       throw new TlsClientException("Algorithm %s is not supported.".formatted(algorithm));
