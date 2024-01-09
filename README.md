@@ -35,12 +35,13 @@ implemented as maven modules and can be used independently or in conjunction wit
 
 ### Requirements
 
-To execute the test suite you need at least Java 17. The test suite ist build and testet
+To execute the test suite, you need at least Java 17.
+The test suite ist build and testet
 with [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
 
 For capturing network traffic via the integrated pcap interface Libpcap for Unix or Npcap for
-Windows (Install Npcap in "Winpcap Compatible Mode") are required. Under linux you have to allow the
-java binary to access the interface:
+Windows (Install Npcap in "Winpcap Compatible Mode") are required.
+Under linux, you have to allow the java binary to access the interface:
 
 ```bash
 sudo setcap cap_net_raw,cap_net_admin=eip $PATH_TO_YOUR_JDK/bin/java
@@ -101,10 +102,10 @@ tslProvider:
 ```
 
 This configuration is also written to every tsl as the download points in `PointersToOtherTSL`. For
-this reason it is crucial to configure it correctly before generating the initial TSL for the test
+this reason, it is crucial to configure it correctly before generating the initial TSL for the test
 object (see [Initial TSL and Trust Anchor](./README.md#initial-tsl-and-trust-anchor)).
 
-The TSL provider is started automatically at the configured socket, but in can be started
+The TSL provider is started automatically at the configured socket, but it can be started
 independently. To do so, one has to set `appPath` to `"externalStartup"` in the `pkits.yml`. Address
 and port can be passed to the jar via `--server.port=[port]`
 and `--server.address=[ipAddressOrFqdn]`. This way it is possible to run the TSL provider in a
@@ -117,7 +118,7 @@ The TSL provider has an open-api interface for documentation at `<socket>/api-do
 The OCSP responder is a service to generate responses to OCSP requests sent by the test object.
 The behavior of this service is configured over a REST interface and transparent to the user.
 Depending on the tests, the test suite configures it to deliver unsigned OCSP responses, wrong cert
-hashes and so on.
+hashes, and so on.
 Similar to the TSL provider, it is implemented as a spring boot tomcat web server and runs as its
 own process.
 
@@ -130,7 +131,7 @@ ocspResponder:
 ```
 
 This configuration is also written to every tsl as the service supply point of each trust service.
-For this reason it is crucial to configure it correctly before generating the initial TSL for the
+For this reason, it is crucial to configure it correctly before generating the initial TSL for the
 test object (see [Initial TSL and Trust Anchor](./README.md#initial-tsl-and-trust-anchor)).
 
 The OCSP responder is started automatically at the configured socket, but in can be started
@@ -238,7 +239,7 @@ For this, a convenient script is provided by the test suite:
 By executing `./initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
 the `./out` directory for manual import into the test object.
 
-Before generating this TSL it is crucial to configure the sockets for
+Before generating this TSL, it is crucial to configure the sockets for
 the [TSL provider](./README.md#2-tsl-provider) and [OCSP responder](./README.md#3-ocsp-responder)
 correctly.
 
@@ -257,13 +258,14 @@ generated in the `./out/testreport` directory.
 
 ### Smoke Test
 
-In order to make a quick check if everything is set up correctly, the test object can be reach by
-the
-test suite, and to initialize the test suite with the TSL sequence number set in the test object; we
-implemented a script that runs an initial test: `./checkInitialState.sh`. Within a TSL download by
-the test object is expected, and afterward, a use case is triggered with a valid certificate. OCSP
-requests are expected and answered correctly as well. Therefore, a configured test object has to be
-up and running and accessible by the testsuite and its components.
+To make a quick check if everything is set up correctly, the test object can be reach by
+the test suite, and to initialize the test suite with the TSL sequence number set in the test
+object; we implemented a script that runs an initial test: `./checkInitialState.sh`.
+Within a TSL download by the test object is expected, and afterward, a use case is triggered with a
+valid certificate.
+OCSP requests are expected and answered correctly as well.
+Therefore, a configured test object has to be up and running and accessible by the testsuite and its
+components.
 
 ### Selecting Specific Tests
 

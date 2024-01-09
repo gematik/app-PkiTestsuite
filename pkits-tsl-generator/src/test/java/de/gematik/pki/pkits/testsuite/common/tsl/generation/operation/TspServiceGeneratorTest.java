@@ -27,11 +27,11 @@ import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.exeptions.TslGenerationException;
 import eu.europa.esig.trustedlist.jaxb.tsl.ExtensionType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
+import jakarta.xml.bind.JAXBElement;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
