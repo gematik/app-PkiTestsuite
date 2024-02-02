@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>2.4.0</version>
+    <version>2.4.1</version>
   </parent>
 
   <artifactId>pkits-tsl-provider</artifactId>
-  <version>2.4.0</version>
+  <version>2.4.1</version>
   <name>TSL Server Simulator</name>
   <description>Spring Boot TSL Provider</description>
 

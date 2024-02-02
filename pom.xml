@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.1</version>
+    <version>3.2.2</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>2.4.0</version>
+  <version>2.4.1</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -85,7 +85,7 @@
 
     <!-- dependencies -->
     <version.ardikars.pcap>1.5.1</version.ardikars.pcap>
-    <version.assertj-core>3.25.1</version.assertj-core>
+    <version.assertj-core>3.25.2</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
     <version.bouncycastle>1.77</version.bouncycastle>
     <version.commons-compress>1.25.0</version.commons-compress>
@@ -118,9 +118,9 @@
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
     <version.maven-site-plugin>3.12.1</version.maven-site-plugin>
     <version.maven-source-plugin>3.3.0</version.maven-source-plugin>
-    <version.maven-surefire-plugin>3.2.3</version.maven-surefire-plugin>
+    <version.maven-surefire-plugin>3.2.5</version.maven-surefire-plugin>
     <version.sonar-maven-plugin>3.10.0.2594</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>2.41.1</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>2.43.0</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
