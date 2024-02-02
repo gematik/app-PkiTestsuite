@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.4.1
+
+- FIX test case verifyExpiredTslInSystem: tolerate missing tsl download (What is crucial is that the
+  test object recognizes the TSL expiration and invalidates the trust store)
+
 ## Release 2.4.0
 
 - change the order of the elements in the subjectDN of the ocsp responder id

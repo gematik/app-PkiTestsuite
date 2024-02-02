@@ -32,6 +32,7 @@ import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload.ClearConfigAfterWai
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.TslOperation;
 import de.gematik.pki.pkits.testsuite.config.Afo;
+import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.reporting.TestResultLoggerExtension;
 import de.gematik.pki.pkits.tsl.provider.api.TslDownloadEndpointType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
@@ -133,11 +134,15 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
             + " in the Test Object.");
 
     tslDownload.configureOcspResponderForTslSigner();
-    tslDownload.waitForTslDownload(
-        tslSequenceNr.getExpectedNrInTestObject(),
-        TslDownloadEndpointType.ANY_ENDPOINT,
-        ClearConfigAfterWaiting.CLEAR_CONFIG);
-    tslDownload.waitUntilOcspRequestForSignerOptional();
+    try {
+      tslDownload.waitForTslDownload(
+          tslSequenceNr.getExpectedNrInTestObject(),
+          TslDownloadEndpointType.ANY_ENDPOINT,
+          ClearConfigAfterWaiting.CLEAR_CONFIG);
+    } catch (final TestSuiteException e) {
+      // PKITS-598: TSL download is expected to fail if the test object just downloads the TSL hash
+      log.info("Expected exception while waiting for TSL download: {}", e.getMessage());
+    }
 
     useCaseWithCert(
         DEFAULT_CLIENT_CERTS_CONFIG,
