@@ -2,6 +2,10 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.4.2
+
+- update dependencies
+
 ## Release 2.4.1
 
 - FIX test case verifyExpiredTslInSystem: tolerate missing tsl download (What is crucial is that the

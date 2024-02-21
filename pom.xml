@@ -9,7 +9,7 @@
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>2.4.1</version>
+  <version>2.4.2</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -85,18 +85,18 @@
 
     <!-- dependencies -->
     <version.ardikars.pcap>1.5.1</version.ardikars.pcap>
-    <version.assertj-core>3.25.2</version.assertj-core>
+    <version.assertj-core>3.25.3</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
     <version.bouncycastle>1.77</version.bouncycastle>
-    <version.commons-compress>1.25.0</version.commons-compress>
+    <version.commons-compress>1.26.0</version.commons-compress>
     <version.commons-io>2.15.1</version.commons-io>
     <version.commons-text>1.11.0</version.commons-text>
     <version.jfiglet>1.0.1</version.jfiglet>
-    <version.gemLibPki>2.1.0</version.gemLibPki>
+    <version.gemLibPki>2.1.1</version.gemLibPki>
     <version.jackson>2.16.1</version.jackson>
     <version.jakarta.annotation-api>3.0.0-M1</version.jakarta.annotation-api>
-    <version.junit-jupiter>5.10.1</version.junit-jupiter>
-    <version.junit-platform-launcher>1.10.1</version.junit-platform-launcher>
+    <version.junit-jupiter>5.10.2</version.junit-jupiter>
+    <version.junit-platform-launcher>1.10.2</version.junit-platform-launcher>
     <version.log4j2>2.22.1</version.log4j2>
     <version.lombok>1.18.30</version.lombok>
     <version.openapi>2.3.0</version.openapi>
@@ -105,7 +105,7 @@
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
-    <version.docker-maven-plugin>0.43.4</version.docker-maven-plugin>
+    <version.docker-maven-plugin>0.44.0</version.docker-maven-plugin>
     <version.git-commit-id-maven-plugin>7.0.0</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.11</version.jacoco-maven-plugin>
     <version.maven-assembly-plugin>3.6.0</version.maven-assembly-plugin>
