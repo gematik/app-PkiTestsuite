@@ -33,16 +33,14 @@ import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
+import java.util.List;
+import javax.net.ssl.*;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.bouncycastle.tls.TlsFatalAlertReceived;
+import org.apache.commons.lang3.StringUtils;
 
 @Builder
 @Slf4j
@@ -140,6 +138,15 @@ public class TlsConnection {
       clientSSLSocket.setSSLParameters(sslParameters);
       clientSSLSocket.setEnabledProtocols(tlsSettings.getEnabledProtocols());
 
+      // Keep in mind java.net.InetAddress.getHostName() will try a DNS lookup if an IP was configured!            // 
+      // Could this be an issue? / Do we need some on/off switch maybe?
+      String hostName = serverAddress.getHostName();
+      if (StringUtils.isNotBlank(hostName) && !serverAddress.isLoopbackAddress()){
+          log.info("Try to connect with S(erver)N(ame)I(ndication):  \"{}\"", hostName);
+          SNIHostName sniHostName = new SNIHostName(hostName);
+          sslParameters.setServerNames(List.of(sniHostName));
+      }
+      
       clientSSLSocket.setUseClientMode(true);
       clientSSLSocket.addHandshakeCompletedListener(new TlsHandshakeCompletedListener());
       log.info(
