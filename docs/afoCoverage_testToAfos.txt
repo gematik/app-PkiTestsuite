@@ -15,7 +15,7 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
   verifyMissingCertHashInOcspResponse                GS-A_4657
   verifyMissingOcspSignerInTslForUseCaseCertificate  GS-A_4657
   verifyOcspCertificateStatusRevokedAndUnknown       GS-A_4657
-  verifyOcspGracePeriod                              GS-A_4657
+  verifyOcspGracePeriod                              A_22290, GS-A_4657, GS-A_4943
   verifyOcspRequestStructure                         GS-A_4657, GS-A_4674, RFC 5019, RFC 6960
   verifyOcspResponseMissingNextUpdate                GS-A_4657, GS-A_5215
   verifyOcspResponseNextUpdatePastOutOfTolerance     GS-A_4657, GS-A_5215

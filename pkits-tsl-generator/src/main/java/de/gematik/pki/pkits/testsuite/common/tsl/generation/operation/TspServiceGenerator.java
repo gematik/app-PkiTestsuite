@@ -245,6 +245,18 @@ public class TspServiceGenerator {
     return getTspServiceSmcb(CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA));
   }
 
+  public static TSPServiceType getTspServiceEgkCa() {
+    return getTspServiceEgk(CertReader.readX509(PkitsTestDataConstants.DEFAULT_EGK_CA));
+  }
+
+  public static TSPServiceType getTspServiceEgkCaAlt() {
+    return getTspServiceEgk(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_EGK_CA));
+  }
+
+  public static TSPServiceType getTspServiceEgkCaRsa() {
+    return getTspServiceEgk(CertReader.readX509(PkitsTestDataConstants.DEFAULT_EGK_CA_RSA));
+  }
+
   public static TSPServiceType getTspServiceTslTrustAnchorCa() {
     return getStandardPkcTspServiceGenerator(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
         .addServiceInformationExtension(CertificateType.TSL_FIELD_TSL_PLACEHOLDER)
@@ -298,6 +310,15 @@ public class TspServiceGenerator {
         .addServiceInformationExtension(CertificateType.CERT_TYPE_SMC_B_ENC)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_SMC_B_AUT)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_SMC_B_OSIG)
+        .generate();
+  }
+
+  private static TSPServiceType getTspServiceEgk(final X509Certificate certificate) {
+    return getStandardPkcTspServiceGenerator(certificate)
+        .addServiceInformationExtension(CertificateType.CERT_TYPE_EGK_AUT)
+        .addServiceInformationExtension(CertificateType.CERT_TYPE_EGK_AUTN)
+        .addServiceInformationExtension(CertificateType.CERT_TYPE_EGK_ENC)
+        .addServiceInformationExtension(CertificateType.CERT_TYPE_EGK_ENCV)
         .generate();
   }
 

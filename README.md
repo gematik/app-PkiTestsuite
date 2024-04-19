@@ -12,7 +12,7 @@ TUC_PKI_018 (certificate validation) and TUC_PKI_006 (OCSP response validation).
 approval tests of every PKI related aspect. It is a re-development of our test suite from 2016.
 
 Products tested by this test suite are: Intermediär, VSDM Fachdienst, VPN Zugangsdienst:
-Registrierungsdienst and Konzentrator, IDP Fachdienst, KIM Fachdienst. More are coming.
+Registrierungsdienst and Konzentrator, IDP Fachdienst, IDP eGK Fachdienst, KIM Fachdienst. More are coming.
 
 ---
 
@@ -182,7 +182,7 @@ copied to the remote location and back. As wells as the IP and port of the remot
 
 ## Configuration
 
-The configuration is done in one file: [/config/pkits.yml](./config/pkits.yml). You can find
+The configuration is done in one file: `/config/pkits.yml`. You can find
 examples in [/docs/config/inttest/](./docs/configs/inttest/). The most important parameters are:
 
 * What is the type of the test object (e.g., KimFachdienst, IntermediaerServer, etc.)?
@@ -225,6 +225,7 @@ tests for the following TI products:
 | VSDM Fachdienst         | VsdmFachdienst              | intermediaerClient          |
 | VSDM Intermediär Server | IntermediaerServer          | fachmodulClientIntermediaer |
 | Zentraler/SmartCard IDP | IdpFachdienst               | fachmodulClient             |
+| Zentraler IDP           | IdpEgkFachdienst            | egkClient                   |
 
 These test data are for our own integration tests and can be used for approval tests as well.
 The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own

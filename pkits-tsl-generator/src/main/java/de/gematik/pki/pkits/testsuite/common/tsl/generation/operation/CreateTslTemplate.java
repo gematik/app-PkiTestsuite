@@ -134,6 +134,7 @@ public final class CreateTslTemplate {
         List.of(
             TspServiceGenerator.getTspServiceKompCaRsa(),
             TspServiceGenerator.getTspServiceSmcbCaRsa(),
+            TspServiceGenerator.getTspServiceEgkCaRsa(),
             TspServiceGenerator.getTspServiceOcspSignerRsa()),
         getCommonTspServices());
   }
@@ -143,6 +144,7 @@ public final class CreateTslTemplate {
         TspServiceGenerator.getTspServiceTslTrustAnchorCa(),
         TspServiceGenerator.getTspServiceKompCa(),
         TspServiceGenerator.getTspServiceSmcbCa(),
+        TspServiceGenerator.getTspServiceEgkCa(),
         TspServiceGenerator.getTspServiceOcspSigner());
   }
 
@@ -150,7 +152,8 @@ public final class CreateTslTemplate {
     return combined(
         getCommonTspServices(),
         TspServiceGenerator.getTspServiceKompCaAlt(),
-        TspServiceGenerator.getTspServiceSmcbCaAlt());
+        TspServiceGenerator.getTspServiceSmcbCaAlt(),
+        TspServiceGenerator.getTspServiceEgkCaAlt());
   }
 
   private static TrustStatusListType addTrustServiceProviderWithTspServices(
@@ -254,7 +257,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA);
+            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+            PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
     tspServicesToModify.forEach(
         tspService ->
@@ -284,7 +288,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA);
+            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+            PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
     tspServicesToModify.forEach(
         tspServiceType -> {
@@ -320,7 +325,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA);
+            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+            PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
     tspServicesToModify.forEach(
         tspService -> {
@@ -348,7 +354,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA);
+            PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+            PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
     final XMLGregorianCalendar pastDate;
     pastDate = TslModifier.getXmlGregorianCalendar(GemLibPkiUtils.now().minusYears(5));
@@ -391,9 +398,11 @@ public final class CreateTslTemplate {
                 .generate(),
             TspServiceGenerator.getTspServiceKompCa(),
             TspServiceGenerator.getTspServiceSmcbCa(),
+            TspServiceGenerator.getTspServiceEgkCa(),
             TspServiceGenerator.getTspServiceOcspSigner(),
             TspServiceGenerator.getTspServiceKompCaAlt(),
-            TspServiceGenerator.getTspServiceSmcbCaAlt());
+            TspServiceGenerator.getTspServiceSmcbCaAlt(),
+            TspServiceGenerator.getTspServiceEgkCaAlt());
 
     return addTrustServiceProviderWithTspServices(baseTslContainer(), tspServices);
   }
@@ -415,6 +424,7 @@ public final class CreateTslTemplate {
                 .generate(),
             TspServiceGenerator.getTspServiceKompCa(),
             TspServiceGenerator.getTspServiceSmcbCa(),
+            TspServiceGenerator.getTspServiceEgkCa(),
             TspServiceGenerator.getTspServiceOcspSigner(),
             getTspServiceGeneratorTrustAnchorChange(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
                 .generate());
@@ -552,6 +562,7 @@ public final class CreateTslTemplate {
                 .generate(),
             TspServiceGenerator.getTspServiceKompCa(),
             TspServiceGenerator.getTspServiceSmcbCa(),
+            TspServiceGenerator.getTspServiceEgkCa(),
             TspServiceGenerator.getTspServiceOcspSigner(),
             getTspServiceGeneratorTrustAnchorChange(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
                 .generate());

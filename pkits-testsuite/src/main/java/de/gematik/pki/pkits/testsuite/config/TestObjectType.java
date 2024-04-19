@@ -37,6 +37,14 @@ public enum TestObjectType {
       PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
       PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA),
 
+  IDP_EGK_FACHDIENST(
+      "IdpEgkFachdienst",
+      "egkClient",
+      UseCaseConnectionType.SCRIPT,
+      PkitsTestDataConstants.DEFAULT_EGK_CA,
+      PkitsTestDataConstants.ALTERNATIVE_EGK_CA,
+      PkitsTestDataConstants.DEFAULT_EGK_CA_RSA),
+
   INTERMEDIAER_SERVER(
       "IntermediaerServer",
       "fachmodulClientIntermediaer",

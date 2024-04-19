@@ -137,9 +137,10 @@ class OcspApprovalTests extends ApprovalTestsBase {
   /** gematikId: UE_PKI_TS_0302_024 */
   @Test
   @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 1")
+  @Afo(afoId = "GS-A_4943", description = "Alter der OCSP-Responses für eGK-Zertifikate")
+  @Afo(afoId = "A_22290", description = "Caching von OCSP-Antworten")
   @DisplayName("Test OCSP grace period")
   void verifyOcspGracePeriod() {
-
     verifyWithConfiguredOcspResponder(
         dtoBuilder -> dtoBuilder.certificateStatus(CustomCertificateStatusDto.createUnknown()),
         USECASE_INVALID);

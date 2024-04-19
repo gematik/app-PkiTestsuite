@@ -102,7 +102,7 @@ class CreateTslTemplateTest {
 
     final TSPType tsp = tspList.get(0);
 
-    assertThat(tsp.getTSPServices().getTSPService()).hasSize(7);
+    assertThat(tsp.getTSPServices().getTSPService()).hasSize(9);
 
     final List<TSPServiceType> pkcTspServices =
         tsp.getTSPServices().getTSPService().stream()
@@ -113,7 +113,7 @@ class CreateTslTemplateTest {
                         .getServiceTypeIdentifier()
                         .equals(TslConstants.STI_PKC))
             .toList();
-    assertThat(pkcTspServices).hasSize(5);
+    assertThat(pkcTspServices).hasSize(7);
 
     final List<TSPServiceType> ocspTspServices =
         tsp.getTSPServices().getTSPService().stream()
