@@ -1,6 +1,7 @@
 A_17124      ECDSA cipher suites for TLS
 A_17688      Nutzung des ECC-RSA-Vertrauensraumes (ECC-Migration)
 A_17700      TSL-Auswertung ServiceTypeIdentifier "unspecified"
+A_22290      Caching von OCSP-Antworten
 GS-A_4357    ECDSA algorithms - Tab_KRYPT_002a
 GS-A_4357    RSA algorithms - Tab_KRYPT_002
 GS-A_4384    RSA cipher suites for TLS
@@ -58,6 +59,7 @@ GS-A_4663    Zertifikats-Prüfparameter für den TLS-Handshake - positive cases
 GS-A_4674    OCSP-Requests gemäß Standards
 GS-A_4749    TUC_PKI_007: Prüfung Zertifikatstyp - Schritt 8
 GS-A_4898    TSL-Grace-Period einer TSL
+GS-A_4943    Alter der OCSP-Responses für eGK-Zertifikate
 GS-A_5215    Festlegung der zeitlichen Toleranzen in einer OCSP-Response
 GS-A_5336    Zertifikatsprüfung nach Ablauf TSL-Graceperiod
 RFC 5019     2.1.1. OCSPRequest Structure

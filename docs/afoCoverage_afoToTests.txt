@@ -7,6 +7,9 @@ A_17688
 A_17700
   TslApprovalTests.verifyForUnspecifiedServiceTypeIdentifierOfTSPService
 
+A_22290
+  OcspApprovalTests.verifyOcspGracePeriod
+
 GS-A_4357
   CertificateApprovalTests.verifyUseCaseCertsValid
   CertificateApprovalTests.verifyUseCaseRsaCertValid
@@ -180,6 +183,9 @@ GS-A_4749
 
 GS-A_4898
   TslApprovalExtraTests.verifyExpiredTslInSystem
+
+GS-A_4943
+  OcspApprovalTests.verifyOcspGracePeriod
 
 GS-A_5215
   OcspApprovalTests.verifyOcspResponseMissingNextUpdate

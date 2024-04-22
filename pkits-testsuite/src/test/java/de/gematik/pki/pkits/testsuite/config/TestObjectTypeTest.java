@@ -75,8 +75,8 @@ class TestObjectTypeTest {
         .hasMessageStartingWith(
             "Cannot construct instance of `de.gematik.pki.pkits.testsuite.config.TestObjectType`,"
                 + " problem: unknown value <dummyValue> for TestObjectType. Allowed values:"
-                + " IdpFachdienst, IntermediaerServer, KimFachdienst, VpnKonzentrator,"
-                + " VpnRegServer, VsdmFachdienst.");
+                + " IdpEgkFachdienst, IdpFachdienst, IntermediaerServer, KimFachdienst,"
+                + " VpnKonzentrator, VpnRegServer, VsdmFachdienst.");
   }
 
   @Test
