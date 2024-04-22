@@ -29,24 +29,24 @@ x-service-network: &service-network-ref
 services:
   # OCSP responder
   pkits-ocsp-responder:
-    image: eu.gcr.io/gematik-all-infra-prod/pkits/pkits-ocsp-responder:${appVersion}
+    image: ${PKITS_ARTIFACT_REGISTRY}/pki/pkits-ocsp-responder:${appVersion}
     user: 10000:10000
     container_name: pkits-ocsp-responder
-    <<: [*service-network-ref, *service-setup-ref]
+    <<: [ *service-network-ref, *service-setup-ref ]
     environment:
-      <<: [*environment-timezone-ref, *environment-server-ports-ref]
+      <<: [ *environment-timezone-ref, *environment-server-ports-ref ]
     healthcheck:
       <<: *healthcheck-ref
       test: "curl --fail --silent http://localhost:8083/actuator/health | grep UP"
 
   # TSL provider
   pkits-tsl-provider:
-    image: eu.gcr.io/gematik-all-infra-prod/pkits/pkits-tsl-provider:${appVersion}
+    image: ${PKITS_ARTIFACT_REGISTRY}/pki/pkits-tsl-provider:${appVersion}
     user: 10000:10000
     container_name: pkits-tsl-provider
-    <<: [*service-network-ref, *service-setup-ref]
+    <<: [ *service-network-ref, *service-setup-ref ]
     environment:
-      <<: [*environment-timezone-ref, *environment-server-ports-ref]
+      <<: [ *environment-timezone-ref, *environment-server-ports-ref ]
     healthcheck:
       <<: *healthcheck-ref
       test: "curl --fail --silent http://localhost:8084/actuator/health | grep UP"

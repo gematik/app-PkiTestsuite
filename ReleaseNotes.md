@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 2.5.1
+
+- update dependencies
+- add egk certs for Idp Server which checks eGK certs
+
 ## Release 2.4.2
 
 - update dependencies

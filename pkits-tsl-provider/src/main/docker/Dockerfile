@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.7_7-jre
+FROM eclipse-temurin:17-jre
 
 ARG COMMIT_HASH
 ARG VERSION

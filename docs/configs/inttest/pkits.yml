@@ -1,6 +1,6 @@
 testObject:
   name: "Server 0815"
-  testObjectType: "IntermediaerServer" # one of (IntermediaerServer, KimFachdienst, VsdmFachdienst, VpnKonzentrator, VpnRegServer, IdpFachdienst)
+  testObjectType: "IntermediaerServer" # one of (IntermediaerServer, KimFachdienst, VsdmFachdienst, VpnKonzentrator, VpnRegServer, IdpFachdienst, IdpEgkFachdienst)
   ipAddressOrFqdn: "127.0.0.1"
   port: 8443
   ocspGracePeriodSeconds: 0
