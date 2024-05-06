@@ -61,6 +61,7 @@ public class TlsClientApplication {
       return 2;
     } catch (final UnknownHostException e) {
       log.info("Host unknown: {}", ipAddressOrFqdn);
+      log.info("returning 2...");
       return 2;
     } catch (final IOException
         | UnrecoverableKeyException

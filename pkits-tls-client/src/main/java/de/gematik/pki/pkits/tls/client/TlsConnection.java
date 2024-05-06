@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -131,10 +132,51 @@ public class TlsConnection {
 
     log.info("algorithm: {}, ciphersSuites: {}", algorithm, Arrays.asList(ciphersSuites));
 
+    log.info("Try to connect with cert \"{}\"", clientKeystorePath);
     try (final SSLSocket clientSSLSocket =
         (SSLSocket) sslContextClient.getSocketFactory().createSocket()) {
-      log.info("Try to connect with cert \"{}\"", clientKeystorePath);
+      // Attempt to establish the connection
+      sslConnect(serverAddress, serverPort, clientSSLSocket, ciphersSuites);
+      // Start the handshake
+      sslHandshake(clientSSLSocket);
+    } catch (final IOException e) {
+      log.info("IOException: {}", e.getMessage());
+      throw new TlsClientException("IOException: socket creation error.", e);
+    }
+  }
 
+  private static void sslHandshake(final SSLSocket clientSSLSocket)
+      throws IOException, TlsConnectionException, TlsClientException {
+    try {
+      log.info(
+          "Starting handshake from: {} to remote server socket: {}...",
+          clientSSLSocket.getLocalSocketAddress(),
+          clientSSLSocket.getRemoteSocketAddress());
+      clientSSLSocket.startHandshake();
+      log.info(
+          "...handshake successfully started. To send application data implement:"
+              + " clientSSLSocket.getOutputStream().write()");
+    } catch (final TlsFatalAlertReceived | SocketTimeoutException e) {
+      log.info("No ssl connection established: {}", e.getMessage());
+      throw new TlsConnectionException("No ssl connection established.", e);
+    } catch (final SocketException e) {
+      log.info("SocketException: {}", e.getMessage());
+      if (e.getMessage().startsWith("Connection refused")) {
+        throw new TlsClientException("SocketException: Connection refused.", e);
+      } else {
+        throw new TlsConnectionException(
+            "No ssl connection established. SocketException: " + e.getMessage(), e);
+      }
+    }
+  }
+
+  private void sslConnect(
+      final InetAddress serverAddress,
+      final int serverPort,
+      final SSLSocket clientSSLSocket,
+      final String[] ciphersSuites)
+      throws TlsClientException {
+    try {
       final SSLParameters sslParameters = clientSSLSocket.getSSLParameters();
       sslParameters.setCipherSuites(ciphersSuites);
       clientSSLSocket.setSSLParameters(sslParameters);
@@ -149,20 +191,10 @@ public class TlsConnection {
           ocspDelaySeconds);
       clientSSLSocket.connect(
           new InetSocketAddress(serverAddress, serverPort), ocspDelaySeconds * 1000);
-      log.info("...connection successful.");
-      log.info(
-          "Starting handshake from: {} to remote server socket: {}...",
-          clientSSLSocket.getLocalSocketAddress(),
-          clientSSLSocket.getRemoteSocketAddress());
-      clientSSLSocket.startHandshake();
-      log.info(
-          "...handshake successfully started. To send application data implement:"
-              + " clientSSLSocket.getOutputStream().write()");
-    } catch (final TlsFatalAlertReceived | SocketTimeoutException e) {
-      log.info("No ssl connection established: {}", e.getMessage());
-      throw new TlsConnectionException("No ssl connection established.", e);
+      log.info("... socket connect successful.");
     } catch (final IOException e) {
-      throw new TlsClientException("Problems creating or using client SSL socket.", e);
+      log.info("IOException: {}", e.getMessage());
+      throw new TlsClientException("SSLSocket connection error.", e);
     }
   }
 }

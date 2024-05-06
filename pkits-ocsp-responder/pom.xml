@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>2.5.1</version>
+    <version>3.0.0</version>
   </parent>
 
   <artifactId>pkits-ocsp-responder</artifactId>
-  <version>2.5.1</version>
+  <version>3.0.0</version>
   <name>OCSP Responder Simulator</name>
   <description>Spring Boot OCSP Responder</description>
 
