@@ -9,7 +9,7 @@
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>2.5.1</version>
+  <version>3.0.0</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -92,8 +92,8 @@
     <version.commons-io>2.16.1</version.commons-io>
     <version.commons-text>1.12.0</version.commons-text>
     <version.jfiglet>1.0.1</version.jfiglet>
-    <version.gemLibPki>2.1.3</version.gemLibPki>
-    <version.jackson>2.17.0</version.jackson>
+    <version.gemLibPki>2.1.4</version.gemLibPki>
+    <version.jackson>2.17.1</version.jackson>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.junit-jupiter>5.10.2</version.junit-jupiter>
     <version.junit-platform-launcher>1.10.2</version.junit-platform-launcher>
@@ -101,7 +101,7 @@
     <version.lombok>1.18.32</version.lombok>
     <version.openapi>2.5.0</version.openapi>
     <version.unirest-java>3.14.5</version.unirest-java>
-    <version.xmlunit>2.9.1</version.xmlunit>
+    <version.xmlunit>2.10.0</version.xmlunit>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
@@ -111,7 +111,7 @@
     <version.maven-assembly-plugin>3.6.0</version.maven-assembly-plugin>
     <version.maven-clean-plugin>3.3.2</version.maven-clean-plugin>
     <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
-    <version.maven-deploy-plugin>3.1.1</version.maven-deploy-plugin>
+    <version.maven-deploy-plugin>3.1.2</version.maven-deploy-plugin>
     <version.maven-enforcer-plugin>3.4.1</version.maven-enforcer-plugin>
     <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
     <version.maven-project-info-reports-plugin>3.5.0</version.maven-project-info-reports-plugin>

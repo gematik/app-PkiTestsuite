@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 3.0.0
+
+- ANFPKI-21: distinguish between different SocketException messages in case of aborted TLS handshake
+- update dependencies
+
 ## Release 2.5.1
 
 - update dependencies
