@@ -333,10 +333,7 @@ public final class CreateTslTemplate {
           final ExtensionsListType extensions = new ExtensionsListType();
           for (final CertificateType oid :
               List.of(
-                  CertificateType.CERT_TYPE_EGK_ENC,
-                  CertificateType.CERT_TYPE_EGK_ENCV,
-                  CertificateType.CERT_TYPE_EGK_AUT,
-                  CertificateType.CERT_TYPE_EGK_AUTN)) {
+                  CertificateType.TSL_FIELD_TSL_PLACEHOLDER)) {
             extensions.getExtension().add(TspServiceGenerator.toExtension(oid));
           }
           tspService.getServiceInformation().setServiceInformationExtensions(extensions);
