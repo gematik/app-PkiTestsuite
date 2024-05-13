@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 3.0.1
+
+- adjust type of cert in defectAlternativeCaWrongSrvInfoExtTsl
+- update test data (GEM.EGK-CA52_TEST-ONLY.pem)
+
 ## Release 3.0.0
 
 - ANFPKI-21: distinguish between different SocketException messages in case of aborted TLS handshake
