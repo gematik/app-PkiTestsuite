@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 3.0.2
+
+- fix NPE in logging of OCSP response when cert hash is not required
+- update dependencies
+
 ## Release 3.0.1
 
 - adjust type of cert in defectAlternativeCaWrongSrvInfoExtTsl

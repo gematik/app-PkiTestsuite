@@ -331,9 +331,7 @@ public final class CreateTslTemplate {
     tspServicesToModify.forEach(
         tspService -> {
           final ExtensionsListType extensions = new ExtensionsListType();
-          for (final CertificateType oid :
-              List.of(
-                  CertificateType.TSL_FIELD_TSL_PLACEHOLDER)) {
+          for (final CertificateType oid : List.of(CertificateType.TSL_FIELD_TSL_PLACEHOLDER)) {
             extensions.getExtension().add(TspServiceGenerator.toExtension(oid));
           }
           tspService.getServiceInformation().setServiceInformationExtensions(extensions);

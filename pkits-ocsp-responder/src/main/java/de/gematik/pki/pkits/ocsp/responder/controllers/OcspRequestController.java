@@ -40,12 +40,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.isismtt.ocsp.CertHash;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.util.encoders.Hex;
@@ -178,14 +178,19 @@ public class OcspRequestController {
               config.getEeCert(),
               config.getIssuerCert(),
               config.getOcspCertificateStatus());
-      final CertHash asn1CertHash =
-          CertHash.getInstance(
-              getFirstSingleResp(ocspResponse)
-                  .getExtension(id_isismtt_at_certHash)
-                  .getParsedValue());
+
+      final Extension certHashExtension =
+          getFirstSingleResp(ocspResponse).getExtension(id_isismtt_at_certHash);
+
+      byte[] certHash = null;
+      if (certHashExtension != null) {
+        certHash = CertHash.getInstance(certHashExtension.getParsedValue()).getCertificateHash();
+      }
+
       log.debug(
           "Building OcspResponse done. CertHash: {}.",
-          new String(Hex.encode(asn1CertHash.getCertificateHash()), StandardCharsets.UTF_8));
+          certHash != null ? Hex.toHexString(certHash) : "not included");
+
       return ocspResponse.getEncoded();
     } catch (final IOException e) {
       throw new OcspResponderException("Could not create OcspResponse.", e);

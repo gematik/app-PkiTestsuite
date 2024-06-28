@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
   </parent>
 
   <artifactId>pkits-distro-assembly</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <packaging>pom</packaging>
 
   <name>Distribution</name>
