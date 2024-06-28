@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
@@ -23,14 +21,13 @@
       **/de/gematik/pki/pkits/testsuite/runner/**,
       **/de/gematik/pki/pkits/testsuite/ssh/**,
       **/de/gematik/pki/pkits/testsuite/testutils/**,
-      **/de/gematik/pki/pkits/testsuite/usecases/**
-    </sonar.coverage.exclusions>
+      **/de/gematik/pki/pkits/testsuite/usecases/**</sonar.coverage.exclusions>
 
     <testReportDirectory>${project.basedir}/../out/testreport</testReportDirectory>
 
     <!-- dependencies -->
     <version.commons-lang3>3.14.0</version.commons-lang3>
-    <version.apache.sshd>2.12.1</version.apache.sshd>
+    <version.apache.sshd>2.13.1</version.apache.sshd>
     <version.itextpdf.html2pdf>5.0.4</version.itextpdf.html2pdf>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
     <version.mockito>5.12.0</version.mockito>
@@ -38,12 +35,9 @@
 
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
-    <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}
-    </version.maven-surefire-report-plugin>
+    <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
 
-    <tsl-procurer.initialTslPrimaryDownloadUrl>
-      http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000
-    </tsl-procurer.initialTslPrimaryDownloadUrl>
+    <tsl-procurer.initialTslPrimaryDownloadUrl>http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000</tsl-procurer.initialTslPrimaryDownloadUrl>
   </properties>
 
   <dependencies>
