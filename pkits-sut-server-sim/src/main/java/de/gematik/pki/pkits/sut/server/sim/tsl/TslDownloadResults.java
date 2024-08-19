@@ -16,7 +16,7 @@
 
 package de.gematik.pki.pkits.sut.server.sim.tsl;
 
-import kong.unirest.HttpResponse;
+import kong.unirest.core.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 

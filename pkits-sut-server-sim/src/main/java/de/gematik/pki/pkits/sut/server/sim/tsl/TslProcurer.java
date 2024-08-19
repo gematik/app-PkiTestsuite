@@ -50,9 +50,9 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestException;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
+import kong.unirest.core.UnirestException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -138,11 +138,8 @@ public class TslProcurer {
   private TslDownloadResults downloadTsl(final String tslUrl, final String additionalInfo) {
     log.info("{}: downloading TSL at: {}", additionalInfo, tslUrl);
     try {
-      final HttpResponse<byte[]> bytesResponse =
-          Unirest.get(tslUrl)
-              .connectTimeout(tslProcurerConfig.getTimeoutMilliseconds())
-              .socketTimeout(tslProcurerConfig.getTimeoutMilliseconds())
-              .asBytes();
+      Unirest.config().reset().connectTimeout(tslProcurerConfig.getTimeoutMilliseconds());
+      final HttpResponse<byte[]> bytesResponse = Unirest.get(tslUrl).asBytes();
       return TslDownloadResults.forTslBytes(bytesResponse);
     } catch (final UnirestException e) {
       log.info("Downloading TSL failed. {}", e.getMessage());
@@ -289,11 +286,8 @@ public class TslProcurer {
   private TslDownloadResults downloadTslHash(@NonNull final String hashUrl) {
 
     try {
-      final HttpResponse<String> stringHttpResponse =
-          Unirest.get(hashUrl)
-              .connectTimeout(tslProcurerConfig.getTimeoutMilliseconds())
-              .socketTimeout(tslProcurerConfig.getTimeoutMilliseconds())
-              .asString();
+      Unirest.config().reset().connectTimeout(tslProcurerConfig.getTimeoutMilliseconds());
+      final HttpResponse<String> stringHttpResponse = Unirest.get(hashUrl).asString();
       return TslDownloadResults.forHash(stringHttpResponse);
     } catch (final UnirestException e) {
       log.info("Downloading TSL HASH failed. {}", e.getMessage());

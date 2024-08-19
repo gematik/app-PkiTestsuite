@@ -2,6 +2,15 @@
 
 # Release notes PKI Test Suite
 
+## Release 4.0.0
+
+- testcase verifyUseCaseRsaCertValid is disabled by default (allTests.txt)
+- testcase verifyHashAlgorithmsInOcspSha2 deleted
+- new classes for tolerance test cases
+- remove "percent" from testsuite parameters
+- implement SNI (https://github.com/gematik/app-PkiTestsuite/pull/11)
+- update dependencies
+
 ## Release 3.0.2
 
 - fix NPE in logging of OCSP response when cert hash is not required

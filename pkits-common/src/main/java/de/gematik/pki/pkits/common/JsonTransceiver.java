@@ -16,10 +16,10 @@
 
 package de.gematik.pki.pkits.common;
 
-import kong.unirest.HttpRequestWithBody;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestException;
+import kong.unirest.core.HttpRequestWithBody;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
+import kong.unirest.core.UnirestException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.http.HttpHeaders;

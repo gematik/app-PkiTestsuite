@@ -30,8 +30,8 @@ import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import java.math.BigInteger;
 import java.util.List;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.assertj.core.api.Assertions;
@@ -49,6 +49,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @Slf4j
 class OcspResponderManagerTest {
+
   @LocalServerPort private int localServerPort;
   @Autowired OcspRequestHistory ocspRequestHistory;
 

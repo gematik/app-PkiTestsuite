@@ -108,8 +108,10 @@ public abstract class ApprovalTestsBase {
       List.of(
           CertificateApprovalTests.class,
           OcspApprovalTests.class,
+          OcspToleranceApprovalTests.class,
           TslApprovalTests.class,
           TslSignerApprovalTests.class,
+          TslSignerToleranceApprovalTests.class,
           TslTaApprovalTests.class,
           InitialStateTest.class,
           InitialTestDataTest.class,
@@ -630,14 +632,14 @@ public abstract class ApprovalTestsBase {
     if (!isInitialState) {
       commonMessage =
           """
-            {}
-              {} useCaseWithCert for
-                %s
-                %s with parameters
-                eeCertPath %s,
-                %s,  %s,  %s
+              {}
+                {} useCaseWithCert for
+                  %s
+                  %s with parameters
+                  eeCertPath %s,
+                  %s,  %s,  %s
 
-              """
+                """
               .formatted(
                   currentTestInfo,
                   PkitsTestSuiteUtils.getCallerTrace(),
