@@ -34,13 +34,16 @@ import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.List;
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SNIHostName;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.bouncycastle.tls.TlsFatalAlertReceived;
@@ -178,6 +181,16 @@ public class TlsConnection {
       throws TlsClientException {
     try {
       final SSLParameters sslParameters = clientSSLSocket.getSSLParameters();
+
+      if (tlsSettings.isSniEnabled()) {
+        final String hostName = serverAddress.getHostName();
+        if (StringUtils.isNotBlank(hostName) && !serverAddress.isLoopbackAddress()) {
+          log.info("Try to connect with S(erver)N(ame)I(ndication):  \"{}\"", hostName);
+          final SNIHostName sniHostName = new SNIHostName(hostName);
+          sslParameters.setServerNames(List.of(sniHostName));
+        }
+      }
+
       sslParameters.setCipherSuites(ciphersSuites);
       clientSSLSocket.setSSLParameters(sslParameters);
       clientSSLSocket.setEnabledProtocols(tlsSettings.getEnabledProtocols());

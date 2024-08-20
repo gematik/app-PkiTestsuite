@@ -34,8 +34,8 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
@@ -183,7 +183,7 @@ class OcspRequestControllerTest {
             .asBytes();
 
     final OCSPResp ocspResp = new OCSPResp(response.getBody());
-    BasicOCSPResp ocspResponse = (BasicOCSPResp) ocspResp.getResponseObject();
+    final BasicOCSPResp ocspResponse = (BasicOCSPResp) ocspResp.getResponseObject();
     assertThat(ocspResponse.hasExtensions()).isTrue();
     assertThat(ocspResponse.getExtensionOIDs()).hasSize(1);
     assertThat(ocspResponse.getExtensionOIDs()).contains(id_isismtt_at_certHash);
@@ -211,7 +211,7 @@ class OcspRequestControllerTest {
             .asBytes();
 
     final OCSPResp ocspResp = new OCSPResp(response.getBody());
-    BasicOCSPResp ocspResponse = (BasicOCSPResp) ocspResp.getResponseObject();
+    final BasicOCSPResp ocspResponse = (BasicOCSPResp) ocspResp.getResponseObject();
     assertThat(ocspResponse.hasExtensions()).isFalse();
     assertThat(ocspResponse.getExtensionOIDs()).isEmpty();
   }

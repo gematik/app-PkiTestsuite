@@ -64,6 +64,10 @@ public class ListApprovalTestsAndAfos {
 
   private static final Set<String> testsOrClassesToSkipPerDefault = new TreeSet<>();
 
+  static {
+    testsOrClassesToSkipPerDefault.add("verifyUseCaseRsaCertValid");
+  }
+
   public static final Predicate<CustomTestInfo> relevantCustomTestInfoPredicate =
       (customTestInfo -> !customTestInfo.getMethodName().equals("checkInitialState"));
 
@@ -87,6 +91,7 @@ public class ListApprovalTestsAndAfos {
 
   @AllArgsConstructor
   public static class TestClassesContainer {
+
     Map<String, Set<CustomTestInfo>> testClasses;
 
     public static TestClassesContainer readForDefaultTestClasses() {

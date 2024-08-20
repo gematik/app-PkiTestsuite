@@ -26,8 +26,8 @@ import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import java.nio.charset.StandardCharsets;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,11 +96,11 @@ class TslConfigControllerTest {
     final String tslEncoded = GemLibPkiUtils.toMimeBase64NoLineBreaks(tslBytes);
     final String jsonContent =
         """
-        {
-          "tslBytes": "%s",
-          "tslProviderEndpointsConfig": "%s"
-        }
-        """
+            {
+              "tslBytes": "%s",
+              "tslProviderEndpointsConfig": "%s"
+            }
+            """
             .formatted(tslEncoded, TslProviderEndpointsConfig.PRIMARY_404_BACKUP_200);
 
     final HttpResponse<String> response =

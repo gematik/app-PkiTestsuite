@@ -130,8 +130,7 @@ final class PkitsTestsuiteRunnerUtils {
 
   static List<CustomTestInfo> getTestsToRun(
       final List<InputTestInfo> inputTestInfoList,
-      final TestClassesContainer testClassesContainer,
-      final int percent) {
+      final TestClassesContainer testClassesContainer) {
 
     final List<CustomTestInfo> customTestInfoList = testClassesContainer.getAllCustomTestInfos();
 
@@ -161,23 +160,7 @@ final class PkitsTestsuiteRunnerUtils {
         customTestInfoList.stream().map(CustomTestInfo::toString).collect(Collectors.joining("\n"));
 
     log.info("\n\nAll selected tests,  n={}:\n{}\n\n", allSelected.size(), allSelectedStr);
-
     Collections.shuffle(allSelected);
-
-    final int minTestsToSelect = Math.min(1, allSelected.size());
-    final int testsToSelect =
-        Math.max(minTestsToSelect, (int) Math.round(allSelected.size() * percent / 100.0));
-
-    final List<CustomTestInfo> selectedToRun = allSelected.subList(0, testsToSelect);
-    final String selectedToRunStr =
-        selectedToRun.stream().map(CustomTestInfo::toString).collect(Collectors.joining("\n"));
-
-    log.info(
-        "\n\nTests to run after applying value (={}) of option -p or --percent,  n={}:\n{}\n\n",
-        percent,
-        selectedToRun.size(),
-        selectedToRunStr);
-
-    return selectedToRun;
+    return allSelected;
   }
 }

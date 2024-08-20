@@ -26,4 +26,5 @@ public class TlsSettings {
   String[] ecCiphersSuites;
   String[] rsaCiphersSuites;
   String[] enabledProtocols;
+  boolean sniEnabled;
 }

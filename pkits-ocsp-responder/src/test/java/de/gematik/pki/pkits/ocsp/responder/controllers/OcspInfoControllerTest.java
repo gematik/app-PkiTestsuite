@@ -38,8 +38,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.cert.ocsp.OCSPReq;
@@ -120,12 +120,12 @@ class OcspInfoControllerTest {
   void getEmptyOcspRequestHistoryForImaginaryCertAsJson2() {
     final String requestBodyAsJson =
         """
-        {
-            "tslSeqNr": -1,
-            "certSerialNr": 420000,
-            "historyDeleteOption": "DELETE_NOTHING"
-        }
-        """;
+            {
+                "tslSeqNr": -1,
+                "certSerialNr": 420000,
+                "historyDeleteOption": "DELETE_NOTHING"
+            }
+            """;
     final String responseBodyAsJson =
         JsonTransceiver.txRxJsonViaHttp(ocspInfoUrl, requestBodyAsJson);
 
@@ -364,12 +364,12 @@ class OcspInfoControllerTest {
 
     final String requestBodyAsJson =
         """
-        {
-            "tslSeqNr": %s,
-            "certSerialNr": %s,
-            "historyDeleteOption": "%s"
-        }
-        """
+            {
+                "tslSeqNr": %s,
+                "certSerialNr": %s,
+                "historyDeleteOption": "%s"
+            }
+            """
             .formatted(tslSeqNr, certSerialNr, historyDeleteOption);
 
     final String responseBodyAsJson =

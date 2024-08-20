@@ -12,7 +12,8 @@ TUC_PKI_018 (certificate validation) and TUC_PKI_006 (OCSP response validation).
 approval tests of every PKI related aspect. It is a re-development of our test suite from 2016.
 
 Products tested by this test suite are: Intermediär, VSDM Fachdienst, VPN Zugangsdienst:
-Registrierungsdienst and Konzentrator, IDP Fachdienst, IDP eGK Fachdienst, KIM Fachdienst. More are coming.
+Registrierungsdienst and Konzentrator, IDP Fachdienst, IDP eGK Fachdienst, KIM Fachdienst. More are
+coming.
 
 ---
 
@@ -70,13 +71,8 @@ Usage: <main class> [-h] [-np] [-faf=<failedTestCases>] [-p=NUMBER]
                                file can be used as parameter for theCLI option
                                --tests-file.
                                Default: ./allFailedOrAborted.txt
-  -h, --help                 Display this help message.
+      -h, --help             Display this help message.
       -np, --no-pdf-report   Do not generate report as PDF.
-  -p, --percent=NUMBER       Execute only proportion of randomly selected tests
-                               from all tests that were passed via --tests-file
-                               or --tests-names). It is a number from 1 to 100.
-                               At least 1 test from passed will be selected.
-                               Default: 100
       -tf, --tests-file=<testCasesFile>
                              The file with tests to run.
                                Default: ./allTests.txt
@@ -211,6 +207,9 @@ Remember: A change of parameters that will change the TSL (i.e. OCSP responder a
 TSL provider address an port) require a new generation of the initial TSL and import to the test 
 object.
 ``` 
+
+The TLS-Client used by the testsuite to connect to the testobject supports SNI. SNI is enabled by
+default in:  pkits-tls-client/src/main/resources/config.yml.
 
 ### Test Data
 

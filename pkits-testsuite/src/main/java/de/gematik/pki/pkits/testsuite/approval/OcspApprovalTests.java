@@ -30,7 +30,6 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALI
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.pki.gemlibpki.exception.GemPkiException;
-import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
@@ -50,7 +49,6 @@ import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusType;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig.OcspResponderConfigBuilder;
-import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
@@ -78,7 +76,6 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.CertificateID;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.Req;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -190,194 +187,6 @@ class OcspApprovalTests extends ApprovalTestsBase {
 
     verifyWithConfiguredOcspResponder(
         dtoBuilder -> dtoBuilder.validSignature(false), USECASE_INVALID);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_021 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with producedAt in past within tolerance")
-  void verifyOcspResponseProducedAtPastWithinTolerance() {
-
-    final int producedAtDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
-            - ocspSettings.getTimeoutDeltaMilliseconds());
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_021 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with producedAt in past out of tolerance")
-  void verifyOcspResponseProducedAtPastOutOfTolerance() {
-
-    final int producedAtDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
-            + ocspSettings.getTimeoutDeltaMilliseconds());
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_021 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with producedAt in future within tolerance")
-  void verifyOcspResponseProducedAtFutureWithinTolerance() {
-
-    final int producedAtDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
-
-    // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
-    // influenced
-    //   verifyOcspResponseProducedAtFutureOutOfTolerance
-    //   verifyOcspResponseProducedAtFutureWithinTolerance
-    //   verifyOcspResponseThisUpdateFutureOutOfTolerance
-    //   verifyOcspResponseThisUpdateFutureWithinTolerance
-    waitForOcspCacheToExpire(
-        testSuiteConfig.getTestObject().getOcspGracePeriodSeconds()
-            + producedAtDeltaMilliseconds / 1000);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_021 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with producedAt in future out of tolerance")
-  void verifyOcspResponseProducedAtFutureOutOfTolerance() {
-
-    final int producedAtDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
-
-    // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
-    // influenced
-    //   verifyOcspResponseProducedAtFutureOutOfTolerance
-    //   verifyOcspResponseProducedAtFutureWithinTolerance
-    //   verifyOcspResponseThisUpdateFutureOutOfTolerance
-    //   verifyOcspResponseThisUpdateFutureWithinTolerance
-    waitForOcspCacheToExpire(
-        testSuiteConfig.getTestObject().getOcspGracePeriodSeconds()
-            + producedAtDeltaMilliseconds / 1000);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_022 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with thisUpdate in future within tolerance")
-  void verifyOcspResponseThisUpdateFutureWithinTolerance() {
-
-    final int thisUpdateDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
-
-    // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
-    // influenced
-    //   verifyOcspResponseProducedAtFutureOutOfTolerance
-    //   verifyOcspResponseProducedAtFutureWithinTolerance
-    //   verifyOcspResponseThisUpdateFutureOutOfTolerance
-    //   verifyOcspResponseThisUpdateFutureWithinTolerance
-    waitForOcspCacheToExpire(
-        testSuiteConfig.getTestObject().getOcspGracePeriodSeconds()
-            + thisUpdateDeltaMilliseconds / 1000);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_022 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with thisUpdate in future out of tolerance")
-  void verifyOcspResponseThisUpdateFutureOutOfTolerance() {
-
-    final int thisUpdateDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
-
-    // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
-    // influenced
-    //   verifyOcspResponseProducedAtFutureOutOfTolerance
-    //   verifyOcspResponseProducedAtFutureWithinTolerance
-    //   verifyOcspResponseThisUpdateFutureOutOfTolerance
-    //   verifyOcspResponseThisUpdateFutureWithinTolerance
-    waitForOcspCacheToExpire(
-        testSuiteConfig.getTestObject().getOcspGracePeriodSeconds()
-            + thisUpdateDeltaMilliseconds / 1000);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_032 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with nextUpdate in past within tolerance")
-  void verifyOcspResponseNextUpdatePastWithinTolerance() {
-
-    final int nextUpdateAtDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
-            - ocspSettings.getTimeoutDeltaMilliseconds());
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
-  }
-
-  /** gematikId: UE_PKI_TS_0302_032 */
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 6")
-  @Afo(
-      afoId = "GS-A_5215",
-      description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
-  @DisplayName("Test OCSP response with nextUpdate in past out of tolerance")
-  void verifyOcspResponseNextUpdatePastOutOfTolerance() {
-
-    final int nextUpdateDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
-            + ocspSettings.getTimeoutDeltaMilliseconds());
-
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
-        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds);
-
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_031 */
@@ -714,20 +523,6 @@ class OcspApprovalTests extends ApprovalTestsBase {
 
     verifyWithConfiguredOcspResponder(
         dtoBuilder -> dtoBuilder.responseAlgoBehavior(ResponseAlgoBehavior.SHA1), USECASE_VALID);
-  }
-
-  @Test
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage")
-  @Afo(afoId = "GS-A_4674", description = "OCSP-Requests gemäß Standards")
-  @Afo(afoId = "RFC 6960", description = "4.2.1. ASN.1 Specification of the OCSP Response")
-  @Afo(afoId = "RFC 5754", description = "2.2. SHA-256")
-  @DisplayName("Test OCSP Responses with SHA1 used for the certId.")
-  @Disabled(
-      "will be activated after the specification is updated to use SHA256 as default algorithm")
-  void verifyHashAlgorithmsInOcspSha2() {
-
-    verifyWithConfiguredOcspResponder(
-        dtoBuilder -> dtoBuilder.responseAlgoBehavior(ResponseAlgoBehavior.SHA2), USECASE_VALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_028 */

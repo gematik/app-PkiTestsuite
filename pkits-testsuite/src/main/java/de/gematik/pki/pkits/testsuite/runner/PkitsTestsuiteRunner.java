@@ -396,8 +396,7 @@ public class PkitsTestsuiteRunner {
         TestClassesContainer.readForDefaultTestClasses();
 
     final List<CustomTestInfo> testsToRun =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(
-            inputTestInfoList, testClassesContainer, runnerParams.getPercent());
+        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer);
 
     runTests(testsToRun);
 
