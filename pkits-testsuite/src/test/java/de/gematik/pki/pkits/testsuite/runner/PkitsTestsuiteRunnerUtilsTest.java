@@ -36,19 +36,19 @@ class PkitsTestsuiteRunnerUtilsTest {
 
     final String content =
         """
-        +	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-        	verifyUseCaseCertsInvalid   Test use case with invalid certificates
-        	verifyUseCaseCertsValid     Test use case with valid certificates
+            +	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
+            	verifyUseCaseCertsInvalid   Test use case with invalid certificates
+            	verifyUseCaseCertsValid     Test use case with valid certificates
 
-        -	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
-        	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
-        +	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
+            -	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
+            	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
+            +	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
 
-        	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
-        -	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
-        +	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
-         	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
-        """;
+            	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
+            -	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
+            +	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
+             	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
+            """;
 
     final Path testFile = Path.of("sampleAllTests.txt");
     Files.writeString(testFile, content, StandardCharsets.UTF_8);
@@ -77,24 +77,8 @@ class PkitsTestsuiteRunnerUtilsTest {
         TestClassesContainer.readForDefaultTestClasses();
 
     final List<CustomTestInfo> testsToRun100 =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 100);
+        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer);
     assertThat(testsToRun100).hasSize(4);
-
-    final List<CustomTestInfo> testsToRun75 =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 75);
-    assertThat(testsToRun75).hasSize(3);
-
-    final List<CustomTestInfo> testsToRun50 =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 50);
-    assertThat(testsToRun50).hasSize(2);
-
-    final List<CustomTestInfo> testsToRun25 =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 25);
-    assertThat(testsToRun25).hasSize(1);
-
-    final List<CustomTestInfo> testsToRun0 =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 0);
-    assertThat(testsToRun0).hasSize(1);
   }
 
   @Test
@@ -119,7 +103,7 @@ class PkitsTestsuiteRunnerUtilsTest {
         TestClassesContainer.readForDefaultTestClasses();
 
     final List<CustomTestInfo> testsToRun =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 100);
+        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer);
 
     log.info(
         "testsToRun\n{}",
@@ -133,19 +117,19 @@ class PkitsTestsuiteRunnerUtilsTest {
 
     final String content =
         """
-        	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-        	verifyUseCaseCertsInvalid   Test use case with invalid certificates
-        	verifyUseCaseCertsValid     Test use case with valid certificates
+            	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
+            	verifyUseCaseCertsInvalid   Test use case with invalid certificates
+            	verifyUseCaseCertsValid     Test use case with valid certificates
 
-        -	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
-        -	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
-        -	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
+            -	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
+            -	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
+            -	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
 
-        	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
-        -	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
-        -	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
-         	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
-        """;
+            	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
+            -	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
+            -	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
+             	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
+            """;
 
     final Path testFile = Path.of("sampleAllTests.txt");
     Files.writeString(testFile, content, StandardCharsets.UTF_8);
@@ -167,7 +151,7 @@ class PkitsTestsuiteRunnerUtilsTest {
         TestClassesContainer.readForDefaultTestClasses();
 
     final List<CustomTestInfo> testsToRun100 =
-        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer, 100);
+        PkitsTestsuiteRunnerUtils.getTestsToRun(inputTestInfoList, testClassesContainer);
 
     assertThat(testsToRun100).isEmpty();
   }

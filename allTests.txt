@@ -2,12 +2,11 @@
 	verifyUseCaseCertsInvalid   Test use case with invalid certificates (multiple data variants)
 	verifyUseCaseCertsNotInTsl  Test use case with valid certificates with issuer not in trust store (multiple data variants)
 	verifyUseCaseCertsValid     Test use case with valid certificates (multiple data variants)
-	verifyUseCaseRsaCertValid   Test use case with valid RSA certificate (multiple data variants)
+-	verifyUseCaseRsaCertValid   Test use case with valid RSA certificate (multiple data variants)
 
 +	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
 	verifyForCaCertificateWithoutServiceSupplyPoint    CA certificate in TSL without ServiceSupplyPoint
 	verifyHashAlgorithmsInOcspSha1                     Test OCSP response with SHA1 used for the certId.
-	verifyHashAlgorithmsInOcspSha2                     (DISABLED) Test OCSP Responses with SHA1 used for the certId.
 	verifyHashAlgorithmsInOcspShaVersion               Test that the test object understands OCSP responses with the same hash algorithm it uses for its requests in the certId.
 	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response (multiple data variants)
 	verifyInvalidCertHashInOcspResponse                Test invalid CertHash in OCSP response
@@ -18,18 +17,20 @@
 	verifyOcspGracePeriod                              Test OCSP grace period
 	verifyOcspRequestStructure                         Test OCSP request structure
 	verifyOcspResponseMissingNextUpdate                Test OCSP response with missing nextUpdate
+	verifyOcspResponseResponderIdByName                Test OCSP response with responder id byName
+	verifyOcspResponseTimeoutAndDelay                  Test OCSP response with timeout and delay
+	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes (multiple data variants)
+	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId (multiple data variants)
+
++	de.gematik.pki.pkits.testsuite.approval.OcspToleranceApprovalTests
 	verifyOcspResponseNextUpdatePastOutOfTolerance     Test OCSP response with nextUpdate in past out of tolerance
 	verifyOcspResponseNextUpdatePastWithinTolerance    Test OCSP response with nextUpdate in past within tolerance
 	verifyOcspResponseProducedAtFutureOutOfTolerance   Test OCSP response with producedAt in future out of tolerance
 	verifyOcspResponseProducedAtFutureWithinTolerance  Test OCSP response with producedAt in future within tolerance
 	verifyOcspResponseProducedAtPastOutOfTolerance     Test OCSP response with producedAt in past out of tolerance
 	verifyOcspResponseProducedAtPastWithinTolerance    Test OCSP response with producedAt in past within tolerance
-	verifyOcspResponseResponderIdByName                Test OCSP response with responder id byName
 	verifyOcspResponseThisUpdateFutureOutOfTolerance   Test OCSP response with thisUpdate in future out of tolerance
 	verifyOcspResponseThisUpdateFutureWithinTolerance  Test OCSP response with thisUpdate in future within tolerance
-	verifyOcspResponseTimeoutAndDelay                  Test OCSP response with timeout and delay
-	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes (multiple data variants)
-	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId (multiple data variants)
 
 +	de.gematik.pki.pkits.testsuite.approval.TslApprovalExtraTests
 	verifyExpiredTslInSystem  Expired TSL in system (NextUpdate is outside the TSL Grace Period). WARNING: After the test a TSL must then be manually inserted into the system.
@@ -51,30 +52,32 @@
 	verifyUseBackupTslDownload                             Test TSL download on primary endpoint not possible
 
 +	de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
-	verifyForInvalidSignatureOfTslSigner                            Invalid signature of the TSL signer certificate.
-	verifyMissingOcspSignerInTslForTslSignerCert                    Test missing OCSP signer in TSL for TSL signer certificate (multiple data variants)
-	verifyOcspResponseTslSignerCertInvalidCertHash                  Test OCSP response of TSL signer certificate with invalid CertHash
-	verifyOcspResponseTslSignerCertInvalidCertId                    Test invalid cert id in OCSP response for TSL signer cert (multiple data variants)
-	verifyOcspResponseTslSignerCertMissingCertHash                  Test OCSP response of TSL signer certificate with missing CertHash
-	verifyOcspResponseTslSignerCertMissingNextUpdate                Test OCSP response of TSL signer certificate with missing nextUpdate
+	verifyForInvalidSignatureOfTslSigner                          Invalid signature of the TSL signer certificate.
+	verifyMissingOcspSignerInTslForTslSignerCert                  Test missing OCSP signer in TSL for TSL signer certificate (multiple data variants)
+	verifyOcspResponseTslSignerCertInvalidCertHash                Test OCSP response of TSL signer certificate with invalid CertHash
+	verifyOcspResponseTslSignerCertInvalidCertId                  Test invalid cert id in OCSP response for TSL signer cert (multiple data variants)
+	verifyOcspResponseTslSignerCertMissingCertHash                Test OCSP response of TSL signer certificate with missing CertHash
+	verifyOcspResponseTslSignerCertMissingNextUpdate              Test OCSP response of TSL signer certificate with missing nextUpdate
+	verifyOcspResponseTslSignerCertResponderIdByName              Test OCSP response of TSL signer certificate with responder id byName
+	verifyOcspResponseTslSignerCertStatusRevokedAndUnknown        Test OCSP response of TSL signer certificate with status revoked and unknown (multiple data variants)
+	verifyOcspResponseTslSignerCertTimeoutAndDelay                Test OCSP response TSL signer certificate with timeout and delay
+	verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes  Test various status of OCSP responses of TSL signer certificate with and without response bytes (multiple data variants)
+	verifyOcspResponseTslSignerCertWithNullParameterInCertId      Test OCSP response of TSL signer certificate with null parameter in CertId (multiple data variants)
+	verifyOcspResponseWithInvalidSignatureForTslSignerCert        Test invalid OCSP response signature for TSL signer certificate
+	verifyTslSignerCertBroken                                     Test TSL signer certificate is broken
+	verifyTslSignerCertExpired                                    Test TSL signer certificate that is expired
+	verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage         Test TSL signer certificates with invalid key usage and extended key usage
+	verifyTslSignerCertNotYetValid                                Test TSL signer certificate that is not yet valid - notBefore is in the future
+
++	de.gematik.pki.pkits.testsuite.approval.TslSignerToleranceApprovalTests
 	verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance     Test OCSP response of TSL signer certificate with nextUpdate in past out of tolerance
 	verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance    Test OCSP response of TSL signer certificate with nextUpdate in past within tolerance
 	verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance   Test OCSP response of TSL signer certificate with producedAt in future out of tolerance
 	verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance  Test OCSP response of TSL signer certificate with producedAt in future within tolerance
 	verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     Test OCSP response of TSL signer certificate with producedAt in past out of tolerance
 	verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    Test OCSP response of TSL signer certificate with producedAt in past within tolerance
-	verifyOcspResponseTslSignerCertResponderIdByName                Test OCSP response of TSL signer certificate with responder id byName
-	verifyOcspResponseTslSignerCertStatusRevokedAndUnknown          Test OCSP response of TSL signer certificate with status revoked and unknown (multiple data variants)
 	verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance   Test OCSP response of TSL signer certificate with thisUpdate in future out of tolerance
 	verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance  Test OCSP response of TSL signer certificate with thisUpdate in future within tolerance
-	verifyOcspResponseTslSignerCertTimeoutAndDelay                  Test OCSP response TSL signer certificate with timeout and delay
-	verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes    Test various status of OCSP responses of TSL signer certificate with and without response bytes (multiple data variants)
-	verifyOcspResponseTslSignerCertWithNullParameterInCertId        Test OCSP response of TSL signer certificate with null parameter in CertId (multiple data variants)
-	verifyOcspResponseWithInvalidSignatureForTslSignerCert          Test invalid OCSP response signature for TSL signer certificate
-	verifyTslSignerCertBroken                                       Test TSL signer certificate is broken
-	verifyTslSignerCertExpired                                      Test TSL signer certificate that is expired
-	verifyTslSignerCertInvalidKeyUsageAndExtendedKeyUsage           Test TSL signer certificates with invalid key usage and extended key usage
-	verifyTslSignerCertNotYetValid                                  Test TSL signer certificate that is not yet valid - notBefore is in the future
 
 +	de.gematik.pki.pkits.testsuite.approval.TslTaApprovalTests
 	verifyHandlingOfStatusStartingTimeAndOverwriteAnnouncedInactiveTrustAnchors  Test overwrite behaviour and proper handling of StatusStartingTime of announced trust anchors (multiple data variants)

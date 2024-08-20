@@ -65,7 +65,6 @@ GS-A_5336    Zertifikatsprüfung nach Ablauf TSL-Graceperiod
 RFC 5019     2.1.1. OCSPRequest Structure
 RFC 5280     4.1.1.2. signatureAlgorithm
 RFC 5280     4.2.1. Certificate Extensions
-RFC 5754     2.2. SHA-256
 RFC 6960     4.1.1. ASN.1 Specification of the OCSP Request
 RFC 6960     4.2.1. ASN.1 Specification of the OCSP Response
 TIP1-A_5120  Clients des TSL-Dienstes: HTTP-Komprimierung unterstützen

@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>3.0.2</version>
+    <version>4.0.1</version>
   </parent>
 
   <artifactId>pkits-sut-server-sim</artifactId>
-  <version>3.0.2</version>
+  <version>4.0.1</version>
   <name>Test Object Simulator (Server)</name>
   <description>Test object simulator (server)</description>
 
@@ -88,7 +88,7 @@
     </dependency>
     <dependency>
       <groupId>com.konghq</groupId>
-      <artifactId>unirest-java</artifactId>
+      <artifactId>unirest-java-core</artifactId>
     </dependency>
   </dependencies>
 

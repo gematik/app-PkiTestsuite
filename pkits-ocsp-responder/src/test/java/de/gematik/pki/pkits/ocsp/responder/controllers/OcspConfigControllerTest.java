@@ -37,8 +37,8 @@ import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigJsonDto;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
@@ -106,31 +106,31 @@ class OcspConfigControllerTest {
 
     final String jsonContent =
         """
-        {
-          "validCertHash": false,
-          "withCertHash": false,
-          "validSignature": false,
-          "certificateIdGeneration": "%s",
-          "delayMilliseconds": 11,
-          "respStatus": "%s",
-          "withResponseBytes": false,
-          "responderIdType": "%s",
-          "thisUpdateDeltaMilliseconds": 22,
-          "producedAtDeltaMilliseconds": 33,
-          "nextUpdateDeltaMilliseconds": 44,
-          "withNullParameterHashAlgoOfCertId": true,
-          "responseAlgoBehavior": "%s",
-          "certificateStatus": {
-            "type": "REVOKED",
-            "revokedDate": "2028-08-08T08:08:08.2665079Z",
-            "revokedReason": 55
-          },
-          "eeCertEncoded": "%s",
-          "issuerCertEncoded": "%s",
-          "signerCertificateEncoded": "%s",
-          "signerPrivateKeyEncoded": "%s"
-        }
-        """
+            {
+              "validCertHash": false,
+              "withCertHash": false,
+              "validSignature": false,
+              "certificateIdGeneration": "%s",
+              "delayMilliseconds": 11,
+              "respStatus": "%s",
+              "withResponseBytes": false,
+              "responderIdType": "%s",
+              "thisUpdateDeltaMilliseconds": 22,
+              "producedAtDeltaMilliseconds": 33,
+              "nextUpdateDeltaMilliseconds": 44,
+              "withNullParameterHashAlgoOfCertId": true,
+              "responseAlgoBehavior": "%s",
+              "certificateStatus": {
+                "type": "REVOKED",
+                "revokedDate": "2028-08-08T08:08:08.2665079Z",
+                "revokedReason": 55
+              },
+              "eeCertEncoded": "%s",
+              "issuerCertEncoded": "%s",
+              "signerCertificateEncoded": "%s",
+              "signerPrivateKeyEncoded": "%s"
+            }
+            """
             .formatted(
                 CertificateIdGeneration.INVALID_CERTID_HASH_ALGO,
                 OCSPRespStatus.TRY_LATER,

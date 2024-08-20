@@ -20,10 +20,7 @@ import de.gematik.pki.pkits.testsuite.reporting.ListApprovalTestsAndAfos;
 import java.nio.file.Path;
 import lombok.Getter;
 import picocli.CommandLine.Help.Visibility;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParameterException;
-import picocli.CommandLine.Spec;
 
 @Getter
 class PkitsTestsuiteRunnerParams {
@@ -50,31 +47,6 @@ class PkitsTestsuiteRunnerParams {
           "Comma separated list of names to run, for example: \"verifyUseCaseCertsValid,"
               + " TslApprovalTestsIT, TslSignerApprovalTestsIT#checkInitialState\".")
   String testCasesNames;
-
-  int percent;
-  @Spec CommandSpec spec;
-
-  @Option(
-      names = {"-p", "--percent"},
-      paramLabel = "NUMBER",
-      description =
-          "Execute only proportion of randomly selected tests from all tests that were passed via"
-              + " --tests-file or --tests-names). It is a number from 1 to 100. At least 1 test"
-              + " from passed will be selected.",
-      defaultValue = "100",
-      showDefaultValue = Visibility.ALWAYS)
-  public void setPercentNumber(final int value) {
-    final boolean isValid = (1 <= value) && (value <= 100);
-    if (!isValid) {
-      throw new ParameterException(
-          spec.commandLine(),
-          String.format(
-              "Invalid value '%s' for option '-p (--percent)': "
-                  + "value is not between 1 and 100.",
-              value));
-    }
-    this.percent = value;
-  }
 
   @Option(
       names = {"-h", "--help"},
