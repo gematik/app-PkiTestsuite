@@ -30,6 +30,7 @@ import de.gematik.pki.pkits.ocsp.responder.controllers.OcspResponderTestUtils;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
+import java.util.List;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.UnknownStatus;
@@ -38,20 +39,23 @@ import org.junit.jupiter.api.Test;
 class OcspResponderConfigTest {
 
   void assertGood(final OcspResponderConfig config) {
-    assertThat(config.getOcspCertificateStatus()).isEqualTo(CertificateStatus.GOOD);
-    assertThat(config.getCertificateStatusDto().isGood()).isTrue();
+    assertThat(config.getCertificateDtos().get(0).getOcspCertificateStatus())
+        .isEqualTo(CertificateStatus.GOOD);
+    assertThat(config.getCertificateDtos().get(0).getCertificateStatusDto().isGood()).isTrue();
   }
 
   void assertUnknown(final OcspResponderConfig config) {
-    assertThat(config.getOcspCertificateStatus()).isInstanceOf(UnknownStatus.class);
-    assertThat(config.getCertificateStatusDto().isUnknown()).isTrue();
+    assertThat(config.getCertificateDtos().get(0).getOcspCertificateStatus())
+        .isInstanceOf(UnknownStatus.class);
+    assertThat(config.getCertificateDtos().get(0).getCertificateStatusDto().isUnknown()).isTrue();
   }
 
   void assertRevoked(final OcspResponderConfig config, final ZonedDateTime revokedDate) {
 
-    final CertificateStatus certificateStatus = config.getOcspCertificateStatus();
+    final CertificateStatus certificateStatus =
+        config.getCertificateDtos().get(0).getOcspCertificateStatus();
     assertThat(certificateStatus).isInstanceOf(RevokedStatus.class);
-    assertThat(config.getCertificateStatusDto().isRevoked()).isTrue();
+    assertThat(config.getCertificateDtos().get(0).getCertificateStatusDto().isRevoked()).isTrue();
 
     final RevokedStatus revokedStatus = (RevokedStatus) certificateStatus;
     assertThat(revokedStatus.getRevocationReason()).isEqualTo(1);
@@ -61,7 +65,7 @@ class OcspResponderConfigTest {
 
   @Test
   void getCustomCertificateStatusDto() {
-    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert();
+    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
 
     final X509Certificate issuerCert = CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
 
@@ -69,28 +73,40 @@ class OcspResponderConfigTest {
 
     assertGood(
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .signer(signer)
-            .certificateStatus(CustomCertificateStatusDto.createGood())
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .signer(signer)
+                        .certificateStatus(CustomCertificateStatusDto.createGood())
+                        .build()))
             .build());
 
     assertUnknown(
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .signer(signer)
-            .certificateStatus(CustomCertificateStatusDto.createUnknown())
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .signer(signer)
+                        .certificateStatus(CustomCertificateStatusDto.createUnknown())
+                        .build()))
             .build());
 
     final ZonedDateTime revokedDate = ZonedDateTime.now();
 
     assertRevoked(
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .signer(signer)
-            .certificateStatus(CustomCertificateStatusDto.createRevoked(revokedDate, 1))
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .signer(signer)
+                        .certificateStatus(CustomCertificateStatusDto.createRevoked(revokedDate, 1))
+                        .build()))
             .build(),
         revokedDate);
   }
@@ -115,7 +131,7 @@ class OcspResponderConfigTest {
   @Test
   void serializeAndDeserializeOcspConfigReqDto() throws IOException {
 
-    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert();
+    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
 
     final X509Certificate issuerCert = CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
 
@@ -124,21 +140,30 @@ class OcspResponderConfigTest {
     // make config to serialize
     OcspResponderConfig ocspResponderConfig =
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .certificateStatus(CustomCertificateStatusDto.createUnknown())
-            .signer(signer)
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .certificateStatus(CustomCertificateStatusDto.createUnknown())
+                        .signer(signer)
+                        .build()))
             .build();
 
     assertSerializeAndDeserializeOcspConfig(ocspResponderConfig);
 
     ocspResponderConfig =
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .certificateStatus(
-                CustomCertificateStatusDto.createRevoked(GemLibPkiUtils.now().plusYears(1), 100))
-            .signer(signer)
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .certificateStatus(
+                            CustomCertificateStatusDto.createRevoked(
+                                GemLibPkiUtils.now().plusYears(1), 100))
+                        .signer(signer)
+                        .build()))
             .build();
 
     assertSerializeAndDeserializeOcspConfig(ocspResponderConfig);

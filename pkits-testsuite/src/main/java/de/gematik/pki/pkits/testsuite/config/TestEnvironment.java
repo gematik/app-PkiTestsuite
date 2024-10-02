@@ -62,8 +62,12 @@ public final class TestEnvironment {
     OcspResponderManager.configure(ocspRespUri, ocspResponderConfig);
 
     log.info(
-        "OcspResponder configured with certSerialNr {}.:: {}",
-        ocspResponderConfig.getEeCert().getSerialNumber(),
+        "OcspResponder configured with certSerialNrs {}.:: {}",
+        String.join(
+            ", ",
+            ocspResponderConfig.getCertificateDtos().stream()
+                .map(cert -> cert.getEeCert().getSerialNumber().toString())
+                .toList()),
         PkitsTestSuiteUtils.getCallerTrace());
   }
 

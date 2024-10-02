@@ -63,7 +63,8 @@ class OcspInfoControllerTest {
   private final int imaginaryNumber = 10000815;
   private final int tslSeqNrFromOcspRequest = 420000;
 
-  private final X509Certificate VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert();
+  private final X509Certificate VALID_X509_EE_CERT =
+      OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
 
   private final X509Certificate VALID_X509_ISSUER_CERT =
       CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);

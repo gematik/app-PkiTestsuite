@@ -16,8 +16,10 @@
 
 package de.gematik.pki.pkits.ocsp.responder;
 
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import java.math.BigInteger;
+import java.util.Optional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,9 +35,10 @@ public class OcspResponseConfigHolder {
     return ocspResponderConfig != null;
   }
 
-  public boolean isCertSerialNrConfigured(final BigInteger certSerialNr) {
+  public Optional<CertificateDto> getCertificateFromSerialNr(final BigInteger certSerialNr) {
     log.debug("Requested  certSerialNr: {}", certSerialNr);
-    log.debug("Configured certSerialNr: {}", ocspResponderConfig.getEeCert().getSerialNumber());
-    return ocspResponderConfig.getEeCert().getSerialNumber().equals(certSerialNr);
+    return ocspResponderConfig.getCertificateDtos().stream()
+        .filter(certificate -> certificate.getEeCert().getSerialNumber().equals(certSerialNr))
+        .findFirst();
   }
 }

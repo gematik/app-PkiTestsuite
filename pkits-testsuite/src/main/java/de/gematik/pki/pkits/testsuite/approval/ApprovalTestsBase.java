@@ -36,8 +36,8 @@ import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig.OcspResponderConfigBuilder;
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
 import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.common.PkitsCertType;
@@ -74,10 +74,7 @@ import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
@@ -312,7 +309,7 @@ public abstract class ApprovalTestsBase {
               config.getTestObject().getOcspTimeoutSeconds() * 1000
                   + config.getTestSuiteParameter().getOcspSettings().getTimeoutDeltaMilliseconds());
 
-  public static Consumer<OcspResponderConfigBuilder> getDateConfigStep(
+  public static Consumer<CertificateDto.CertificateDtoBuilder> getDateConfigStep(
       final DtoDateConfigOption dateConfigOption, final int deltaMilliseconds) {
 
     return switch (dateConfigOption) {
@@ -604,9 +601,13 @@ public abstract class ApprovalTestsBase {
       @NonNull final X509Certificate eeCert, @NonNull final X509Certificate issuerCert) {
     final OcspResponderConfig config =
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .signer(DEFAULT_OCSP_SIGNER)
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .signer(DEFAULT_OCSP_SIGNER)
+                        .build()))
             .build();
 
     TestEnvironment.configureOcspResponder(ocspResponderUri, config);
@@ -639,7 +640,7 @@ public abstract class ApprovalTestsBase {
                   eeCertPath %s,
                   %s,  %s,  %s
 
-                """
+              """
               .formatted(
                   currentTestInfo,
                   PkitsTestSuiteUtils.getCallerTrace(),

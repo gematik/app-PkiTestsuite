@@ -28,9 +28,9 @@ import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.isismtt.ocsp.CertHash;
@@ -103,11 +104,10 @@ public class OcspRequestController {
 
     final OCSPReq ocspReq = createOcspReqFromServletRequest(ocspRequestBytes);
     final BigInteger certSerialNr = getCertSerialNrFromRequest(ocspReq);
-    if (!ocspResponseConfigHolder.isCertSerialNrConfigured(certSerialNr)) {
-      log.error(
-          "CertSerialNr {} is not configured. Configured is certSerialNr {}.",
-          certSerialNr,
-          ocspResponseConfigHolder.getOcspResponderConfig().getEeCert().getSerialNumber());
+    Optional<CertificateDto> certificateDto =
+        ocspResponseConfigHolder.getCertificateFromSerialNr(certSerialNr);
+    if (certificateDto.isEmpty()) {
+      log.error("CertSerialNr {} is not configured.", certSerialNr);
       throw new OcspResponderException("CertSerialNr is not configured");
     }
 
@@ -128,14 +128,13 @@ public class OcspRequestController {
         request.getRemoteHost(),
         request.getRemotePort());
 
-    final int delayMilliseconds =
-        ocspResponseConfigHolder.getOcspResponderConfig().getDelayMilliseconds();
+    final int delayMilliseconds = certificateDto.get().getDelayMilliseconds();
 
     if (delayMilliseconds < 0) {
       throw new PkiCommonException("delayMilliseconds is < 0");
     }
 
-    final byte[] ocspResponseBytes = buildOcspResponseBytes(ocspReq);
+    final byte[] ocspResponseBytes = buildOcspResponseBytes(ocspReq, certificateDto.get());
 
     if (delayMilliseconds > 0) {
       log.info("Delay sending OCSP Response for {} milliseconds", delayMilliseconds);
@@ -145,39 +144,38 @@ public class OcspRequestController {
     return new ResponseEntity<>(ocspResponseBytes, HttpStatus.OK);
   }
 
-  private byte[] buildOcspResponseBytes(final OCSPReq ocspReq) {
-    final OcspResponderConfig config = ocspResponseConfigHolder.getOcspResponderConfig();
+  private byte[] buildOcspResponseBytes(final OCSPReq ocspReq, final CertificateDto certificate) {
     final ZonedDateTime now = GemLibPkiUtils.now();
 
     ZonedDateTime nextUpdate = null;
-    if (config.getNextUpdateDeltaMilliseconds() != null) {
-      nextUpdate = now.plus(config.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
+    if (certificate.getNextUpdateDeltaMilliseconds() != null) {
+      nextUpdate = now.plus(certificate.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
     }
 
     final OcspResponseGenerator ocspResponseGenerator =
         OcspResponseGenerator.builder()
-            .signer(config.getSigner())
-            .withCertHash(config.isWithCertHash())
-            .validCertHash(config.isValidCertHash())
-            .validSignature(config.isValidSignature())
-            .certificateIdGeneration(config.getCertificateIdGeneration())
-            .responderIdType(config.getResponderIdType())
-            .respStatus(config.getRespStatus())
-            .withResponseBytes(config.isWithResponseBytes())
-            .thisUpdate(now.plus(config.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
-            .producedAt(now.plus(config.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .signer(certificate.getSigner())
+            .withCertHash(certificate.isWithCertHash())
+            .validCertHash(certificate.isValidCertHash())
+            .validSignature(certificate.isValidSignature())
+            .certificateIdGeneration(certificate.getCertificateIdGeneration())
+            .responderIdType(certificate.getResponderIdType())
+            .respStatus(certificate.getRespStatus())
+            .withResponseBytes(certificate.isWithResponseBytes())
+            .thisUpdate(now.plus(certificate.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .producedAt(now.plus(certificate.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
             .nextUpdate(nextUpdate)
-            .withNullParameterHashAlgoOfCertId(config.isWithNullParameterHashAlgoOfCertId())
-            .responseAlgoBehavior(config.getResponseAlgoBehavior())
+            .withNullParameterHashAlgoOfCertId(certificate.isWithNullParameterHashAlgoOfCertId())
+            .responseAlgoBehavior(certificate.getResponseAlgoBehavior())
             .build();
     try {
 
       final OCSPResp ocspResponse =
           ocspResponseGenerator.generate(
               ocspReq,
-              config.getEeCert(),
-              config.getIssuerCert(),
-              config.getOcspCertificateStatus());
+              certificate.getEeCert(),
+              certificate.getIssuerCert(),
+              certificate.getOcspCertificateStatus());
 
       final Extension certHashExtension =
           getFirstSingleResp(ocspResponse).getExtension(id_isismtt_at_certHash);

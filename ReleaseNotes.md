@@ -2,6 +2,10 @@
 
 # Release notes PKI Test Suite
 
+## Release 5.0.0
+
+- change OCSP responder to be able to accept multiple certificates
+
 ## Release 4.0.1
 
 - testcase verifyUseCaseRsaCertValid is disabled by default (allTests.txt)
