@@ -28,6 +28,7 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVA
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 
 import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
@@ -37,6 +38,7 @@ import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.usecases.UseCaseResult;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
+import java.util.List;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -49,17 +51,17 @@ import org.junit.jupiter.api.Test;
 class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
 
   private void updateTrustStoreWithAlternativeCerts(
-      final Consumer<OcspResponderConfig.OcspResponderConfigBuilder> configBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
       final TslSignerApprovalTests.TslUpdateExpectation tslUpdateExpected,
       final UseCaseResult useCaseResult) {
 
-    final OcspResponderConfig.OcspResponderConfigBuilder configBuilder =
-        OcspResponderConfig.builder()
+    final CertificateDto.CertificateDtoBuilder certificateDtoBuilder =
+        CertificateDto.builder()
             .eeCert(DEFAULT_TSL_SIGNER.getCertificate())
             .issuerCert(DEFAULT_TRUST_ANCHOR)
             .signer(DEFAULT_OCSP_SIGNER);
 
-    configBuilderStep.accept(configBuilder);
+    certificateDtoBuilderStep.accept(certificateDtoBuilder);
 
     log.info(
         "START updateTrustStoreWithAlternativeCerts - {}", PkitsTestSuiteUtils.getCallerTrace());
@@ -70,7 +72,10 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     final TslDownload tslDownload =
         newTslDownloadGenerator("updateTrustStoreWithAlternativeCerts").getStandardTslDownload(tsl);
 
-    tslDownload.configureOcspResponderForTslSigner(configBuilder.build());
+    tslDownload.configureOcspResponderForTslSigner(
+        OcspResponderConfig.builder()
+            .certificateDtos(List.of(certificateDtoBuilder.build()))
+            .build());
     tslSequenceNr.setLastOfferedTslSeqNr(offeredTslSeqNr);
     tslDownload.waitForTslDownload(tslSequenceNr.getExpectedNrInTestObject());
     tslDownload.waitUntilOcspRequestForTslSigner(tslSequenceNr.getExpectedNrInTestObject());

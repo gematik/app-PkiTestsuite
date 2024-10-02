@@ -26,13 +26,14 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALI
 
 import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
 import de.gematik.pki.gemlibpki.utils.CertReader;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig.OcspResponderConfigBuilder;
 import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
 import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import de.gematik.pki.pkits.testsuite.usecases.UseCaseResult;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -45,41 +46,45 @@ import org.junit.jupiter.api.Test;
 class OcspToleranceApprovalTests extends ApprovalTestsBase {
 
   void verifyWithConfiguredOcspResponder(
-      final Consumer<OcspResponderConfigBuilder> configBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
       final UseCaseResult useCaseResult) {
 
-    verifyWithConfiguredOcspResponder(true, configBuilderStep, useCaseResult);
+    verifyWithConfiguredOcspResponder(true, certificateDtoBuilderStep, useCaseResult);
   }
 
-  void configureOcspResponder(final Consumer<OcspResponderConfigBuilder> configBuilderStep) {
+  void configureOcspResponder(
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep) {
 
     final Path eeCertPath = getPathOfDefaultClientCert();
 
-    final OcspResponderConfigBuilder configBuilder =
-        OcspResponderConfig.builder()
+    final CertificateDto.CertificateDtoBuilder certificateDtoBuilder =
+        CertificateDto.builder()
             .eeCert(CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD))
             .issuerCert(
                 CertReader.readX509(
                     DEFAULT_CLIENT_CERTS_CONFIG.getIssuerCertPathFunc().apply(this)))
             .signer(DEFAULT_OCSP_SIGNER);
 
-    configBuilderStep.accept(configBuilder);
+    certificateDtoBuilderStep.accept(certificateDtoBuilder);
 
-    final OcspResponderConfig config = configBuilder.build();
+    final OcspResponderConfig config =
+        OcspResponderConfig.builder()
+            .certificateDtos(List.of(certificateDtoBuilder.build()))
+            .build();
 
     TestEnvironment.configureOcspResponder(ocspResponderUri, config);
   }
 
   void verifyWithConfiguredOcspResponder(
       final boolean executeInitialState,
-      final Consumer<OcspResponderConfigBuilder> configBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
       final UseCaseResult useCaseResult) {
 
     if (executeInitialState) {
       initialState();
     }
 
-    configureOcspResponder(configBuilderStep);
+    configureOcspResponder(certificateDtoBuilderStep);
 
     useCaseWithCert(
         DEFAULT_CLIENT_CERTS_CONFIG, useCaseResult, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);
@@ -98,10 +103,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_VALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_021 */
@@ -117,10 +122,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_INVALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_021 */
@@ -135,10 +140,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
     final int producedAtDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_VALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -163,10 +168,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
     final int producedAtDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_INVALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -191,10 +196,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
     final int thisUpdateDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_VALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -219,10 +224,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
     final int thisUpdateDeltaMilliseconds =
         OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_INVALID);
 
     // NOTE: if this test case fails, and we do not wait -- all the following test cases can be
     // influenced
@@ -248,10 +253,10 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_VALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_VALID);
   }
 
   /** gematikId: UE_PKI_TS_0302_032 */
@@ -267,9 +272,9 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
         -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
-    final Consumer<OcspResponderConfigBuilder> configBuilderStep =
+    final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep =
         getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds);
 
-    verifyWithConfiguredOcspResponder(configBuilderStep, USECASE_INVALID);
+    verifyWithConfiguredOcspResponder(certificateDtoBuilderStep, USECASE_INVALID);
   }
 }

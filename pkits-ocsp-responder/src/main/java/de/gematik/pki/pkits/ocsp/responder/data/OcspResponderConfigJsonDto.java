@@ -16,11 +16,8 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,42 +32,23 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class OcspResponderConfigJsonDto extends OcspResponderConfig {
 
-  @NonNull private String eeCertEncoded;
-  @NonNull private String issuerCertEncoded;
-  @NonNull private String signerCertificateEncoded;
-  @NonNull private String signerPrivateKeyEncoded;
+  @NonNull private List<CertificateJsonDto> certificateJsonDtos;
 
   public OcspResponderConfigJsonDto(final OcspResponderConfig config) {
     super(config.toBuilder());
 
-    this.eeCertEncoded = GemLibPkiUtils.toMimeBase64NoLineBreaks(eeCert);
-    this.issuerCertEncoded = GemLibPkiUtils.toMimeBase64NoLineBreaks(issuerCert);
-
-    this.signerCertificateEncoded =
-        GemLibPkiUtils.toMimeBase64NoLineBreaks(signer.getCertificate());
-
-    this.signerPrivateKeyEncoded =
-        GemLibPkiUtils.toMimeBase64NoLineBreaks(signer.getPrivateKey().getEncoded());
+    this.certificateJsonDtos = new ArrayList<>();
+    for (CertificateDto certificateDto : config.getCertificateDtos()) {
+      certificateJsonDtos.add(new CertificateJsonDto(certificateDto));
+    }
   }
 
   public OcspResponderConfig toConfig() {
 
-    final X509Certificate eeCert =
-        CertReader.readX509(GemLibPkiUtils.decodeFromMimeBase64(this.eeCertEncoded));
-
-    final X509Certificate issuerCert =
-        CertReader.readX509(GemLibPkiUtils.decodeFromMimeBase64(this.issuerCertEncoded));
-
-    final X509Certificate signerCert =
-        CertReader.readX509(GemLibPkiUtils.decodeFromMimeBase64(this.signerCertificateEncoded));
-
-    final PrivateKey signerPrivateKey =
-        GemLibPkiUtils.convertPrivateKey(this.signerPrivateKeyEncoded);
-
-    this.eeCert = eeCert;
-    this.issuerCert = issuerCert;
-    this.signer = new P12Container(signerCert, signerPrivateKey);
-
+    this.certificateDtos = new ArrayList<>();
+    for (CertificateJsonDto certificateJsonDto : certificateJsonDtos) {
+      certificateDtos.add(certificateJsonDto.toCertificateDto());
+    }
     return this;
   }
 }

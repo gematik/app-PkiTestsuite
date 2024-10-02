@@ -23,6 +23,7 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestHistoryContainer;
@@ -88,9 +89,13 @@ public class TslDownload {
     try {
       final OcspResponderConfig ocspResponderConfig =
           OcspResponderConfig.builder()
-              .eeCert(tslSignerCert)
-              .issuerCert(trustAnchor)
-              .signer(ocspSigner)
+              .certificateDtos(
+                  List.of(
+                      CertificateDto.builder()
+                          .eeCert(tslSignerCert)
+                          .issuerCert(trustAnchor)
+                          .signer(ocspSigner)
+                          .build()))
               .build();
 
       TestEnvironment.configureOcspResponder(ocspRespUri, ocspResponderConfig);

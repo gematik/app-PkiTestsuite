@@ -22,20 +22,22 @@ import de.gematik.pki.gemlibpki.utils.P12Reader;
 import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.NonNull;
 
 public class OcspResponderTestUtils {
 
-  public static X509Certificate getValidEeCert() {
+  public static X509Certificate getValidEeCert(String filename) {
     return CertReader.readX509(
         ResourceReader.getFileFromResourceAsBytes(
-            "certificates/GEM.SMCB-CA10/valid/DrMedGunther.pem", OcspResponderTestUtils.class));
+            "certificates/GEM.SMCB-CA10/valid/" + filename, OcspResponderTestUtils.class));
   }
 
   public static X509Certificate getValidIssuerCert() {
@@ -67,11 +69,15 @@ public class OcspResponderTestUtils {
 
     final OcspResponderConfig ocspResponderConfig =
         OcspResponderConfig.builder()
-            .eeCert(eeCert)
-            .issuerCert(issuerCert)
-            .certificateStatus(certificateStatus)
-            .signer(signer)
-            .delayMilliseconds(delayMilliseconds)
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .certificateStatus(certificateStatus)
+                        .signer(signer)
+                        .delayMilliseconds(delayMilliseconds)
+                        .build()))
             .build();
 
     OcspResponderManager.configure(uri, ocspResponderConfig);

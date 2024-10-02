@@ -28,6 +28,7 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALI
 
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
 import de.gematik.pki.pkits.testsuite.common.PkitsCertType;
@@ -36,6 +37,7 @@ import de.gematik.pki.pkits.testsuite.config.Afo;
 import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -87,9 +89,13 @@ class CertificateApprovalTests extends ApprovalTestsBase {
 
     final OcspResponderConfig config =
         OcspResponderConfig.builder()
-            .eeCert(CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD))
-            .issuerCert(issuerCert)
-            .signer(PkitsTestDataConstants.OCSP_SIGNER_RSA)
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD))
+                        .issuerCert(issuerCert)
+                        .signer(PkitsTestDataConstants.OCSP_SIGNER_RSA)
+                        .build()))
             .build();
 
     TestEnvironment.configureOcspResponder(ocspResponderUri, config);

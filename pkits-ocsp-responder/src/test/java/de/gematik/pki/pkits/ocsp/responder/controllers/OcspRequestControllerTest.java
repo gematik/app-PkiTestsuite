@@ -27,6 +27,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import de.gematik.pki.gemlibpki.ocsp.OcspRequestGenerator;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistory;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.List;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +80,7 @@ class OcspRequestControllerTest {
 
   @BeforeAll
   public static void setup() {
-    VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert();
+    VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
     VALID_X509_ISSUER_CERT = OcspResponderTestUtils.getValidIssuerCert();
     signer = OcspResponderTestUtils.getSigner();
     ocspReq =
@@ -193,12 +195,16 @@ class OcspRequestControllerTest {
   void shouldNotIncludeCertHashExtensionInResponse() throws IOException, OCSPException {
     final OcspResponderConfig ocspResponderConfig =
         OcspResponderConfig.builder()
-            .eeCert(VALID_X509_EE_CERT)
-            .issuerCert(VALID_X509_ISSUER_CERT)
-            .certificateStatus(CERT_STATUS_GOOD)
-            .withCertHash(false)
-            .signer(signer)
-            .delayMilliseconds(delayMilliseconds)
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(VALID_X509_EE_CERT)
+                        .issuerCert(VALID_X509_ISSUER_CERT)
+                        .certificateStatus(CERT_STATUS_GOOD)
+                        .withCertHash(false)
+                        .signer(signer)
+                        .delayMilliseconds(delayMilliseconds)
+                        .build()))
             .build();
 
     OcspResponderManager.configure(getLocalhostEndpoint(""), ocspResponderConfig);
