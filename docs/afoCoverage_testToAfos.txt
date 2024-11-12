@@ -25,10 +25,10 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
 de.gematik.pki.pkits.testsuite.approval.OcspToleranceApprovalTests
   verifyOcspResponseNextUpdatePastOutOfTolerance     GS-A_4657, GS-A_5215
   verifyOcspResponseNextUpdatePastWithinTolerance    GS-A_4657, GS-A_5215
-  verifyOcspResponseProducedAtFutureOutOfTolerance   GS-A_4657, GS-A_5215
-  verifyOcspResponseProducedAtFutureWithinTolerance  GS-A_4657, GS-A_5215
-  verifyOcspResponseProducedAtPastOutOfTolerance     GS-A_4657, GS-A_5215
-  verifyOcspResponseProducedAtPastWithinTolerance    GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtFutureOutOfTolerance   A_23225, GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtFutureWithinTolerance  A_23225, GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtPastOutOfTolerance     A_23225, GS-A_4657, GS-A_5215
+  verifyOcspResponseProducedAtPastWithinTolerance    A_23225, GS-A_4657, GS-A_5215
   verifyOcspResponseThisUpdateFutureOutOfTolerance   GS-A_4657, GS-A_5215
   verifyOcspResponseThisUpdateFutureWithinTolerance  GS-A_4657, GS-A_5215
 
@@ -72,10 +72,10 @@ de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
 de.gematik.pki.pkits.testsuite.approval.TslSignerToleranceApprovalTests
   verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance     GS-A_4642, GS-A_4657, GS-A_5215
   verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance    GS-A_4642, GS-A_4657, GS-A_5215
-  verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance   GS-A_4642, GS-A_4657, GS-A_5215
-  verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance  GS-A_4642, GS-A_4657, GS-A_5215
-  verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     GS-A_4642, GS-A_4657, GS-A_5215
-  verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance   A_23225, GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance  A_23225, GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance     A_23225, GS-A_4642, GS-A_4657, GS-A_5215
+  verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance    A_23225, GS-A_4642, GS-A_4657, GS-A_5215
   verifyOcspResponseTslSignerCertThisUpdateFutureOutOfTolerance   GS-A_4642, GS-A_4657, GS-A_5215
   verifyOcspResponseTslSignerCertThisUpdateFutureWithinTolerance  GS-A_4642, GS-A_4657, GS-A_5215
 

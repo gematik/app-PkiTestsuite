@@ -123,6 +123,10 @@ public final class HandshakeInterceptor implements X509TrustManager {
                 .ocspRespCache(PkiSutServerSimApplication.getOcspRespCache())
                 .withOcspCheck(OCSP_ENABLED)
                 .ocspTimeoutSeconds(ocspConfig.getOcspTimeoutSeconds())
+                .ocspTimeToleranceProducedAtPastMilliseconds(
+                    1000 * ocspConfig.getToleranceProducedAtPastSeconds())
+                .ocspTimeToleranceProducedAtFutureMilliseconds(
+                    1000 * ocspConfig.getToleranceProducedAtFutureSeconds())
                 .tolerateOcspFailure(ocspConfig.isTolerateOcspFailure())
                 .build();
       } catch (final TosException e) {

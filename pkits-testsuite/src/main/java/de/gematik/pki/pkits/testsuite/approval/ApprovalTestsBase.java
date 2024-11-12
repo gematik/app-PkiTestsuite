@@ -74,7 +74,10 @@ import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
@@ -309,7 +312,7 @@ public abstract class ApprovalTestsBase {
               config.getTestObject().getOcspTimeoutSeconds() * 1000
                   + config.getTestSuiteParameter().getOcspSettings().getTimeoutDeltaMilliseconds());
 
-  public static Consumer<CertificateDto.CertificateDtoBuilder> getDateConfigStep(
+  public static Consumer<CertificateDto.CertificateDtoBuilder> applyDateConfig(
       final DtoDateConfigOption dateConfigOption, final int deltaMilliseconds) {
 
     return switch (dateConfigOption) {
@@ -713,7 +716,7 @@ public abstract class ApprovalTestsBase {
 
   protected void waitForOcspCacheToExpire(int seconds) {
     seconds = seconds + ocspSettings.getGracePeriodExtraDelay();
-    log.info("Waiting for ocsp cache to expire.");
+    log.info("Waiting {} seconds for ocsp cache to expire.", seconds);
     waitSeconds(seconds);
   }
 

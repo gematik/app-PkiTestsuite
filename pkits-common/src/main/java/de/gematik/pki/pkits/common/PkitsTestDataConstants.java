@@ -77,20 +77,20 @@ public final class PkitsTestDataConstants {
 
   /** Absolute or relative path to issue certificate. */
   public static final X509Certificate DEFAULT_TRUST_ANCHOR =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA8_TEST-ONLY.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA51-TEST-ONLY.pem"));
 
   /** Absolute or relative path to key store in p12 format to sign TSLs with. */
   public static final P12Container DEFAULT_TSL_SIGNER =
       P12Reader.getContentFromP12(
-          trustAnchorCertsDir.resolve("TSL-Signing-Unit-8-TEST-ONLY.p12"), KEYSTORE_PASSWORD);
+          trustAnchorCertsDir.resolve("TSL-Signing-Unit-51-TEST-ONLY.p12"), KEYSTORE_PASSWORD);
 
   public static final X509Certificate ALTERNATIVE_FIRST_TRUST_ANCHOR =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA9_TEST-ONLY.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA52-TEST-ONLY.pem"));
   public static final X509Certificate ALTERNATIVE_SECOND_TRUST_ANCHOR =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA16_TEST-ONLY.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA53-TEST-ONLY.pem"));
 
   public static final X509Certificate EXPIRED_TRUST_ANCHOR =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA17_TEST-ONLY_expired.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA54-TEST-ONLY_expired.pem"));
   public static final X509Certificate NOT_YET_VALID_TRUST_ANCHOR =
-      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA18_TEST-ONLY_not-yet-valid.pem"));
+      CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA55-TEST-ONLY_not-yet-valid.pem"));
 }

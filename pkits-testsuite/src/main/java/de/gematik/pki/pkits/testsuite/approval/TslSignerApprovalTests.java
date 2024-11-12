@@ -79,7 +79,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
   }
 
   private void updateTrustStoreWithAlternativeCerts(
-      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoDateConfigurer,
       final TslUpdateExpectation tslUpdateExpected,
       final UseCaseResult useCaseResult) {
 
@@ -89,7 +89,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
             .issuerCert(DEFAULT_TRUST_ANCHOR)
             .signer(DEFAULT_OCSP_SIGNER);
 
-    certificateDtoBuilderStep.accept(certificateDtoBuilder);
+    certificateDtoDateConfigurer.accept(certificateDtoBuilder);
 
     log.info(
         "START updateTrustStoreWithAlternativeCerts - {}", PkitsTestSuiteUtils.getCallerTrace());

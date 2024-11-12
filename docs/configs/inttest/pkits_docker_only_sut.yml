@@ -4,6 +4,8 @@ testObject:
   ipAddressOrFqdn: "HOSTNAME_TO_REPLACE"
   port: 8443
   ocspGracePeriodSeconds: 0
+  ocspToleranceProducedAtPastSeconds: 10
+  ocspToleranceProducedAtFutureSeconds: 20
   tslDownloadIntervalSeconds: 2
   tslProcessingTimeSeconds: 2
 

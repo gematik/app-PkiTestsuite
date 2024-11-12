@@ -401,6 +401,10 @@ public class TslProcurer {
               .currentTslId(currentTslId)
               .currentTslSeqNr(currentTslSeqNr)
               .ocspTimeoutSeconds(ocspConfig.getOcspTimeoutSeconds())
+              .ocspTimeToleranceProducedAtPastMilliseconds(
+                  ocspConfig.getToleranceProducedAtPastSeconds() * 1000)
+              .ocspTimeToleranceProducedAtFutureMilliseconds(
+                  ocspConfig.getToleranceProducedAtFutureSeconds() * 1000)
               .tolerateOcspFailure(ocspConfig.isTolerateOcspFailure())
               .build();
 

@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 5.1.0
+
+- update test certificates
+- new Afo A_23225 is part of the test suite (tolerances for producedAt of OCSP responses)
+
 ## Release 5.0.0
 
 - change OCSP responder to be able to accept multiple certificates
