@@ -21,7 +21,9 @@ handshake-interception:
 ocsp:
   enabled: true
   service-url: http://localhost:8083/ocsp
-  grace-period-seconds: 0
+  grace-period-seconds: 3
+  tolerance-produced-at-past-seconds: 10
+  tolerance-produced-at-future-seconds: 20
   ocsp-timeout-seconds: 10
   tolerate-ocsp-failure: false
 

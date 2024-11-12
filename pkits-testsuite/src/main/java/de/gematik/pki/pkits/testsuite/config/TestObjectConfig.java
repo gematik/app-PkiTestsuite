@@ -46,6 +46,18 @@ public class TestObjectConfig {
   int ocspGracePeriodSeconds = 30;
 
   @ParameterDescription(
+      withDefault = true,
+      description =
+          "OCSP tolerance for producedAt in the past, in seconds configured in the test object.")
+  int ocspToleranceProducedAtPastSeconds = 5;
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
+          "OCSP tolerance for producedAt in the future, in seconds configured in the test object.")
+  int ocspToleranceProducedAtFutureSeconds = 3;
+
+  @ParameterDescription(
       description = "TSL download interval in seconds configured in the test object.")
   int tslDownloadIntervalSeconds;
 

@@ -66,7 +66,11 @@ public final class TestEnvironment {
         String.join(
             ", ",
             ocspResponderConfig.getCertificateDtos().stream()
-                .map(cert -> cert.getEeCert().getSerialNumber().toString())
+                .map(
+                    cert ->
+                        cert.getEeCert().getSerialNumber().toString()
+                            + " ProducedAtDeltaMilliseconds: "
+                            + cert.getProducedAtDeltaMilliseconds())
                 .toList()),
         PkitsTestSuiteUtils.getCallerTrace());
   }

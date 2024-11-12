@@ -22,13 +22,13 @@ import de.gematik.pki.pkits.sut.server.sim.exceptions.TosException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
-import lombok.Getter;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Getter
+@Data
 @Component
 @RequiredArgsConstructor
 @ConfigurationProperties("ocsp")
@@ -42,6 +42,12 @@ public class OcspConfig {
 
   @Value("${ocsp.grace-period-seconds:30}")
   private int ocspGracePeriodSeconds;
+
+  @Value("5")
+  private int toleranceProducedAtPastSeconds;
+
+  @Value("3")
+  private int toleranceProducedAtFutureSeconds;
 
   @Value("${ocsp.ocsp-timeout-seconds:10}")
   private int ocspTimeoutSeconds;

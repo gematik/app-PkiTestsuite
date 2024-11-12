@@ -104,7 +104,7 @@ public class OcspRequestController {
 
     final OCSPReq ocspReq = createOcspReqFromServletRequest(ocspRequestBytes);
     final BigInteger certSerialNr = getCertSerialNrFromRequest(ocspReq);
-    Optional<CertificateDto> certificateDto =
+    final Optional<CertificateDto> certificateDto =
         ocspResponseConfigHolder.getCertificateFromSerialNr(certSerialNr);
     if (certificateDto.isEmpty()) {
       log.error("CertSerialNr {} is not configured.", certSerialNr);
@@ -141,6 +141,7 @@ public class OcspRequestController {
       PkitsCommonUtils.waitMilliseconds(delayMilliseconds);
     }
     log.info("Sending OCSP response.");
+    log.info("OCSP response: {}", Hex.toHexString(ocspResponseBytes));
     return new ResponseEntity<>(ocspResponseBytes, HttpStatus.OK);
   }
 

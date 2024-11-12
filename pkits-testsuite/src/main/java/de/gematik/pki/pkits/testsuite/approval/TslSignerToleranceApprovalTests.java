@@ -35,6 +35,8 @@ import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import de.gematik.pki.pkits.testsuite.config.Afo;
+import de.gematik.pki.pkits.testsuite.config.TestConfigManager;
+import de.gematik.pki.pkits.testsuite.config.TestObjectConfig;
 import de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour;
 import de.gematik.pki.pkits.testsuite.usecases.UseCaseResult;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
@@ -50,8 +52,10 @@ import org.junit.jupiter.api.Test;
 @Order(1)
 class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
 
+  TestObjectConfig testObjectConfig = TestConfigManager.getTestSuiteConfig().getTestObject();
+
   private void updateTrustStoreWithAlternativeCerts(
-      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoDateConfigurer,
       final TslSignerApprovalTests.TslUpdateExpectation tslUpdateExpected,
       final UseCaseResult useCaseResult) {
 
@@ -61,7 +65,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
             .issuerCert(DEFAULT_TRUST_ANCHOR)
             .signer(DEFAULT_OCSP_SIGNER);
 
-    certificateDtoBuilderStep.accept(certificateDtoBuilder);
+    certificateDtoDateConfigurer.accept(certificateDtoBuilder);
 
     log.info(
         "START updateTrustStoreWithAlternativeCerts - {}", PkitsTestSuiteUtils.getCallerTrace());
@@ -109,6 +113,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_5215",
       description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
+  @Afo(afoId = "A_23225", description = "lokales Caching von Sperrinformationen und Toleranzzeiten")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in past within tolerance")
   void verifyOcspResponseTslSignerCertProducedAtPastWithinTolerance() {
@@ -116,11 +121,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int producedAtDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
+        -(testObjectConfig.getOcspToleranceProducedAtPastSeconds() * 1000
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
         USECASE_VALID);
 
@@ -136,6 +141,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_5215",
       description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
+  @Afo(afoId = "A_23225", description = "lokales Caching von Sperrinformationen und Toleranzzeiten")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in past out of tolerance")
   void verifyOcspResponseTslSignerCertProducedAtPastOutOfTolerance() {
@@ -143,11 +149,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int producedAtDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
+        -(testObjectConfig.getOcspToleranceProducedAtPastSeconds() * 1000
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
         USECASE_INVALID);
 
@@ -163,6 +169,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_5215",
       description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
+  @Afo(afoId = "A_23225", description = "lokales Caching von Sperrinformationen und Toleranzzeiten")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in future within tolerance")
   void verifyOcspResponseTslSignerCertProducedAtFutureWithinTolerance() {
@@ -170,10 +177,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int producedAtDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
+        testObjectConfig.getOcspToleranceProducedAtFutureSeconds() * 1000
+            - ocspSettings.getTimeoutDeltaMilliseconds();
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
         USECASE_VALID);
 
@@ -193,6 +201,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
   @Afo(
       afoId = "GS-A_5215",
       description = "Festlegung der zeitlichen Toleranzen in einer OCSP-Response")
+  @Afo(afoId = "A_23225", description = "lokales Caching von Sperrinformationen und Toleranzzeiten")
   @DisplayName(
       "Test OCSP response of TSL signer certificate with producedAt in future out of tolerance")
   void verifyOcspResponseTslSignerCertProducedAtFutureOutOfTolerance() {
@@ -200,12 +209,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int producedAtDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
-            + ocspSettings.getTimeoutDeltaMilliseconds()
-            + 1000 * testSuiteConfig.getTestObject().getOcspGracePeriodSeconds();
+        testObjectConfig.getOcspToleranceProducedAtFutureSeconds() * 1000
+            + ocspSettings.getTimeoutDeltaMilliseconds();
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.PRODUCED_AT, producedAtDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
         USECASE_INVALID);
 
@@ -232,10 +240,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int thisUpdateDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS - ocspSettings.getTimeoutDeltaMilliseconds();
+        OcspConstants.OCSP_TIME_TOLERANCE_THISNEXTUPDATE_MILLISECONDS
+            - ocspSettings.getTimeoutDeltaMilliseconds();
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
         USECASE_VALID);
 
@@ -262,10 +271,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int thisUpdateDeltaMilliseconds =
-        OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS + ocspSettings.getTimeoutDeltaMilliseconds();
+        OcspConstants.OCSP_TIME_TOLERANCE_THISNEXTUPDATE_MILLISECONDS
+            + ocspSettings.getTimeoutDeltaMilliseconds();
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.THIS_UPDATE, thisUpdateDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
         USECASE_INVALID);
 
@@ -292,11 +302,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int nextUpdateAtDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
+        -(OcspConstants.OCSP_TIME_TOLERANCE_THISNEXTUPDATE_MILLISECONDS
             - ocspSettings.getTimeoutDeltaMilliseconds());
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.NEXT_UPDATE, nextUpdateAtDeltaMilliseconds),
         TSL_UPDATE_EXPECTED,
         USECASE_VALID);
 
@@ -319,11 +329,11 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     initialState();
 
     final int nextUpdateDeltaMilliseconds =
-        -(OcspConstants.OCSP_TIME_TOLERANCE_MILLISECONDS
+        -(OcspConstants.OCSP_TIME_TOLERANCE_THISNEXTUPDATE_MILLISECONDS
             + ocspSettings.getTimeoutDeltaMilliseconds());
 
     updateTrustStoreWithAlternativeCerts(
-        getDateConfigStep(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds),
+        applyDateConfig(DtoDateConfigOption.NEXT_UPDATE, nextUpdateDeltaMilliseconds),
         TSL_UPDATE_NOT_EXPECTED,
         USECASE_INVALID);
 

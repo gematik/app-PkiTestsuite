@@ -62,7 +62,7 @@ public class TslProviderController {
     return headerValues.stream().anyMatch(v -> v.contains("gzip"));
   }
 
-  @Operation(summary = "Returns TLS according to current configuration of the OCSP Responder.")
+  @Operation(summary = "Returns TSL according to current configuration of the OCSP Responder.")
   @GetMapping(value = TSL_XML_PRIMARY_ENDPOINT, produces = MEDIA_TYPE_APPLICATION_VND_ETSI_TSL_XML)
   public ResponseEntity<byte[]> getTslXmlPrimary(
       final HttpServletRequest request,

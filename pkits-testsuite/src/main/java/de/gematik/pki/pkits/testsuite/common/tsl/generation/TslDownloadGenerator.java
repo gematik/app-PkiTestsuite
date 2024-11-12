@@ -74,10 +74,10 @@ public class TslDownloadGenerator {
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_invalid-ext-keyusage.p12");
 
   public static final Path alternativeTslSignerP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-9-TEST-ONLY.p12");
+      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-52-TEST-ONLY.p12");
 
   public static final Path alternativeSecondTslSignerP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-16-TEST-ONLY.p12");
+      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-53-TEST-ONLY.p12");
 
   public static final Path tslSignerFromExpiredTrustAnchorP12Path =
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_expired_ta.p12");

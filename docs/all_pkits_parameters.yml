@@ -5,6 +5,8 @@ testObject:
   ipAddressOrFqdn: "HasToBeDefined_ipAddressOrFqdn"                                        # FQDN or IP address to connect to the test object.
   port: HasToBeDefined_port                                                                # Port where the test object listens on.
   ocspGracePeriodSeconds: 30                                                               # OCSP grace period in seconds configured in the test object.
+  ocspToleranceProducedAtPastSeconds: 5                                                    # OCSP tolerance for producedAt in the past, in seconds configured in the test object.
+  ocspToleranceProducedAtFutureSeconds: 3                                                  # OCSP tolerance for producedAt in the future, in seconds configured in the test object.
   tslDownloadIntervalSeconds: HasToBeDefined_tslDownloadIntervalSeconds                    # TSL download interval in seconds configured in the test object.
   tslGracePeriodDays: 0                                                                    # Duration in days after expiration of the TSL during which the TSL is still regarded as valid.
   tslProcessingTimeSeconds: 3                                                              # Amount of seconds to wait after a TSL update for processing inside the test object.

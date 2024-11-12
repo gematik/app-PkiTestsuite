@@ -44,7 +44,11 @@ import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
-import de.gematik.pki.pkits.ocsp.responder.data.*;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusType;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspRequestHistoryEntryDto;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
@@ -84,17 +88,18 @@ import org.junit.jupiter.params.provider.ValueSource;
 @DisplayName("PKI OCSP approval tests.")
 @Order(1)
 class OcspApprovalTests extends ApprovalTestsBase {
+
   private static final boolean SKIP_INITIAL_STATE = false;
 
   void verifyWithConfiguredOcspResponder(
-      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoDateConfigurer,
       final UseCaseResult useCaseResult) {
 
-    verifyWithConfiguredOcspResponder(true, certificateDtoBuilderStep, useCaseResult);
+    verifyWithConfiguredOcspResponder(true, certificateDtoDateConfigurer, useCaseResult);
   }
 
   void configureOcspResponder(
-      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep) {
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoDateConfigurer) {
 
     final Path eeCertPath = getPathOfDefaultClientCert();
 
@@ -106,7 +111,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
                     DEFAULT_CLIENT_CERTS_CONFIG.getIssuerCertPathFunc().apply(this)))
             .signer(DEFAULT_OCSP_SIGNER);
 
-    certificateDtoBuilderStep.accept(certificateDtoBuilder);
+    certificateDtoDateConfigurer.accept(certificateDtoBuilder);
 
     final OcspResponderConfig config =
         OcspResponderConfig.builder()
@@ -118,14 +123,14 @@ class OcspApprovalTests extends ApprovalTestsBase {
 
   void verifyWithConfiguredOcspResponder(
       final boolean executeInitialState,
-      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoBuilderStep,
+      final Consumer<CertificateDto.CertificateDtoBuilder> certificateDtoDateConfigurer,
       final UseCaseResult useCaseResult) {
 
     if (executeInitialState) {
       initialState();
     }
 
-    configureOcspResponder(certificateDtoBuilderStep);
+    configureOcspResponder(certificateDtoDateConfigurer);
 
     useCaseWithCert(
         DEFAULT_CLIENT_CERTS_CONFIG, useCaseResult, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);

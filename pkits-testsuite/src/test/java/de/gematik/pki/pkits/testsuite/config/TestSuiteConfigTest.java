@@ -52,6 +52,7 @@ class TestSuiteConfigTest {
   }
 
   private static class CustomAsserter {
+
     int counter = 0;
 
     <T> void assertEquals(final T expected, final T actual) {
@@ -81,6 +82,8 @@ class TestSuiteConfigTest {
 
     final String testObject_scriptPath = "unused by default";
     final int testObject_ocspGracePeriodSeconds = 30;
+    final int ocspToleranceProducedAtPastSeconds = 5;
+    final int ocspToleranceProducedAtFutureSeconds = 3;
     final int testObject_tslProcessingTimeSeconds = 3;
     final int testObject_ocspProcessingTimeSeconds = 1;
     final int testObject_tslGracePeriodDays = 0;
@@ -113,6 +116,12 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testObject_ocspGracePeriodSeconds,
         testSuiteConfig.getTestObject().getOcspGracePeriodSeconds());
+    ca.assertEquals(
+        ocspToleranceProducedAtPastSeconds,
+        testSuiteConfig.getTestObject().getOcspToleranceProducedAtPastSeconds());
+    ca.assertEquals(
+        ocspToleranceProducedAtFutureSeconds,
+        testSuiteConfig.getTestObject().getOcspToleranceProducedAtFutureSeconds());
     ca.assertEquals(
         testObject_ocspTimeoutSeconds, testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
 
@@ -230,6 +239,14 @@ class TestSuiteConfigTest {
         .setOcspGracePeriodSeconds(tscBlank.getTestObject().getOcspGracePeriodSeconds());
     testSuiteConfig
         .getTestObject()
+        .setOcspToleranceProducedAtPastSeconds(
+            tscBlank.getTestObject().getOcspToleranceProducedAtPastSeconds());
+    testSuiteConfig
+        .getTestObject()
+        .setOcspToleranceProducedAtFutureSeconds(
+            tscBlank.getTestObject().getOcspToleranceProducedAtFutureSeconds());
+    testSuiteConfig
+        .getTestObject()
         .setTslProcessingTimeSeconds(tscBlank.getTestObject().getTslProcessingTimeSeconds());
     testSuiteConfig.getTestSuiteParameter().setCaptureInterfaces("9.9.9.9");
 
@@ -330,6 +347,8 @@ class TestSuiteConfigTest {
     final int tslProcessingTimeSeconds = -200;
     final int ocspProcessingTimeSeconds = -250;
     final int ocspGracePeriodSeconds = -300;
+    final int ocspToleranceProducedAtPastSeconds = -100;
+    final int ocspToleranceProducedAtFutureSeconds = -100;
     final int ocspTimeoutSeconds = -400;
 
     final String scriptUseCase_scriptPath = "testObject.scriptUseCase.scriptPath";
@@ -348,6 +367,10 @@ class TestSuiteConfigTest {
     ca.assertEquals(tslProcessingTimeSeconds, testObject.getTslProcessingTimeSeconds());
     ca.assertEquals(ocspProcessingTimeSeconds, testObject.getOcspProcessingTimeSeconds());
     ca.assertEquals(ocspGracePeriodSeconds, testObject.getOcspGracePeriodSeconds());
+    ca.assertEquals(
+        ocspToleranceProducedAtFutureSeconds, testObject.getOcspToleranceProducedAtFutureSeconds());
+    ca.assertEquals(
+        ocspToleranceProducedAtPastSeconds, testObject.getOcspToleranceProducedAtPastSeconds());
     ca.assertEquals(ocspTimeoutSeconds, testObject.getOcspTimeoutSeconds());
 
     final ScriptUseCase scriptUseCase = testObject.getScriptUseCase();

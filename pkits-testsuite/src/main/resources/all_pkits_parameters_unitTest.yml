@@ -8,6 +8,8 @@ testObject:
   tslProcessingTimeSeconds: -200
   ocspProcessingTimeSeconds: -250
   ocspGracePeriodSeconds: -300
+  ocspToleranceProducedAtPastSeconds: -100
+  ocspToleranceProducedAtFutureSeconds: -100
   ocspTimeoutSeconds: -400
   scriptUseCase:
     scriptPath: "testObject.scriptUseCase.scriptPath"
