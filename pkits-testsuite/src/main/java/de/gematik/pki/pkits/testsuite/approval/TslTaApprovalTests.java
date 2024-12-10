@@ -80,7 +80,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with announcement of trust anchor change.",
         newTslDownloadGenerator("announceAlternativeFirstTrustAnchor")
             .getStandardTslDownload(
-                CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl()),
+                CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 
@@ -89,7 +89,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
     offerTslAndVerifyItsTrustAnchorIsNotActive(
         "Offer a TSL with alternative CAs, signed with old (no longer active) trust anchor.",
         "invalidDefaultTrustAnchorWithAlternativeCAs",
-        CreateTslTemplate.alternativeTsl(),
+        CreateTslTemplate.alternativeTsl(eccOnly),
         DEFAULT_TSL_SIGNER,
         DEFAULT_TRUST_ANCHOR);
 
@@ -98,7 +98,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " trust anchor.",
         newTslDownloadGenerator(ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS)
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
                 ALTERNATIVE_FIRST_TRUST_ANCHOR),
         OCSP_REQUEST_EXPECT,
@@ -115,7 +115,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         getSwitchMessage(TA_NAME_ALT1, TA_NAME_DEFAULT),
         newTslDownloadGenerator("fallbackFromAlternativeFirstTrustAnchorToDefault")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(),
+                CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
                 ALTERNATIVE_FIRST_TRUST_ANCHOR),
         OCSP_REQUEST_EXPECT,
@@ -178,7 +178,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Try to import invalid trust anchor: offer a valid TSL announcing a new trust anchor (but"
             + " expired).",
         newTslDownloadGenerator("case1AnnounceExpiredTrustAnchor")
-            .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeExpiredTsl()),
+            .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeExpiredTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -186,7 +186,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs and the TSL signer certificate from the new trust anchor"
             + " (but expired).",
         "case1ExpiredTrustAnchorWithAlternativeCAs",
-        CreateTslTemplate.invalidAlternativeTrustAnchorExpiredAlternativeCaTsl(),
+        CreateTslTemplate.invalidAlternativeTrustAnchorExpiredAlternativeCaTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.tslSignerFromExpiredTrustAnchorP12Path),
         PkitsTestDataConstants.EXPIRED_TRUST_ANCHOR);
 
@@ -198,7 +198,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Try to import invalid trust anchor: offer a valid TSL announcing a new trust anchor (but"
             + " not yet valid).",
         newTslDownloadGenerator("case2AnnounceNotYetValidTrustAnchor")
-            .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeNotYetValidTsl()),
+            .getStandardTslDownload(
+                CreateTslTemplate.defectTrustAnchorChangeNotYetValidTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -206,7 +207,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs and with the TSL signer certificate from the new trust"
             + " anchor (but not yet valid).",
         "case2NotYetValidTrustAnchorWithAlternativeCAs",
-        CreateTslTemplate.invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl(),
+        CreateTslTemplate.invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.tslSignerFromNotYetValidTrustAnchorP12Path),
         PkitsTestDataConstants.NOT_YET_VALID_TRUST_ANCHOR);
 
@@ -218,7 +219,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " that expires with the beginning of the StatusStartingTime.",
         newTslDownloadGenerator("case3AnnounceValidTrustAnchorExpiringAtStatusStartingTimeInFuture")
             .getStandardTslDownload(
-                CreateTslTemplate.defectTrustAnchorChangeStartingTimeFutureTsl()),
+                CreateTslTemplate.defectTrustAnchorChangeStartingTimeFutureTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 
@@ -252,7 +253,8 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Try to import invalid trust anchor: offer a TSL announcing two trust - the first and"
             + " second alternative - anchors at the same time, but without alternative CAs.",
         newTslDownloadGenerator("announceTwoAlternativeTrustAnchors")
-            .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeTwoEntriesTsl()),
+            .getStandardTslDownload(
+                CreateTslTemplate.defectTrustAnchorChangeTwoEntriesTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -260,14 +262,14 @@ class TslTaApprovalTests extends ApprovalTestsBase {
     offerTslAndVerifyItsTrustAnchorIsNotActive(
         "Offer a TSL with alternative CAs and the first alternative TSL signer certificate.",
         "alternativeFirstTrustAnchor",
-        CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+        CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
         ALTERNATIVE_FIRST_TRUST_ANCHOR);
 
     offerTslAndVerifyItsTrustAnchorIsNotActive(
         "Offer a TSL with alternative CAs and the second alternative TSL signer certificate.",
         "alternativeSecondTrustAnchor",
-        CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+        CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.alternativeSecondTslSignerP12Path),
         ALTERNATIVE_SECOND_TRUST_ANCHOR);
 
@@ -297,14 +299,14 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Try to import invalid trust anchor:  offer of a TSL (without alternative CAs) announcing a"
             + " new trust anchor that has broken ASN.1 certificate structure.",
         newTslDownloadGenerator("brokenTrustAnchor")
-            .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeBrokenTsl()),
+            .getStandardTslDownload(CreateTslTemplate.defectTrustAnchorChangeBrokenTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 
     updateTrustStore(
         OFFER_DEFAULT_TSL_MESSAGE,
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_DEFAULT)
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(DEFAULT_CLIENT_CERTS_CONFIG, USECASE_VALID));
   }
@@ -374,7 +376,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
                 "announceFirstAlternativeTrustAnchorWithActivationTime3TslDownload",
                 newActivationTimeTslOperation(DEFAULT_TSL_SIGNER, newActivationTime))
             .getStandardTslDownload(
-                CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl()),
+                CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -391,7 +393,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " active.",
         newTslDownloadGenerator(ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS)
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
                 ALTERNATIVE_FIRST_TRUST_ANCHOR),
         OCSP_REQUEST_IGNORE,
@@ -407,7 +409,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs and TSL signer certificate from the standard trust"
             + " space.",
         "defaultTrustAnchorWithAlternativeCAs",
-        CreateTslTemplate.alternativeTsl(),
+        CreateTslTemplate.alternativeTsl(eccOnly),
         DEFAULT_TSL_SIGNER,
         DEFAULT_TRUST_ANCHOR);
 
@@ -418,7 +420,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " anchor. Trust anchor should be active.",
         newTslDownloadGenerator(ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS)
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
                 ALTERNATIVE_FIRST_TRUST_ANCHOR),
         OCSP_REQUEST_EXPECT,
@@ -462,7 +464,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         newTslDownloadGenerator("announceFirstAlternativeTrustAnchor")
             .getStandardTslDownload(
                 CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(
-                    newActivationTime)),
+                    newActivationTime, eccOnly)),
         OCSP_REQUEST_EXPECT,
         WITHOUT_USECASE);
 
@@ -483,7 +485,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         newTslDownloadGenerator("announceAlternativeSecondTrustAnchor")
             .getStandardTslDownload(
                 CreateTslTemplate.trustAnchorChangeAlternativeTrustAnchor2FutureShortTsl(
-                    newActivationTime2)),
+                    newActivationTime2, eccOnly)),
         OCSP_REQUEST_EXPECT,
         WITHOUT_USECASE);
 
@@ -500,7 +502,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs and TSL signer certificate from the first new trust"
             + " anchor.",
         ALTERNATIVE_FIRST_TRUST_ANCHOR_WITH_ALTERNATIVE_CAS,
-        CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+        CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
         ALTERNATIVE_FIRST_TRUST_ANCHOR);
 
@@ -512,7 +514,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
             + " (alternative) new trust anchor.",
         newTslDownloadGenerator("alternativeSecondTrustAnchorWithAlternativeCAs")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(),
+                CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeSecondTslSignerP12Path),
                 ALTERNATIVE_SECOND_TRUST_ANCHOR),
         OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT,
@@ -524,7 +526,7 @@ class TslTaApprovalTests extends ApprovalTestsBase {
         getSwitchMessage(TA_NAME_ALT2, TA_NAME_DEFAULT),
         newTslDownloadGenerator("fallbackFromAlternativeSecondTrustAnchorToDefault")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(),
+                CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeSecondTslSignerP12Path),
                 ALTERNATIVE_SECOND_TRUST_ANCHOR),
         OCSP_REQUEST_EXPECT,

@@ -72,7 +72,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     final int offeredTslSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
 
-    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl();
+    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl(eccOnly);
     final TslDownload tslDownload =
         newTslDownloadGenerator("updateTrustStoreWithAlternativeCerts").getStandardTslDownload(tsl);
 

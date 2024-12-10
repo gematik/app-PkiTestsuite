@@ -47,7 +47,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
     switchTrustAnchor(
         getSwitchMessage(TA_NAME_DEFAULT, TA_NAME_ALT1),
         "trustAnchorChangeFromDefaultToAlternative1",
-        CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(),
+        CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(eccOnly),
         DEFAULT_TSL_SIGNER,
         DEFAULT_TRUST_ANCHOR,
         true);
@@ -57,7 +57,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
             + " trust anchor.",
         newTslDownloadGenerator("firstAlternativeTrustAnchor")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(),
+                CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
                 ALTERNATIVE_FIRST_TRUST_ANCHOR),
         OCSP_REQUEST_EXPECT,
@@ -70,7 +70,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
     switchTrustAnchor(
         getSwitchMessage(TA_NAME_ALT1, TA_NAME_DEFAULT),
         "trustAnchorChangeFromAlternative1ToDefault",
-        CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(),
+        CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.alternativeTslSignerP12Path),
         ALTERNATIVE_FIRST_TRUST_ANCHOR,
         false);
@@ -78,7 +78,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
     updateTrustStore(
         OFFER_DEFAULT_TSL_MESSAGE,
         newTslDownloadGenerator(TSL_NAME_DEFAULT)
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(DEFAULT_CLIENT_CERTS_CONFIG, UseCaseResult.USECASE_VALID));
   }
@@ -90,7 +90,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
         getSwitchMessage(TA_NAME_DEFAULT, TA_NAME_ALT2),
         "trustAnchorChangeFromDefaultToAlternative2",
         CreateTslTemplate.trustAnchorChangeAlternativeTrustAnchor2FutureShortTsl(
-            GemLibPkiUtils.now()),
+            GemLibPkiUtils.now(), eccOnly),
         DEFAULT_TSL_SIGNER,
         DEFAULT_TRUST_ANCHOR,
         true);
@@ -100,7 +100,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
             + " (alternative) new trust anchor.",
         newTslDownloadGenerator("secondAlternativeTrustAnchor")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(),
+                CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(eccOnly),
                 getTslSignerP12(TslDownloadGenerator.alternativeSecondTslSignerP12Path),
                 ALTERNATIVE_SECOND_TRUST_ANCHOR),
         OCSP_REQUEST_EXPECT,
@@ -113,7 +113,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
     switchTrustAnchor(
         getSwitchMessage(TA_NAME_ALT2, TA_NAME_DEFAULT),
         "trustAnchorChangeFromAlternative2ToDefault",
-        CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(),
+        CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(eccOnly),
         getTslSignerP12(TslDownloadGenerator.alternativeSecondTslSignerP12Path),
         ALTERNATIVE_SECOND_TRUST_ANCHOR,
         false);
@@ -121,7 +121,7 @@ public class TslTaSwitchUtils extends ApprovalTestsBase {
     updateTrustStore(
         OFFER_DEFAULT_TSL_MESSAGE,
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_DEFAULT)
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(DEFAULT_CLIENT_CERTS_CONFIG, UseCaseResult.USECASE_VALID));
   }

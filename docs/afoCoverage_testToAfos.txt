@@ -1,7 +1,7 @@
 de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
   verifyUseCaseCertsInvalid   GS-A_4652, GS-A_4654, GS-A_4655, GS-A_4656, GS-A_4657, GS-A_4661, GS-A_4663, RFC 5280
   verifyUseCaseCertsNotInTsl  GS-A_4652, GS-A_4654, GS-A_4656, GS-A_4657, GS-A_4663
-  verifyUseCaseCertsValid     A_17124, GS-A_4357, GS-A_4652, GS-A_4663
+  verifyUseCaseCertsValid     A_17124, GS-A_4357, GS-A_4385, GS-A_4652, GS-A_4663
   verifyUseCaseRsaCertValid   GS-A_4357, GS-A_4384
 
 de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests

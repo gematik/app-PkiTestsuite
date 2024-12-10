@@ -52,7 +52,7 @@ public final class PkitsTestDataConstants {
 
   public static final P12Container DEFAULT_OCSP_SIGNER =
       P12Reader.getContentFromP12(
-          ocspKeystoreDir.resolve("OCSP_Signer_09_ecc_TEST-ONLY.p12"), KEYSTORE_PASSWORD);
+          ocspKeystoreDir.resolve("pkits_OCSP_Signer_57_ecc_TEST-ONLY.p12"), KEYSTORE_PASSWORD);
   public static final P12Container OCSP_SIGNER_NOT_IN_TSL =
       P12Reader.getContentFromP12(ocspKeystoreDir.resolve("ee_not-in-tsl.p12"), KEYSTORE_PASSWORD);
   public static final P12Container OCSP_SIGNER_DIFFERENT_KEY =
@@ -65,9 +65,14 @@ public final class PkitsTestDataConstants {
   public static final X509Certificate CERT_UNSPECIFIED_STI =
       CertReader.readX509(trustStoreDir.resolve("SGD1_TEST-ONLY.pem"));
 
-  public static final Path DEFAULT_KOMP_CA = trustStoreDir.resolve("GEM.KOMP-CA11_TEST-ONLY.pem");
+  public static final Path DEFAULT_KOMP_CA = trustStoreDir.resolve("GEM.KOMP-CA51_TEST-ONLY.pem");
   public static final Path ALTERNATIVE_KOMP_CA =
+      trustStoreDir.resolve("GEM.KOMP-CA52_TEST-ONLY.pem");
+
+  public static final Path DEFAULT_KOMP_CA11 = trustStoreDir.resolve("GEM.KOMP-CA11_TEST-ONLY.pem");
+  public static final Path ALTERNATIVE_KOMP_CA33 =
       trustStoreDir.resolve("GEM.KOMP-CA33_TEST-ONLY.pem");
+
   public static final Path DEFAULT_SMCB_CA = trustStoreDir.resolve("GEM.SMCB-CA10_TEST-ONLY.pem");
   public static final Path ALTERNATIVE_SMCB_CA =
       trustStoreDir.resolve("GEM.SMCB-CA33_TEST-ONLY.pem");

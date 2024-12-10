@@ -44,6 +44,7 @@ ocspResponder:
   appPath: "./bin/pkits-ocsp-responder-exec.jar"                                           # Path to the OCSP responder jar which should be started during tests. This can be skipped with the keyword "externalStartup".
 
 tslProvider:
+  tslCryptTypeEccOnly: false                                                               # TSL contains certificates with crypt type ECC-Only.
   ipAddressOrFqdn: "HasToBeDefined_ipAddressOrFqdn"                                        # FQDN or IP address where the tsl provider is running. This will be used as the PointersToOther field in the TSLs.
   port: HasToBeDefined_port                                                                # Port where the TSL provider is listening.
   id: "TSL Provider"                                                                       # Name of the TSL provider for better identification in log files.
@@ -51,8 +52,6 @@ tslProvider:
 
 testSuiteParameter:
   performInitialState: true                                                                # Execute smoke test (TSL and use case including OCSP) before each test.
-  captureNetworkTraffic: false                                                             # Capture network traffic in pcap file format. Configuration of interfaces to sniff on is done by parameter "captureInterfaces" If OCSP responder and TSL provider are not started externally, sniffing on there interfaces is activated as well.
-  captureInterfaces: "HasToBeDefined_captureInterfaces"                                    # Comma separated list of IP addresses for interfaces to sniff communication with the test object from.
 
   ocspSettings:
     timeoutDeltaMilliseconds: 1500                                                         # Amount of milliseconds to add/subtract from OCSP timeout during the test to get a result inside/outside the timeout.

@@ -31,7 +31,7 @@ import org.w3c.dom.Document;
 class TslContainerTest {
 
   @Test
-  void testTslContainerFromTsl() {
+  void testRSATslContainerFromTsl() {
     final TrustStatusListType tsl = TslReader.getTslUnsigned(CreateTslTemplate.ARVATO_TU_TSL);
 
     final TslContainer tslContainer = new TslContainer(tsl);
@@ -45,9 +45,37 @@ class TslContainerTest {
   }
 
   @Test
-  void testTslContainerFromDocument() {
+  void testECCTslContainerFromTsl() {
+    final TrustStatusListType tsl =
+        TslReader.getTslUnsigned(CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL);
+
+    final TslContainer tslContainer = new TslContainer(tsl);
+    assertThat(tslContainer.getAsTslUnsignedBytes()).hasSizeGreaterThan(0);
+    assertThat(tslContainer.getAsTslUnsignedDoc()).isNotNull();
+
+    // same reference
+    assertThat(tslContainer.getAsTslUnsigned()).isEqualTo(tsl);
+
+    assertDoesNotThrow(() -> new TslContainer(tslContainer));
+  }
+
+  @Test
+  void testRSATslContainerFromDocument() {
 
     final Document tslDoc = TslReader.getTslAsDoc(CreateTslTemplate.ARVATO_TU_TSL);
+
+    final TslContainer tslContainer = new TslContainer(tslDoc);
+    assertThat(tslContainer.getAsTslUnsignedBytes()).hasSizeGreaterThan(0);
+    assertThat(tslContainer.getAsTslUnsigned()).isNotNull();
+
+    // same reference
+    assertThat(tslContainer.getAsTslUnsignedDoc()).isEqualTo(tslDoc);
+  }
+
+  @Test
+  void testECCTslContainerFromDocument() {
+
+    final Document tslDoc = TslReader.getTslAsDoc(CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL);
 
     final TslContainer tslContainer = new TslContainer(tslDoc);
     assertThat(tslContainer.getAsTslUnsignedBytes()).hasSizeGreaterThan(0);

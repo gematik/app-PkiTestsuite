@@ -28,8 +28,36 @@ import org.junit.jupiter.api.Test;
 class ChangNameTslOperationTest {
 
   @Test
-  void testChangNameTslOperation() {
-    final TrustStatusListType tsl = CreateTslTemplate.defaultTsl();
+  void testRSAChangNameTslOperation() {
+    final TrustStatusListType tsl = CreateTslTemplate.defaultTsl(false);
+    final String tslStrUnsigned =
+        new String(TslConverter.tslUnsignedToBytes(tsl), StandardCharsets.UTF_8);
+
+    final String substrFormat =
+        "<TSPInformation><TSPName><Name xml:lang=\"DE\">%s</Name></TSPName><TSPTradeName>"
+            + "<Name xml:lang=\"DE\">%s</Name></TSPTradeName>";
+
+    final String originalSubstr =
+        substrFormat.formatted(
+            PkitsConstants.GEMATIK_TEST_TSP, PkitsConstants.GEMATIK_TEST_TSP_TRADENAME);
+    final String newTspTradeName = "gematik Test-TSL: NewSampleTslName";
+    final String newSubstr =
+        substrFormat.formatted(PkitsConstants.GEMATIK_TEST_TSP, newTspTradeName);
+
+    assertThat(tslStrUnsigned).containsOnlyOnce(originalSubstr).doesNotContain(newSubstr);
+
+    final TslOperation tslOperation = new ChangNameTslOperation(newTspTradeName);
+    final TslContainer tslContainer = tslOperation.apply(tsl);
+
+    final String newTslStr =
+        new String(tslContainer.getAsTslUnsignedBytes(), StandardCharsets.UTF_8);
+
+    assertThat(newTslStr).doesNotContain(originalSubstr).containsOnlyOnce(newSubstr);
+  }
+
+  @Test
+  void testECCChangNameTslOperation() {
+    final TrustStatusListType tsl = CreateTslTemplate.defaultTsl(true);
     final String tslStrUnsigned =
         new String(TslConverter.tslUnsignedToBytes(tsl), StandardCharsets.UTF_8);
 

@@ -6,6 +6,7 @@ A_23225      lokales Caching von Sperrinformationen und Toleranzzeiten
 GS-A_4357    ECDSA algorithms - Tab_KRYPT_002a
 GS-A_4357    RSA algorithms - Tab_KRYPT_002
 GS-A_4384    RSA cipher suites for TLS
+GS-A_4385    TLS-Verbindungen, Version 1.2
 GS-A_4642    TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 2
 GS-A_4642    TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 3
 GS-A_4642    TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4

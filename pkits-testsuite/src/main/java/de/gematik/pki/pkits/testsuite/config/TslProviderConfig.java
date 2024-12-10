@@ -22,6 +22,11 @@ import lombok.Getter;
 public class TslProviderConfig {
 
   @ParameterDescription(
+      withDefault = true,
+      description = "TSL contains certificates with crypt type ECC-Only.")
+  boolean tslCryptTypeEccOnly = false;
+
+  @ParameterDescription(
       description =
           "FQDN or IP address where the tsl provider is running. This will be used as the"
               + " PointersToOther field in the TSLs.")

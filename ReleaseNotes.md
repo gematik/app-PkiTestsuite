@@ -2,6 +2,13 @@
 
 # Release notes PKI Test Suite
 
+## Release 5.2.0
+
+- remove pcap support
+- update test data
+- add ECC-Only TSL (new parameter tslCryptTypeEccOnly: false)
+- add Afo GS-A_4385
+
 ## Release 5.1.0
 
 - update test certificates

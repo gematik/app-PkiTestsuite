@@ -57,8 +57,8 @@ public enum TestObjectType {
       "KimFachdienst",
       "kimClientModul",
       UseCaseConnectionType.TLS_SERVER,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
+      PkitsTestDataConstants.DEFAULT_KOMP_CA11,
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
       PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA),
 
   VSDM_FACHDIENST(
@@ -73,8 +73,8 @@ public enum TestObjectType {
       "VpnKonzentrator",
       "netzkonnektorClient",
       UseCaseConnectionType.SCRIPT_OVER_SSH,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
+      PkitsTestDataConstants.DEFAULT_KOMP_CA11,
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
       PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA),
 
   VPN_REG_SERVER(

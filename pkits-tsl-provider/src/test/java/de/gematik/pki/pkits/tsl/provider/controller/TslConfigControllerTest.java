@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

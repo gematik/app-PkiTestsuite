@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TSL_CERT_TSL_CA28_SHA256;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TSL_OCSP_SIGNER_10_CERT_SHA256;
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.deleteInitialTspServices;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,32 +43,51 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class CreateTslTemplateTest {
 
-  private TslContainer tslContainer = null;
+  private TslContainer tslRSAContainer = null;
+  private TslContainer tslECCContainer = null;
 
   @BeforeEach
   void setUp() {
-    tslContainer = new TslContainer(TslReader.getTslUnsigned(ARVATO_TU_TSL));
+    tslRSAContainer = new TslContainer(TslReader.getTslUnsigned(ARVATO_TU_TSL));
+    tslECCContainer = new TslContainer(TslReader.getTslUnsigned(ARVATO_TU_ECC_ONLY_TSL));
   }
 
   @Test
-  void verifyDeleteInitialTspServices() {
+  void verifyRSADeleteInitialTspServices() {
 
-    final int oldTslBytes = tslContainer.getAsTslUnsignedBytes().length;
-    final int newTslBytes = deleteInitialTspServices(tslContainer).getAsTslUnsignedBytes().length;
+    final int oldTslBytes = tslRSAContainer.getAsTslUnsignedBytes().length;
+    final int newTslBytes =
+        deleteInitialTspServices(tslRSAContainer).getAsTslUnsignedBytes().length;
+    assertThat(newTslBytes).isLessThan(oldTslBytes);
+  }
+
+  @Test
+  void verifyECCDeleteInitialTspServices() {
+
+    final int oldTslBytes = tslECCContainer.getAsTslUnsignedBytes().length;
+    final int newTslBytes =
+        deleteInitialTspServices(tslECCContainer).getAsTslUnsignedBytes().length;
     assertThat(newTslBytes).isLessThan(oldTslBytes);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {ARVATO_TSL_CERT_TSL_CA28_SHA256, ARVATO_TSL_OCSP_SIGNER_10_CERT_SHA256})
-  void verifyToRemoveCertExists(final String certhash) {
-    assertThat(new DeleteTspServiceForCertShaTslOperation(certhash).count(tslContainer))
+  void verifyRSAToRemoveCertExists(final String certhash) {
+    assertThat(new DeleteTspServiceForCertShaTslOperation(certhash).count(tslRSAContainer))
+        .isEqualTo(1);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {ARVATO_TSL_CERT_TSL_CA28_SHA256, ARVATO_TSL_OCSP_SIGNER_10_CERT_SHA256})
+  void verifyECCToRemoveCertExists(final String certhash) {
+    assertThat(new DeleteTspServiceForCertShaTslOperation(certhash).count(tslECCContainer))
         .isEqualTo(1);
   }
 
   @Test
-  void testGetTspServicesForCertsException() {
+  void testGetRSATspServicesForCertsException() {
     final List<TSPServiceType> tspServices =
-        CreateTslTemplate.defaultTsl()
+        CreateTslTemplate.defaultTsl(false)
             .getTrustServiceProviderList()
             .getTrustServiceProvider()
             .get(0)
@@ -82,8 +102,25 @@ class CreateTslTemplateTest {
   }
 
   @Test
-  void verifyDefaultTsl() {
-    final TrustStatusListType tsl = CreateTslTemplate.defaultTsl();
+  void testGetECCTspServicesForCertsException() {
+    final List<TSPServiceType> tspServices =
+        CreateTslTemplate.defaultTsl(true)
+            .getTrustServiceProviderList()
+            .getTrustServiceProvider()
+            .get(0)
+            .getTSPServices()
+            .getTSPService();
+
+    assertThatThrownBy(() -> CreateTslTemplate.getTspServicesForCerts(tspServices))
+        .isInstanceOf(TslGenerationException.class)
+        .cause()
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("length of certs is 0");
+  }
+
+  @Test
+  void verifyDefaultRSATsl() {
+    final TrustStatusListType tsl = CreateTslTemplate.defaultTsl(false);
     assertThat(tsl.getSignature()).isNull();
 
     final List<TSPType> tspList =
@@ -102,7 +139,7 @@ class CreateTslTemplateTest {
 
     final TSPType tsp = tspList.get(0);
 
-    assertThat(tsp.getTSPServices().getTSPService()).hasSize(9);
+    assertThat(tsp.getTSPServices().getTSPService()).hasSize(10);
 
     final List<TSPServiceType> pkcTspServices =
         tsp.getTSPServices().getTSPService().stream()
@@ -113,7 +150,7 @@ class CreateTslTemplateTest {
                         .getServiceTypeIdentifier()
                         .equals(TslConstants.STI_PKC))
             .toList();
-    assertThat(pkcTspServices).hasSize(7);
+    assertThat(pkcTspServices).hasSize(8);
 
     final List<TSPServiceType> ocspTspServices =
         tsp.getTSPServices().getTSPService().stream()
@@ -128,29 +165,108 @@ class CreateTslTemplateTest {
   }
 
   @Test
-  void verifyTsls() {
+  void verifyDefaultECCTsl() {
+    final TrustStatusListType tsl = CreateTslTemplate.defaultTsl(true);
+    assertThat(tsl.getSignature()).isNull();
+
+    final List<TSPType> tspList =
+        tsl.getTrustServiceProviderList().getTrustServiceProvider().stream()
+            .filter(
+                tsp ->
+                    tsp.getTSPInformation()
+                        .getTSPName()
+                        .getName()
+                        .get(0)
+                        .getValue()
+                        .equals(PkitsConstants.GEMATIK_TEST_TSP))
+            .toList();
+
+    assertThat(tspList).hasSize(1);
+
+    final TSPType tsp = tspList.get(0);
+
+    assertThat(tsp.getTSPServices().getTSPService()).hasSize(6);
+
+    final List<TSPServiceType> pkcTspServices =
+        tsp.getTSPServices().getTSPService().stream()
+            .filter(
+                tspService ->
+                    tspService
+                        .getServiceInformation()
+                        .getServiceTypeIdentifier()
+                        .equals(TslConstants.STI_PKC))
+            .toList();
+    assertThat(pkcTspServices).hasSize(5);
+
+    final List<TSPServiceType> ocspTspServices =
+        tsp.getTSPServices().getTSPService().stream()
+            .filter(
+                tspService ->
+                    tspService
+                        .getServiceInformation()
+                        .getServiceTypeIdentifier()
+                        .equals(TslConstants.STI_OCSP))
+            .toList();
+    assertThat(ocspTspServices).hasSize(1);
+  }
+
+  @Test
+  void verifyRSATsls() {
     final ZonedDateTime now = GemLibPkiUtils.now();
-    assertDoesNotThrow(CreateTslTemplate::alternativeTsl);
-    assertDoesNotThrow(CreateTslTemplate::alternativeCaRevokedLaterTsl);
-    assertDoesNotThrow(CreateTslTemplate::alternativeCaUnspecifiedStiTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectAlternativeCaBrokenTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectAlternativeCaWrongSrvInfoExtTsl);
-    assertDoesNotThrow(CreateTslTemplate::alternativeCaRevokedTsl);
-    assertDoesNotThrow(() -> CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl());
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeCaRevokedLaterTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeCaUnspecifiedStiTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectAlternativeCaBrokenTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectAlternativeCaWrongSrvInfoExtTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeCaRevokedTsl(false));
     assertDoesNotThrow(
-        () -> CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(now));
-    assertDoesNotThrow(CreateTslTemplate::alternativeTrustAnchorAlternativeCaTsl);
-    assertDoesNotThrow(CreateTslTemplate::alternativeTrustAnchorTrustAnchorChangeTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectTrustAnchorChangeNotYetValidTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectTrustAnchorChangeExpiredTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectTrustAnchorChangeTwoEntriesTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectTrustAnchorChangeStartingTimeFutureTsl);
-    assertDoesNotThrow(CreateTslTemplate::defectTrustAnchorChangeBrokenTsl);
+        () -> CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(false));
     assertDoesNotThrow(
-        () -> CreateTslTemplate.trustAnchorChangeAlternativeTrustAnchor2FutureShortTsl(now));
-    assertDoesNotThrow(CreateTslTemplate::invalidAlternativeTrustAnchorExpiredAlternativeCaTsl);
-    assertDoesNotThrow(CreateTslTemplate::invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl);
-    assertDoesNotThrow(CreateTslTemplate::alternativeTrustAnchor2AlternativeCaTsl);
-    assertDoesNotThrow(CreateTslTemplate::alternativeTrustAnchor2TrustAnchorChangeTsl);
+        () -> CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(now, false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeNotYetValidTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeExpiredTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeTwoEntriesTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeStartingTimeFutureTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeBrokenTsl(false));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.trustAnchorChangeAlternativeTrustAnchor2FutureShortTsl(now, false));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.invalidAlternativeTrustAnchorExpiredAlternativeCaTsl(false));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(false));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(false));
+  }
+
+  @Test
+  void verifyECCTsls() {
+    final ZonedDateTime now = GemLibPkiUtils.now();
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeCaRevokedLaterTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeCaUnspecifiedStiTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectAlternativeCaBrokenTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectAlternativeCaWrongSrvInfoExtTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeCaRevokedTsl(true));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(true));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.trustAnchorChangeFromDefaultToAlternativeFirstTsl(now, true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchorAlternativeCaTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchorTrustAnchorChangeTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeNotYetValidTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeExpiredTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeTwoEntriesTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeStartingTimeFutureTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.defectTrustAnchorChangeBrokenTsl(true));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.trustAnchorChangeAlternativeTrustAnchor2FutureShortTsl(now, true));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.invalidAlternativeTrustAnchorExpiredAlternativeCaTsl(true));
+    assertDoesNotThrow(
+        () -> CreateTslTemplate.invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchor2AlternativeCaTsl(true));
+    assertDoesNotThrow(() -> CreateTslTemplate.alternativeTrustAnchor2TrustAnchorChangeTsl(true));
   }
 }

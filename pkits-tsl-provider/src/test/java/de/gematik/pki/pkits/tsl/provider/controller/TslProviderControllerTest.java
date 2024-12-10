@@ -31,7 +31,7 @@ import de.gematik.pki.pkits.tsl.provider.data.TslProviderEndpointsConfig;
 import java.nio.charset.StandardCharsets;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

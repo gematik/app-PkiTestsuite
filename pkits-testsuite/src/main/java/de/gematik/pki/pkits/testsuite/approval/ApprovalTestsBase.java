@@ -55,8 +55,6 @@ import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import de.gematik.pki.pkits.testsuite.config.TestObjectType;
 import de.gematik.pki.pkits.testsuite.config.TestSuiteConfig;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
-import de.gematik.pki.pkits.testsuite.pcap.PcapHelper;
-import de.gematik.pki.pkits.testsuite.pcap.PcapManager;
 import de.gematik.pki.pkits.testsuite.reporting.CurrentTestInfo;
 import de.gematik.pki.pkits.testsuite.reporting.CustomTestExecutionListener;
 import de.gematik.pki.pkits.testsuite.reporting.TestResultLoggerExtension;
@@ -138,9 +136,9 @@ public abstract class ApprovalTestsBase {
 
   protected static TslSequenceNr tslSequenceNr;
 
-  private PcapManager pcapManager = null;
-
   protected CurrentTestInfo currentTestInfo;
+
+  protected static boolean eccOnly = false;
 
   protected static String getSwitchMessage(final String anchorType1, final String anchorType2) {
     return "Offer a TSL to switch from the %s trust anchor to the %s trust anchor."
@@ -171,13 +169,11 @@ public abstract class ApprovalTestsBase {
     log.info(
         "TestObject: {}:{}", testSuiteConfig.getTestObject().getIpAddressOrFqdn(), sutServerPort);
 
-    if (testSuiteConfig.getTestSuiteParameter().isCaptureNetworkTraffic()) {
-      try {
-        PcapHelper.assignDevices(testSuiteConfig);
-      } catch (final Exception e) {
-        log.error("problems occurred when assigning devices to sniff", e);
-      }
+    if (testSuiteConfig.getTslProvider().isTslCryptTypeEccOnly()) {
+      eccOnly = true;
     }
+
+    log.info("TslCryptTypeEccOnly: {}", eccOnly);
   }
 
   @BeforeEach
@@ -199,17 +195,6 @@ public abstract class ApprovalTestsBase {
 
       Assumptions.abort(message);
     }
-
-    if (testSuiteConfig.getTestSuiteParameter().isCaptureNetworkTraffic()) {
-      pcapManager =
-          new PcapManager(
-              PcapHelper.getPcapService(),
-              PcapHelper.getPcapDeviceCommonInfos(),
-              OUT_LOGS_DIRNAME,
-              testInfo,
-              true);
-      pcapManager.start();
-    }
   }
 
   @AfterEach
@@ -226,15 +211,6 @@ public abstract class ApprovalTestsBase {
 
             """,
         currentTestInfo);
-
-    if (testSuiteConfig.getTestSuiteParameter().isCaptureNetworkTraffic()
-        || (pcapManager != null)) {
-      pcapManager.stop();
-      pcapManager.close();
-      pcapManager.createGzipFile();
-      pcapManager.deletePcapFile();
-      pcapManager = null;
-    }
 
     currentTestInfo = null;
   }
@@ -328,7 +304,7 @@ public abstract class ApprovalTestsBase {
       updateTrustStore(
           OFFER_DEFAULT_TSL_MESSAGE,
           newTslDownloadGenerator("defaultTsl")
-              .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
+              .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly)),
           OCSP_REQUEST_EXPECT,
           WITHOUT_USECASE);
     }
@@ -432,13 +408,13 @@ public abstract class ApprovalTestsBase {
   }
 
   protected TslDownload initialTslDownloadByTestObject() {
-    return initialStateWithTemplate("initialTslDownload", CreateTslTemplate.defaultTsl());
+    return initialStateWithTemplate("initialTslDownload", CreateTslTemplate.defaultTsl(eccOnly));
   }
 
   void initialStateWithAlternativeTemplate() {
 
     initialStateWithTemplate(
-        "initialStateWithAlternativeTemplate", CreateTslTemplate.alternativeTsl());
+        "initialStateWithAlternativeTemplate", CreateTslTemplate.alternativeTsl(eccOnly));
 
     useCaseWithCert(
         ALTERNATIVE_CLIENT_CERTS_CONFIG,
