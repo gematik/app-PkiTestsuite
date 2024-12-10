@@ -16,6 +16,7 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,15 +35,23 @@ class TslOperationTest {
   Document tslDoc;
   byte[] tslBytes;
 
+  TrustStatusListType tslECCUnsigned;
+  Document tslECCDoc;
+  byte[] tslECCBytes;
+
   @BeforeEach
   void init() {
     tslUnsigned = TslReader.getTslUnsigned(ARVATO_TU_TSL);
     tslDoc = TslReader.getTslAsDoc(ARVATO_TU_TSL);
     tslBytes = GemLibPkiUtils.readContent(ARVATO_TU_TSL);
+
+    tslECCUnsigned = TslReader.getTslUnsigned(ARVATO_TU_ECC_ONLY_TSL);
+    tslECCDoc = TslReader.getTslAsDoc(ARVATO_TU_ECC_ONLY_TSL);
+    tslECCBytes = GemLibPkiUtils.readContent(ARVATO_TU_ECC_ONLY_TSL);
   }
 
   @Test
-  void testApply() {
+  void testRSAApply() {
     final TslOperation tslOperation = tslContainer -> tslContainer;
 
     final TslContainer tc1 = tslOperation.apply(tslUnsigned);
@@ -55,5 +64,21 @@ class TslOperationTest {
 
     final TslContainer tc3 = tslOperation.apply(tslBytes);
     assertThat(Arrays.equals(tc3.getAsTslUnsignedBytes(), tslBytes)).isTrue();
+  }
+
+  @Test
+  void testECCApply() {
+    final TslOperation tslOperation = tslContainer -> tslContainer;
+
+    final TslContainer tc1 = tslOperation.apply(tslECCUnsigned);
+    assertThat(TslGenerationTestUtils.documentsAreEqual(tc1.getAsTslUnsignedDoc(), tslECCDoc))
+        .isTrue();
+
+    final TslContainer tc2 = tslOperation.apply(tslECCDoc);
+    assertThat(TslGenerationTestUtils.documentsAreEqual(tc2.getAsTslUnsignedDoc(), tslECCDoc))
+        .isTrue();
+
+    final TslContainer tc3 = tslOperation.apply(tslECCBytes);
+    assertThat(Arrays.equals(tc3.getAsTslUnsignedBytes(), tslECCBytes)).isTrue();
   }
 }

@@ -18,6 +18,7 @@ package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
+import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -39,14 +40,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 class StandardTslOperationTest {
+  @Test
+  void createRSATslFromFile() throws IOException {
+    createTslFromFile(ARVATO_TU_TSL, false);
+  }
 
   @Test
-  void createTslFromFile() throws IOException {
+  void createECCTslFromFile() throws IOException {
+    createTslFromFile(ARVATO_TU_ECC_ONLY_TSL, true);
+  }
+
+  private void createTslFromFile(Path path, boolean eccOnly) throws IOException {
     final Path destFilePath = Path.of("pkits-tsl-generator/target/unittest_createTslFromFile.xml");
     final String newSsp = "http://my.new-cool-service-supply-point:5544/ocsp";
 
     final int minModifiedSspAmountExpected =
-        new TslInformationProvider(TslReader.getTslUnsigned(ARVATO_TU_TSL))
+        new TslInformationProvider(TslReader.getTslUnsigned(path))
             .getFilteredTspServices(TslConstants.STI_CA_LIST)
             .size();
 
@@ -75,7 +84,8 @@ class StandardTslOperationTest {
     final TslOperation aggregateTslOperation =
         new AggregateTslOperation(standardTslOperation, signTslOperation);
 
-    final TslContainer tslContainer = aggregateTslOperation.apply(CreateTslTemplate.defaultTsl());
+    final TslContainer tslContainer =
+        aggregateTslOperation.apply(CreateTslTemplate.defaultTsl(eccOnly));
 
     final byte[] tslBytes = tslContainer.getAsTslUnsignedBytes();
     Files.write(destFilePath, tslBytes);

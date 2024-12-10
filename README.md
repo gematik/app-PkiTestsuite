@@ -40,14 +40,6 @@ To execute the test suite, you need at least Java 17.
 The test suite ist build and testet
 with [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
 
-For capturing network traffic via the integrated pcap interface Libpcap for Unix or Npcap for
-Windows (Install Npcap in "Winpcap Compatible Mode") are required.
-Under linux, you have to allow the java binary to access the interface:
-
-```bash
-sudo setcap cap_net_raw,cap_net_admin=eip $PATH_TO_YOUR_JDK/bin/java
-```
-
 ### 1. PKI Test Suite
 
 This is the test suite itself. It is used to start all following modules, configure them and read
@@ -230,6 +222,13 @@ These test data are for our own integration tests and can be used for approval t
 The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own
 test data, make sure that issuing certificates are added in
 the [tsl template](./testDataTemplates/tsl/ECC-RSA_TSL-test.xml) as well.
+
+The TSLs are generated depending on the parameter tslCryptType in pkits.yml, which can have the
+values "RSA-ECC" and "ECC-Only".
+The default value is "RSA-ECC".
+If tslCryptType is set to ECC-Only,
+a [separate tsl template](./testDataTemplates/tsl/ECC_TSL-test.xml) with only ECC certificates is
+used for TSL generation.
 
 ### Initial TSL and Trust Anchor
 

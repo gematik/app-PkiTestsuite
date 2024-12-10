@@ -58,6 +58,7 @@ class CertificateApprovalTests extends ApprovalTestsBase {
       afoId = "GS-A_4663",
       description = "Zertifikats-Prüfparameter für den TLS-Handshake - positive cases")
   @Afo(afoId = "GS-A_4357", description = "ECDSA algorithms - Tab_KRYPT_002a")
+  @Afo(afoId = "GS-A_4385", description = "TLS-Verbindungen, Version 1.2")
   @Afo(afoId = "A_17124", description = "ECDSA cipher suites for TLS")
   @ArgumentsSource(CertificateProvider.class)
   @VariableSource(value = PkitsCertType.PKITS_CERT_VALID)

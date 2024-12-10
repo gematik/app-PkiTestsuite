@@ -27,6 +27,9 @@ GS-A_4357
 GS-A_4384
   CertificateApprovalTests.verifyUseCaseRsaCertValid
 
+GS-A_4385
+  CertificateApprovalTests.verifyUseCaseCertsValid
+
 GS-A_4642
   TslApprovalExtraTests.verifyExpiredTslInSystem
   TslApprovalTests.verifyForBadCertificateOfTSPService

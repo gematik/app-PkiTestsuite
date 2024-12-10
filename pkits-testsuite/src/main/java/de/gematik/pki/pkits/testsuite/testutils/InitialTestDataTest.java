@@ -62,7 +62,7 @@ public class InitialTestDataTest {
             .build();
 
     final TslDownload tslDownload =
-        tslDownloadGenerator.getStandardTslDownload(CreateTslTemplate.defaultTsl());
+        tslDownloadGenerator.getStandardTslDownload(CreateTslTemplate.defaultTsl(false));
 
     final Path initialTslPath = Path.of("./out/initialTsl.xml");
     log.info("copying initial Tsl to: {}", initialTslPath);

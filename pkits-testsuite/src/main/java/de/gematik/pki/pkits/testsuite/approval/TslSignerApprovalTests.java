@@ -96,7 +96,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     final int offeredTslSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
 
-    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl();
+    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl(eccOnly);
     final TslDownload tslDownload =
         newTslDownloadGenerator("updateTrustStoreWithAlternativeCerts").getStandardTslDownload(tsl);
 
@@ -451,7 +451,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs (the TSL signer certificate contains an invalid ASN1"
             + " structure).",
         newTslDownloadGenerator("altCaAndTslSignerBrokenAsn1", new BreakSignerTslOperation())
-            .getStandardTslDownload(CreateTslTemplate.alternativeTsl()),
+            .getStandardTslDownload(CreateTslTemplate.alternativeTsl(eccOnly)),
         OCSP_REQUEST_DO_NOT_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -473,7 +473,7 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         newTslDownloadGenerator()
             .getTslDownloadWithTemplateAndSigner(
                 offeredTslSeqNr,
-                CreateTslTemplate.alternativeTsl(),
+                CreateTslTemplate.alternativeTsl(eccOnly),
                 p12ContainerBad,
                 trustAnchor,
                 signerKeyUsageCheck,
@@ -561,7 +561,9 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternate CAs.",
         newTslDownloadGenerator("invalidSignerSignatureAlternativeCA")
             .getStandardTslDownload(
-                CreateTslTemplate.alternativeTsl(), p12ContainerInvalidSig, DEFAULT_TRUST_ANCHOR),
+                CreateTslTemplate.alternativeTsl(eccOnly),
+                p12ContainerInvalidSig,
+                DEFAULT_TRUST_ANCHOR),
         OCSP_REQUEST_IGNORE,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 

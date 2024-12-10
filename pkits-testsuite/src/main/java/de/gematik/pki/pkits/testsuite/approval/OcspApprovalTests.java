@@ -305,7 +305,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with alternative CAs without ServiceSupplyPoints.",
         newTslDownloadGenerator("noServiceSupplyPoints", deleteSsps)
-            .getStandardTslDownload(CreateTslTemplate.alternativeTsl()),
+            .getStandardTslDownload(CreateTslTemplate.alternativeTsl(eccOnly)),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -405,7 +405,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
     final TslDownload tslDownload =
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_DEFAULT)
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl());
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly));
 
     tslDownload.configureOcspResponderForTslSigner();
     tslSequenceNr.setLastOfferedTslSeqNr(offeredTslSeqNr);

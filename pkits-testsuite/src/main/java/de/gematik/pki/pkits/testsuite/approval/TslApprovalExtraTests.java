@@ -103,7 +103,7 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
         newTslDownloadGenerator(
                 "nextUpdateInPastOutsideGracePeriod",
                 rewriteIssueDateAndNextUpdate.apply(newIssueDate, newNextUpdate))
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl());
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly));
 
     final String testResultsMessage =
         "Now, the product type does not have a valid trust space after the test and should neither"

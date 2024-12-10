@@ -22,8 +22,8 @@ import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JsonTransceiver {

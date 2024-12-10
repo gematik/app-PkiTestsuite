@@ -89,6 +89,7 @@ class TestSuiteConfigTest {
     final int testObject_tslGracePeriodDays = 0;
     final int testObject_ocspTimeoutSeconds = 10;
 
+    final boolean tslCryptTypeEccOnly = false;
     final boolean testObject_scriptUseCase_sendReceiveApplicationData = true;
     final String testObject_scriptUseCase_cryptMethod = "ECC";
 
@@ -99,7 +100,6 @@ class TestSuiteConfigTest {
     final String tslProvider_appPath = "./bin/pkits-tsl-provider-exec.jar";
 
     final boolean testSuiteParameter_performInitialState = true;
-    final boolean testSuiteParameter_captureNetworkTraffic = false;
     final int testSuiteParameter_ocspSettings_timeoutDeltaMilliseconds = 1500;
     final int testSuiteParameter_ocspSettings_gracePeriodeExtraDelay = 5;
 
@@ -125,6 +125,7 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testObject_ocspTimeoutSeconds, testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
 
+    ca.assertEquals(tslCryptTypeEccOnly, testSuiteConfig.getTslProvider().isTslCryptTypeEccOnly());
     testSshConfigDefaults(ca, testSuiteConfig.getSshConfig());
 
     final ScriptUseCase scriptUseCase = testSuiteConfig.getTestObject().getScriptUseCase();
@@ -142,9 +143,6 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testSuiteParameter_performInitialState,
         testSuiteConfig.getTestSuiteParameter().isPerformInitialState());
-    ca.assertEquals(
-        testSuiteParameter_captureNetworkTraffic,
-        testSuiteConfig.getTestSuiteParameter().isCaptureNetworkTraffic());
 
     ca.assertEquals(
         testSuiteParameter_ocspSettings_timeoutDeltaMilliseconds,
@@ -211,9 +209,6 @@ class TestSuiteConfigTest {
   @Test
   void testDefaultsAndNonDefaults() {
 
-    // these parameters are optional and without defaults: they are not set in the tscMinimal
-    final String testSuiteParameter_captureNetworkTraffic = "9.9.9.9";
-
     // definition of parameters without defaults
     final String testObject_name = "Server 0815";
     final TestObjectType testObject_testObjectType = TestObjectType.INTERMEDIAER_SERVER;
@@ -248,7 +243,6 @@ class TestSuiteConfigTest {
     testSuiteConfig
         .getTestObject()
         .setTslProcessingTimeSeconds(tscBlank.getTestObject().getTslProcessingTimeSeconds());
-    testSuiteConfig.getTestSuiteParameter().setCaptureInterfaces("9.9.9.9");
 
     setNonDefaultValues(testSuiteConfig);
 
@@ -270,15 +264,12 @@ class TestSuiteConfigTest {
         tslProvider_ipAddressOrFqdn, testSuiteConfig.getTslProvider().getIpAddressOrFqdn());
     ca.assertEquals(tslProvider_port, testSuiteConfig.getTslProvider().getPort());
     ca.assertEquals(
-        testSuiteParameter_captureNetworkTraffic,
-        testSuiteConfig.getTestSuiteParameter().getCaptureInterfaces());
-    ca.assertEquals(
         testObject_scriptUseCase__appDataHttpFwdSocket,
         testSuiteConfig.getTestObject().getScriptUseCase().getAppDataHttpFwdSocket());
 
     testNonDefaultsInSshConfig(ca, testSuiteConfig.getSshConfig());
 
-    assertThat(ca.counter).as("20 parameters without defaults").isEqualTo(20);
+    assertThat(ca.counter).as("19 parameters without defaults").isEqualTo(19);
 
     testDefaults(ca, testSuiteConfig);
 
@@ -297,6 +288,7 @@ class TestSuiteConfigTest {
     final String ocspResponder_id = "ocspResponder.id";
     final String ocspResponder_appPath = "ocspResponder.appPath";
 
+    final boolean tslProvider_tslCryptTypeEccOnly = false;
     final String tslProvider_ipAddressOrFqdn = "tslProvider.ipAddressOrFqdn";
     final int tslProvider_port = -2000;
     final String tslProvider_id = "tslProvider.id";
@@ -307,6 +299,7 @@ class TestSuiteConfigTest {
     ca.assertEquals(ocspResponder_id, tsc.getOcspResponder().getId());
     ca.assertEquals(ocspResponder_appPath, tsc.getOcspResponder().getAppPath());
 
+    ca.assertEquals(tslProvider_tslCryptTypeEccOnly, tsc.getTslProvider().isTslCryptTypeEccOnly());
     ca.assertEquals(tslProvider_ipAddressOrFqdn, tsc.getTslProvider().getIpAddressOrFqdn());
     ca.assertEquals(tslProvider_port, tsc.getTslProvider().getPort());
     ca.assertEquals(tslProvider_id, tsc.getTslProvider().getId());
@@ -317,15 +310,11 @@ class TestSuiteConfigTest {
       final CustomAsserter ca, final TestSuiteParameter testSuiteParameter) {
 
     final boolean performInitialState = false;
-    final boolean captureNetworkTraffic = true;
-    final String captureInterfaces = "testSuiteParameter.captureInterfaces";
 
     final int ocspSettings_timeoutDeltaMilliseconds = -3000;
     final int ocspSettings_gracePeriodExtraDelay = -1000;
 
     ca.assertEquals(performInitialState, testSuiteParameter.isPerformInitialState());
-    ca.assertEquals(captureNetworkTraffic, testSuiteParameter.isCaptureNetworkTraffic());
-    ca.assertEquals(captureInterfaces, testSuiteParameter.getCaptureInterfaces());
 
     ca.assertEquals(
         ocspSettings_timeoutDeltaMilliseconds,

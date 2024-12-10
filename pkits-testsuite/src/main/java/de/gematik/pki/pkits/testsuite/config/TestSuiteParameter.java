@@ -28,19 +28,5 @@ public class TestSuiteParameter {
       description = "Execute smoke test (TSL and use case including OCSP) before each test.")
   boolean performInitialState = true;
 
-  @ParameterDescription(
-      withDefault = true,
-      description =
-          "Capture network traffic in pcap file format. Configuration of interfaces to sniff on is"
-              + " done by parameter \"captureInterfaces\" If OCSP responder and TSL provider are"
-              + " not started externally, sniffing on there interfaces is activated as well.")
-  boolean captureNetworkTraffic = false;
-
-  @ParameterDescription(
-      description =
-          "Comma separated list of IP addresses for interfaces to sniff communication with the test"
-              + " object from.")
-  String captureInterfaces;
-
   OcspSettings ocspSettings = new OcspSettings();
 }

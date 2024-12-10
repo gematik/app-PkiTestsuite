@@ -31,15 +31,19 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;
-import de.gematik.pki.pkits.ocsp.responder.data.*;
+import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;
+import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusType;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
+import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfigJsonDto;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,9 +154,9 @@ class OcspConfigControllerTest {
             .asString();
 
     assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
-    CertificateDto actualCertificateDtoGood =
+    final CertificateDto actualCertificateDtoGood =
         ocspResponseConfigHolder.getOcspResponderConfig().getCertificateDtos().get(0);
-    CertificateDto actualCertificateDtoRevoked =
+    final CertificateDto actualCertificateDtoRevoked =
         ocspResponseConfigHolder.getOcspResponderConfig().getCertificateDtos().get(1);
     assertThat(actualCertificateDtoGood.getEeCert().getSerialNumber())
         .isEqualTo(eeCerts.get(0).getSerialNumber());
@@ -169,34 +173,34 @@ class OcspConfigControllerTest {
 
     final String jsonContent =
         """
-        {
-          "certificateJsonDtos":
-          [{
-            "validCertHash": false,
-            "withCertHash": false,
-            "validSignature": false,
-            "certificateIdGeneration": "%s",
-            "delayMilliseconds": 11,
-            "respStatus": "%s",
-            "withResponseBytes": false,
-            "responderIdType": "%s",
-            "thisUpdateDeltaMilliseconds": 22,
-            "producedAtDeltaMilliseconds": 33,
-            "nextUpdateDeltaMilliseconds": 44,
-            "withNullParameterHashAlgoOfCertId": true,
-            "responseAlgoBehavior": "%s",
-            "certificateStatus": {
-              "type": "REVOKED",
-              "revokedDate": "2028-08-08T08:08:08.2665079Z",
-              "revokedReason": 55
-            },
-            "eeCertEncoded": "%s",
-            "issuerCertEncoded": "%s",
-            "signerCertificateEncoded": "%s",
-            "signerPrivateKeyEncoded": "%s"
-          }]
-        }
-        """
+            {
+              "certificateJsonDtos":
+              [{
+                "validCertHash": false,
+                "withCertHash": false,
+                "validSignature": false,
+                "certificateIdGeneration": "%s",
+                "delayMilliseconds": 11,
+                "respStatus": "%s",
+                "withResponseBytes": false,
+                "responderIdType": "%s",
+                "thisUpdateDeltaMilliseconds": 22,
+                "producedAtDeltaMilliseconds": 33,
+                "nextUpdateDeltaMilliseconds": 44,
+                "withNullParameterHashAlgoOfCertId": true,
+                "responseAlgoBehavior": "%s",
+                "certificateStatus": {
+                  "type": "REVOKED",
+                  "revokedDate": "2028-08-08T08:08:08.2665079Z",
+                  "revokedReason": 55
+                },
+                "eeCertEncoded": "%s",
+                "issuerCertEncoded": "%s",
+                "signerCertificateEncoded": "%s",
+                "signerPrivateKeyEncoded": "%s"
+              }]
+            }
+            """
             .formatted(
                 CertificateIdGeneration.INVALID_CERTID_HASH_ALGO,
                 OCSPRespStatus.TRY_LATER,

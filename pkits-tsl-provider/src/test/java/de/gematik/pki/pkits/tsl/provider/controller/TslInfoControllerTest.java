@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.assertj.core.api.Assertions;
 import org.json.JSONArray;
 import org.json.JSONException;

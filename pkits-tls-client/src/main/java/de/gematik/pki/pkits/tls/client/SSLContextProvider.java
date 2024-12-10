@@ -28,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLContext;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 
 public class SSLContextProvider {
 

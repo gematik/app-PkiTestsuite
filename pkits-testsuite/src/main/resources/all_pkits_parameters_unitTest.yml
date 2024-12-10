@@ -41,6 +41,7 @@ ocspResponder:
   appPath: "ocspResponder.appPath"
 
 tslProvider:
+  tslCryptTypeEccOnly: false
   ipAddressOrFqdn: "tslProvider.ipAddressOrFqdn"
   port: -2000
   id: "tslProvider.id"
@@ -48,8 +49,6 @@ tslProvider:
 
 testSuiteParameter:
   performInitialState: false
-  captureNetworkTraffic: true
-  captureInterfaces: "testSuiteParameter.captureInterfaces"
 
   ocspSettings:
     timeoutDeltaMilliseconds: -3000

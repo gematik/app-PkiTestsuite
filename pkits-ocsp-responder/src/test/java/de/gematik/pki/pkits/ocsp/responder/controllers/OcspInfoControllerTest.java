@@ -41,7 +41,7 @@ import java.util.List;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;

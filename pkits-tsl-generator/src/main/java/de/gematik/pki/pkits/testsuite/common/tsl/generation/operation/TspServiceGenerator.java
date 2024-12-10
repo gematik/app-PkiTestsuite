@@ -219,6 +219,14 @@ public class TspServiceGenerator {
     return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA));
   }
 
+  public static TSPServiceType getTspServiceKompCa11() {
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA11));
+  }
+
+  public static TSPServiceType getTspServiceKompCaAlt33() {
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33));
+  }
+
   public static TSPServiceType getTspServiceKompCaRsa() {
     return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA));
   }
