@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.0</version>
+    <version>3.4.3</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>5.2.0</version>
+  <version>5.2.3</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -82,21 +82,21 @@
     <maven.compiler.encoding>${project.build.sourceEncoding}</maven.compiler.encoding>
 
     <!-- dependencies -->
-    <version.assertj-core>3.26.3</version.assertj-core>
-    <version.bouncycastle>1.79</version.bouncycastle>
+    <version.assertj-core>3.27.3</version.assertj-core>
+    <version.bouncycastle>1.80</version.bouncycastle>
     <version.commons-compress>1.27.1</version.commons-compress>
     <version.commons-io>2.18.0</version.commons-io>
-    <version.commons-text>1.12.0</version.commons-text>
+    <version.commons-text>1.13.0</version.commons-text>
     <version.jfiglet>1.0.1</version.jfiglet>
-    <version.jackson>2.18.2</version.jackson>
-    <version.gemLibPki>3.0.1</version.gemLibPki>
-    <version.httpcore5>5.3.1</version.httpcore5>
+    <version.jackson>2.18.3</version.jackson>
+    <version.gemLibPki>3.1.1</version.gemLibPki>
+    <version.httpcore5>5.3.3</version.httpcore5>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-    <version.junit-jupiter>5.11.3</version.junit-jupiter>
-    <version.junit-platform-launcher>1.11.3</version.junit-platform-launcher>
-    <version.log4j2>2.24.2</version.log4j2>
+    <version.junit-jupiter>5.12.0</version.junit-jupiter>
+    <version.junit-platform-launcher>1.12.0</version.junit-platform-launcher>
+    <version.log4j2>2.24.3</version.log4j2>
     <version.lombok>1.18.36</version.lombok>
-    <version.openapi>2.7.0</version.openapi>
+    <version.openapi>2.8.5</version.openapi>
     <version.unirest-java>4.4.5</version.unirest-java>
     <version.xmlunit>2.10.0</version.xmlunit>
 
@@ -105,19 +105,19 @@
     <version.docker-maven-plugin>0.45.1</version.docker-maven-plugin>
     <version.git-commit-id-maven-plugin>9.0.1</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.12</version.jacoco-maven-plugin>
-    <version.maven-assembly-plugin>3.6.0</version.maven-assembly-plugin>
-    <version.maven-clean-plugin>3.4.0</version.maven-clean-plugin>
-    <version.maven-compiler-plugin>3.13.0</version.maven-compiler-plugin>
-    <version.maven-deploy-plugin>3.1.3</version.maven-deploy-plugin>
+    <version.maven-assembly-plugin>3.7.1</version.maven-assembly-plugin>
+    <version.maven-clean-plugin>3.4.1</version.maven-clean-plugin>
+    <version.maven-compiler-plugin>3.14.0</version.maven-compiler-plugin>
+    <version.maven-deploy-plugin>3.1.4</version.maven-deploy-plugin>
     <version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
     <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
-    <version.maven-project-info-reports-plugin>3.8.0</version.maven-project-info-reports-plugin>
+    <version.maven-project-info-reports-plugin>3.9.0</version.maven-project-info-reports-plugin>
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
     <version.maven-site-plugin>3.21.0</version.maven-site-plugin>
     <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.5.2</version.maven-surefire-plugin>
     <version.sonar-maven-plugin>5.0.0.4389</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>2.43.0</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>2.44.3</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
@@ -566,7 +566,18 @@
           </markdown>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.5.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>aggregate-third-party-report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>

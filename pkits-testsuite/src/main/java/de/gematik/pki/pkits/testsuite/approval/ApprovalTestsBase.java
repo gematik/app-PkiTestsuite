@@ -20,6 +20,7 @@ import static de.gematik.pki.pkits.common.PkitsCommonUtils.waitSeconds;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_OCSP_SIGNER;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.TSL_DEFAULT_TTL_DAYS;
 import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.ALTERNATIVE_CLIENT_CERTS_CONFIG;
 import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.DEFAULT_CLIENT_CERTS_CONFIG;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator.NO_TSL_MODIFICATIONS;
@@ -383,6 +384,7 @@ public abstract class ApprovalTestsBase {
         .tslProviderUri(tslProviderUri)
         .ocspResponderUri(ocspResponderUri)
         .tslSeqNr(tslSequenceNr.getNextTslSeqNr())
+        .tslDaysUntilNextupdate(TSL_DEFAULT_TTL_DAYS)
         .modifyTsl(modifyTsl)
         .build();
   }
