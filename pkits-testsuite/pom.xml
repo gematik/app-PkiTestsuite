@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>5.2.0</version>
+    <version>5.2.2</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>5.2.0</version>
+  <version>5.2.2</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
@@ -27,10 +27,10 @@
     <!-- dependencies -->
     <version.awaitility>4.2.0</version.awaitility>
     <version.commons-lang3>3.17.0</version.commons-lang3>
-    <version.apache.sshd>2.14.0</version.apache.sshd>
-    <version.itextpdf.html2pdf>6.0.0</version.itextpdf.html2pdf>
+    <version.apache.sshd>2.15.0</version.apache.sshd>
+    <version.itextpdf.html2pdf>6.1.0</version.itextpdf.html2pdf>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
-    <version.mockito>5.14.2</version.mockito>
+    <version.mockito>5.15.2</version.mockito>
     <version.picocli>4.7.6</version.picocli>
 
     <!-- plugins -->

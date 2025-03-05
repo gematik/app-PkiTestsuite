@@ -15,4 +15,5 @@ docker-compose-baseSut.yml
 docker-compose-deployHot.yml
 docker-compose-deployLTU_DEV.yml
 *.Jenkinsfile
+checkLicenses.sh
 

@@ -119,6 +119,42 @@ class CreateTslTemplateTest {
   }
 
   @Test
+  void testCheckDiscoverTspServicesForDuplication() {
+    final String TSL_WITH_DUPLICATED_TSP_SERVICE = "tsl_duplicated_tsp_GEM.TSL-CA51_TEST-ONLY.xml";
+    assertThat(
+            TslGenerationTestUtils.duplicatedTspServicesFound(
+                TslGenerationTestUtils.getTspServices(TSL_WITH_DUPLICATED_TSP_SERVICE)))
+        .isTrue();
+  }
+
+  @Test
+  void testCheckRsaTspServicesForDuplication() {
+    final List<TSPServiceType> allTspServiceTypes =
+        CreateTslTemplate.defaultTsl(false)
+            .getTrustServiceProviderList()
+            .getTrustServiceProvider()
+            .stream()
+            .flatMap(provider -> provider.getTSPServices().getTSPService().stream())
+            .toList();
+
+    assertThat(TslGenerationTestUtils.duplicatedTspServicesTypesFound(allTspServiceTypes))
+        .isFalse();
+  }
+
+  @Test
+  void testGetEccTspServicesForDuplication() {
+    final List<TSPServiceType> allTspServices =
+        CreateTslTemplate.defaultTsl(true)
+            .getTrustServiceProviderList()
+            .getTrustServiceProvider()
+            .stream()
+            .flatMap(provider -> provider.getTSPServices().getTSPService().stream())
+            .toList();
+
+    assertThat(TslGenerationTestUtils.duplicatedTspServicesTypesFound(allTspServices)).isFalse();
+  }
+
+  @Test
   void verifyDefaultRSATsl() {
     final TrustStatusListType tsl = CreateTslTemplate.defaultTsl(false);
     assertThat(tsl.getSignature()).isNull();

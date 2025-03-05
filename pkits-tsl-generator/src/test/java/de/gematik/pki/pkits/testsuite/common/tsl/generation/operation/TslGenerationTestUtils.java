@@ -16,6 +16,14 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
+import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
+import de.gematik.pki.gemlibpki.tsl.TslReader;
+import de.gematik.pki.gemlibpki.tsl.TspService;
+import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
@@ -35,5 +43,41 @@ public class TslGenerationTestUtils {
       log.info("Diffs: {}", docDiff.getDifferences());
     }
     return !docDiff.hasDifferences();
+  }
+
+  public static boolean duplicatedTspServicesFound(final List<TspService> tspServices) {
+    return duplicatedTspServicesTypesFound(
+        tspServices.stream().map(TspService::getTspServiceType).toList());
+  }
+
+  public static boolean duplicatedTspServicesTypesFound(
+      final List<TSPServiceType> tspServiceTypes) {
+    final Map<String, Long> tspServicesEntriesFound =
+        tspServiceTypes.stream()
+            .collect(
+                Collectors.groupingBy(
+                    tspService ->
+                        tspService
+                            .getServiceInformation()
+                            .getServiceName()
+                            .getName()
+                            .get(0)
+                            .getValue(),
+                    Collectors.counting()));
+
+    final List<String> dups =
+        tspServicesEntriesFound.entrySet().stream()
+            .filter(entry -> entry.getValue() > 1)
+            .map(Map.Entry::getKey)
+            .toList();
+
+    return !dups.isEmpty();
+  }
+
+  public static List<TspService> getTspServices(final String tslFilename) {
+    return new TslInformationProvider(
+            TslReader.getTslUnsigned(
+                ResourceReader.getFilePathFromResources(tslFilename, TslGenerationTestUtils.class)))
+        .getTspServices();
   }
 }

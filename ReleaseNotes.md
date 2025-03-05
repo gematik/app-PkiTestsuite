@@ -2,6 +2,13 @@
 
 # Release notes PKI Test Suite
 
+## Release 5.2.2
+
+- FIX ANFPKI-27: TSP enthält zwei ServiceSupplyPoints (extern und intern)
+- changed intermediaerClient certs
+- TSL TTL in days as optional parameter of initialTslAndTa.sh
+- update dependencies
+
 ## Release 5.2.0
 
 - remove pcap support

@@ -65,9 +65,9 @@ public final class PkitsTestDataConstants {
   public static final X509Certificate CERT_UNSPECIFIED_STI =
       CertReader.readX509(trustStoreDir.resolve("SGD1_TEST-ONLY.pem"));
 
-  public static final Path DEFAULT_KOMP_CA = trustStoreDir.resolve("GEM.KOMP-CA51_TEST-ONLY.pem");
+  public static final Path DEFAULT_KOMP_CA = trustStoreDir.resolve("GEM.KOMP-CA52_TEST-ONLY.pem");
   public static final Path ALTERNATIVE_KOMP_CA =
-      trustStoreDir.resolve("GEM.KOMP-CA52_TEST-ONLY.pem");
+      trustStoreDir.resolve("GEM.KOMP-CA53_TEST-ONLY.pem");
 
   public static final Path DEFAULT_KOMP_CA11 = trustStoreDir.resolve("GEM.KOMP-CA11_TEST-ONLY.pem");
   public static final Path ALTERNATIVE_KOMP_CA33 =
@@ -89,6 +89,7 @@ public final class PkitsTestDataConstants {
       P12Reader.getContentFromP12(
           trustAnchorCertsDir.resolve("TSL-Signing-Unit-51-TEST-ONLY.p12"), KEYSTORE_PASSWORD);
 
+  public static final int TSL_DEFAULT_TTL_DAYS = 30;
   public static final X509Certificate ALTERNATIVE_FIRST_TRUST_ANCHOR =
       CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA52-TEST-ONLY.pem"));
   public static final X509Certificate ALTERNATIVE_SECOND_TRUST_ANCHOR =
