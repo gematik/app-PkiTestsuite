@@ -237,6 +237,7 @@ compatible with the test suite.
 For this, a convenient script is provided by the test suite:
 By executing `./initialTslAndTa.sh` an initial TSL and the corresponding trust anchor are written to
 the `./out` directory for manual import into the test object.
+Try `./initialTslAndTa.sh --help` for usage information.
 
 Before generating this TSL, it is crucial to configure the sockets for
 the [TSL provider](./README.md#2-tsl-provider) and [OCSP responder](./README.md#3-ocsp-responder)
@@ -373,11 +374,11 @@ productive data.
 ## Know issues
 
 - there are no tests for an invalid keyUsages for the UseCase certificate
-- there are no tests for an invalid extended keyUsages the UseCase certificate
+- there are no tests for an invalid extended keyUsage
 
 ## License
 
-Copyright 2023 gematik GmbH
+Copyright 2025 gematik GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License.

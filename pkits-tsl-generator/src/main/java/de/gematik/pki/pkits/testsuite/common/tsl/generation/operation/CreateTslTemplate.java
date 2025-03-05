@@ -45,7 +45,9 @@ import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -130,7 +132,7 @@ public final class CreateTslTemplate {
     return tspInformation;
   }
 
-  private static List<TSPServiceType> getDefaultTspServices(boolean eccOnly) {
+  private static List<TSPServiceType> getDefaultTspServices(final boolean eccOnly) {
     if (eccOnly) {
       return getCommonTspServices();
     }
@@ -198,7 +200,7 @@ public final class CreateTslTemplate {
     return tslContainer;
   }
 
-  private static TslContainer baseTslContainerPath(Path tslPath) {
+  private static TslContainer baseTslContainerPath(final Path tslPath) {
 
     TslContainer tslContainer = new TslContainer(TslReader.getTslUnsigned(tslPath));
     tslContainer = deleteInitialTspServices(tslContainer);
@@ -209,20 +211,22 @@ public final class CreateTslTemplate {
     return new TslContainer(tslUnsigned);
   }
 
-  private static TslContainer baseTslContainer(boolean eccOnly) {
+  private static TslContainer baseTslContainer(final boolean eccOnly) {
 
-    if (eccOnly) return baseTslContainerPath(ARVATO_TU_ECC_ONLY_TSL);
+    if (eccOnly) {
+      return baseTslContainerPath(ARVATO_TU_ECC_ONLY_TSL);
+    }
     return baseTslContainerPath(ARVATO_TU_TSL);
   }
 
   /** TSLTypeID 1 */
-  public static TrustStatusListType defaultTsl(boolean eccOnly) {
+  public static TrustStatusListType defaultTsl(final boolean eccOnly) {
     return addTrustServiceProviderWithTspServices(
         baseTslContainer(eccOnly), getDefaultTspServices(eccOnly));
   }
 
   /** TSLTypeID 2 */
-  public static TrustStatusListType alternativeTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeTsl(final boolean eccOnly) {
     return addTrustServiceProviderWithTspServices(
         baseTslContainer(eccOnly), getAlternativeTspServices());
   }
@@ -263,7 +267,7 @@ public final class CreateTslTemplate {
   }
 
   /** TSLTypeID 194 */
-  public static TrustStatusListType alternativeCaRevokedLaterTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeCaRevokedLaterTsl(final boolean eccOnly) {
 
     final List<TSPServiceType> tspServices = getAlternativeTspServices();
 
@@ -285,7 +289,7 @@ public final class CreateTslTemplate {
   /** TSLTypeID 3 */
   // Alternative template to generate a TSL with an unspecified ServiceTypeIdentifier in TSP service
   // during tests.
-  public static TrustStatusListType alternativeCaUnspecifiedStiTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeCaUnspecifiedStiTsl(final boolean eccOnly) {
     final List<TSPServiceType> tspServices =
         combined(
             List.of(TspServiceGenerator.getTspServiceUnspecifiedSti()),
@@ -296,7 +300,7 @@ public final class CreateTslTemplate {
 
   /** TSLTypeID 202 */
   // Alternative template to generate a TSL with an additional broken CA during tests.
-  public static TrustStatusListType defectAlternativeCaBrokenTsl(boolean eccOnly) {
+  public static TrustStatusListType defectAlternativeCaBrokenTsl(final boolean eccOnly) {
     final List<TSPServiceType> tspServices = getAlternativeTspServices();
 
     final List<TSPServiceType> tspServicesToModify =
@@ -333,7 +337,7 @@ public final class CreateTslTemplate {
   /** TSLTypeID 204 */
   // Alternative template to generate a TSL with an additional wrong (service info extension) CA
   // during tests.
-  public static TrustStatusListType defectAlternativeCaWrongSrvInfoExtTsl(boolean eccOnly) {
+  public static TrustStatusListType defectAlternativeCaWrongSrvInfoExtTsl(final boolean eccOnly) {
 
     final List<TSPServiceType> tspServices = getAlternativeTspServices();
 
@@ -358,7 +362,7 @@ public final class CreateTslTemplate {
   }
 
   /** TSLTypeID 4 */
-  public static TrustStatusListType alternativeCaRevokedTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeCaRevokedTsl(final boolean eccOnly) {
 
     final List<TSPServiceType> tspServices = getAlternativeTspServices();
 
@@ -384,7 +388,7 @@ public final class CreateTslTemplate {
 
   /** to generate TSLTypeID 172 */
   public static TrustStatusListType trustAnchorChangeFromDefaultToAlternativeFirstTsl(
-      final ZonedDateTime newStatusStartingTime, boolean eccOnly) {
+      final ZonedDateTime newStatusStartingTime, final boolean eccOnly) {
     final List<TSPServiceType> tspServices =
         combined(
             getCommonTspServices(),
@@ -398,12 +402,14 @@ public final class CreateTslTemplate {
 
   /** TSLTypeID 102 */
   public static TrustStatusListType trustAnchorChangeFromDefaultToAlternativeFirstTsl(
-      boolean eccOnly) {
+      final boolean eccOnly) {
     return trustAnchorChangeFromDefaultToAlternativeFirstTsl(GemLibPkiUtils.now(), eccOnly);
   }
 
   private static TrustStatusListType pkcAlternativeCaTsl(
-      final X509Certificate certificate, final ZonedDateTime statusStartingTime, boolean eccOnly) {
+      final X509Certificate certificate,
+      final ZonedDateTime statusStartingTime,
+      final boolean eccOnly) {
     final List<TSPServiceType> tspServices =
         List.of(
             TspServiceGenerator.getStandardPkcTspServiceGenerator(certificate)
@@ -424,13 +430,14 @@ public final class CreateTslTemplate {
   }
 
   /** TSLTypeID 174 */
-  public static TrustStatusListType alternativeTrustAnchorAlternativeCaTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeTrustAnchorAlternativeCaTsl(final boolean eccOnly) {
     return pkcAlternativeCaTsl(
         PkitsTestDataConstants.ALTERNATIVE_FIRST_TRUST_ANCHOR, GemLibPkiUtils.now(), eccOnly);
   }
 
   /** TSLTypeID 104 */
-  public static TrustStatusListType alternativeTrustAnchorTrustAnchorChangeTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeTrustAnchorTrustAnchorChangeTsl(
+      final boolean eccOnly) {
 
     final List<TSPServiceType> tspServices =
         List.of(
@@ -450,7 +457,7 @@ public final class CreateTslTemplate {
   }
 
   /** TSLTypeID 347 */
-  public static TrustStatusListType defectTrustAnchorChangeNotYetValidTsl(boolean eccOnly) {
+  public static TrustStatusListType defectTrustAnchorChangeNotYetValidTsl(final boolean eccOnly) {
 
     final ZonedDateTime future = GemLibPkiUtils.now().plusYears(1);
     final List<TSPServiceType> tspServices =
@@ -465,7 +472,7 @@ public final class CreateTslTemplate {
   }
 
   /** TSLTypeID 345 */
-  public static TrustStatusListType defectTrustAnchorChangeExpiredTsl(boolean eccOnly) {
+  public static TrustStatusListType defectTrustAnchorChangeExpiredTsl(final boolean eccOnly) {
 
     final ZonedDateTime past = GemLibPkiUtils.now().minusYears(1);
     final List<TSPServiceType> tspServices =
@@ -479,7 +486,7 @@ public final class CreateTslTemplate {
   }
 
   /** TSLTypeID 357 */
-  public static TrustStatusListType defectTrustAnchorChangeTwoEntriesTsl(boolean eccOnly) {
+  public static TrustStatusListType defectTrustAnchorChangeTwoEntriesTsl(final boolean eccOnly) {
 
     final List<TSPServiceType> tspServices =
         combined(
@@ -496,8 +503,8 @@ public final class CreateTslTemplate {
 
   /** TSLTypeID 355 */
   // TSL_defect_TAchange_startingTimeFuture.xml
-
-  public static TrustStatusListType defectTrustAnchorChangeStartingTimeFutureTsl(boolean eccOnly) {
+  public static TrustStatusListType defectTrustAnchorChangeStartingTimeFutureTsl(
+      final boolean eccOnly) {
 
     final ZonedDateTime farFuture = GemLibPkiUtils.now().plusYears(15);
     return trustAnchorChangeFromDefaultToAlternativeFirstTsl(farFuture, eccOnly);
@@ -505,8 +512,7 @@ public final class CreateTslTemplate {
 
   /** TSLTypeID 361 */
   // TSL_defect_TAchange_broken.xml
-
-  public static TrustStatusListType defectTrustAnchorChangeBrokenTsl(boolean eccOnly) {
+  public static TrustStatusListType defectTrustAnchorChangeBrokenTsl(final boolean eccOnly) {
 
     final byte[] brokenFirstAlternativeTrustAnchor =
         GemLibPkiUtils.certToBytes(PkitsTestDataConstants.ALTERNATIVE_FIRST_TRUST_ANCHOR);
@@ -530,7 +536,7 @@ public final class CreateTslTemplate {
   /** TSLTypeID 173 */
   // TSL_TAchange_altTA2_futureShort.xml
   public static TrustStatusListType trustAnchorChangeAlternativeTrustAnchor2FutureShortTsl(
-      final ZonedDateTime newStatusStartingTime, boolean eccOnly) {
+      final ZonedDateTime newStatusStartingTime, final boolean eccOnly) {
 
     final List<TSPServiceType> tspServices =
         combined(
@@ -546,7 +552,7 @@ public final class CreateTslTemplate {
   /** TSLTypeID 178 */
   // TSL_invalid_altTA_expired_altCA.xml
   public static TrustStatusListType invalidAlternativeTrustAnchorExpiredAlternativeCaTsl(
-      boolean eccOnly) {
+      final boolean eccOnly) {
 
     final ZonedDateTime past = GemLibPkiUtils.now().minusYears(1);
 
@@ -555,9 +561,8 @@ public final class CreateTslTemplate {
 
   /** TSLTypeID 180 */
   // TSL_invalid_altTA_notYetValid_altCA.xml
-
   public static TrustStatusListType invalidAlternativeTrustAnchorNotYetValidAlternativeCaTsl(
-      boolean eccOnly) {
+      final boolean eccOnly) {
 
     final ZonedDateTime future = GemLibPkiUtils.now().plusYears(1);
     return pkcAlternativeCaTsl(PkitsTestDataConstants.NOT_YET_VALID_TRUST_ANCHOR, future, eccOnly);
@@ -565,14 +570,15 @@ public final class CreateTslTemplate {
 
   /** TSLTypeID 175 */
   // TSL_altTA2_altCA.xml
-  public static TrustStatusListType alternativeTrustAnchor2AlternativeCaTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeTrustAnchor2AlternativeCaTsl(final boolean eccOnly) {
     return pkcAlternativeCaTsl(
         PkitsTestDataConstants.ALTERNATIVE_SECOND_TRUST_ANCHOR, GemLibPkiUtils.now(), eccOnly);
   }
 
   /** TSLTypeID 177 */
   // TSL_altTA2_TAchange.xml
-  public static TrustStatusListType alternativeTrustAnchor2TrustAnchorChangeTsl(boolean eccOnly) {
+  public static TrustStatusListType alternativeTrustAnchor2TrustAnchorChangeTsl(
+      final boolean eccOnly) {
     final List<TSPServiceType> tspServices =
         List.of(
             TspServiceGenerator.getStandardPkcTspServiceGenerator(

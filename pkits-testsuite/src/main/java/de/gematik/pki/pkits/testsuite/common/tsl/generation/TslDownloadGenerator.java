@@ -21,6 +21,7 @@ import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_SEQNR_PARAM_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_BACKUP_ENDPOINT;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_XML_PRIMARY_ENDPOINT;
+import static de.gematik.pki.pkits.common.PkitsTestDataConstants.TSL_DEFAULT_TTL_DAYS;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
 
@@ -83,7 +84,6 @@ public class TslDownloadGenerator {
       Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_expired_ta.p12");
 
   public static final TslOperation NO_TSL_MODIFICATIONS = null;
-  private static final int TSL_DAYS_UNTIL_NEXTUPDATE = 90;
   private static final int WEB_SERVER_START_TIMEOUT_SECS = 30;
 
   protected final CurrentTestInfo currentTestInfo;
@@ -100,6 +100,8 @@ public class TslDownloadGenerator {
   protected X509Certificate trustAnchor;
 
   protected P12Container ocspSigner;
+
+  @Getter @Setter protected int tslDaysUntilNextupdate = TSL_DEFAULT_TTL_DAYS;
 
   @Getter @Setter protected int tslSeqNr;
 
@@ -233,7 +235,7 @@ public class TslDownloadGenerator {
             .tslDownloadUrlBackup(getTslDownloadUrlBackup(offeredTslSeqNr))
             .issueDate(GemLibPkiUtils.now())
             .nextUpdate(null)
-            .daysUntilNextUpdate(TSL_DAYS_UNTIL_NEXTUPDATE)
+            .daysUntilNextUpdate(tslDaysUntilNextupdate)
             .build();
     return new StandardTslOperation(standardTslOperationConfig);
   }

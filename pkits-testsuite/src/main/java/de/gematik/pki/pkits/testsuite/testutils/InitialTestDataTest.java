@@ -41,6 +41,7 @@ public class InitialTestDataTest {
   void buildInitialTslAndTa() throws IOException {
 
     final int tslSeqNr = 1;
+    final int tslDaysUntilNextupdate = Integer.parseInt(System.getProperty("tsl.days", "90"));
 
     final TslProviderConfig tslProvider = TestConfigManager.getTestSuiteConfig().getTslProvider();
 
@@ -50,6 +51,7 @@ public class InitialTestDataTest {
     final TslDownloadGenerator tslDownloadGenerator =
         TslDownloadGenerator.builder()
             .tslSeqNr(tslSeqNr)
+            .tslDaysUntilNextupdate(tslDaysUntilNextupdate)
             .tslName("initialTsl")
             .tslSigner(PkitsTestDataConstants.DEFAULT_TSL_SIGNER)
             .trustAnchor(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
