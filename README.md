@@ -19,14 +19,39 @@ coming.
 
 ## tl;dr
 
-```bash 
-# Download release zip file from https://github.com/gematik/app-PkiTestsuite/releases and extract it
+#### setup
+
+``` bash 
+# build the project
+mvn clean package
+# copy configuration file example
 cp <UserDefinedConfigfile>.yml ./config/pkits.yml # examples: /docs/config/inttest/
+```
+
+#### Variant A: SUT is Your Test Object
+
+```bash 
 ./initialTslAndTa.sh # generates trust anchor and TSL in ./out for import in test object
 # The test object has to be started and accessible from now on.
 ./checkInitialState.sh # acquires TSL sequence number from the test object by analysing a tsl download request and applying a use case
 ./startApprovalTest.sh # chose tests that shall be executed from allTests.txt
 # Test artefacts (i.e. logs and report) can be found in ./out directory.
+```
+
+#### Variant B: SUT is a Simulator
+
+The project contains a SUT Server Simulator. For a quick check if your generated binaries are
+working, start this simulator instead of your test object and run the testsuite against it. This
+should work ootb.
+
+``` bash 
+# start SUT Server Simulator
+java -jar ./bin/pkits-sut-server-sim-exec.jar &
+```
+
+```bash 
+# run testsuite
+./startApprovalTest.sh
 ```
 
 ## Technical Functionality
@@ -36,9 +61,9 @@ implemented as maven modules and can be used independently or in conjunction wit
 
 ### Requirements
 
-To execute the test suite, you need at least Java 17.
-The test suite ist build and testet
-with [Eclipse Adoptium Temurin JDK 17](https://github.com/adoptium/temurin17-binaries)
+To build and execute the test suite, you need Java 17 and Maven.
+The test suite is developed and testet
+with [Open JDK 17](https://openjdk.org/projects/jdk/)
 
 ### 1. PKI Test Suite
 
@@ -47,7 +72,7 @@ the results. It has
 a [package](pkits-testsuite/src/main/java/de/gematik/pki/pkits/testsuite/approval/) with classes to
 all approval tests. The test suite calls a use case
 (see [Use Case Modules](./README.md#4-use-case-modules)) and expects it to either pass or fail,
-depending on the test data used. If the expectation is fulfilled, the test case is passed.
+depending on the test data used. If the expectation is met, the test case is passed.
 
 The test suite has a couple of convenience options:
 
@@ -223,10 +248,8 @@ The test data form an own PKI, hence it is not easy to create them by yourself. 
 test data, make sure that issuing certificates are added in
 the [tsl template](./testDataTemplates/tsl/ECC-RSA_TSL-test.xml) as well.
 
-The TSLs are generated depending on the parameter tslCryptType in pkits.yml, which can have the
-values "RSA-ECC" and "ECC-Only".
-The default value is "RSA-ECC".
-If tslCryptType is set to ECC-Only,
+The TSLs are generated depending on the boolean parameter tslCryptTypeEccOnly in pkits.yml.
+If tslCryptTypeEccOnly is true,
 a [separate tsl template](./testDataTemplates/tsl/ECC_TSL-test.xml) with only ECC certificates is
 used for TSL generation.
 
@@ -338,25 +361,18 @@ script.
 
 ## Building the project
 
-Building the project requires at least Java 17, [Apache
-Maven 3.6.3](https://maven.apache.org/index.html) and a local or online accessible Maven Central
-cache.
-
-The following commands will build the sources and generate a zip package like the one from the
-release.
+The following commands will build the project:
 
 ```bash
 mvn clean package 
 ```
 
-You can find the zip package in the directory `./out/pki-testsuite-x.x.x.zip`.
+You can find the binaries in ./bin:
 
-## Contact
-
-For questions or issues, feel free to open a
-ticket: https://service.gematik.de/servicedesk/customer/portal/36
-If you are not a registered user yet, you can use the following contact
-formular: https://www.gematik.de/kontakt/kontaktformular
+```bash
+ls bin
+pkits-ocsp-responder-exec.jar	pkits-sut-server-sim-exec.jar	pkits-testsuite-exec.jar	pkits-tsl-provider-exec.jar
+```
 
 ## Versioning
 
@@ -401,3 +417,45 @@ adaptation of the results to a more current state of the art.
 
 Gematik may remove published results temporarily or permanently from the place of publication at any
 time without prior notice or justification.
+
+## Additional Notes and Disclaimer from gematik GmbH
+
+1. Copyright notice: Each published work result is accompanied by an explicit statement of the
+   license conditions for use. These are regularly typical conditions in connection with open source
+   or free software. Programs described/provided/linked here are free software, unless otherwise
+   stated.
+2. Permission notice: Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal in the Software
+   without restriction, including without limitation the rights to use, copy, modify, merge,
+   publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to
+   whom the Software is furnished to do so, subject to the following conditions::
+    1. The copyright notice (Item 1) and the permission notice (Item 2) shall be included in all
+       copies or substantial portions of the Software.
+    2. The software is provided "as is" without warranty of any kind, either express or implied,
+       including, but not limited to, the warranties of fitness for a particular purpose,
+       merchantability, and/or non-infringement. The authors or copyright holders shall not be
+       liable in any manner whatsoever for any damages or other claims arising from, out of or in
+       connection with the software or the use or other dealings with the software, whether in an
+       action of contract, tort, or otherwise.
+    3. The software is the result of research and development activities, therefore not necessarily
+       quality assured and without the character of a liable product. For this reason, gematik does
+       not provide any support or other user assistance (unless otherwise stated in individual cases
+       and without justification of a legal obligation). Furthermore, there is no claim to further
+       development and adaptation of the results to a more current state of the art.
+3. Gematik may remove published results temporarily or permanently from the place of publication at
+   any time without prior notice or justification.
+4. Please note: Parts of this code may have been generated using AI-supported technology.’ Please
+   take this into account, especially when troubleshooting, for security analyses and possible
+   adjustments.
+
+## Contact
+
+We take open source license compliance very seriously. We are always striving to achieve compliance
+at all times and to improve our processes.
+This software is currently being tested to ensure its technical quality and legal compliance. Your
+feedback is highly valued.
+
+If you find any issues or have any suggestions or comments, or if you see any other ways in which we
+can improve, feel free to open a ticket: https://service.gematik.de/servicedesk/customer/portal/36
+If you are not a registered user yet, you can use the following contact
+formular: https://www.gematik.de/kontakt/kontaktformular

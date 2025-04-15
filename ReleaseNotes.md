@@ -2,6 +2,13 @@
 
 # Release notes PKI Test Suite
 
+## Release 6.0.0
+
+- SUT server (pkits-sut-server-sim-exec.jar) does not support RSA anymore
+- default for parameter tslCryptTypeEccOnly: true
+- end of zip-package delivery - it is required to build this project (it's easy)
+- update dependencies
+
 ## Release 5.2.3
 
 - FIX ANFPKI-27: TSP enthält zwei ServiceSupplyPoints (extern und intern)
