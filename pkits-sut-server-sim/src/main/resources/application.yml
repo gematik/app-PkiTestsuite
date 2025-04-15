@@ -2,13 +2,12 @@ server:
   port: 8443
   ssl:
     key-store: classpath:certificates/steak-ecc/ee_default.p12
-    # key-store: classpath:certificates/steak-rsa/ee_default.p12
     key-store-password: "00"
     enabled: true
     protocol: TLS
     enabled-protocols: TLSv1.2, TLSv1.3
     client-auth: need
-    ciphers: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    ciphers: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
   error:
     include-message: always
   tomcat:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 gematik GmbH
+ * Copyright 2025, gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * ******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  */
 
 package de.gematik.pki.pkits.testsuite.config;
@@ -89,7 +93,7 @@ class TestSuiteConfigTest {
     final int testObject_tslGracePeriodDays = 0;
     final int testObject_ocspTimeoutSeconds = 10;
 
-    final boolean tslCryptTypeEccOnly = false;
+    final boolean tslCryptTypeEccOnly = true;
     final boolean testObject_scriptUseCase_sendReceiveApplicationData = true;
     final String testObject_scriptUseCase_cryptMethod = "ECC";
 
@@ -288,7 +292,7 @@ class TestSuiteConfigTest {
     final String ocspResponder_id = "ocspResponder.id";
     final String ocspResponder_appPath = "ocspResponder.appPath";
 
-    final boolean tslProvider_tslCryptTypeEccOnly = false;
+    final boolean tslProvider_tslCryptTypeEccOnly = true;
     final String tslProvider_ipAddressOrFqdn = "tslProvider.ipAddressOrFqdn";
     final int tslProvider_port = -2000;
     final String tslProvider_id = "tslProvider.id";

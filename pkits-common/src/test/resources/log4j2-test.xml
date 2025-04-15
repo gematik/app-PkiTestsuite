@@ -5,7 +5,8 @@
     <Property name="l4j.level">trace</Property>
     <Property name="l4j.append">false</Property>
     <Property name="l4j.additivity">false</Property>
-    <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1}:%L - %msg%n</Property>
+    <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1}:%L - %msg%n
+    </Property>
   </Properties>
 
   <Appenders>
@@ -23,15 +24,15 @@
   </Appenders>
 
   <Loggers>
-    <Root level="error" additivity="{l4j.additivity}">
+    <Root level="error" additivity="${l4j.additivity}">
       <AppenderRef ref="CONSOLE"/>
     </Root>
 
-    <logger name="de.gematik.pki.gemlibpki" level="${l4j.level}" additivity="{l4j.additivity}">
+    <logger name="de.gematik.pki.gemlibpki" level="${l4j.level}" additivity="${l4j.additivity}">
       <AppenderRef ref="CONSOLE"/>
       <AppenderRef ref="FILE"/>
     </logger>
-    <logger name="de.gematik.pki.pkits" level="${l4j.level}" additivity="{l4j.additivity}">
+    <logger name="de.gematik.pki.pkits" level="${l4j.level}" additivity="${l4j.additivity}">
       <AppenderRef ref="CONSOLE"/>
       <AppenderRef ref="FILE"/>
     </logger>

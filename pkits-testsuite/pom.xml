@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>5.2.3</version>
+    <version>6.0.0</version>
   </parent>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>5.2.3</version>
+  <version>6.0.0</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
@@ -30,7 +30,8 @@
     <version.apache.sshd>2.15.0</version.apache.sshd>
     <version.itextpdf.html2pdf>6.1.0</version.itextpdf.html2pdf>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
-    <version.mockito>5.15.2</version.mockito>
+    <version.jfiglet>1.0.1</version.jfiglet>
+    <version.mockito>5.17.0</version.mockito>
     <version.picocli>4.7.6</version.picocli>
 
     <!-- plugins -->
@@ -194,10 +195,36 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.github.dtmo.jfiglet</groupId>
+      <artifactId>jfiglet</artifactId>
+      <version>${version.jfiglet}</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <id>shade-jar-with-dependencies</id>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>de.gematik.pki.pkits.testsuite.runner.PkitsTestsuiteRunner</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>

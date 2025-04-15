@@ -41,7 +41,7 @@ ocspResponder:
   appPath: "ocspResponder.appPath"
 
 tslProvider:
-  tslCryptTypeEccOnly: false
+  tslCryptTypeEccOnly: true
   ipAddressOrFqdn: "tslProvider.ipAddressOrFqdn"
   port: -2000
   id: "tslProvider.id"
