@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, gematik GmbH
+ * Copyright (Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,13 +73,21 @@ public final class PkitsTestDataConstants {
   public static final Path ALTERNATIVE_KOMP_CA =
       trustStoreDir.resolve("GEM.KOMP-CA53_TEST-ONLY.pem");
 
+  public static final Path DEFAULT_KOMP_CA62 = trustStoreDir.resolve("GEM.KOMP-CA62_TEST-ONLY.pem");
+  public static final Path ALTERNATIVE_KOMP_CA63 =
+      trustStoreDir.resolve("GEM.KOMP-CA63_TEST-ONLY.pem");
+
+  public static final Path DEFAULT_KOMP_CA58 = trustStoreDir.resolve("GEM.KOMP-CA58_TEST-ONLY.pem");
+  public static final Path ALTERNATIVE_KOMP_CA59 =
+      trustStoreDir.resolve("GEM.KOMP-CA59_TEST-ONLY.pem");
+
   public static final Path DEFAULT_KOMP_CA11 = trustStoreDir.resolve("GEM.KOMP-CA11_TEST-ONLY.pem");
   public static final Path ALTERNATIVE_KOMP_CA33 =
       trustStoreDir.resolve("GEM.KOMP-CA33_TEST-ONLY.pem");
 
-  public static final Path DEFAULT_SMCB_CA = trustStoreDir.resolve("GEM.SMCB-CA10_TEST-ONLY.pem");
+  public static final Path DEFAULT_SMCB_CA = trustStoreDir.resolve("GEM.SMCB-CA58-TEST-ONLY.pem");
   public static final Path ALTERNATIVE_SMCB_CA =
-      trustStoreDir.resolve("GEM.SMCB-CA33_TEST-ONLY.pem");
+      trustStoreDir.resolve("GEM.SMCB-CA59-TEST-ONLY.pem");
 
   public static final Path DEFAULT_EGK_CA = trustStoreDir.resolve("GEM.EGK-CA52_TEST-ONLY.pem");
   public static final Path ALTERNATIVE_EGK_CA = trustStoreDir.resolve("GEM.EGK-CA53_TEST-ONLY.pem");

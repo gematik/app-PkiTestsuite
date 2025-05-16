@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>6.0.0</version>
+    <version>7.0.1</version>
   </parent>
 
   <artifactId>pkits-tls-client</artifactId>
-  <version>6.0.0</version>
+  <version>7.0.1</version>
 
   <name>TLS Client</name>
   <description>TLS Client</description>
@@ -17,10 +17,6 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk18on</artifactId>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>

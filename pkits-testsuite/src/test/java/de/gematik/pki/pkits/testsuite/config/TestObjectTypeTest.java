@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, gematik GmbH
+ * Copyright (Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class TestObjectTypeTest {
             "Cannot construct instance of `de.gematik.pki.pkits.testsuite.config.TestObjectType`,"
                 + " problem: unknown value <dummyValue> for TestObjectType. Allowed values:"
                 + " IdpEgkFachdienst, IdpFachdienst, IntermediaerServer, KimFachdienst,"
-                + " VpnKonzentrator, VpnRegServer, VsdmFachdienst.");
+                + " KimFachdienstNist, VpnKonzentrator, VpnRegServer, VsdmFachdienst.");
   }
 
   @Test

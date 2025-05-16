@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, gematik GmbH
+ * Copyright (Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,6 +229,22 @@ public class TspServiceGenerator {
 
   public static TSPServiceType getTspServiceKompCaAlt33() {
     return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33));
+  }
+
+  public static TSPServiceType getTspServiceKompCa58() {
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA58));
+  }
+
+  public static TSPServiceType getTspServiceKompCaAlt59() {
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59));
+  }
+
+  public static TSPServiceType getTspServiceKompCa62() {
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA62));
+  }
+
+  public static TSPServiceType getTspServiceKompCaAlt63() {
+    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63));
   }
 
   public static TSPServiceType getTspServiceKompCaRsa() {

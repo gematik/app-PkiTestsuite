@@ -19,13 +19,22 @@ coming.
 
 ## tl;dr
 
-#### setup
+#### setup with downloaded binaries
+
+Download release zip file from https://github.com/gematik/app-PkiTestsuite/releases and extract it.
+
+``` bash 
+# copy configuration file example and modify it (or use your own configuration)
+cp /docs/config/inttest/pikts.yml ./config/pkits.yml
+```
+
+#### setup from code
 
 ``` bash 
 # build the project
 mvn clean package
-# copy configuration file example
-cp <UserDefinedConfigfile>.yml ./config/pkits.yml # examples: /docs/config/inttest/
+# copy configuration file example and modify it (or use your own configuration)
+cp /docs/config/inttest/pikts.yml ./config/pkits.yml
 ```
 
 #### Variant A: SUT is Your Test Object
@@ -38,7 +47,7 @@ cp <UserDefinedConfigfile>.yml ./config/pkits.yml # examples: /docs/config/intte
 # Test artefacts (i.e. logs and report) can be found in ./out directory.
 ```
 
-#### Variant B: SUT is a Simulator
+#### Variant B: SUT is the Simulator
 
 The project contains a SUT Server Simulator. For a quick check if your generated binaries are
 working, start this simulator instead of your test object and run the testsuite against it. This
@@ -236,12 +245,16 @@ tests for the following TI products:
 | Test object             | testObjectType in pkits.yml | Test data directory         |
 |-------------------------|-----------------------------|-----------------------------|
 | KIM Fachdienst          | KimFachdienst               | kimClientModul              |
+| KIM Fachdienst          | KimFachdienstNist           | kimClientModulNist          |
 | VPN-ZugD Konzentrator   | VpnKonzentrator             | netzkonnektorClient         |
 | VPN-ZugD RegServer      | VpnRegServer                | fachmodulClient             |
 | VSDM Fachdienst         | VsdmFachdienst              | intermediaerClient          |
 | VSDM Intermediär Server | IntermediaerServer          | fachmodulClientIntermediaer |
 | Zentraler/SmartCard IDP | IdpFachdienst               | fachmodulClient             |
 | Zentraler IDP           | IdpEgkFachdienst            | egkClient                   |
+
+Use the new testObjectType KimFachdienstNist instead of KimFachdienst if you want to check if a
+KimFachdienst supports ecc nist certificates correctly.
 
 These test data are for our own integration tests and can be used for approval tests as well.
 The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own
@@ -361,7 +374,7 @@ script.
 
 ## Building the project
 
-The following commands will build the project:
+The following command will build the project:
 
 ```bash
 mvn clean package 
@@ -372,6 +385,34 @@ You can find the binaries in ./bin:
 ```bash
 ls bin
 pkits-ocsp-responder-exec.jar	pkits-sut-server-sim-exec.jar	pkits-testsuite-exec.jar	pkits-tsl-provider-exec.jar
+```
+
+#### How are these binaries have been built?
+
+Following files are created by the spring-boot-maven-plugin:
+
+```
+./bin/pkits-ocsp-responder-exec.jar
+./bin/pkits-sut-server-sim-exec.jar
+./bin/pkits-tsl-provider-exec.jar 
+```
+
+Since version 7.0.1, maven module _pkits-testsuite_ has no longer a parent pom.
+<br>
+<br>
+The maven-shade-plugin is configured in pkits-testsuite/pom.xml to build a fat jar, e.g.,
+_./pkits-testsuite/target/pkits-testsuite-7.0.1-SNAPSHOT.jar_. The copy-rename-maven-plugin copies
+the
+jar file to the _./bin_ directory and renames it to _pkits-testsuite-exec.jar_.
+
+The other 3 binaries are sprig-boot servers and built with the spring-boot-maven-plugin.
+Finally, the following files are created and copied to the bin directory:
+
+```
+./bin/pkits-ocsp-responder-exec.jar
+./bin/pkits-sut-server-sim-exec.jar
+./bin/pkits-tsl-provider-exec.jar 
+./bin/pkits-testsuite-exec.jar
 ```
 
 ## Versioning

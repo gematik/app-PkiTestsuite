@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, gematik GmbH
+ * Copyright (Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,19 +49,19 @@ public class GeneratePdf {
     return noHtml
         ? ""
         : """
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-        p {
-          display:block;
-          margin-left:40px;
-          text-indent: -1em;
-        }
-            </style>
-          </head>
-        <body>
-        """;
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+          p {
+            display:block;
+            margin-left:40px;
+            text-indent: -1em;
+          }
+              </style>
+            </head>
+          <body>
+          """;
   }
 
   public static String htmlDocPostfix() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, gematik GmbH
+ * Copyright (Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,19 @@ class PkitsTestsuiteRunnerUtilsTest {
 
     final String content =
         """
-            +	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-            	verifyUseCaseCertsInvalid   Test use case with invalid certificates
-            	verifyUseCaseCertsValid     Test use case with valid certificates
++	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
+	verifyUseCaseCertsInvalid   Test use case with invalid certificates
+	verifyUseCaseCertsValid     Test use case with valid certificates
 
-            -	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
-            	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
-            +	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
+-	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
+	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
++	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
 
-            	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
-            -	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
-            +	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
-             	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
-            """;
+	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
+-	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
++	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
+ 	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
+""";
 
     final Path testFile = Path.of("sampleAllTests.txt");
     Files.writeString(testFile, content, StandardCharsets.UTF_8);
@@ -121,19 +121,19 @@ class PkitsTestsuiteRunnerUtilsTest {
 
     final String content =
         """
-            	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
-            	verifyUseCaseCertsInvalid   Test use case with invalid certificates
-            	verifyUseCaseCertsValid     Test use case with valid certificates
+	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
+	verifyUseCaseCertsInvalid   Test use case with invalid certificates
+	verifyUseCaseCertsValid     Test use case with valid certificates
 
-            -	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
-            -	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
-            -	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
+-	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
+-	verifyInvalidCerIdInOcspResponse                   Test invalid cert id in OCSP response
+-	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId
 
-            	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
-            -	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
-            -	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
-             	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
-            """;
+	de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
+-	verifyForBadCertificateOfTSPService                    Test bad CA certificate is not extractable from TSL
+-	verifyForWrongServiceInfoExtCertificateOfTSPService    Test CA certificate with missing service information extension in TSL
+ 	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
+""";
 
     final Path testFile = Path.of("sampleAllTests.txt");
     Files.writeString(testFile, content, StandardCharsets.UTF_8);

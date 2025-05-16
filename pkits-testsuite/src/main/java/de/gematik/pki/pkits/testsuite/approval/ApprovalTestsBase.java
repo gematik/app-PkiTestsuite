@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, gematik GmbH
+ * Copyright (Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,13 +208,13 @@ public abstract class ApprovalTestsBase {
     log.info(
         """
 
-            =======================================================================================
-            =  End of test case - {}
-            =======================================================================================
-            =======================================================================================
+=======================================================================================
+=  End of test case - {}
+=======================================================================================
+=======================================================================================
 
 
-            """,
+""",
         currentTestInfo);
 
     currentTestInfo = null;
@@ -256,12 +256,12 @@ public abstract class ApprovalTestsBase {
 
 
 
-            =======================================================================================
-            =======================================================================================
-            = Starting test case: {}
-            =======================================================================================
+=======================================================================================
+=======================================================================================
+= Starting test case: {}
+=======================================================================================
 
-            """,
+""",
         currentTestInfo);
 
     Arrays.stream(
@@ -618,14 +618,14 @@ public abstract class ApprovalTestsBase {
     if (!isInitialState) {
       commonMessage =
           """
-              {}
-                {} useCaseWithCert for
-                  %s
-                  %s with parameters
-                  eeCertPath %s,
-                  %s,  %s,  %s
+          {}
+            {} useCaseWithCert for
+              %s
+              %s with parameters
+              eeCertPath %s,
+              %s,  %s,  %s
 
-              """
+          """
               .formatted(
                   currentTestInfo,
                   PkitsTestSuiteUtils.getCallerTrace(),
