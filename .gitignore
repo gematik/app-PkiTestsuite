@@ -16,4 +16,5 @@ docker-compose-deployHot.yml
 docker-compose-deployLTU_DEV.yml
 *.Jenkinsfile
 checkLicenses.sh
+pkits-testsuite/dependency-reduced-pom.xml
 

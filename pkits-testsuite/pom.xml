@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>de.gematik.pki.pkits</groupId>
-    <artifactId>pki-testsuite</artifactId>
-    <version>6.0.0</version>
-  </parent>
+
+  <groupId>de.gematik.pki.pkits</groupId>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>6.0.0</version>
+  <version>7.0.1</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
   <properties>
+    <java.version>17</java.version>
+    <version.maven>3.6.3</version.maven>
+
+    <project.build.releaseJarsDir>${project.basedir}/../bin/</project.build.releaseJarsDir>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
+    <maven.compiler.encoding>${project.build.sourceEncoding}</maven.compiler.encoding>
+
     <sonar.coverage.exclusions>**/de/gematik/pki/pkits/testsuite/approval/**,
       **/de/gematik/pki/pkits/testsuite/common/ocsp/**,
       **/de/gematik/pki/pkits/testsuite/common/tsl/**,
@@ -25,18 +30,38 @@
     <testReportDirectory>${project.basedir}/../out/testreport</testReportDirectory>
 
     <!-- dependencies -->
-    <version.awaitility>4.2.0</version.awaitility>
-    <version.commons-lang3>3.17.0</version.commons-lang3>
     <version.apache.sshd>2.15.0</version.apache.sshd>
+    <version.assertj-core>3.27.3</version.assertj-core>
+    <version.awaitility>4.2.0</version.awaitility>
+    <version.commons-compress>1.27.1</version.commons-compress>
+    <version.commons-io>2.19.0</version.commons-io>
+    <version.commons-lang3>3.17.0</version.commons-lang3>
+    <version.commons-text>1.13.1</version.commons-text>
+    <version.gemLibPki>3.1.2</version.gemLibPki>
     <version.itextpdf.html2pdf>6.1.0</version.itextpdf.html2pdf>
+    <version.jackson>2.19.0</version.jackson>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
     <version.jfiglet>1.0.1</version.jfiglet>
+    <version.junit-jupiter>5.12.2</version.junit-jupiter>
+    <version.junit-platform-launcher>1.12.2</version.junit-platform-launcher>
+    <version.log4j2>2.24.3</version.log4j2>
+    <version.lombok>1.18.38</version.lombok>
     <version.mockito>5.17.0</version.mockito>
-    <version.picocli>4.7.6</version.picocli>
+    <version.picocli>4.7.7</version.picocli>
+    <version.unirest-java>4.4.7</version.unirest-java>
 
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
+    <version.copy-rename-maven-plugin>1.0.1</version.copy-rename-maven-plugin>
+    <version.git-commit-id-maven-plugin>9.0.1</version.git-commit-id-maven-plugin>
+    <version.jacoco-maven-plugin>0.8.13</version.jacoco-maven-plugin>
+    <version.maven-clean-plugin>3.4.1</version.maven-clean-plugin>
+    <version.maven-compiler-plugin>3.14.0</version.maven-compiler-plugin>
+    <version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
+    <version.maven-surefire-plugin>3.5.3</version.maven-surefire-plugin>
     <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
+    <version.spotless-maven-plugin>2.44.4</version.spotless-maven-plugin>
+    <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <tsl-procurer.initialTslPrimaryDownloadUrl>http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000</tsl-procurer.initialTslPrimaryDownloadUrl>
   </properties>
@@ -51,6 +76,7 @@
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-engine</artifactId>
+      <version>${version.junit-platform-launcher}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -62,12 +88,14 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
+      <version>${version.junit-jupiter}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
+      <version>${version.junit-jupiter}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -78,21 +106,25 @@
     <dependency>
       <groupId>de.gematik.pki</groupId>
       <artifactId>gemLibPki</artifactId>
+      <version>${version.gemLibPki}</version>
     </dependency>
 
     <dependency>
       <groupId>de.gematik.pki.pkits</groupId>
       <artifactId>pkits-tls-client</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>de.gematik.pki.pkits</groupId>
       <artifactId>pkits-tsl-generator</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <version>${version.assertj-core}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -104,33 +136,40 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${version.jackson}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
+      <version>${version.log4j2}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j2-impl</artifactId>
+      <version>${version.log4j2}</version>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>${version.lombok}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-common</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-ocsp-responder</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-tsl-provider</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -143,10 +182,12 @@
     <dependency>
       <groupId>com.konghq</groupId>
       <artifactId>unirest-java-core</artifactId>
+      <version>${version.unirest-java}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
+      <version>${version.commons-compress}</version>
     </dependency>
 
     <dependency>
@@ -164,11 +205,13 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
+      <version>${version.commons-text}</version>
     </dependency>
 
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <version>${version.commons-io}</version>
     </dependency>
 
     <dependency>
@@ -181,11 +224,6 @@
       <groupId>org.apache.sshd</groupId>
       <artifactId>sshd-scp</artifactId>
       <version>${version.apache.sshd}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.github.dtmo.jfiglet</groupId>
-      <artifactId>jfiglet</artifactId>
     </dependency>
 
     <dependency>
@@ -206,16 +244,76 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${version.maven-compiler-plugin}</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <release>${java.version}</release>
+          <debug>true</debug>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${version.maven-enforcer-plugin}</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>${version.maven}</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>[${java.version},17.99.99]</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>3.4.5</version>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <!-- block execution -->
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.6.0</version>
         <executions>
           <execution>
+            <!-- create a fat jar in ./target-->
             <id>shade-jar-with-dependencies</id>
             <goals>
               <goal>shade</goal>
             </goals>
             <phase>package</phase>
             <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>de.gematik.pki.pkits.testsuite.runner.PkitsTestsuiteRunner</mainClass>
@@ -226,8 +324,28 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>${version.copy-rename-maven-plugin}</version>
+        <executions>
+          <execution>
+            <id>copy-pkits-testsuite-jar</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>package</phase>
+            <!-- copy and rename fat jar to where assembly-plugin previously created the file -->
+            <configuration>
+              <sourceFile>${project.build.directory}/pkits-testsuite-${project.version}.jar</sourceFile>
+              <destinationFile>${project.build.releaseJarsDir}/pkits-testsuite-exec.jar</destinationFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
+        <version>${version.maven-clean-plugin}</version>
         <configuration>
           <filesets>
             <!-- delete logfiles -->
@@ -252,11 +370,21 @@
       <plugin>
         <groupId>io.github.git-commit-id</groupId>
         <artifactId>git-commit-id-maven-plugin</artifactId>
+        <version>${version.git-commit-id-maven-plugin}</version>
+        <configuration>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <includeOnlyProperties>
+            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+            <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+          </includeOnlyProperties>
+          <commitIdGenerationMode>full</commitIdGenerationMode>
+        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${version.jacoco-maven-plugin}</version>
         <executions>
           <execution>
             <id>prepare-agent-integration</id>
@@ -273,6 +401,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${version.maven-surefire-plugin}</version>
         <configuration>
           <workingDirectory>${project.basedir}/..</workingDirectory>
         </configuration>
@@ -281,6 +410,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>${version.maven-surefire-report-plugin}</version>
         <executions>
           <execution>
             <goals>
@@ -295,31 +425,66 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <outputDirectory>${project.build.releaseJarsDir}</outputDirectory>
-              <finalName>pkits-testsuite</finalName>
-              <appendAssemblyId>true</appendAssemblyId>
-              <descriptors>
-                <descriptor>assembly.xml</descriptor>
-              </descriptors>
-              <archive>
-                <manifest>
-                  <mainClass>de.gematik.pki.pkits.testsuite.runner.PkitsTestsuiteRunner</mainClass>
-                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${version.spotless-maven-plugin}</version>
+        <configuration>
+          <formats>
+            <!-- you can define as many formats as you want, each is independent -->
+            <format>
+              <!-- define the files to apply to -->
+              <includes>
+                <include>**/*.yml</include>
+                <include>.gitignore</include>
+              </includes>
+              <excludes>
+                <exclude>**/target/**/*</exclude>
+              </excludes>
+              <!-- define the steps to apply to those files -->
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <spaces>true</spaces>
+                <spacesPerTab>2</spacesPerTab>
+              </indent>
+            </format>
+          </formats>
+
+          <!-- define a language-specific format -->
+          <pom>
+            <!-- https://github.com/diffplug/spotless/tree/main/plugin-maven#maven-pom -->
+            <!-- https://github.com/Ekryd/sortpom/wiki/Parameters -->
+            <includes>
+              <include>pom.xml</include>
+            </includes>
+            <sortPom>
+              <encoding>UTF-8</encoding>
+              <expandEmptyElements>false</expandEmptyElements>
+              <nrOfIndentSpace>2</nrOfIndentSpace>
+              <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+            </sortPom>
+          </pom>
+          <java>
+            <toggleOffOn/>
+            <googleJavaFormat>
+              <version>${version.spotless.google-java-format}</version>
+              <style>GOOGLE</style>
+              <reflowLongStrings>true</reflowLongStrings>
+            </googleJavaFormat>
+            <licenseHeader>
+              <file>../LICENSE_PLACEHOLDER</file>
+            </licenseHeader>
+          </java>
+          <markdown>
+            <includes>
+              <include>**/*.md</include>
+            </includes>
+            <excludes>
+              <exclude>**/target/**/*</exclude>
+              <exclude>**/src/site/markdown/*</exclude>
+            </excludes>
+          </markdown>
+        </configuration>
       </plugin>
     </plugins>
   </build>

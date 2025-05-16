@@ -2,11 +2,18 @@
 
 # Release notes PKI Test Suite
 
+## Release 7.0.1
+
+- remove parent pom from pkits-testsuite due to problems with spring-boot-maven-plugin
+- zip-package delivery available again
+- update license file
+- update dependencies
+
 ## Release 6.0.0
 
 - SUT server (pkits-sut-server-sim-exec.jar) does not support RSA anymore
 - default for parameter tslCryptTypeEccOnly: true
-- end of zip-package delivery - it is required to build this project (it's easy)
+- end of zip-package delivery - now it's required to build this project (it's easy)
 - update dependencies
 
 ## Release 5.2.3
