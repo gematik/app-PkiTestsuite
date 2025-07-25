@@ -5,7 +5,7 @@
   <groupId>de.gematik.pki.pkits</groupId>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>7.0.1</version>
+  <version>7.0.3</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
@@ -34,33 +34,33 @@
     <version.assertj-core>3.27.3</version.assertj-core>
     <version.awaitility>4.2.0</version.awaitility>
     <version.commons-compress>1.27.1</version.commons-compress>
-    <version.commons-io>2.19.0</version.commons-io>
-    <version.commons-lang3>3.17.0</version.commons-lang3>
+    <version.commons-io>2.20.0</version.commons-io>
+    <version.commons-lang3>3.18.0</version.commons-lang3>
     <version.commons-text>1.13.1</version.commons-text>
-    <version.gemLibPki>3.1.2</version.gemLibPki>
-    <version.itextpdf.html2pdf>6.1.0</version.itextpdf.html2pdf>
-    <version.jackson>2.19.0</version.jackson>
+    <version.gemLibPki>3.1.5</version.gemLibPki>
+    <version.itextpdf.html2pdf>6.2.0</version.itextpdf.html2pdf>
+    <version.jackson>2.19.2</version.jackson>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
     <version.jfiglet>1.0.1</version.jfiglet>
-    <version.junit-jupiter>5.12.2</version.junit-jupiter>
-    <version.junit-platform-launcher>1.12.2</version.junit-platform-launcher>
-    <version.log4j2>2.24.3</version.log4j2>
+    <version.junit-jupiter>5.13.4</version.junit-jupiter>
+    <version.junit-platform-launcher>1.13.4</version.junit-platform-launcher>
+    <version.log4j2>2.25.1</version.log4j2>
     <version.lombok>1.18.38</version.lombok>
-    <version.mockito>5.17.0</version.mockito>
+    <version.mockito>5.18.0</version.mockito>
     <version.picocli>4.7.7</version.picocli>
-    <version.unirest-java>4.4.7</version.unirest-java>
+    <version.unirest-java>4.5.0</version.unirest-java>
 
     <!-- plugins -->
     <version.build-helper-maven-plugin>3.3.0</version.build-helper-maven-plugin>
     <version.copy-rename-maven-plugin>1.0.1</version.copy-rename-maven-plugin>
-    <version.git-commit-id-maven-plugin>9.0.1</version.git-commit-id-maven-plugin>
+    <version.git-commit-id-maven-plugin>9.0.2</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.13</version.jacoco-maven-plugin>
-    <version.maven-clean-plugin>3.4.1</version.maven-clean-plugin>
+    <version.maven-clean-plugin>3.5.0</version.maven-clean-plugin>
     <version.maven-compiler-plugin>3.14.0</version.maven-compiler-plugin>
-    <version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
+    <version.maven-enforcer-plugin>3.6.1</version.maven-enforcer-plugin>
     <version.maven-surefire-plugin>3.5.3</version.maven-surefire-plugin>
     <version.maven-surefire-report-plugin>${version.maven-surefire-plugin}</version.maven-surefire-report-plugin>
-    <version.spotless-maven-plugin>2.44.4</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>2.46.1</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <tsl-procurer.initialTslPrimaryDownloadUrl>http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=700000</tsl-procurer.initialTslPrimaryDownloadUrl>
@@ -279,7 +279,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>3.4.5</version>
+        <version>3.5.3</version>
         <executions>
           <execution>
             <id>repackage</id>

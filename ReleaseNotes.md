@@ -2,6 +2,12 @@
 
 # Release notes PKI Test Suite
 
+## Release 7.0.3
+
+- update expired certs, remove unused komp-ca11 and komp-ca33
+- update file headers
+- update dependencies
+
 ## Release 7.0.1
 
 - remove parent pom from pkits-testsuite due to problems with spring-boot-maven-plugin

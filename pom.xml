@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.5</version>
+    <version>3.5.3</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>7.0.1</version>
+  <version>7.0.3</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -83,31 +83,31 @@
 
     <!-- dependencies -->
     <version.assertj-core>3.27.3</version.assertj-core>
-    <version.bouncycastle>1.80</version.bouncycastle>
+    <version.bouncycastle>1.81</version.bouncycastle>
     <version.commons-compress>1.27.1</version.commons-compress>
-    <version.commons-io>2.19.0</version.commons-io>
+    <version.commons-io>2.20.0</version.commons-io>
     <version.commons-text>1.13.1</version.commons-text>
-    <version.jackson>2.19.0</version.jackson>
-    <version.gemLibPki>3.1.3</version.gemLibPki>
+    <version.jackson>2.19.2</version.jackson>
+    <version.gemLibPki>3.2.0</version.gemLibPki>
     <version.httpcore5>5.3.4</version.httpcore5>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-    <version.junit-jupiter>5.12.2</version.junit-jupiter>
-    <version.junit-platform-launcher>1.12.2</version.junit-platform-launcher>
-    <version.log4j2>2.24.3</version.log4j2>
+    <version.junit-jupiter>5.13.4</version.junit-jupiter>
+    <version.junit-platform-launcher>1.13.4</version.junit-platform-launcher>
+    <version.log4j2>2.25.1</version.log4j2>
     <version.lombok>1.18.38</version.lombok>
-    <version.openapi>2.8.8</version.openapi>
-    <version.unirest-java>4.4.7</version.unirest-java>
-    <version.xmlunit>2.10.0</version.xmlunit>
+    <version.openapi>2.8.9</version.openapi>
+    <version.unirest-java>4.5.0</version.unirest-java>
+    <version.xmlunit>2.10.3</version.xmlunit>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
     <version.docker-maven-plugin>0.46.0</version.docker-maven-plugin>
-    <version.git-commit-id-maven-plugin>9.0.1</version.git-commit-id-maven-plugin>
+    <version.git-commit-id-maven-plugin>9.0.2</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.13</version.jacoco-maven-plugin>
-    <version.maven-clean-plugin>3.4.1</version.maven-clean-plugin>
+    <version.maven-clean-plugin>3.5.0</version.maven-clean-plugin>
     <version.maven-compiler-plugin>3.14.0</version.maven-compiler-plugin>
     <version.maven-deploy-plugin>3.1.4</version.maven-deploy-plugin>
-    <version.maven-enforcer-plugin>3.5.0</version.maven-enforcer-plugin>
+    <version.maven-enforcer-plugin>3.6.1</version.maven-enforcer-plugin>
     <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
     <version.maven-project-info-reports-plugin>3.9.0</version.maven-project-info-reports-plugin>
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
@@ -115,7 +115,7 @@
     <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.5.3</version.maven-surefire-plugin>
     <version.sonar-maven-plugin>5.1.0.4751</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>2.44.4</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>2.46.1</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
@@ -551,7 +551,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>2.5.0</version>
+        <version>2.6.0</version>
         <executions>
           <execution>
             <goals>

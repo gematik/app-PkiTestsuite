@@ -1,5 +1,5 @@
 /*
- * Copyright (Date see Readme), gematik GmbH
+ * Copyright (Change Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,14 +223,6 @@ public class TspServiceGenerator {
     return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA));
   }
 
-  public static TSPServiceType getTspServiceKompCa11() {
-    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA11));
-  }
-
-  public static TSPServiceType getTspServiceKompCaAlt33() {
-    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33));
-  }
-
   public static TSPServiceType getTspServiceKompCa58() {
     return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA58));
   }
@@ -315,7 +307,6 @@ public class TspServiceGenerator {
         .addServiceInformationExtension(CertificateType.CERT_TYPE_CM_TLS_CS)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_FD_ENC)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_FD_SIG)
-        .addServiceInformationExtension(CertificateType.CERT_TYPE_SGD_HSM_AUT)
         .addServiceInformationExtension(CertificateType.CERT_TYPE_ZD_SIG)
         .generate();
   }
