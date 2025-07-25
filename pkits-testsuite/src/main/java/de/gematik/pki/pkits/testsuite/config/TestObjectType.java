@@ -1,5 +1,5 @@
 /*
- * Copyright (Date see Readme), gematik GmbH
+ * Copyright (Change Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,8 @@ public enum TestObjectType {
       "VpnKonzentrator",
       "netzkonnektorClient",
       UseCaseConnectionType.SCRIPT_OVER_SSH,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA11,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
+      PkitsTestDataConstants.DEFAULT_KOMP_CA58,
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
       PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA),
 
   VPN_REG_SERVER(

@@ -1,5 +1,5 @@
 /*
- * Copyright (Date see Readme), gematik GmbH
+ * Copyright (Change Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ class CreateTslTemplateTest {
 
     final TSPType tsp = tspList.get(0);
 
-    assertThat(tsp.getTSPServices().getTSPService()).hasSize(10);
+    assertThat(tsp.getTSPServices().getTSPService()).hasSize(11);
 
     final List<TSPServiceType> pkcTspServices =
         tsp.getTSPServices().getTSPService().stream()
@@ -190,7 +190,7 @@ class CreateTslTemplateTest {
                         .getServiceTypeIdentifier()
                         .equals(TslConstants.STI_PKC))
             .toList();
-    assertThat(pkcTspServices).hasSize(8);
+    assertThat(pkcTspServices).hasSize(9);
 
     final List<TSPServiceType> ocspTspServices =
         tsp.getTSPServices().getTSPService().stream()
@@ -225,7 +225,7 @@ class CreateTslTemplateTest {
 
     final TSPType tsp = tspList.get(0);
 
-    assertThat(tsp.getTSPServices().getTSPService()).hasSize(6);
+    assertThat(tsp.getTSPServices().getTSPService()).hasSize(7);
 
     final List<TSPServiceType> pkcTspServices =
         tsp.getTSPServices().getTSPService().stream()
@@ -236,7 +236,7 @@ class CreateTslTemplateTest {
                         .getServiceTypeIdentifier()
                         .equals(TslConstants.STI_PKC))
             .toList();
-    assertThat(pkcTspServices).hasSize(5);
+    assertThat(pkcTspServices).hasSize(6);
 
     final List<TSPServiceType> ocspTspServices =
         tsp.getTSPServices().getTSPService().stream()

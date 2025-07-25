@@ -1,5 +1,5 @@
 /*
- * Copyright (Date see Readme), gematik GmbH
+ * Copyright (Change Date see Readme), gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,8 @@ public final class CreateTslTemplate {
     return List.of(
         TspServiceGenerator.getTspServiceTslTrustAnchorCa(),
         TspServiceGenerator.getTspServiceKompCa(),
-        TspServiceGenerator.getTspServiceKompCa11(),
+        TspServiceGenerator.getTspServiceKompCa58(),
+        TspServiceGenerator.getTspServiceKompCa62(),
         TspServiceGenerator.getTspServiceSmcbCa(),
         TspServiceGenerator.getTspServiceEgkCa(),
         TspServiceGenerator.getTspServiceOcspSigner());
@@ -163,7 +164,8 @@ public final class CreateTslTemplate {
     return combined(
         getCommonTspServices(),
         TspServiceGenerator.getTspServiceKompCaAlt(),
-        TspServiceGenerator.getTspServiceKompCaAlt33(),
+        TspServiceGenerator.getTspServiceKompCaAlt59(),
+        TspServiceGenerator.getTspServiceKompCaAlt63(),
         TspServiceGenerator.getTspServiceSmcbCaAlt(),
         TspServiceGenerator.getTspServiceEgkCaAlt());
   }
@@ -279,7 +281,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63,
             PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
             PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
@@ -311,7 +314,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63,
             PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
             PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
@@ -349,7 +353,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63,
             PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
             PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
@@ -374,7 +379,8 @@ public final class CreateTslTemplate {
         getTspServicesForCerts(
             tspServices,
             PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA33,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
+            PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63,
             PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
             PkitsTestDataConstants.ALTERNATIVE_EGK_CA);
 
@@ -421,12 +427,14 @@ public final class CreateTslTemplate {
                 .statusStartingTime(statusStartingTime)
                 .generate(),
             TspServiceGenerator.getTspServiceKompCa(),
-            TspServiceGenerator.getTspServiceKompCa11(),
+            TspServiceGenerator.getTspServiceKompCa58(),
+            TspServiceGenerator.getTspServiceKompCa62(),
             TspServiceGenerator.getTspServiceSmcbCa(),
             TspServiceGenerator.getTspServiceEgkCa(),
             TspServiceGenerator.getTspServiceOcspSigner(),
             TspServiceGenerator.getTspServiceKompCaAlt(),
-            TspServiceGenerator.getTspServiceKompCaAlt33(),
+            TspServiceGenerator.getTspServiceKompCaAlt59(),
+            TspServiceGenerator.getTspServiceKompCaAlt63(),
             TspServiceGenerator.getTspServiceSmcbCaAlt(),
             TspServiceGenerator.getTspServiceEgkCaAlt());
 
@@ -450,7 +458,8 @@ public final class CreateTslTemplate {
                 .addServiceInformationExtension(CertificateType.TSL_FIELD_TSL_PLACEHOLDER)
                 .generate(),
             TspServiceGenerator.getTspServiceKompCa(),
-            TspServiceGenerator.getTspServiceKompCa11(),
+            TspServiceGenerator.getTspServiceKompCa58(),
+            TspServiceGenerator.getTspServiceKompCa62(),
             TspServiceGenerator.getTspServiceSmcbCa(),
             TspServiceGenerator.getTspServiceEgkCa(),
             TspServiceGenerator.getTspServiceOcspSigner(),
@@ -590,7 +599,8 @@ public final class CreateTslTemplate {
                 .addServiceInformationExtension(CertificateType.TSL_FIELD_TSL_PLACEHOLDER)
                 .generate(),
             TspServiceGenerator.getTspServiceKompCa(),
-            TspServiceGenerator.getTspServiceKompCa11(),
+            TspServiceGenerator.getTspServiceKompCa58(),
+            TspServiceGenerator.getTspServiceKompCa62(),
             TspServiceGenerator.getTspServiceSmcbCa(),
             TspServiceGenerator.getTspServiceEgkCa(),
             TspServiceGenerator.getTspServiceOcspSigner(),
