@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>7.0.1</version>
+    <version>7.0.4</version>
   </parent>
 
   <artifactId>pkits-tls-client</artifactId>
-  <version>7.0.1</version>
+  <version>7.0.4</version>
 
   <name>TLS Client</name>
   <description>TLS Client</description>

@@ -2,6 +2,13 @@
 
 # Release notes PKI Test Suite
 
+## Release 7.0.4
+
+- update expired certs
+- remove unused GEM.KOMP-CA11 and GEM.KOMP-CA33
+- update file headers
+- update dependencies
+
 ## Release 7.0.1
 
 - remove parent pom from pkits-testsuite due to problems with spring-boot-maven-plugin
