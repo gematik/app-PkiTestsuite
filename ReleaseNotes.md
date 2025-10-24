@@ -2,6 +2,13 @@
 
 # Release notes PKI Test Suite
 
+## Release 7.1.0
+
+- fix ee_invalid-signature.p12
+- add new testcase verifyUseHashBeforeTslDownload for A_17690 "Nutzung der Hash-Datei für TSL (ECC-Migration)"
+- add new testcase verifyOcspResponseWithCertChain for GS-A_4657 "TUC_PKI_006: OCSP-Abfrage - Schritt 5"
+- update dependencies
+
 ## Release 7.0.4
 
 - update expired certs

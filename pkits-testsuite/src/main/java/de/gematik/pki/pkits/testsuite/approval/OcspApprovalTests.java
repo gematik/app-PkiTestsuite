@@ -259,6 +259,15 @@ class OcspApprovalTests extends ApprovalTestsBase {
         dtoBuilder -> dtoBuilder.validCertHash(false), USECASE_INVALID);
   }
 
+  @Test
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5")
+  @DisplayName("Test OCSP response with signer cert chain")
+  void verifyOcspResponseWithCertChain() {
+
+    verifyWithConfiguredOcspResponder(
+        dtoBuilder -> dtoBuilder.attachIssuerCert(true), USECASE_VALID);
+  }
+
   /** gematikId: UE_PKI_TS_0302_027 */
   @ParameterizedTest
   @EnumSource(

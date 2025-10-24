@@ -73,7 +73,7 @@ class TslProviderManagerTest {
     return new TslRequestHistoryEntryDto(tslSeqNr, tslDownloadEndpoint, true, "HTTP/1.1");
   }
 
-  private void assertGetOcspHistoryPart(
+  private void assertGetTslHistoryPart(
       final Integer tslSeqNr,
       final TslDownloadEndpointType tslDownloadEndpointType,
       final int expectedAmount) {
@@ -86,7 +86,7 @@ class TslProviderManagerTest {
   }
 
   @Test
-  void testGetOcspHistoryPart() {
+  void testGetTslHistoryPart() {
 
     TslProviderManager.clearTslHistory(tslProviderUri);
 
@@ -109,28 +109,28 @@ class TslProviderManagerTest {
     tslRequestHistory.add(getEntry(1000, TSL_XML_BACKUP_ENDPOINT));
     tslRequestHistory.add(getEntry(1000, TSL_HASH_BACKUP_ENDPOINT));
 
-    assertGetOcspHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.ANY_ENDPOINT, 14);
-    assertGetOcspHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.XML_ENDPOINTS, 6);
-    assertGetOcspHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.HASH_ENDPOINTS, 8);
+    assertGetTslHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.ANY_ENDPOINT, 14);
+    assertGetTslHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.XML_ENDPOINTS, 6);
+    assertGetTslHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.HASH_ENDPOINTS, 8);
 
-    assertGetOcspHistoryPart(1, TslDownloadEndpointType.XML_ENDPOINTS, 1);
-    assertGetOcspHistoryPart(1, TslDownloadEndpointType.HASH_ENDPOINTS, 0);
+    assertGetTslHistoryPart(1, TslDownloadEndpointType.XML_ENDPOINTS, 1);
+    assertGetTslHistoryPart(1, TslDownloadEndpointType.HASH_ENDPOINTS, 0);
 
-    assertGetOcspHistoryPart(2, TslDownloadEndpointType.XML_ENDPOINTS, 0);
-    assertGetOcspHistoryPart(2, TslDownloadEndpointType.HASH_ENDPOINTS, 2);
+    assertGetTslHistoryPart(2, TslDownloadEndpointType.XML_ENDPOINTS, 0);
+    assertGetTslHistoryPart(2, TslDownloadEndpointType.HASH_ENDPOINTS, 2);
 
-    assertGetOcspHistoryPart(3, TslDownloadEndpointType.XML_ENDPOINTS, 3);
-    assertGetOcspHistoryPart(3, TslDownloadEndpointType.HASH_ENDPOINTS, 0);
+    assertGetTslHistoryPart(3, TslDownloadEndpointType.XML_ENDPOINTS, 3);
+    assertGetTslHistoryPart(3, TslDownloadEndpointType.HASH_ENDPOINTS, 0);
 
-    assertGetOcspHistoryPart(4, TslDownloadEndpointType.XML_ENDPOINTS, 0);
-    assertGetOcspHistoryPart(4, TslDownloadEndpointType.HASH_ENDPOINTS, 4);
+    assertGetTslHistoryPart(4, TslDownloadEndpointType.XML_ENDPOINTS, 0);
+    assertGetTslHistoryPart(4, TslDownloadEndpointType.HASH_ENDPOINTS, 4);
 
-    assertGetOcspHistoryPart(1000, TslDownloadEndpointType.ANY_ENDPOINT, 4);
-    assertGetOcspHistoryPart(1000, TslDownloadEndpointType.HASH_ENDPOINTS, 2);
-    assertGetOcspHistoryPart(1000, TslDownloadEndpointType.HASH_ENDPOINTS, 2);
+    assertGetTslHistoryPart(1000, TslDownloadEndpointType.ANY_ENDPOINT, 4);
+    assertGetTslHistoryPart(1000, TslDownloadEndpointType.HASH_ENDPOINTS, 2);
+    assertGetTslHistoryPart(1000, TslDownloadEndpointType.HASH_ENDPOINTS, 2);
 
     TslProviderManager.clearTslHistory(tslProviderUri);
-    assertGetOcspHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.ANY_ENDPOINT, 0);
+    assertGetTslHistoryPart(IGNORE_SEQUENCE_NUMBER, TslDownloadEndpointType.ANY_ENDPOINT, 0);
   }
 
   @Test

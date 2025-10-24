@@ -26,7 +26,10 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.security.cert.X509Certificate;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 
@@ -49,6 +52,7 @@ public class CertificateDto {
   @Builder.Default private final int delayMilliseconds = 0;
   @Builder.Default private final OCSPRespStatus respStatus = OCSPRespStatus.SUCCESSFUL;
   @Builder.Default private final boolean withResponseBytes = true;
+  @Builder.Default private final boolean attachIssuerCert = false;
 
   @Builder.Default
   private final OcspResponseGenerator.ResponderIdType responderIdType =
@@ -90,7 +94,7 @@ public class CertificateDto {
     return ("CertificateDto{eeCertSerialNr=%s, issuerSubjectCN=%s, signerCN=%s, "
             + " validCertHash=%s, withCertHash=%s, validSignature=%s,"
             + " certificateIdGeneration=%s, certificateStatus=%s, respStatus=%s,"
-            + " withResponseBytes=%s, thisUpdateDeltaMilliseconds=%s,"
+            + " withResponseBytes=%s, attachIssuerCert=%s, thisUpdateDeltaMilliseconds=%s,"
             + " producedAtDeltaMilliseconds=%s, nextUpdateDeltaMilliseconds=%s,"
             + " withNullParameterHashAlgoOfCertId=%s}")
         .formatted(
@@ -104,6 +108,7 @@ public class CertificateDto {
             certificateStatus,
             respStatus,
             withResponseBytes,
+            attachIssuerCert,
             thisUpdateDeltaMilliseconds,
             producedAtDeltaMilliseconds,
             nextUpdateDeltaMilliseconds,

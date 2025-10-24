@@ -20,6 +20,7 @@
 	verifyOcspResponseResponderIdByName                Test OCSP response with responder id byName
 	verifyOcspResponseTimeoutAndDelay                  Test OCSP response with timeout and delay
 	verifyOcspResponseVariousStatusAndResponseBytes    Test various status of OCSP responses with and without response bytes (multiple data variants)
+	verifyOcspResponseWithCertChain                    Test OCSP response with signer cert chain
 	verifyOcspResponseWithNullParameterInCertId        Test OCSP response with null parameter in CertId (multiple data variants)
 
 +	de.gematik.pki.pkits.testsuite.approval.OcspToleranceApprovalTests
@@ -50,6 +51,7 @@
 	verifyTslSignatureInvalid                              Test TSL signature invalid - "to be signed block" with integrity violation
 	verifyUpdateTrustStoreInTestObject                     Test update of TSL with different XML format (pretty print)
 	verifyUseBackupTslDownload                             Test TSL download on primary endpoint not possible
+	verifyUseHashBeforeTslDownload                         Test download TSL Hash before TSL download
 
 +	de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
 	verifyForInvalidSignatureOfTslSigner                          Invalid signature of the TSL signer certificate.
@@ -63,6 +65,7 @@
 	verifyOcspResponseTslSignerCertTimeoutAndDelay                Test OCSP response TSL signer certificate with timeout and delay
 	verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes  Test various status of OCSP responses of TSL signer certificate with and without response bytes (multiple data variants)
 	verifyOcspResponseTslSignerCertWithNullParameterInCertId      Test OCSP response of TSL signer certificate with null parameter in CertId (multiple data variants)
+	verifyOcspResponseTslSignerWithCertChain                      Test OCSP response of TSL signer certificate with signer cert chain
 	verifyOcspResponseWithInvalidSignatureForTslSignerCert        Test invalid OCSP response signature for TSL signer certificate
 	verifyTslSignerCertBroken                                     Test TSL signer certificate is broken
 	verifyTslSignerCertExpired                                    Test TSL signer certificate that is expired

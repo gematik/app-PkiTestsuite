@@ -4,6 +4,9 @@ A_17124
 A_17688
   TslApprovalTests.verifyUpdateTrustStoreInTestObject
 
+A_17690
+  TslApprovalTests.verifyUseHashBeforeTslDownload
+
 A_17700
   TslApprovalTests.verifyForUnspecifiedServiceTypeIdentifierOfTSPService
 
@@ -151,6 +154,7 @@ GS-A_4657
   OcspApprovalTests.verifyOcspResponseMissingNextUpdate
   OcspApprovalTests.verifyOcspResponseTimeoutAndDelay
   OcspApprovalTests.verifyOcspResponseVariousStatusAndResponseBytes
+  OcspApprovalTests.verifyOcspResponseWithCertChain
   OcspToleranceApprovalTests.verifyOcspResponseNextUpdatePastOutOfTolerance
   OcspToleranceApprovalTests.verifyOcspResponseNextUpdatePastWithinTolerance
   OcspToleranceApprovalTests.verifyOcspResponseProducedAtFutureOutOfTolerance
@@ -167,6 +171,7 @@ GS-A_4657
   TslSignerApprovalTests.verifyOcspResponseTslSignerCertStatusRevokedAndUnknown
   TslSignerApprovalTests.verifyOcspResponseTslSignerCertTimeoutAndDelay
   TslSignerApprovalTests.verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes
+  TslSignerApprovalTests.verifyOcspResponseTslSignerWithCertChain
   TslSignerApprovalTests.verifyOcspResponseWithInvalidSignatureForTslSignerCert
   TslSignerToleranceApprovalTests.verifyOcspResponseTslSignerCertNextUpdatePastOutOfTolerance
   TslSignerToleranceApprovalTests.verifyOcspResponseTslSignerCertNextUpdatePastWithinTolerance

@@ -180,7 +180,8 @@ public class OcspRequestController {
               ocspReq,
               certificate.getEeCert(),
               certificate.getIssuerCert(),
-              certificate.getOcspCertificateStatus());
+              certificate.getOcspCertificateStatus(),
+              certificate.isAttachIssuerCert());
 
       final Extension certHashExtension =
           getFirstSingleResp(ocspResponse).getExtension(id_isismtt_at_certHash);

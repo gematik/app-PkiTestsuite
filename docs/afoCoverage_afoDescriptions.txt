@@ -1,5 +1,6 @@
 A_17124      ECDSA cipher suites for TLS
 A_17688      Nutzung des ECC-RSA-Vertrauensraumes (ECC-Migration)
+A_17690      Nutzung der Hash-Datei für TSL (ECC-Migration)
 A_17700      TSL-Auswertung ServiceTypeIdentifier "unspecified"
 A_22290      Caching von OCSP-Antworten
 A_23225      lokales Caching von Sperrinformationen und Toleranzzeiten
@@ -47,6 +48,7 @@ GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Anmerkungen
 GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 1
 GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 2
 GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 4c
+GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 5
 GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 5a
 GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 5a1
 GS-A_4657    TUC_PKI_006: OCSP-Abfrage - Schritt 6
