@@ -314,12 +314,25 @@ class TslSignerApprovalTests extends ApprovalTestsBase {
     establishDefaultTrustStoreAndExecuteUseCase();
   }
 
+  @Test
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5")
+  @DisplayName("Test OCSP response of TSL signer certificate with signer cert chain")
+  void verifyOcspResponseTslSignerWithCertChain() {
+
+    initialState();
+
+    updateTrustStoreWithAlternativeCerts(
+        dtoBuilder -> dtoBuilder.attachIssuerCert(true), TSL_UPDATE_EXPECTED, USECASE_VALID);
+
+    establishDefaultTrustStoreAndExecuteUseCase();
+  }
+
   /** gematikId: UE_PKI_TC_0105_021 */
   @Test
   @Afo(
       afoId = "GS-A_4642",
       description = "TUC_PKI_001: Periodische Aktualisierung TI-Vertrauensraum - Schritt 4")
-  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 4c")
+  @Afo(afoId = "GS-A_4657", description = "TUC_PKI_006: OCSP-Abfrage - Schritt 5")
   @DisplayName("Test OCSP response TSL signer certificate with timeout and delay")
   void verifyOcspResponseTslSignerCertTimeoutAndDelay() {
 

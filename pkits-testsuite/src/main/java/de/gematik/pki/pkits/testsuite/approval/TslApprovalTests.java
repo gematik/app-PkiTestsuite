@@ -603,6 +603,34 @@ class TslApprovalTests extends ApprovalTestsBase {
     establishDefaultTrustStoreAndExecuteUseCase();
   }
 
+  @Test
+  @Afo(afoId = "A_17690", description = "Nutzung der Hash-Datei für TSL (ECC-Migration)")
+  @DisplayName("Test download TSL Hash before TSL download")
+  void verifyUseHashBeforeTslDownload() {
+
+    initialState();
+
+    TestEnvironment.configureTslProvider(
+        tslProviderUri, "dummy".getBytes(), TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200);
+
+    final int tslSequenceNrToQuery = TslRequestHistory.IGNORE_SEQUENCE_NUMBER;
+    PkitsTestSuiteUtils.waitForEvent(
+        "TslDownloadHistoryHasEntry for tslSeqNr " + tslSequenceNrToQuery,
+        getTslDownloadIntervalWithExtraTimeSeconds(),
+        tslDownloadHistoryHasSpecificEntry(
+            tslProviderUri, tslSequenceNrToQuery, TslDownloadEndpointType.XML_ENDPOINTS));
+
+    final List<TslRequestHistoryEntryDto> historyEntryDtos =
+        TslProviderManager.getTslRequestHistoryPart(
+            tslProviderUri, tslSequenceNrToQuery, TslDownloadEndpointType.HASH_ENDPOINTS);
+
+    assertThat(historyEntryDtos).as("No TSL download requests received").isNotEmpty();
+    assertThat(historyEntryDtos.get(0).getTslDownloadEndpoint())
+        .isIn(TslDownloadEndpointType.HASH_ENDPOINTS.getEndpoints());
+
+    establishDefaultTrustStoreAndExecuteUseCase();
+  }
+
   /** gematikId: UE_PKI_TC_0104_003 */
   @Test
   @Afo(afoId = "GS-A_4648", description = "TUC_PKI_019: Prüfung der Aktualität der TSL - Schritt 1")

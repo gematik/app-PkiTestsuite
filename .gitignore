@@ -7,6 +7,8 @@ bin/
 /pid.file
 **/sampleAllTests.txt
 /allFailedOrAborted.txt
+pkits-testsuite/dependency-reduced-pom.xml
+pkits-testsuite/testDataTemplates
 
 docs/configs/tuTestObjects/
 docs/configs/inttest/pkits_ltu_run.yml

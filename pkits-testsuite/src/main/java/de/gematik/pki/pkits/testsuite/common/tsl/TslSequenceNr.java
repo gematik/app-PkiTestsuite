@@ -92,6 +92,12 @@ public final class TslSequenceNr {
     this.currentNrInTestObject = tslSeqNr;
   }
 
+  /**
+   * Get the next sequence number to be offered to the test object. If no sequence number was
+   * offered yet, the next number is the current number in the test object +1.
+   *
+   * @return next sequence number to be offered
+   */
   public int getNextTslSeqNr() {
     if (lastOfferedTslSeqNr == 0) {
       return getCurrentNrInTestObject() + 1;

@@ -20,6 +20,7 @@ de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
   verifyOcspResponseResponderIdByName                RFC 6960
   verifyOcspResponseTimeoutAndDelay                  GS-A_4657
   verifyOcspResponseVariousStatusAndResponseBytes    GS-A_4657
+  verifyOcspResponseWithCertChain                    GS-A_4657
   verifyOcspResponseWithNullParameterInCertId        RFC 5280, RFC 6960
 
 de.gematik.pki.pkits.testsuite.approval.OcspToleranceApprovalTests
@@ -50,6 +51,7 @@ de.gematik.pki.pkits.testsuite.approval.TslApprovalTests
   verifyTslSignatureInvalid                              GS-A_4648, GS-A_4651
   verifyUpdateTrustStoreInTestObject                     A_17688, GS-A_4649
   verifyUseBackupTslDownload                             GS-A_4642, GS-A_4647, GS-A_4648
+  verifyUseHashBeforeTslDownload                         A_17690
 
 de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
   verifyForInvalidSignatureOfTslSigner                          GS-A_4642, GS-A_4648, GS-A_4650, GS-A_4655
@@ -63,6 +65,7 @@ de.gematik.pki.pkits.testsuite.approval.TslSignerApprovalTests
   verifyOcspResponseTslSignerCertTimeoutAndDelay                GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertVariousStatusAndResponseBytes  GS-A_4642, GS-A_4657
   verifyOcspResponseTslSignerCertWithNullParameterInCertId      GS-A_4642, RFC 5280
+  verifyOcspResponseTslSignerWithCertChain                      GS-A_4657
   verifyOcspResponseWithInvalidSignatureForTslSignerCert        GS-A_4642, GS-A_4657
   verifyTslSignerCertBroken                                     GS-A_4642
   verifyTslSignerCertExpired                                    GS-A_4642, GS-A_4648, GS-A_4650, GS-A_4653
