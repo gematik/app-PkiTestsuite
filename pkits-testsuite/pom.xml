@@ -5,7 +5,7 @@
   <groupId>de.gematik.pki.pkits</groupId>
 
   <artifactId>pkits-testsuite</artifactId>
-  <version>7.1.0</version>
+  <version>7.1.1</version>
   <name>PKI Test Suite</name>
   <description>PKI test suite</description>
 
@@ -37,7 +37,7 @@
     <version.commons-io>2.20.0</version.commons-io>
     <version.commons-lang3>3.19.0</version.commons-lang3>
     <version.commons-text>1.14.0</version.commons-text>
-    <version.gemLibPki>3.2.0</version.gemLibPki>
+    <version.gemLibPki>3.3.1</version.gemLibPki>
     <version.itextpdf.html2pdf>6.2.1</version.itextpdf.html2pdf>
     <version.jackson>2.19.2</version.jackson>
     <version.jaxb-runtime>4.0.1</version.jaxb-runtime>
@@ -279,7 +279,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>3.5.6</version>
+        <version>3.5.7</version>
         <executions>
           <execution>
             <id>repackage</id>

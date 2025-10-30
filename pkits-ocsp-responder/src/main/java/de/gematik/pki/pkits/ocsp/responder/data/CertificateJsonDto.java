@@ -25,7 +25,11 @@ import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -38,6 +42,7 @@ public class CertificateJsonDto extends CertificateDto {
   @NonNull private String eeCertEncoded;
   @NonNull private String issuerCertEncoded;
   @NonNull private String signerCertificateEncoded;
+  private String signerCaCertEncoded;
   @NonNull private String signerPrivateKeyEncoded;
 
   public CertificateJsonDto(final CertificateDto certificateDto) {
@@ -47,6 +52,10 @@ public class CertificateJsonDto extends CertificateDto {
     this.issuerCertEncoded = GemLibPkiUtils.toMimeBase64NoLineBreaks(this.getIssuerCert());
     this.signerCertificateEncoded =
         GemLibPkiUtils.toMimeBase64NoLineBreaks(this.getSigner().getCertificate());
+    this.signerCaCertEncoded =
+        this.getSignerCaCert() != null
+            ? GemLibPkiUtils.toMimeBase64NoLineBreaks(this.getSignerCaCert())
+            : null;
     this.signerPrivateKeyEncoded =
         GemLibPkiUtils.toMimeBase64NoLineBreaks(this.getSigner().getPrivateKey().getEncoded());
   }
@@ -62,11 +71,17 @@ public class CertificateJsonDto extends CertificateDto {
     final X509Certificate signerCert =
         CertReader.readX509(GemLibPkiUtils.decodeFromMimeBase64(this.signerCertificateEncoded));
 
+    final X509Certificate signerCaCert =
+        this.signerCaCertEncoded != null
+            ? CertReader.readX509(GemLibPkiUtils.decodeFromMimeBase64(this.signerCaCertEncoded))
+            : null;
+
     final PrivateKey signerPrivateKey =
         GemLibPkiUtils.convertPrivateKey(this.signerPrivateKeyEncoded);
 
     this.eeCert = eeCert;
     this.issuerCert = issuerCert;
+    this.signerCaCert = signerCaCert;
     this.signer = new P12Container(signerCert, signerPrivateKey);
 
     return this;

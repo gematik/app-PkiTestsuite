@@ -38,7 +38,7 @@ import lombok.NonNull;
 
 public class OcspResponderTestUtils {
 
-  public static X509Certificate getValidEeCert(String filename) {
+  public static X509Certificate getValidEeCert(final String filename) {
     return CertReader.readX509(
         ResourceReader.getFileFromResourceAsBytes(
             "certificates/GEM.SMCB-CA10/valid/" + filename, OcspResponderTestUtils.class));
@@ -56,6 +56,12 @@ public class OcspResponderTestUtils {
         ResourceReader.getFilePathFromResources(
             "certificates/eccOcspSigner.p12", OcspResponderTestUtils.class),
         PkitsTestDataConstants.KEYSTORE_PASSWORD);
+  }
+
+  public static X509Certificate getSignerCaCert() {
+    return CertReader.readX509(
+        ResourceReader.getFileFromResourceAsBytes(
+            "certificates/GEM.EGK-CA57/GEM.EGK-CA57-TEST-ONLY.pem", OcspResponderTestUtils.class));
   }
 
   public static OcspRequestHistoryEntryDto getEntry(final int tslSeqNr, final String certSerialNr) {
@@ -85,5 +91,35 @@ public class OcspResponderTestUtils {
             .build();
 
     OcspResponderManager.configure(uri, ocspResponderConfig);
+  }
+
+  public static void configureWithSignerCa(
+      final String uri,
+      @NonNull final X509Certificate eeCert,
+      @NonNull final X509Certificate issuerCert,
+      final CustomCertificateStatusDto certificateStatus,
+      @NonNull final P12Container signer,
+      @NonNull final X509Certificate signerCaCert,
+      final int delayMilliseconds) {
+
+    final OcspResponderConfig ocspResponderConfig =
+        OcspResponderConfig.builder()
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .certificateStatus(certificateStatus)
+                        .signer(signer)
+                        .signerCaCert(signerCaCert)
+                        .delayMilliseconds(delayMilliseconds)
+                        .build()))
+            .build();
+
+    OcspResponderManager.configure(uri, ocspResponderConfig);
+  }
+
+  public static void clear(final String uri) {
+    OcspResponderManager.clear(uri);
   }
 }

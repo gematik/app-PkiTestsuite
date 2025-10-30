@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.6</version>
+    <version>3.5.7</version>
   </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>7.1.0</version>
+  <version>7.1.1</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -88,7 +88,7 @@
     <version.commons-io>2.20.0</version.commons-io>
     <version.commons-text>1.14.0</version.commons-text>
     <version.jackson>2.19.2</version.jackson>
-    <version.gemLibPki>3.2.0</version.gemLibPki>
+    <version.gemLibPki>3.3.1</version.gemLibPki>
     <version.httpcore5>5.3.6</version.httpcore5>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.junit-jupiter>6.0.0</version.junit-jupiter>
