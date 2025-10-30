@@ -72,6 +72,7 @@ class OcspRequestControllerTest {
   private static final CustomCertificateStatusDto CERT_STATUS_GOOD =
       CustomCertificateStatusDto.createGood();
   private static P12Container signer;
+  private static X509Certificate signerCaCert;
   private static X509Certificate VALID_X509_EE_CERT;
   private static X509Certificate VALID_X509_ISSUER_CERT;
   private static OCSPReq ocspReq;
@@ -87,6 +88,7 @@ class OcspRequestControllerTest {
     VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
     VALID_X509_ISSUER_CERT = OcspResponderTestUtils.getValidIssuerCert();
     signer = OcspResponderTestUtils.getSigner();
+    signerCaCert = OcspResponderTestUtils.getSignerCaCert();
     ocspReq =
         OcspRequestGenerator.generateSingleOcspRequest(VALID_X509_EE_CERT, VALID_X509_ISSUER_CERT);
   }
@@ -254,6 +256,34 @@ class OcspRequestControllerTest {
     final SingleResp singleResp = ((BasicOCSPResp) ocspResp.getResponseObject()).getResponses()[0];
     assertThat(singleResp.getCertID().getSerialNumber())
         .isEqualTo(VALID_X509_EE_CERT.getSerialNumber());
+  }
+
+  @Test
+  void checkOcspSingleResponseSignerCaCertificate() throws IOException, OCSPException {
+    OcspResponderTestUtils.clear(getLocalhostEndpoint(""));
+    OcspResponderTestUtils.configureWithSignerCa(
+        getLocalhostEndpoint(""),
+        VALID_X509_EE_CERT,
+        VALID_X509_ISSUER_CERT,
+        CERT_STATUS_GOOD,
+        signer,
+        signerCaCert,
+        delayMilliseconds);
+
+    final HttpResponse<byte[]> response =
+        Unirest.post(ocspServiceUrlSeqNr31)
+            .header(CONTENT_TYPE, MEDIA_TYPE_APPLICATION_OCSP_REQUEST)
+            .header(ACCEPT, MEDIA_TYPE_APPLICATION_OCSP_RESPONSE)
+            .body(ocspReq.getEncoded())
+            .asBytes();
+
+    final OCSPResp ocspResp = new OCSPResp(response.getBody());
+    final BasicOCSPResp basicOcspResp = (BasicOCSPResp) ocspResp.getResponseObject();
+
+    assertThat(basicOcspResp.getCerts()).isNotNull();
+    assertThat(basicOcspResp.getCerts()).hasSize(2);
+    assertThat(basicOcspResp.getCerts()[1].getSerialNumber())
+        .isEqualTo(signerCaCert.getSerialNumber());
   }
 
   @Test

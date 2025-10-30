@@ -41,6 +41,7 @@ public class CertificateDto {
   @JsonIgnore @NonNull protected X509Certificate eeCert;
   @JsonIgnore @NonNull protected X509Certificate issuerCert;
   @JsonIgnore @NonNull protected P12Container signer;
+  @JsonIgnore @Builder.Default protected X509Certificate signerCaCert = null;
   @Builder.Default private final boolean validCertHash = true;
   @Builder.Default private final boolean withCertHash = true;
   @Builder.Default private final boolean validSignature = true;
@@ -91,7 +92,7 @@ public class CertificateDto {
 
   @Override
   public String toString() {
-    return ("CertificateDto{eeCertSerialNr=%s, issuerSubjectCN=%s, signerCN=%s, "
+    return ("CertificateDto{eeCertSerialNr=%s, issuerSubjectCN=%s, signerCN=%s, signerCaCertCN=%s, "
             + " validCertHash=%s, withCertHash=%s, validSignature=%s,"
             + " certificateIdGeneration=%s, certificateStatus=%s, respStatus=%s,"
             + " withResponseBytes=%s, attachIssuerCert=%s, thisUpdateDeltaMilliseconds=%s,"
@@ -101,6 +102,7 @@ public class CertificateDto {
             eeCert.getSerialNumber(),
             issuerCert.getSubjectX500Principal().getName(),
             signer.getCertificate().getSubjectX500Principal().getName(),
+            signerCaCert != null ? signerCaCert.getSubjectX500Principal().getName() : "null",
             validCertHash,
             withCertHash,
             validSignature,

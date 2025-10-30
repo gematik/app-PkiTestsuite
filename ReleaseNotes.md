@@ -2,7 +2,7 @@
 
 # Release notes PKI Test Suite
 
-## Release 7.1.0
+## Release 7.1.1
 
 - fix ee_invalid-signature.p12
 - add new testcase verifyUseHashBeforeTslDownload for A_17690 "Nutzung der Hash-Datei für TSL (ECC-Migration)"

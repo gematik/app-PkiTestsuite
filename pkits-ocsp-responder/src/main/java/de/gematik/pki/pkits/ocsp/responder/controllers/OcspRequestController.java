@@ -149,39 +149,45 @@ public class OcspRequestController {
     return new ResponseEntity<>(ocspResponseBytes, HttpStatus.OK);
   }
 
-  private byte[] buildOcspResponseBytes(final OCSPReq ocspReq, final CertificateDto certificate) {
+  private byte[] buildOcspResponseBytes(
+      final OCSPReq ocspReq, final CertificateDto certificateDto) {
     final ZonedDateTime now = GemLibPkiUtils.now();
 
     ZonedDateTime nextUpdate = null;
-    if (certificate.getNextUpdateDeltaMilliseconds() != null) {
-      nextUpdate = now.plus(certificate.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
+    if (certificateDto.getNextUpdateDeltaMilliseconds() != null) {
+      nextUpdate = now.plus(certificateDto.getNextUpdateDeltaMilliseconds(), ChronoUnit.MILLIS);
     }
 
-    final OcspResponseGenerator ocspResponseGenerator =
+    final OcspResponseGenerator.OcspResponseGeneratorBuilder builder =
         OcspResponseGenerator.builder()
-            .signer(certificate.getSigner())
-            .withCertHash(certificate.isWithCertHash())
-            .validCertHash(certificate.isValidCertHash())
-            .validSignature(certificate.isValidSignature())
-            .certificateIdGeneration(certificate.getCertificateIdGeneration())
-            .responderIdType(certificate.getResponderIdType())
-            .respStatus(certificate.getRespStatus())
-            .withResponseBytes(certificate.isWithResponseBytes())
-            .thisUpdate(now.plus(certificate.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
-            .producedAt(now.plus(certificate.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .signer(certificateDto.getSigner())
+            .withCertHash(certificateDto.isWithCertHash())
+            .validCertHash(certificateDto.isValidCertHash())
+            .validSignature(certificateDto.isValidSignature())
+            .certificateIdGeneration(certificateDto.getCertificateIdGeneration())
+            .responderIdType(certificateDto.getResponderIdType())
+            .respStatus(certificateDto.getRespStatus())
+            .withResponseBytes(certificateDto.isWithResponseBytes())
+            .thisUpdate(
+                now.plus(certificateDto.getThisUpdateDeltaMilliseconds(), ChronoUnit.MILLIS))
+            .producedAt(
+                now.plus(certificateDto.getProducedAtDeltaMilliseconds(), ChronoUnit.MILLIS))
             .nextUpdate(nextUpdate)
-            .withNullParameterHashAlgoOfCertId(certificate.isWithNullParameterHashAlgoOfCertId())
-            .responseAlgoBehavior(certificate.getResponseAlgoBehavior())
-            .build();
-    try {
+            .withNullParameterHashAlgoOfCertId(certificateDto.isWithNullParameterHashAlgoOfCertId())
+            .responseAlgoBehavior(certificateDto.getResponseAlgoBehavior());
 
+    if (certificateDto.getSignerCaCert() != null) {
+      builder.signerCaCert(certificateDto.getSignerCaCert());
+    }
+    final OcspResponseGenerator ocspResponseGenerator = builder.build();
+
+    try {
       final OCSPResp ocspResponse =
           ocspResponseGenerator.generate(
               ocspReq,
-              certificate.getEeCert(),
-              certificate.getIssuerCert(),
-              certificate.getOcspCertificateStatus(),
-              certificate.isAttachIssuerCert());
+              certificateDto.getEeCert(),
+              certificateDto.getIssuerCert(),
+              certificateDto.getOcspCertificateStatus());
 
       final Extension certHashExtension =
           getFirstSingleResp(ocspResponse).getExtension(id_isismtt_at_certHash);
