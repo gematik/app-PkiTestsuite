@@ -682,10 +682,7 @@ public abstract class ApprovalTestsBase {
         .isInstanceOf(TestSuiteException.class)
         .hasMessageStartingWith(expectedMessagePrefix)
         .cause()
-        .isInstanceOf(ConditionTimeoutException.class)
-        .hasMessageStartingWith(
-            "Condition with de.gematik.pki.pkits.testsuite.common.ocsp.OcspRequestHistoryContainer"
-                + " was not fulfilled within ");
+        .isInstanceOf(ConditionTimeoutException.class);
 
     log.info(
         "As expected, observed an TestSuiteException with message <{}>", expectedMessagePrefix);

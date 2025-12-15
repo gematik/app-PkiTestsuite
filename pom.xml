@@ -9,7 +9,7 @@
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>7.1.1</version>
+  <version>7.1.2</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -83,25 +83,25 @@
 
     <!-- dependencies -->
     <version.assertj-core>3.27.6</version.assertj-core>
-    <version.bouncycastle>1.82</version.bouncycastle>
+    <version.bouncycastle>1.83</version.bouncycastle>
     <version.commons-compress>1.28.0</version.commons-compress>
-    <version.commons-io>2.20.0</version.commons-io>
-    <version.commons-text>1.14.0</version.commons-text>
+    <version.commons-io>2.21.0</version.commons-io>
+    <version.commons-text>1.15.0</version.commons-text>
     <version.jackson>2.19.2</version.jackson>
     <version.gemLibPki>3.3.1</version.gemLibPki>
-    <version.httpcore5>5.3.6</version.httpcore5>
+    <version.httpcore5>5.4</version.httpcore5>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-    <version.junit-jupiter>6.0.0</version.junit-jupiter>
-    <version.junit-platform-launcher>6.0.0</version.junit-platform-launcher>
+    <version.junit-jupiter>6.0.1</version.junit-jupiter>
+    <version.junit-platform-launcher>6.0.1</version.junit-platform-launcher>
     <version.log4j2>2.25.2</version.log4j2>
     <version.lombok>1.18.42</version.lombok>
-    <version.openapi>2.8.13</version.openapi>
-    <version.unirest-java>4.5.1</version.unirest-java>
-    <version.xmlunit>2.10.4</version.xmlunit>
+    <version.openapi>2.8.14</version.openapi>
+    <version.unirest-java>4.7.0</version.unirest-java>
+    <version.xmlunit>2.11.0</version.xmlunit>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
-    <version.docker-maven-plugin>0.46.0</version.docker-maven-plugin>
+    <version.docker-maven-plugin>0.48.0</version.docker-maven-plugin>
     <version.git-commit-id-maven-plugin>9.0.2</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.14</version.jacoco-maven-plugin>
     <version.maven-clean-plugin>3.5.0</version.maven-clean-plugin>
@@ -112,10 +112,10 @@
     <version.maven-project-info-reports-plugin>3.9.0</version.maven-project-info-reports-plugin>
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
     <version.maven-site-plugin>3.21.0</version.maven-site-plugin>
-    <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
+    <version.maven-source-plugin>3.4.0</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.5.4</version.maven-surefire-plugin>
-    <version.sonar-maven-plugin>5.2.0.4988</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>3.0.0</version.spotless-maven-plugin>
+    <version.sonar-maven-plugin>5.5.0.6356</version.sonar-maven-plugin>
+    <version.spotless-maven-plugin>3.1.0</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->

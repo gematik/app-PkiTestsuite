@@ -2,6 +2,11 @@
 
 # Release notes PKI Test Suite
 
+## Release 7.1.2
+
+- do not expect a message from timeout exception, resolves ANFINT-5
+- update dependencies
+
 ## Release 7.1.1
 
 - fix ee_invalid-signature.p12
