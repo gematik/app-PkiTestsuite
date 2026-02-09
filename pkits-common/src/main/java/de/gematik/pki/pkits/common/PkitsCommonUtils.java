@@ -20,10 +20,6 @@
 
 package de.gematik.pki.pkits.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import java.io.IOException;
@@ -54,6 +50,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.HttpStatus;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.CollectionType;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -98,20 +97,21 @@ public final class PkitsCommonUtils {
 
   public static String createJsonContent(final Object infoReq) {
     try {
-      return new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(infoReq);
-    } catch (final JsonProcessingException e) {
+      return JsonMapper.builder().build().writeValueAsString(infoReq);
+    } catch (final JacksonException e) {
       throw new PkiCommonException("Generation of JsonContent failed.", e);
     }
   }
 
   public static <T> List<T> convertToList(final String jsonStr, final Class<T> clazz) {
     try {
-      final ObjectMapper mapper = new ObjectMapper();
-      final JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, clazz);
+      final JsonMapper mapper = JsonMapper.builder().build();
+      final CollectionType type =
+          mapper.getTypeFactory().constructCollectionType(List.class, clazz);
 
       return mapper.readValue(jsonStr, type);
 
-    } catch (final JsonProcessingException e) {
+    } catch (final JacksonException e) {
       throw new PkiCommonException("Deserialization of json string failed.", e);
     }
   }

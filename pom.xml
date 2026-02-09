@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.7</version>
-  </parent>
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>7.1.2</version>
+  <version>7.2.0</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -67,13 +62,9 @@
 
     <!-- header-->
     <skip.dockerbuild>true</skip.dockerbuild>
-
     <docker.registry.gematik>local</docker.registry.gematik>
-    <docker.image.name.pkits-ocsp-responder>${docker.registry.gematik}/pki/pkits-ocsp-responder</docker.image.name.pkits-ocsp-responder>
-    <docker.image.name.pkits-tsl-provider>${docker.registry.gematik}/pki/pkits-tsl-provider</docker.image.name.pkits-tsl-provider>
-    <docker.image.name.pkits-sut-server-sim>${docker.registry.gematik}/pki/pkits-sut-server-sim</docker.image.name.pkits-sut-server-sim>
 
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <version.maven>3.6.3</version.maven>
 
     <project.build.releaseJarsDir>${project.basedir}/../bin/</project.build.releaseJarsDir>
@@ -82,58 +73,79 @@
     <maven.compiler.encoding>${project.build.sourceEncoding}</maven.compiler.encoding>
 
     <!-- dependencies -->
-    <version.assertj-core>3.27.6</version.assertj-core>
+    <version.assertj-core>3.27.7</version.assertj-core>
     <version.bouncycastle>1.83</version.bouncycastle>
     <version.commons-compress>1.28.0</version.commons-compress>
     <version.commons-io>2.21.0</version.commons-io>
     <version.commons-text>1.15.0</version.commons-text>
-    <version.jackson>2.19.2</version.jackson>
-    <version.gemLibPki>3.3.1</version.gemLibPki>
+    <version.gemLibPki>3.4.0</version.gemLibPki>
     <version.httpcore5>5.4</version.httpcore5>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-    <version.junit-jupiter>6.0.1</version.junit-jupiter>
-    <version.junit-platform-launcher>6.0.1</version.junit-platform-launcher>
-    <version.log4j2>2.25.2</version.log4j2>
+    <version.junit-jupiter>6.0.2</version.junit-jupiter>
+    <version.log4j2>2.25.3</version.log4j2>
     <version.lombok>1.18.42</version.lombok>
-    <version.openapi>2.8.14</version.openapi>
-    <version.unirest-java>4.7.0</version.unirest-java>
+    <version.openapi>3.0.1</version.openapi>
+    <version.spring-boot>4.0.2</version.spring-boot>
+    <version.spring-boot-maven-plugin>4.0.2</version.spring-boot-maven-plugin>
+    <version.unirest-java>4.7.4</version.unirest-java>
     <version.xmlunit>2.11.0</version.xmlunit>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
-    <version.docker-maven-plugin>0.48.0</version.docker-maven-plugin>
+    <version.docker-maven-plugin>0.48.1</version.docker-maven-plugin>
     <version.git-commit-id-maven-plugin>9.0.2</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.14</version.jacoco-maven-plugin>
-    <version.maven-clean-plugin>3.5.0</version.maven-clean-plugin>
-    <version.maven-compiler-plugin>3.14.1</version.maven-compiler-plugin>
-    <version.maven-deploy-plugin>3.1.4</version.maven-deploy-plugin>
+    <version.maven-compiler-plugin>3.15.0</version.maven-compiler-plugin>
     <version.maven-enforcer-plugin>3.6.2</version.maven-enforcer-plugin>
-    <version.maven-failsafe-plugin>${version.maven-surefire-plugin}</version.maven-failsafe-plugin>
     <version.maven-project-info-reports-plugin>3.9.0</version.maven-project-info-reports-plugin>
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
     <version.maven-site-plugin>3.21.0</version.maven-site-plugin>
     <version.maven-source-plugin>3.4.0</version.maven-source-plugin>
-    <version.maven-surefire-plugin>3.5.4</version.maven-surefire-plugin>
     <version.sonar-maven-plugin>5.5.0.6356</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>3.1.0</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>3.2.1</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../pkits-coverage-reports/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <sonar.dependencyCheck.htmlReportPath>${project.build.directory}/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
-    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-    <sonar.language>java</sonar.language>
 
   </properties>
 
   <dependencyManagement>
     <dependencies>
-
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${version.spring-boot}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${version.log4j2}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         <version>${version.openapi}</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>3.0.4</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>3.0.4</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>3.0.4</version>
       </dependency>
 
       <dependency>
@@ -169,27 +181,6 @@
         <version>${version.httpcore5}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-
-      <dependency>
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
         <version>${version.jakarta.annotation-api}</version>
@@ -210,53 +201,6 @@
         <artifactId>commons-text</artifactId>
         <version>${version.commons-text}</version>
       </dependency>
-
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-params</artifactId>
-        <version>${version.junit-jupiter}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.platform</groupId>
-        <artifactId>junit-platform-commons</artifactId>
-        <version>${version.junit-platform-launcher}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.platform</groupId>
-        <artifactId>junit-platform-engine</artifactId>
-        <version>${version.junit-platform-launcher}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>${version.log4j2}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>${version.log4j2}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-slf4j2-impl</artifactId>
-        <version>${version.log4j2}</version>
-      </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
@@ -264,57 +208,22 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-ocsp-responder</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-sut-server-sim</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-testsuite</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-tsl-provider</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-tls-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>pkits-tsl-generator</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.konghq</groupId>
         <artifactId>unirest-java-core</artifactId>
         <version>${version.unirest-java}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.xmlunit</groupId>
+        <artifactId>xmlunit-core</artifactId>
+        <version>${version.xmlunit}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>${version.maven-clean-plugin}</version>
-        </plugin>
         <plugin>
           <groupId>io.github.git-commit-id</groupId>
           <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -343,18 +252,7 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>${version.maven-deploy-plugin}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${version.maven-surefire-plugin}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-report-plugin</artifactId>
-          <version>${version.maven-surefire-report-plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
@@ -450,7 +348,7 @@
                   <version>${version.maven}</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>[${java.version},17.99.99]</version>
+                  <version>[${java.version},]</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -558,7 +456,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>2.7.0</version>
+        <version>2.7.1</version>
         <executions>
           <execution>
             <goals>

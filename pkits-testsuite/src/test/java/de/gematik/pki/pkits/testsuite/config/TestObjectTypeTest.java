@@ -25,19 +25,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 class TestObjectTypeTest {
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final JsonMapper mapper = JsonMapper.builder().build();
 
   @Test
   void readExistingConfigFiles() throws IOException {
@@ -55,7 +54,7 @@ class TestObjectTypeTest {
   }
 
   @Test
-  void testDeserialize() throws JsonProcessingException {
+  void testDeserialize() {
     final String testObjectConfigJsonStr =
         "{ 'testObjectType' : 'VsdmFachdienst' }".replace("'", "\"");
 
@@ -75,7 +74,7 @@ class TestObjectTypeTest {
     final String testObjectConfigJsonStr = "{ 'testObjectType' : 'dummyValue' }".replace("'", "\"");
 
     assertThatThrownBy(() -> mapper.readValue(testObjectConfigJsonStr, TestObjectConfig.class))
-        .isInstanceOf(ValueInstantiationException.class)
+        .isInstanceOf(JacksonException.class)
         .hasMessageStartingWith(
             "Cannot construct instance of `de.gematik.pki.pkits.testsuite.config.TestObjectType`,"
                 + " problem: unknown value <dummyValue> for TestObjectType. Allowed values:"
@@ -84,7 +83,7 @@ class TestObjectTypeTest {
   }
 
   @Test
-  void testSerialize() throws JsonProcessingException {
+  void testSerialize() {
     final String testObjectConfigJsonStr =
         "{ 'testObjectType' : 'VsdmFachdienst' }".replace("'", "\"");
 

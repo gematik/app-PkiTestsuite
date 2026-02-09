@@ -20,6 +20,7 @@
 
 package de.gematik.pki.pkits.tsl.provider.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +34,10 @@ public class TslRequestHistoryEntryDto {
 
   private int tslSeqNr;
   private String tslDownloadEndpoint;
+
+  @JsonProperty("isGzipCompressed")
   private boolean isGzipCompressed;
+
   private String protocol;
 
   @Override

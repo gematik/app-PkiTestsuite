@@ -8,8 +8,6 @@ server:
     enabled-protocols: TLSv1.2, TLSv1.3
     client-auth: need
     ciphers: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-  error:
-    include-message: always
   tomcat:
     accesslog:
       enabled: true
@@ -33,3 +31,7 @@ tsl-procurer:
   repetitions: 4
   tslGracePeriodDays: 0
   timeoutMilliseconds: 500
+spring:
+  web:
+    error:
+      include-message: always

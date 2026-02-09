@@ -23,9 +23,6 @@ package de.gematik.pki.pkits.ocsp.responder.controllers;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
 import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
@@ -59,6 +56,7 @@ import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.databind.json.JsonMapper;
 
 @TestComponent
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -92,7 +90,7 @@ class OcspConfigControllerTest {
     final CertificateStatus certificateStatus = CertificateStatus.GOOD;
     final CertificateDto certificateDto =
         CertificateDto.builder()
-            .eeCert(eeCerts.get(0))
+            .eeCert(eeCerts.getFirst())
             .issuerCert(issuerCert)
             .signer(signer)
             .build();
@@ -112,15 +110,15 @@ class OcspConfigControllerTest {
             ocspResponseConfigHolder
                 .getOcspResponderConfig()
                 .getCertificateDtos()
-                .get(0)
+                .getFirst()
                 .getEeCert()
                 .getSerialNumber())
-        .isEqualTo(eeCerts.get(0).getSerialNumber());
+        .isEqualTo(eeCerts.getFirst().getSerialNumber());
     assertThat(
             ocspResponseConfigHolder
                 .getOcspResponderConfig()
                 .getCertificateDtos()
-                .get(0)
+                .getFirst()
                 .getOcspCertificateStatus())
         .isEqualTo(certificateStatus);
   }
@@ -171,46 +169,72 @@ class OcspConfigControllerTest {
   }
 
   @Test
-  void ocspConfigNewJsonStr() throws JsonProcessingException {
+  void ocspConfigNewCheckCertificateIdGeneration() {
+    final CertificateDto certificateDto =
+        CertificateDto.builder()
+            .eeCert(eeCerts.getFirst())
+            .issuerCert(issuerCert)
+            .signer(signer)
+            .certificateIdGeneration(CertificateIdGeneration.INVALID_CERTID_ISSUER_KEY_HASH)
+            .build();
+    final OcspResponderConfig ocspResponderConfig =
+        OcspResponderConfig.builder().certificateDtos(List.of(certificateDto)).build();
+
+    final OcspResponderConfigJsonDto jsonDto = ocspResponderConfig.toJsonDto();
+    final String jsonContent = PkitsCommonUtils.createJsonContent(jsonDto);
+
+    assertThat(jsonContent)
+        .contains(CertificateIdGeneration.INVALID_CERTID_ISSUER_KEY_HASH.toString());
+
+    final OcspResponderConfigJsonDto expectedJsonDto =
+        JsonMapper.builder().build().readValue(jsonContent, OcspResponderConfigJsonDto.class);
+
+    assertThat(expectedJsonDto.getCertificateJsonDtos().getFirst().getCertificateIdGeneration())
+        .isEqualTo(CertificateIdGeneration.INVALID_CERTID_ISSUER_KEY_HASH);
+  }
+
+  @Test
+  void ocspConfigNewJsonStr() {
     final String WEBSERVER_CONFIG_URL =
         "http://localhost:" + localServerPort + OCSP_WEBSERVER_CONFIG_ENDPOINT;
-
+    //    hier ist nur  "revokedDate": "2028-08-08T08:08:08.2665079Z", das Problem, Leerstring
+    // funktioniert
     final String jsonContent =
         """
-            {
-              "certificateJsonDtos":
-              [{
-                "validCertHash": false,
-                "withCertHash": false,
-                "validSignature": false,
-                "certificateIdGeneration": "%s",
-                "delayMilliseconds": 11,
-                "respStatus": "%s",
-                "withResponseBytes": false,
-                "responderIdType": "%s",
-                "thisUpdateDeltaMilliseconds": 22,
-                "producedAtDeltaMilliseconds": 33,
-                "nextUpdateDeltaMilliseconds": 44,
-                "withNullParameterHashAlgoOfCertId": true,
-                "responseAlgoBehavior": "%s",
-                "certificateStatus": {
-                  "type": "REVOKED",
-                  "revokedDate": "2028-08-08T08:08:08.2665079Z",
-                  "revokedReason": 55
-                },
-                "eeCertEncoded": "%s",
-                "issuerCertEncoded": "%s",
-                "signerCertificateEncoded": "%s",
-                "signerPrivateKeyEncoded": "%s"
-              }]
-            }
-            """
+              {
+                "certificateJsonDtos":
+                [{
+                  "validCertHash": false,
+                  "withCertHash": false,
+                  "validSignature": false,
+                  "certificateIdGeneration": "%s",
+                  "delayMilliseconds": 11,
+                  "respStatus": "%s",
+                  "withResponseBytes": false,
+                  "responderIdType": "%s",
+                  "thisUpdateDeltaMilliseconds": 22,
+                  "producedAtDeltaMilliseconds": 33,
+                  "nextUpdateDeltaMilliseconds": 44,
+                  "withNullParameterHashAlgoOfCertId": true,
+                  "responseAlgoBehavior": "%s",
+                  "certificateStatus": {
+                    "type": "REVOKED",
+                    "revokedDate": "2028-08-08T08:08:08.2665079Z",
+                    "revokedReason": 55
+                  },
+                  "eeCertEncoded": "%s",
+                  "issuerCertEncoded": "%s",
+                  "signerCertificateEncoded": "%s",
+                  "signerPrivateKeyEncoded": "%s"
+                }]
+              }
+              """
             .formatted(
                 CertificateIdGeneration.INVALID_CERTID_HASH_ALGO,
                 OCSPRespStatus.TRY_LATER,
                 ResponderIdType.BY_NAME,
                 ResponseAlgoBehavior.SHA2,
-                GemLibPkiUtils.toMimeBase64NoLineBreaks(eeCerts.get(0)),
+                GemLibPkiUtils.toMimeBase64NoLineBreaks(eeCerts.getFirst()),
                 GemLibPkiUtils.toMimeBase64NoLineBreaks(issuerCert),
                 GemLibPkiUtils.toMimeBase64NoLineBreaks(signer.getCertificate()),
                 GemLibPkiUtils.toMimeBase64NoLineBreaks(signer.getPrivateKey().getEncoded()));
@@ -233,16 +257,16 @@ class OcspConfigControllerTest {
             ocspResponseConfigHolder
                 .getOcspResponderConfig()
                 .getCertificateDtos()
-                .get(0)
+                .getFirst()
                 .getEeCert()
                 .getSerialNumber())
-        .isEqualTo(eeCerts.get(0).getSerialNumber());
+        .isEqualTo(eeCerts.getFirst().getSerialNumber());
     final RevokedStatus actualCertificateStatus =
         (RevokedStatus)
             ocspResponseConfigHolder
                 .getOcspResponderConfig()
                 .getCertificateDtos()
-                .get(0)
+                .getFirst()
                 .getOcspCertificateStatus();
     assertThat(actualCertificateStatus.getRevocationReason())
         .isEqualTo(expectedCertificateStatus.getRevocationReason());
@@ -250,13 +274,62 @@ class OcspConfigControllerTest {
         .isEqualTo(expectedCertificateStatus.getRevocationTime());
 
     final OcspResponderConfigJsonDto expectedJsonDto =
-        new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .readValue(jsonContent, OcspResponderConfigJsonDto.class);
+        JsonMapper.builder().build().readValue(jsonContent, OcspResponderConfigJsonDto.class);
 
     final OcspResponderConfig expectedConfig = expectedJsonDto.toConfig();
     final OcspResponderConfig actualConfig = ocspResponseConfigHolder.getOcspResponderConfig();
     assertThat(actualConfig).hasToString(expectedConfig.toString());
+  }
+
+  @Test
+  void ocspConfigCheckCertificateIdGeneration() {
+    final String jsonContent =
+        """
+              {
+                "certificateJsonDtos":
+                [{
+                  "validCertHash": false,
+                  "withCertHash": false,
+                  "validSignature": false,
+                  "certificateIdGeneration": "%s",
+                  "delayMilliseconds": 11,
+                  "respStatus": "%s",
+                  "withResponseBytes": false,
+                  "responderIdType": "%s",
+                  "thisUpdateDeltaMilliseconds": 22,
+                  "producedAtDeltaMilliseconds": 33,
+                  "nextUpdateDeltaMilliseconds": 44,
+                  "withNullParameterHashAlgoOfCertId": true,
+                  "responseAlgoBehavior": "%s",
+                  "certificateStatus": {
+                    "type": "REVOKED",
+                    "revokedDate": "2028-08-08T08:08:08.2665079Z",
+                    "revokedReason": 55
+                  },
+                  "eeCertEncoded": "%s",
+                  "issuerCertEncoded": "%s",
+                  "signerCertificateEncoded": "%s",
+                  "signerPrivateKeyEncoded": "%s"
+                }]
+              }
+              """
+            .formatted(
+                CertificateIdGeneration.INVALID_CERTID_HASH_ALGO,
+                OCSPRespStatus.TRY_LATER,
+                ResponderIdType.BY_NAME,
+                ResponseAlgoBehavior.SHA2,
+                GemLibPkiUtils.toMimeBase64NoLineBreaks(eeCerts.getFirst()),
+                GemLibPkiUtils.toMimeBase64NoLineBreaks(issuerCert),
+                GemLibPkiUtils.toMimeBase64NoLineBreaks(signer.getCertificate()),
+                GemLibPkiUtils.toMimeBase64NoLineBreaks(signer.getPrivateKey().getEncoded()));
+
+    assertThat(jsonContent).contains(CertificateIdGeneration.INVALID_CERTID_HASH_ALGO.toString());
+
+    final OcspResponderConfigJsonDto expectedJsonDto =
+        JsonMapper.builder().build().readValue(jsonContent, OcspResponderConfigJsonDto.class);
+
+    assertThat(expectedJsonDto.getCertificateJsonDtos().getFirst().getCertificateIdGeneration())
+        .isEqualTo(CertificateIdGeneration.INVALID_CERTID_HASH_ALGO);
   }
 
   private void invalidateOcspRespConfiguration() {

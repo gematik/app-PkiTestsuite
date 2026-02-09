@@ -4,11 +4,10 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>7.1.2</version>
+    <version>7.2.0</version>
   </parent>
 
   <artifactId>pkits-coverage-reports</artifactId>
-  <version>7.1.2</version>
   <packaging>pom</packaging>
 
   <name>Code Coverage Reports</name>
@@ -22,30 +21,37 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-common</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-ocsp-responder</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-sut-server-sim</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-tsl-provider</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-testsuite</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-tls-client</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>pkits-tsl-generator</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

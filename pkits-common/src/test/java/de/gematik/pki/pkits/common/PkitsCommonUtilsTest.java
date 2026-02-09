@@ -24,10 +24,16 @@ import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.getFirstSubStringByPattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.gematik.pki.pkits.common.PkitsCommonUtils.GitProperties;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
@@ -87,5 +93,104 @@ class PkitsCommonUtilsTest {
     final String searchPattern = "<URI>(\\S+)</URI>";
     final String result = getFirstSubStringByPattern(src, searchPattern);
     assertThat(result).isEqualTo("mailto:pki@gematik.de");
+  }
+
+  @Test
+  void convertToList() {
+    // this String is similar to the one generated in TslProviderManagerTest:testGetTslHistoryPart
+    final String jsonString =
+        """
+        [ {
+           "tslSeqNr" : 1,
+           "tslDownloadEndpoint" : "/tsl/tsl.xml",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 2,
+           "tslDownloadEndpoint" : "/tsl/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 2,
+           "tslDownloadEndpoint" : "/tsl/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 3,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.xml",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 3,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.xml",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 3,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.xml",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 4,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 4,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 4,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 4,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 1000,
+           "tslDownloadEndpoint" : "/tsl/tsl.xml",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 1000,
+           "tslDownloadEndpoint" : "/tsl/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 1000,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.xml",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         }, {
+           "tslSeqNr" : 1000,
+           "tslDownloadEndpoint" : "/tsl-backup/tsl.sha2",
+           "protocol" : "HTTP/1.1",
+           "isGzipCompressed" : true
+         } ]
+        """;
+
+    final var list = PkitsCommonUtils.convertToList(jsonString, Object.class);
+    assertThat(list).hasSize(14);
+    final List<TestTslRequestHistoryEntryDto> list2 =
+        PkitsCommonUtils.convertToList(jsonString, TestTslRequestHistoryEntryDto.class);
+    assertThat(list2).hasSize(14);
+  }
+
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @Getter
+  @Setter
+  static class TestTslRequestHistoryEntryDto {
+    private int tslSeqNr;
+    private String tslDownloadEndpoint;
+
+    @JsonProperty("isGzipCompressed")
+    private boolean isGzipCompressed;
+
+    private String protocol;
   }
 }

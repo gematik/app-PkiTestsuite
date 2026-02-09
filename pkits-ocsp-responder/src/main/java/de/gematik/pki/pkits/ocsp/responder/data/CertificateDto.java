@@ -26,46 +26,50 @@ import de.gematik.pki.gemlibpki.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.security.cert.X509Certificate;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.bouncycastle.cert.ocsp.CertificateStatus;
 
 @SuperBuilder(toBuilder = true)
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class CertificateDto {
 
   @JsonIgnore @NonNull protected X509Certificate eeCert;
   @JsonIgnore @NonNull protected X509Certificate issuerCert;
   @JsonIgnore @NonNull protected P12Container signer;
   @JsonIgnore @Builder.Default protected X509Certificate signerCaCert = null;
-  @Builder.Default private final boolean validCertHash = true;
-  @Builder.Default private final boolean withCertHash = true;
-  @Builder.Default private final boolean validSignature = true;
+  @Builder.Default private boolean validCertHash = true;
+  @Builder.Default private boolean withCertHash = true;
+  @Builder.Default private boolean validSignature = true;
 
   @Builder.Default
-  private final OcspResponseGenerator.CertificateIdGeneration certificateIdGeneration =
+  private OcspResponseGenerator.CertificateIdGeneration certificateIdGeneration =
       OcspResponseGenerator.CertificateIdGeneration.VALID_CERTID;
 
-  @Builder.Default private final int delayMilliseconds = 0;
-  @Builder.Default private final OCSPRespStatus respStatus = OCSPRespStatus.SUCCESSFUL;
-  @Builder.Default private final boolean withResponseBytes = true;
-  @Builder.Default private final boolean attachIssuerCert = false;
+  @Builder.Default private int delayMilliseconds = 0;
+  @Builder.Default private OCSPRespStatus respStatus = OCSPRespStatus.SUCCESSFUL;
+  @Builder.Default private boolean withResponseBytes = true;
+  @Builder.Default private boolean attachIssuerCert = false;
 
   @Builder.Default
   private final OcspResponseGenerator.ResponderIdType responderIdType =
       OcspResponseGenerator.ResponderIdType.BY_KEY;
 
-  @Builder.Default private final int thisUpdateDeltaMilliseconds = 0;
-  @Builder.Default private final int producedAtDeltaMilliseconds = 0;
+  @Builder.Default private int thisUpdateDeltaMilliseconds = 0;
+  @Builder.Default private int producedAtDeltaMilliseconds = 0;
 
   /** if nextUpdateDeltaMilliseconds is null, then nextUpdate is set to null */
-  @Builder.Default private final Integer nextUpdateDeltaMilliseconds = 0;
+  @Builder.Default private Integer nextUpdateDeltaMilliseconds = 0;
 
-  @Builder.Default private final boolean withNullParameterHashAlgoOfCertId = false;
+  @Builder.Default private boolean withNullParameterHashAlgoOfCertId = false;
 
   @Builder.Default
   OcspResponseGenerator.ResponseAlgoBehavior responseAlgoBehavior =
@@ -74,8 +78,7 @@ public class CertificateDto {
   // CertificateStatus is not serializable: for this reason we have to use
   // CustomCertificateStatusDto
   @Builder.Default
-  private final CustomCertificateStatusDto certificateStatus =
-      CustomCertificateStatusDto.createGood();
+  private CustomCertificateStatusDto certificateStatus = CustomCertificateStatusDto.createGood();
 
   @JsonIgnore
   public CustomCertificateStatusDto getCertificateStatusDto() {

@@ -44,7 +44,7 @@ public final class OcspResponderManager {
       final String ocspRespUri, final OcspResponderConfig ocspResponderConfig) {
 
     final String jsonContent = PkitsCommonUtils.createJsonContent(ocspResponderConfig.toJsonDto());
-
+    log.info("Sending ocspResponderConfig JSON: {}", jsonContent);
     PkitsCommonUtils.checkHealth(log, "OcspResponder", ocspRespUri);
 
     /**

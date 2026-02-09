@@ -20,13 +20,12 @@
 
 package de.gematik.pki.pkits.testsuite.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.gematik.pki.pkits.common.PkiCommonException;
-import java.io.IOException;
 import java.nio.file.Path;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @Getter
 @Setter
@@ -43,7 +42,7 @@ public class TestSuiteConfig {
   private TestSuiteParameter testSuiteParameter = new TestSuiteParameter();
 
   public static TestSuiteConfig fromYaml(final Path yamlFile) {
-    final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    final YAMLMapper yamlMapper = YAMLMapper.builder().build();
     try {
       final TestSuiteConfig testSuiteConfig =
           yamlMapper.readValue(yamlFile.toFile(), TestSuiteConfig.class);
@@ -65,7 +64,7 @@ public class TestSuiteConfig {
       }
 
       return testSuiteConfig;
-    } catch (final IOException e) {
+    } catch (final JacksonException e) {
       throw new PkiCommonException("Cannot process yamlPath", e);
     }
   }

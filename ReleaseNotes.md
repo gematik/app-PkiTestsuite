@@ -2,6 +2,12 @@
 
 # Release notes PKI Test Suite
 
+## Release 7.2.0
+
+- switch from OpenJDK 17 to OpenJDK 21
+- upgrade to spring-boot 4.0.x and Jackson 3.x.x
+- update dependencies
+
 ## Release 7.1.2
 
 - do not expect a message from timeout exception, resolves ANFINT-5

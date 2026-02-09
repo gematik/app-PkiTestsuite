@@ -45,9 +45,31 @@ public class OcspConfigController {
   @PostMapping(path = PkitsConstants.OCSP_WEBSERVER_CONFIG_ENDPOINT)
   public void ocspConfig(final @RequestBody OcspResponderConfigJsonDto jsonDto) {
     log.info("Ocsp ConfigurationRequest received");
+    log.info(
+        "JsonDto certificates count: {}",
+        jsonDto.getCertificateJsonDtos() != null
+            ? jsonDto.getCertificateJsonDtos().size()
+            : "null");
+
+    if (jsonDto.getCertificateJsonDtos() != null && !jsonDto.getCertificateJsonDtos().isEmpty()) {
+      log.info(
+          "First certificate delayMilliseconds: {}",
+          jsonDto.getCertificateJsonDtos().get(0).getDelayMilliseconds());
+    }
 
     final OcspResponderConfig ocspResponderConfig = jsonDto.toConfig();
+    log.info(
+        "Config certificates count: {}",
+        ocspResponderConfig.getCertificateDtos() != null
+            ? ocspResponderConfig.getCertificateDtos().size()
+            : "null");
 
+    if (ocspResponderConfig.getCertificateDtos() != null
+        && !ocspResponderConfig.getCertificateDtos().isEmpty()) {
+      log.info(
+          "First certificate delayMilliseconds after toConfig: {}",
+          ocspResponderConfig.getCertificateDtos().get(0).getDelayMilliseconds());
+    }
     processConfigurationRequest(ocspResponderConfig);
 
     log.info("Ocsp ConfigurationRequest processed (and history cleared).");

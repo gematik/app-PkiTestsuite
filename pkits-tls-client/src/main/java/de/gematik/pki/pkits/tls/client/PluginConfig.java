@@ -20,13 +20,12 @@
 
 package de.gematik.pki.pkits.tls.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.gematik.pki.gemlibpki.utils.ResourceReader;
 import de.gematik.pki.pkits.common.PkiCommonException;
-import java.io.IOException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JacksonException;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @Getter
 @Slf4j
@@ -38,12 +37,12 @@ public final class PluginConfig {
   public static synchronized PluginConfig getInstance() {
     if (instance == null) {
 
-      final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+      final YAMLMapper yamlMapper = YAMLMapper.builder().build();
       try {
         final String cfgFile =
             ResourceReader.getFileFromResourceAsString("config.yml", PluginConfig.class);
         instance = yamlMapper.readValue(cfgFile, PluginConfig.class);
-      } catch (final IOException e) {
+      } catch (final JacksonException e) {
         throw new PkiCommonException("Cannot process yamlPath", e);
       }
     }

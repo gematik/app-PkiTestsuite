@@ -22,9 +22,6 @@ package de.gematik.pki.pkits.ocsp.responder.data;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.gematik.pki.gemlibpki.utils.CertReader;
 import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.utils.P12Container;
@@ -39,6 +36,9 @@ import org.bouncycastle.cert.ocsp.CertificateStatus;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.UnknownStatus;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 class OcspResponderConfigTest {
 
@@ -115,18 +115,16 @@ class OcspResponderConfigTest {
         revokedDate);
   }
 
-  void assertSerializeAndDeserializeOcspConfig(final OcspResponderConfig ocspResponderConfig)
-      throws JsonProcessingException {
+  void assertSerializeAndDeserializeOcspConfig(final OcspResponderConfig ocspResponderConfig) {
 
     final OcspResponderConfigJsonDto jsonDto = ocspResponderConfig.toJsonDto();
     // serialize
     final String jsonContent = PkitsCommonUtils.createJsonContent(jsonDto);
 
+    System.out.println("JSON Content: " + jsonContent);
     // deserialize
     final OcspResponderConfigJsonDto jsonDtoBack =
-        new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .readValue(jsonContent, OcspResponderConfigJsonDto.class);
+        JsonMapper.builder().build().readValue(jsonContent, OcspResponderConfigJsonDto.class);
 
     final OcspResponderConfig ocspResponderConfigBack = jsonDtoBack.toConfig();
     assertThat(ocspResponderConfigBack).hasToString(ocspResponderConfig.toString());
@@ -171,5 +169,80 @@ class OcspResponderConfigTest {
             .build();
 
     assertSerializeAndDeserializeOcspConfig(ocspResponderConfig);
+  }
+
+  @Test
+  void serializeAndDeserializeOcspConfigReqDto_delayMilliseconds() throws IOException {
+
+    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
+
+    final X509Certificate issuerCert = CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
+
+    final P12Container signer = OcspResponderTestUtils.getSigner();
+
+    // make config to serialize
+    final OcspResponderConfig ocspResponderConfig =
+        OcspResponderConfig.builder()
+            .certificateDtos(
+                List.of(
+                    CertificateDto.builder()
+                        .eeCert(eeCert)
+                        .issuerCert(issuerCert)
+                        .certificateStatus(CustomCertificateStatusDto.createGood())
+                        .signer(signer)
+                        .delayMilliseconds(4242)
+                        .build()))
+            .build();
+
+    assertSerializeAndDeserializeOcspConfig(ocspResponderConfig);
+  }
+
+  @Test
+  void testCertificateJsonDtoDeserialization() {
+    final String json =
+        """
+        {
+          "delayMilliseconds": 4242,
+          "attachIssuerCert": false,
+          "validSignature": true,
+          "validCertHash": true,
+          "withCertHash": true,
+          "withNullParameterHashAlgoOfCertId": false,
+          "withResponseBytes": true
+        }
+        """;
+
+    final ObjectMapper mapper =
+        JsonMapper.builder()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .build();
+
+    final CertificateJsonDto dto = mapper.readValue(json, CertificateJsonDto.class);
+
+    System.out.println("Deserialized delayMilliseconds: " + dto.getDelayMilliseconds());
+
+    assertThat(dto.getDelayMilliseconds()).isEqualTo(4242);
+  }
+
+  @Test
+  void testCustomCertificateStatusDtoDeserialization() {
+    final String json =
+        """
+        {
+          "type": "UNKNOWN",
+          "revokedDate": null,
+          "revokedReason": 0
+        }
+        """;
+
+    final ObjectMapper mapper =
+        JsonMapper.builder()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .build();
+
+    final CustomCertificateStatusDto dto = mapper.readValue(json, CustomCertificateStatusDto.class);
+
+    assertThat(dto.getType()).isEqualTo(CustomCertificateStatusType.UNKNOWN);
+    assertThat(dto.isUnknown()).isTrue();
   }
 }
