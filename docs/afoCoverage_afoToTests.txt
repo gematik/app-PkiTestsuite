@@ -25,10 +25,6 @@ A_23225
 
 GS-A_4357
   CertificateApprovalTests.verifyUseCaseCertsValid
-  CertificateApprovalTests.verifyUseCaseRsaCertValid
-
-GS-A_4384
-  CertificateApprovalTests.verifyUseCaseRsaCertValid
 
 GS-A_4385
   CertificateApprovalTests.verifyUseCaseCertsValid

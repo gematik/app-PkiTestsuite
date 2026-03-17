@@ -20,9 +20,9 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.tsl.TslUtils;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.commons.tsl.TslUtils;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.security.cert.X509Certificate;

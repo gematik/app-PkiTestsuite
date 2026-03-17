@@ -23,7 +23,7 @@ package de.gematik.pki.pkits.tls.client;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
@@ -37,7 +37,7 @@ class SSLContextProviderTest {
   static final TlsSettings TLS_SETTINGS = PluginConfig.getInstance().getTlsSettings();
 
   final Path clientKeystorePath =
-      ResourceReader.getFilePathFromResources("certificates/rsa/valid/ee_default.p12", getClass());
+      ResourceReader.getFilePathFromResources("certificates/ecc/valid/ee_default.p12", getClass());
 
   @Test
   void createSSLContext() {
@@ -46,23 +46,6 @@ class SSLContextProviderTest {
         new SSLContextProvider().createSSLContext(clientKeystorePath, KEYSTORE_PASSWORD);
 
     Assertions.assertThat(sslContext).isNotNull();
-  }
-
-  @Disabled("Development only")
-  @Test
-  void connectRsa() throws UnknownHostException {
-
-    final TlsConnection connection =
-        TlsConnection.builder()
-            .clientKeystorePassw(KEYSTORE_PASSWORD)
-            .serverAddress(InetAddress.getByName("127.0.0.1"))
-            .sutServerPort(8443)
-            .tlsSettings(TLS_SETTINGS)
-            .build();
-
-    assertDoesNotThrow(
-        () -> connection.tlsConnectCerts(clientKeystorePath),
-        String.format("Exception with cert: %s", clientKeystorePath));
   }
 
   @Disabled("Development only")

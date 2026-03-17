@@ -71,8 +71,8 @@ class OcspRequestHistoryTest {
 
     final List<OcspRequestHistoryEntryDto> excerpt = ocspRequestHistory.getExcerpt(7, certSerialNr);
     assertThat(excerpt).hasSize(1);
-    assertThat(excerpt.get(0).getCertSerialNr()).isEqualTo(certSerialNr);
-    assertThat(excerpt.get(0).getTslSeqNr()).isEqualTo(7);
+    assertThat(excerpt.getFirst().getCertSerialNr()).isEqualTo(certSerialNr);
+    assertThat(excerpt.getFirst().getTslSeqNr()).isEqualTo(7);
   }
 
   /**

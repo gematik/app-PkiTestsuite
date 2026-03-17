@@ -20,9 +20,9 @@
 
 package de.gematik.pki.pkits.common;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.utils.P12Reader;
 import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 import lombok.AccessLevel;
@@ -36,23 +36,10 @@ public final class PkitsTestDataConstants {
 
   public static final Path trustStoreDir =
       Path.of("./testDataTemplates/certificates/ecc/trustStore/");
-  public static final Path trustStoreDirRsa =
-      Path.of("./testDataTemplates/certificates/rsa/trustStore/");
   public static final Path ocspKeystoreDir =
       Path.of("./testDataTemplates/certificates/ecc/ocspKeystore/");
-  public static final Path ocspKeystoreDirRsa =
-      Path.of("./testDataTemplates/certificates/rsa/ocspKeystore/");
   public static final Path trustAnchorCertsDir =
       Path.of("./testDataTemplates/certificates/ecc/trustAnchor/");
-
-  public static final Path DEFAULT_KOMP_CA_RSA =
-      trustStoreDirRsa.resolve("GEM.KOMP-CA40_TEST-ONLY.pem");
-
-  public static final Path DEFAULT_SMCB_CA_RSA =
-      trustStoreDirRsa.resolve("GEM.SMCB-CA40_TEST-ONLY.pem");
-
-  public static final Path DEFAULT_EGK_CA_RSA =
-      trustStoreDirRsa.resolve("GEM.EGK-CA40_TEST-ONLY.pem");
 
   public static final P12Container DEFAULT_OCSP_SIGNER =
       P12Reader.getContentFromP12(
@@ -63,9 +50,6 @@ public final class PkitsTestDataConstants {
       P12Reader.getContentFromP12(
           ocspKeystoreDir.resolve("ee_different-key.p12"), KEYSTORE_PASSWORD);
 
-  public static final P12Container OCSP_SIGNER_RSA =
-      P12Reader.getContentFromP12(
-          ocspKeystoreDirRsa.resolve("OCSP_Signer_egk_41_rsa_TEST-ONLY.p12"), KEYSTORE_PASSWORD);
   public static final X509Certificate CERT_UNSPECIFIED_STI =
       CertReader.readX509(trustStoreDir.resolve("SGD1_TEST-ONLY.pem"));
 

@@ -38,64 +38,56 @@ public enum TestObjectType {
       "fachmodulClient",
       UseCaseConnectionType.SCRIPT,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
-      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
-      PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA),
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA),
 
   IDP_EGK_FACHDIENST(
       "IdpEgkFachdienst",
       "egkClient",
       UseCaseConnectionType.SCRIPT,
       PkitsTestDataConstants.DEFAULT_EGK_CA,
-      PkitsTestDataConstants.ALTERNATIVE_EGK_CA,
-      PkitsTestDataConstants.DEFAULT_EGK_CA_RSA),
+      PkitsTestDataConstants.ALTERNATIVE_EGK_CA),
 
   INTERMEDIAER_SERVER(
       "IntermediaerServer",
       "fachmodulClientIntermediaer",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
-      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
-      PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA),
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA),
 
   KIM_FACHDIENST(
       "KimFachdienst",
       "kimClientModul",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_KOMP_CA58,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59),
 
   KIM_FACHDIENST_NIST(
       "KimFachdienstNist",
       "kimClientModulNist",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_KOMP_CA62,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA62),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63),
 
   VSDM_FACHDIENST(
       "VsdmFachdienst",
       "intermediaerClient",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_KOMP_CA,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA),
 
   VPN_KONZENTRATOR(
       "VpnKonzentrator",
       "netzkonnektorClient",
       UseCaseConnectionType.SCRIPT_OVER_SSH,
       PkitsTestDataConstants.DEFAULT_KOMP_CA58,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
-      PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59),
 
   VPN_REG_SERVER(
       "VpnRegServer",
       "fachmodulClient",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
-      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
-      PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA);
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA);
 
   private static final Map<String, TestObjectType> typeNamesMap = new TreeMap<>();
 
@@ -116,9 +108,6 @@ public enum TestObjectType {
 
   /** path to alternative issuer certificate */
   final Path clientAlternativeIssuerCertPath;
-
-  /** path to default issuer RSA certificate */
-  final Path clientDefaultIssuerRsaCertPath;
 
   @JsonCreator
   public static TestObjectType forValue(final String value) {
@@ -156,9 +145,5 @@ public enum TestObjectType {
    */
   public Path getClientKeystorePathInvalidCerts() {
     return Path.of("./testDataTemplates/certificates/ecc/%s/invalid".formatted(directory));
-  }
-
-  public Path getClientKeystorePathRsaCerts() {
-    return Path.of("./testDataTemplates/certificates/rsa/%s".formatted(directory));
   }
 }

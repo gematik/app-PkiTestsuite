@@ -23,8 +23,8 @@ package de.gematik.pki.pkits.tsl.provider.controller;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.tsl.provider.TslConfigHolder;
 import de.gematik.pki.pkits.tsl.provider.data.TslProviderConfigDto;

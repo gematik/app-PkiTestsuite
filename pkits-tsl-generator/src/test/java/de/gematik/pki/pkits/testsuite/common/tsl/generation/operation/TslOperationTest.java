@@ -21,11 +21,10 @@
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL;
-import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import de.gematik.pki.gemlibpki.tsl.TslReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.util.Arrays;
@@ -35,39 +34,16 @@ import org.w3c.dom.Document;
 
 class TslOperationTest {
 
-  TrustStatusListType tslUnsigned;
-  Document tslDoc;
-  byte[] tslBytes;
-
   TrustStatusListType tslECCUnsigned;
   Document tslECCDoc;
   byte[] tslECCBytes;
 
   @BeforeEach
   void init() {
-    tslUnsigned = TslReader.getTslUnsigned(ARVATO_TU_TSL);
-    tslDoc = TslReader.getTslAsDoc(ARVATO_TU_TSL);
-    tslBytes = GemLibPkiUtils.readContent(ARVATO_TU_TSL);
 
     tslECCUnsigned = TslReader.getTslUnsigned(ARVATO_TU_ECC_ONLY_TSL);
     tslECCDoc = TslReader.getTslAsDoc(ARVATO_TU_ECC_ONLY_TSL);
     tslECCBytes = GemLibPkiUtils.readContent(ARVATO_TU_ECC_ONLY_TSL);
-  }
-
-  @Test
-  void testRSAApply() {
-    final TslOperation tslOperation = tslContainer -> tslContainer;
-
-    final TslContainer tc1 = tslOperation.apply(tslUnsigned);
-    assertThat(TslGenerationTestUtils.documentsAreEqual(tc1.getAsTslUnsignedDoc(), tslDoc))
-        .isTrue();
-
-    final TslContainer tc2 = tslOperation.apply(tslDoc);
-    assertThat(TslGenerationTestUtils.documentsAreEqual(tc2.getAsTslUnsignedDoc(), tslDoc))
-        .isTrue();
-
-    final TslContainer tc3 = tslOperation.apply(tslBytes);
-    assertThat(Arrays.equals(tc3.getAsTslUnsignedBytes(), tslBytes)).isTrue();
   }
 
   @Test

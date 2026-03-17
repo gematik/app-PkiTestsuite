@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
-import de.gematik.pki.gemlibpki.tsl.TslSigner;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.tsl.TslSigner;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import lombok.NonNull;
 import org.w3c.dom.Document;

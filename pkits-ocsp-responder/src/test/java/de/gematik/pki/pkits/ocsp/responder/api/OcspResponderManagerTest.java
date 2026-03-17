@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.ocsp.responder.api;
 
-import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST;
-import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
+import static de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST;
+import static de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static de.gematik.pki.pkits.ocsp.responder.controllers.OcspResponderTestUtils.getEntry;
 import static org.apache.hc.core5.http.HttpHeaders.ACCEPT;

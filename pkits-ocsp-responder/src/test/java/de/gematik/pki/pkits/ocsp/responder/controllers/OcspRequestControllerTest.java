@@ -20,16 +20,16 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
-import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST;
-import static de.gematik.pki.gemlibpki.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
+import static de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_REQUEST;
+import static de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants.MEDIA_TYPE_APPLICATION_OCSP_RESPONSE;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static org.apache.hc.core5.http.HttpHeaders.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.bouncycastle.internal.asn1.isismtt.ISISMTTObjectIdentifiers.id_isismtt_at_certHash;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspRequestGenerator;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspRequestGenerator;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.CustomCertificateStatusDto;

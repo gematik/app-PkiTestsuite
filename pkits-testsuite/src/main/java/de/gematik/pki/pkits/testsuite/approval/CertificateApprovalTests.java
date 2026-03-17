@@ -20,28 +20,18 @@
 
 package de.gematik.pki.pkits.testsuite.approval;
 
-import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
-import static de.gematik.pki.pkits.testsuite.common.PkitsCertType.PKITS_CERT_VALID_RSA;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_DO_NOT_EXPECT;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_EXPECT;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBehaviour.OCSP_REQUEST_IGNORE;
-import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_PRECONFIGURED;
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.pkits.common.PkitsTestDataConstants;
-import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
-import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.CertificateProvider;
 import de.gematik.pki.pkits.testsuite.common.PkitsCertType;
 import de.gematik.pki.pkits.testsuite.common.VariableSource;
 import de.gematik.pki.pkits.testsuite.config.Afo;
-import de.gematik.pki.pkits.testsuite.config.TestEnvironment;
 import java.nio.file.Path;
-import java.security.cert.X509Certificate;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -77,36 +67,6 @@ class CertificateApprovalTests extends ApprovalTestsBase {
         USECASE_VALID,
         OCSP_RESP_WITH_PROVIDED_CERT,
         OCSP_REQUEST_EXPECT);
-  }
-
-  /** gematikId: UE_PKI_TS_0305_001 */
-  @ParameterizedTest
-  @Afo(afoId = "GS-A_4357", description = "RSA algorithms - Tab_KRYPT_002")
-  @Afo(afoId = "GS-A_4384", description = "RSA cipher suites for TLS")
-  @DisplayName("Test use case with valid RSA certificate")
-  @ArgumentsSource(CertificateProvider.class)
-  @VariableSource(value = PKITS_CERT_VALID_RSA)
-  void verifyUseCaseRsaCertValid(final Path eeCertPath, final Path issuerCertPath) {
-
-    initialState(PKITS_CERT_VALID_RSA);
-
-    final X509Certificate issuerCert = CertReader.readX509(issuerCertPath);
-
-    final OcspResponderConfig config =
-        OcspResponderConfig.builder()
-            .certificateDtos(
-                List.of(
-                    CertificateDto.builder()
-                        .eeCert(CertReader.getX509FromP12(eeCertPath, KEYSTORE_PASSWORD))
-                        .issuerCert(issuerCert)
-                        .signer(PkitsTestDataConstants.OCSP_SIGNER_RSA)
-                        .build()))
-            .build();
-
-    TestEnvironment.configureOcspResponder(ocspResponderUri, config);
-
-    useCaseWithCert(
-        eeCertPath, issuerCertPath, USECASE_VALID, OCSP_RESP_PRECONFIGURED, OCSP_REQUEST_EXPECT);
   }
 
   /** gematikId: UE_PKI_TS_0302_001 */

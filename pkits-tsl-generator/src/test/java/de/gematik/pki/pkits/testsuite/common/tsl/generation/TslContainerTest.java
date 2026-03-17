@@ -24,29 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import de.gematik.pki.gemlibpki.exception.GemPkiRuntimeException;
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.exception.GemPkiRuntimeException;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 class TslContainerTest {
-
-  @Test
-  void testRSATslContainerFromTsl() {
-    final TrustStatusListType tsl = TslReader.getTslUnsigned(CreateTslTemplate.ARVATO_TU_TSL);
-
-    final TslContainer tslContainer = new TslContainer(tsl);
-    assertThat(tslContainer.getAsTslUnsignedBytes()).hasSizeGreaterThan(0);
-    assertThat(tslContainer.getAsTslUnsignedDoc()).isNotNull();
-
-    // same reference
-    assertThat(tslContainer.getAsTslUnsigned()).isEqualTo(tsl);
-
-    assertDoesNotThrow(() -> new TslContainer(tslContainer));
-  }
 
   @Test
   void testECCTslContainerFromTsl() {
@@ -61,19 +47,6 @@ class TslContainerTest {
     assertThat(tslContainer.getAsTslUnsigned()).isEqualTo(tsl);
 
     assertDoesNotThrow(() -> new TslContainer(tslContainer));
-  }
-
-  @Test
-  void testRSATslContainerFromDocument() {
-
-    final Document tslDoc = TslReader.getTslAsDoc(CreateTslTemplate.ARVATO_TU_TSL);
-
-    final TslContainer tslContainer = new TslContainer(tslDoc);
-    assertThat(tslContainer.getAsTslUnsignedBytes()).hasSizeGreaterThan(0);
-    assertThat(tslContainer.getAsTslUnsigned()).isNotNull();
-
-    // same reference
-    assertThat(tslContainer.getAsTslUnsignedDoc()).isEqualTo(tslDoc);
   }
 
   @Test

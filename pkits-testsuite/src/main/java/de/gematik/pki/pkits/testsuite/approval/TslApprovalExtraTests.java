@@ -27,8 +27,8 @@ import static de.gematik.pki.pkits.testsuite.usecases.OcspRequestExpectationBeha
 import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RESP_WITH_PROVIDED_CERT;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
@@ -107,7 +107,7 @@ class TslApprovalExtraTests extends ApprovalTestsBase {
         newTslDownloadGenerator(
                 "nextUpdateInPastOutsideGracePeriod",
                 rewriteIssueDateAndNextUpdate.apply(newIssueDate, newNextUpdate))
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly));
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl());
 
     final String testResultsMessage =
         "Now, the product type does not have a valid trust space after the test and should neither"

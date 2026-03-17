@@ -23,8 +23,8 @@ package de.gematik.pki.pkits.sut.server.sim.tsl;
 import static de.gematik.pki.pkits.common.PkitsConstants.TSL_ID_LENGTH;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import org.junit.jupiter.api.Test;
 

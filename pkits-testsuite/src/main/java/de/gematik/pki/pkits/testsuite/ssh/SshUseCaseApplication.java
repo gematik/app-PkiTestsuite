@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.testsuite.ssh;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase;
@@ -296,7 +296,6 @@ public class SshUseCaseApplication {
 
     parts.add(FilenameUtils.getName(getRemoteCrtFilename(certPath)));
     parts.add(testObjectConfig.getIpAddressOrFqdn());
-    parts.add(scriptUseCase.getCryptMethod());
     parts.add(String.valueOf(testObjectConfig.getOcspTimeoutSeconds()));
 
     return String.join(" ", parts);

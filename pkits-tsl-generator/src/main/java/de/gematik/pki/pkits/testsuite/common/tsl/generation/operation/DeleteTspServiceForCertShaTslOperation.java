@@ -20,7 +20,7 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPType;
@@ -39,7 +39,7 @@ public class DeleteTspServiceForCertShaTslOperation implements TslOperation {
             .getServiceInformation()
             .getServiceDigitalIdentity()
             .getDigitalId()
-            .get(0)
+            .getFirst()
             .getX509Certificate();
 
     if (certBytes == null) {

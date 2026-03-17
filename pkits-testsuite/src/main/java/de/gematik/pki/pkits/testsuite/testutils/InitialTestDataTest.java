@@ -22,7 +22,7 @@ package de.gematik.pki.pkits.testsuite.testutils;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.getHttpAddressString;
 
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslDownloadGenerator;
@@ -68,7 +68,7 @@ public class InitialTestDataTest {
             .build();
 
     final TslDownload tslDownload =
-        tslDownloadGenerator.getStandardTslDownload(CreateTslTemplate.defaultTsl(false));
+        tslDownloadGenerator.getStandardTslDownload(CreateTslTemplate.defaultTsl());
 
     final Path initialTslPath = Path.of("./out/initialTsl.xml");
     log.info("copying initial Tsl to: {}", initialTslPath);

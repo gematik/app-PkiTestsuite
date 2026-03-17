@@ -33,19 +33,19 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVA
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import de.gematik.pki.gemlibpki.exception.GemPkiException;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
-import de.gematik.pki.gemlibpki.ocsp.OcspUtils;
-import de.gematik.pki.gemlibpki.tsl.TslConstants;
-import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.tsl.TspInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TspService;
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.exception.GemPkiException;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator.CertificateIdGeneration;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator.ResponderIdType;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.commons.tsl.TslInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.commons.tsl.TspInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TspService;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
@@ -318,7 +318,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with alternative CAs without ServiceSupplyPoints.",
         newTslDownloadGenerator("noServiceSupplyPoints", deleteSsps)
-            .getStandardTslDownload(CreateTslTemplate.alternativeTsl(eccOnly)),
+            .getStandardTslDownload(CreateTslTemplate.alternativeTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
 
@@ -418,7 +418,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
     final TslDownload tslDownload =
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_DEFAULT)
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly));
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl());
 
     tslDownload.configureOcspResponderForTslSigner();
     tslSequenceNr.setLastOfferedTslSeqNr(offeredTslSeqNr);
@@ -452,7 +452,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
       throw new TestSuiteException(
           "Problem analyzing OCSP request. No request found in OCSP responder history.");
     }
-    final byte[] ocspReqBytes = historyEntries.get(0).getOcspReqBytes();
+    final byte[] ocspReqBytes = historyEntries.getFirst().getOcspReqBytes();
     final OCSPReq ocspReq = new OCSPReq(ocspReqBytes);
 
     final X509Certificate eeCert = tslDownload.getTslSignerCert();
@@ -483,7 +483,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
           "Problem analyzing OCSP request. No request found in OCSP responder history.");
     }
 
-    final byte[] ocspReqBytes = ocspHistoryPart.get(0).getOcspReqBytes();
+    final byte[] ocspReqBytes = ocspHistoryPart.getFirst().getOcspReqBytes();
 
     final OCSPReq ocspReq = new OCSPReq(ocspReqBytes);
 
@@ -566,7 +566,7 @@ class OcspApprovalTests extends ApprovalTestsBase {
             ocspResponderUri, tslSequenceNr.getExpectedNrInTestObject(), certSerial);
 
     assertThat(historyEntries).isNotEmpty();
-    final OcspRequestHistoryEntryDto historyEntry = historyEntries.get(0);
+    final OcspRequestHistoryEntryDto historyEntry = historyEntries.getFirst();
 
     final OCSPReq ocspReq = new OCSPReq(historyEntry.getOcspReqBytes());
     final Req singleReq = OcspUtils.getFirstSingleReq(ocspReq);

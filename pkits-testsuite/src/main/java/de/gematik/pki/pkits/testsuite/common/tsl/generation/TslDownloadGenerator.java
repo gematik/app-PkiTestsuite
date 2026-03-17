@@ -29,9 +29,9 @@ import static de.gematik.pki.pkits.common.PkitsTestDataConstants.TSL_DEFAULT_TTL
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
 
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.AggregateTslOperation;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.AggregateTslOperation.AggregateTslOperationBuilder;

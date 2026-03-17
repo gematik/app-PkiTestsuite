@@ -20,9 +20,9 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import lombok.AllArgsConstructor;

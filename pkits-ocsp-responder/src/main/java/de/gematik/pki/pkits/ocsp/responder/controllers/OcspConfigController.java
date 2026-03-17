@@ -54,7 +54,7 @@ public class OcspConfigController {
     if (jsonDto.getCertificateJsonDtos() != null && !jsonDto.getCertificateJsonDtos().isEmpty()) {
       log.info(
           "First certificate delayMilliseconds: {}",
-          jsonDto.getCertificateJsonDtos().get(0).getDelayMilliseconds());
+          jsonDto.getCertificateJsonDtos().getFirst().getDelayMilliseconds());
     }
 
     final OcspResponderConfig ocspResponderConfig = jsonDto.toConfig();
@@ -68,7 +68,7 @@ public class OcspConfigController {
         && !ocspResponderConfig.getCertificateDtos().isEmpty()) {
       log.info(
           "First certificate delayMilliseconds after toConfig: {}",
-          ocspResponderConfig.getCertificateDtos().get(0).getDelayMilliseconds());
+          ocspResponderConfig.getCertificateDtos().getFirst().getDelayMilliseconds());
     }
     processConfigurationRequest(ocspResponderConfig);
 

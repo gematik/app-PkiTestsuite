@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.tls.client;
 
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.utils.P12Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -115,10 +115,6 @@ public class TlsConnection {
     final String[] ciphersSuites;
     if ("EC".equalsIgnoreCase(algorithm)) {
       ciphersSuites = tlsSettings.getEcCiphersSuites();
-      kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
-
-    } else if ("RSA".equalsIgnoreCase(algorithm)) {
-      ciphersSuites = tlsSettings.getRsaCiphersSuites();
       kfAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
     } else {
       throw new TlsClientException("Algorithm %s is not supported.".formatted(algorithm));

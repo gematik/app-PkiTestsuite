@@ -23,6 +23,5 @@ package de.gematik.pki.pkits.testsuite.common;
 public enum PkitsCertType {
   PKITS_CERT_VALID,
   PKITS_CERT_VALID_ALTERNATIVE,
-  PKITS_CERT_INVALID,
-  PKITS_CERT_VALID_RSA
+  PKITS_CERT_INVALID
 }

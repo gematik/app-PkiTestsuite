@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.sut.server.sim.tsl;
 
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.math.BigInteger;
 

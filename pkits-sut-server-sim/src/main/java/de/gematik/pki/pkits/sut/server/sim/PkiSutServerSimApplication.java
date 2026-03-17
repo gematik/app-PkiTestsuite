@@ -20,7 +20,7 @@
 
 package de.gematik.pki.pkits.sut.server.sim;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspRespCache;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspRespCache;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
 import jakarta.servlet.Filter;

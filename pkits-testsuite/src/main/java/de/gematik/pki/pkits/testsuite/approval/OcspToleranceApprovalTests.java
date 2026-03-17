@@ -28,8 +28,8 @@ import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RES
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
-import de.gematik.pki.gemlibpki.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
 import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
@@ -83,7 +83,7 @@ class OcspToleranceApprovalTests extends ApprovalTestsBase {
     log.info("config.toString(): {} ", config.toString());
     log.info(
         "config ProducedAtDeltaMilliseconds: {} ",
-        config.getCertificateDtos().get(0).getProducedAtDeltaMilliseconds());
+        config.getCertificateDtos().getFirst().getProducedAtDeltaMilliseconds());
 
     TestEnvironment.configureOcspResponder(ocspResponderUri, config);
   }

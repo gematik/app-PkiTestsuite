@@ -20,13 +20,24 @@
 
 package de.gematik.pki.pkits.sut.server.sim.webserverconfigs;
 
-import static de.gematik.pki.gemlibpki.certificate.Role.*;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_ADV_KTR;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_BUNDESWEHRAPOTHEKE;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_EPA_KTR;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_INSTITUTION_PFLEGE;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_KOSTENTRAEGER;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_KRANKENHAUS;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_KRANKENHAUSAPOTHEKE;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_MOBILE_EINRICHTUNG_RETTUNGSDIENST;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_OEFFENTLICHE_APOTHEKE;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_PRAXIS_ARZT;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_PRAXIS_PSYCHOTHERAPEUT;
+import static de.gematik.pki.gemlibpki.commons.certificate.Role.OID_ZAHNARZTPRAXIS;
 import static de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication.PRODUCT_TYPE;
 
-import de.gematik.pki.gemlibpki.certificate.Admission;
-import de.gematik.pki.gemlibpki.certificate.CertificateProfile;
-import de.gematik.pki.gemlibpki.certificate.TucPki018Verifier;
-import de.gematik.pki.gemlibpki.exception.GemPkiException;
+import de.gematik.pki.gemlibpki.commons.certificate.Admission;
+import de.gematik.pki.gemlibpki.commons.certificate.CertificateProfile;
+import de.gematik.pki.gemlibpki.commons.certificate.TucPki018Verifier;
+import de.gematik.pki.gemlibpki.commons.exception.GemPkiException;
 import de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication;
 import de.gematik.pki.pkits.sut.server.sim.configs.HandshakeInterceptorConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;

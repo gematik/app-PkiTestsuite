@@ -65,8 +65,6 @@ class TestObjectTypeTest {
     assertThat(testObjectConfig.getTestObjectType().getClientKeystorePathAlternativeCerts())
         .isEqualTo(
             Path.of("./testDataTemplates/certificates/ecc/intermediaerClient/valid-alternative"));
-    assertThat(testObjectConfig.getTestObjectType().getClientKeystorePathRsaCerts())
-        .isEqualTo(Path.of("./testDataTemplates/certificates/rsa/intermediaerClient"));
   }
 
   @Test

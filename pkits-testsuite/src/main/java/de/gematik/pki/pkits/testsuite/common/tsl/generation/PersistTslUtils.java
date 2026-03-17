@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation;
 
-import de.gematik.pki.gemlibpki.tsl.TslReader;
-import de.gematik.pki.gemlibpki.tsl.TslUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.tsl.TslUtils;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.reporting.CurrentTestInfo;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;

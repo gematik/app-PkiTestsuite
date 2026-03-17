@@ -15,7 +15,6 @@ testObject:
     scriptPath: "testObject.scriptUseCase.scriptPath"
     sendReceiveApplicationData: false
     appDataHttpFwdSocket: "testObject.scriptUseCase.appDataHttpFwdSocket"
-    cryptMethod: "testObject.scriptUseCase.cryptMethod"
 
 sshConfig:
   username: "sshConfig.username"
@@ -41,7 +40,6 @@ ocspResponder:
   appPath: "ocspResponder.appPath"
 
 tslProvider:
-  tslCryptTypeEccOnly: true
   ipAddressOrFqdn: "tslProvider.ipAddressOrFqdn"
   port: -2000
   id: "tslProvider.id"

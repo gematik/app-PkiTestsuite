@@ -31,7 +31,7 @@ import static de.gematik.pki.pkits.testsuite.usecases.OcspResponderType.OCSP_RES
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVALID;
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
 import de.gematik.pki.pkits.testsuite.common.DtoDateConfigOption;
@@ -76,7 +76,7 @@ class TslSignerToleranceApprovalTests extends ApprovalTestsBase {
     final int offeredTslSeqNr = tslSequenceNr.getNextTslSeqNr();
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
 
-    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl(eccOnly);
+    final TrustStatusListType tsl = CreateTslTemplate.alternativeTsl();
     final TslDownload tslDownload =
         newTslDownloadGenerator("updateTrustStoreWithAlternativeCerts").getStandardTslDownload(tsl);
 

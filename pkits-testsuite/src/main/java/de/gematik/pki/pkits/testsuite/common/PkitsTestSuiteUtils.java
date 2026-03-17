@@ -22,7 +22,7 @@ package de.gematik.pki.pkits.testsuite.common;
 
 import static org.awaitility.Awaitility.await;
 
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;

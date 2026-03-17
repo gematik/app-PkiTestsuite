@@ -23,12 +23,12 @@ package de.gematik.pki.pkits.ocsp.responder.controllers;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_WEBSERVER_CONFIG_ENDPOINT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.CertificateIdGeneration;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponderIdType;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator.CertificateIdGeneration;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator.ResponderIdType;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator.ResponseAlgoBehavior;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponseConfigHolder;

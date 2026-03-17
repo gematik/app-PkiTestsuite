@@ -182,8 +182,6 @@ specifications from gemSpec_Krypt with the following parameters:
 * TLS Version: 1.2
 * cipher suites used: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 or
   TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-* for the test of RSA functionality, we use the following cipher suites:
-  TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
 * for ECDHE either NIST P-256 or P-384 is used
 
 #### Script
@@ -259,12 +257,9 @@ KimFachdienst supports ecc nist certificates correctly.
 These test data are for our own integration tests and can be used for approval tests as well.
 The test data form an own PKI, hence it is not easy to create them by yourself. If you use your own
 test data, make sure that issuing certificates are added in
-the [tsl template](./testDataTemplates/tsl/ECC-RSA_TSL-test.xml) as well.
+the [tsl template](./testDataTemplates/tsl/ECC-TSL-test.xml) as well.
 
-The TSLs are generated depending on the boolean parameter tslCryptTypeEccOnly in pkits.yml.
-If tslCryptTypeEccOnly is true,
-a [separate tsl template](./testDataTemplates/tsl/ECC_TSL-test.xml) with only ECC certificates is
-used for TSL generation.
+The TSLs generated within testsuite execution contain ECC certificates only.
 
 ### Initial TSL and Trust Anchor
 
@@ -435,7 +430,7 @@ productive data.
 
 ## License
 
-Copyright 2020-2025 gematik GmbH
+Copyright 2020-2026 gematik GmbH
 
 Apache License, Version 2.0
 

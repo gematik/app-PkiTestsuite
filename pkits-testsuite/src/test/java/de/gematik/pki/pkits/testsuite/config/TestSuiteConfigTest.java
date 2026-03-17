@@ -93,9 +93,7 @@ class TestSuiteConfigTest {
     final int testObject_tslGracePeriodDays = 0;
     final int testObject_ocspTimeoutSeconds = 10;
 
-    final boolean tslCryptTypeEccOnly = true;
     final boolean testObject_scriptUseCase_sendReceiveApplicationData = true;
-    final String testObject_scriptUseCase_cryptMethod = "ECC";
 
     final String ocspResponder_id = "OCSP Responder";
     final String ocspResponder_appPath = "./bin/pkits-ocsp-responder-exec.jar";
@@ -129,14 +127,12 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testObject_ocspTimeoutSeconds, testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
 
-    ca.assertEquals(tslCryptTypeEccOnly, testSuiteConfig.getTslProvider().isTslCryptTypeEccOnly());
     testSshConfigDefaults(ca, testSuiteConfig.getSshConfig());
 
     final ScriptUseCase scriptUseCase = testSuiteConfig.getTestObject().getScriptUseCase();
     ca.assertEquals(
         testObject_scriptUseCase_sendReceiveApplicationData,
         scriptUseCase.isSendReceiveApplicationData());
-    ca.assertEquals(testObject_scriptUseCase_cryptMethod, scriptUseCase.getCryptMethod());
 
     ca.assertEquals(ocspResponder_id, testSuiteConfig.getOcspResponder().getId());
     ca.assertEquals(ocspResponder_appPath, testSuiteConfig.getOcspResponder().getAppPath());
@@ -292,7 +288,6 @@ class TestSuiteConfigTest {
     final String ocspResponder_id = "ocspResponder.id";
     final String ocspResponder_appPath = "ocspResponder.appPath";
 
-    final boolean tslProvider_tslCryptTypeEccOnly = true;
     final String tslProvider_ipAddressOrFqdn = "tslProvider.ipAddressOrFqdn";
     final int tslProvider_port = -2000;
     final String tslProvider_id = "tslProvider.id";
@@ -303,7 +298,6 @@ class TestSuiteConfigTest {
     ca.assertEquals(ocspResponder_id, tsc.getOcspResponder().getId());
     ca.assertEquals(ocspResponder_appPath, tsc.getOcspResponder().getAppPath());
 
-    ca.assertEquals(tslProvider_tslCryptTypeEccOnly, tsc.getTslProvider().isTslCryptTypeEccOnly());
     ca.assertEquals(tslProvider_ipAddressOrFqdn, tsc.getTslProvider().getIpAddressOrFqdn());
     ca.assertEquals(tslProvider_port, tsc.getTslProvider().getPort());
     ca.assertEquals(tslProvider_id, tsc.getTslProvider().getId());
@@ -348,7 +342,6 @@ class TestSuiteConfigTest {
     final boolean scriptUseCase_sendReceiveApplicationData = false;
     final String scriptUseCase_appDataHttpFwdSocket =
         "testObject.scriptUseCase.appDataHttpFwdSocket";
-    final String scriptUseCase_cryptMethod = "testObject.scriptUseCase.cryptMethod";
 
     ca.assertEquals(name, testObject.getName());
     ca.assertEquals(testObjectType, testObject.getTestObjectType());
@@ -370,7 +363,6 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         scriptUseCase_sendReceiveApplicationData, scriptUseCase.isSendReceiveApplicationData());
     ca.assertEquals(scriptUseCase_appDataHttpFwdSocket, scriptUseCase.getAppDataHttpFwdSocket());
-    ca.assertEquals(scriptUseCase_cryptMethod, scriptUseCase.getCryptMethod());
   }
 
   void testAllFieldsAsNonDefaultSshConfig(final CustomAsserter ca, final SshConfig sshConfig) {

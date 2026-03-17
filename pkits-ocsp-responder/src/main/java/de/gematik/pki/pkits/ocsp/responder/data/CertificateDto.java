@@ -21,8 +21,8 @@
 package de.gematik.pki.pkits.ocsp.responder.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.security.cert.X509Certificate;

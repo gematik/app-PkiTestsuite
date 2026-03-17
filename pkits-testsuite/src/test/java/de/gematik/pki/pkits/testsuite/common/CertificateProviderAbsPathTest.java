@@ -94,13 +94,4 @@ class CertificateProviderAbsPathTest {
     assertThat(eeCertPath.toString()).contains(".p12");
     assertThat(issuerCertPath.toString()).contains(".pem");
   }
-
-  @ParameterizedTest
-  @ArgumentsSource(CertificateProvider.class)
-  @VariableSource(value = PkitsCertType.PKITS_CERT_VALID_RSA)
-  void testAbsPathArgumentsSourceValidRsaCerts(final Path eeCertPath, final Path issuerCertPath) {
-    log.info("\n\n Test with certificate \"{}\"\n", eeCertPath);
-    assertThat(eeCertPath.toString()).contains(".p12");
-    assertThat(issuerCertPath.toString()).contains(".pem");
-  }
 }

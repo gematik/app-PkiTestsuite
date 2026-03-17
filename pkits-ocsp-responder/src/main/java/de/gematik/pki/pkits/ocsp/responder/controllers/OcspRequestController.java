@@ -20,14 +20,14 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
-import static de.gematik.pki.gemlibpki.ocsp.OcspUtils.getFirstSingleResp;
+import static de.gematik.pki.gemlibpki.commons.ocsp.OcspUtils.getFirstSingleResp;
 import static de.gematik.pki.pkits.common.PkitsConstants.NOT_CONFIGURED;
 import static de.gematik.pki.pkits.common.PkitsConstants.OCSP_SSP_ENDPOINT;
 import static org.bouncycastle.internal.asn1.isismtt.ISISMTTObjectIdentifiers.id_isismtt_at_certHash;
 
-import de.gematik.pki.gemlibpki.ocsp.OcspConstants;
-import de.gematik.pki.gemlibpki.ocsp.OcspResponseGenerator;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspConstants;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.ocsp.responder.OcspResponderException;

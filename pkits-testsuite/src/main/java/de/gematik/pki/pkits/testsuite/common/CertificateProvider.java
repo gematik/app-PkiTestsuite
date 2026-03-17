@@ -88,10 +88,6 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
         eeCertsDir = testObjectType.getClientKeystorePathInvalidCerts();
         issuerCert = testObjectType.getClientDefaultIssuerCertPath();
       }
-      default -> { // PkitsCertType.PKITS_CERT_VALID_RSA
-        eeCertsDir = testObjectType.getClientKeystorePathRsaCerts();
-        issuerCert = testObjectType.getClientDefaultIssuerRsaCertPath();
-      }
     }
     eeCertsDir = PkitsTestSuiteUtils.buildAbsolutePathForDir(eeCertsDir);
     issuerCert = PkitsTestSuiteUtils.buildAbsolutePath(issuerCert);

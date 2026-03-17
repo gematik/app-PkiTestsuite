@@ -2,6 +2,10 @@
 
 # Release notes PKI Test Suite
 
+## Release 8.0.0
+
+- remove RSA support
+
 ## Release 7.2.0
 
 - switch from OpenJDK 17 to OpenJDK 21

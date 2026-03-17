@@ -88,7 +88,7 @@ class PkitsTestsuiteRunnerUtilsTest {
   @Test
   void testGetTestsToRunFromCliArgument() {
 
-    final int numberOfExpectedTestToRun = 10;
+    final int numberOfExpectedTestToRun = 9;
     final String testCasesNames =
         "CertificateApprovalTests," //       +4 tests
             + "verifyOcspGracePeriod, " //   +1 test

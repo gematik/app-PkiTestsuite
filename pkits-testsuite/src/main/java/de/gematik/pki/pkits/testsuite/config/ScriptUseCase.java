@@ -42,11 +42,4 @@ public class ScriptUseCase {
       description =
           "send AppData over http-forwarder (to gematik OCSP-sim, as defined in bash script)")
   String appDataHttpFwdSocket;
-
-  @ParameterDescription(
-      withDefault = true,
-      description =
-          "Parameter is used as an argument for the called script. It can be used for handling"
-              + " different implementations in RSA or ECC.")
-  String cryptMethod = "ECC";
 }

@@ -20,10 +20,10 @@
 
 package de.gematik.pki.pkits.sut.server.sim.tsl;
 
-import de.gematik.pki.gemlibpki.tsl.TslConstants;
-import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TspService;
-import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier.TrustAnchorUpdate;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.commons.tsl.TslInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TspService;
+import de.gematik.pki.gemlibpki.commons.tsl.TucPki001Verifier.TrustAnchorUpdate;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import java.util.List;
@@ -98,6 +98,6 @@ class StatefulTrustAnchorUpdate {
   }
 
   private static TSPServiceType getTspServiceTSLServiceCertChange(final TrustStatusListType tsl) {
-    return getChangeCertTspServices(tsl).get(0);
+    return getChangeCertTspServices(tsl).getFirst();
   }
 }

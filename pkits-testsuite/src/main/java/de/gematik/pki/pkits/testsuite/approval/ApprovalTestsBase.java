@@ -37,9 +37,9 @@ import static de.gematik.pki.pkits.tsl.provider.data.TslRequestHistory.IGNORE_SE
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.utils.P12Reader;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;
 import de.gematik.pki.pkits.ocsp.responder.data.OcspResponderConfig;
@@ -143,8 +143,6 @@ public abstract class ApprovalTestsBase {
 
   protected CurrentTestInfo currentTestInfo;
 
-  protected static boolean eccOnly = false;
-
   protected static String getSwitchMessage(final String anchorType1, final String anchorType2) {
     return "Offer a TSL to switch from the %s trust anchor to the %s trust anchor."
         .formatted(anchorType1, anchorType2);
@@ -173,12 +171,6 @@ public abstract class ApprovalTestsBase {
 
     log.info(
         "TestObject: {}:{}", testSuiteConfig.getTestObject().getIpAddressOrFqdn(), sutServerPort);
-
-    if (testSuiteConfig.getTslProvider().isTslCryptTypeEccOnly()) {
-      eccOnly = true;
-    }
-
-    log.info("TslCryptTypeEccOnly: {}", eccOnly);
   }
 
   @BeforeEach
@@ -309,7 +301,7 @@ public abstract class ApprovalTestsBase {
       updateTrustStore(
           OFFER_DEFAULT_TSL_MESSAGE,
           newTslDownloadGenerator("defaultTsl")
-              .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly)),
+              .getStandardTslDownload(CreateTslTemplate.defaultTsl()),
           OCSP_REQUEST_EXPECT,
           WITHOUT_USECASE);
     }
@@ -344,16 +336,8 @@ public abstract class ApprovalTestsBase {
     log.info("\n\n===> Establishing initial state... - {}\n", currentTestInfo);
     initialTslDownloadByTestObject();
 
-    final Path clientCertPath;
-    final Path issuerCertPath;
-
-    if (certType == PkitsCertType.PKITS_CERT_VALID_RSA) {
-      clientCertPath = getPathOfDefaultClientRsaCert();
-      issuerCertPath = getPathOfDefaultIssuerRsaCert();
-    } else {
-      clientCertPath = getPathOfDefaultClientCert();
-      issuerCertPath = getPathOfDefaultIssuerCert();
-    }
+    final Path clientCertPath = getPathOfDefaultClientCert();
+    final Path issuerCertPath = getPathOfDefaultIssuerCert();
 
     useCaseWithCert(
         true,
@@ -414,13 +398,13 @@ public abstract class ApprovalTestsBase {
   }
 
   protected TslDownload initialTslDownloadByTestObject() {
-    return initialStateWithTemplate("initialTslDownload", CreateTslTemplate.defaultTsl(eccOnly));
+    return initialStateWithTemplate("initialTslDownload", CreateTslTemplate.defaultTsl());
   }
 
   void initialStateWithAlternativeTemplate() {
 
     initialStateWithTemplate(
-        "initialStateWithAlternativeTemplate", CreateTslTemplate.alternativeTsl(eccOnly));
+        "initialStateWithAlternativeTemplate", CreateTslTemplate.alternativeTsl());
 
     useCaseWithCert(
         ALTERNATIVE_CLIENT_CERTS_CONFIG,
@@ -704,11 +688,6 @@ public abstract class ApprovalTestsBase {
     return getPathOfCert(testObjectType.getClientKeystorePathValidCerts());
   }
 
-  protected Path getPathOfDefaultClientRsaCert() {
-    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
-    return getPathOfCert(testObjectType.getClientKeystorePathRsaCerts());
-  }
-
   protected Path getPathOfAlternativeClientCert() {
     final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
     return getPathOfCert(testObjectType.getClientKeystorePathAlternativeCerts());
@@ -717,11 +696,6 @@ public abstract class ApprovalTestsBase {
   protected Path getPathOfDefaultIssuerCert() {
     final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
     return testObjectType.getClientDefaultIssuerCertPath();
-  }
-
-  protected Path getPathOfDefaultIssuerRsaCert() {
-    final TestObjectType testObjectType = testSuiteConfig.getTestObject().getTestObjectType();
-    return testObjectType.getClientDefaultIssuerRsaCertPath();
   }
 
   protected Path getPathOfAlternativeIssuerCert() {

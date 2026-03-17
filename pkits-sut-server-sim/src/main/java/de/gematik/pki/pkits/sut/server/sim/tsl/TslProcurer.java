@@ -23,21 +23,21 @@ package de.gematik.pki.pkits.sut.server.sim.tsl;
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 import static de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication.PRODUCT_TYPE;
 
-import de.gematik.pki.gemlibpki.error.ErrorCode;
-import de.gematik.pki.gemlibpki.exception.GemPkiException;
-import de.gematik.pki.gemlibpki.exception.GemPkiRuntimeException;
-import de.gematik.pki.gemlibpki.ocsp.OcspRespCache;
-import de.gematik.pki.gemlibpki.tsl.TslConstants;
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TslReader;
-import de.gematik.pki.gemlibpki.tsl.TslUtils;
-import de.gematik.pki.gemlibpki.tsl.TspInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TspService;
-import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier;
-import de.gematik.pki.gemlibpki.tsl.TucPki001Verifier.TrustAnchorUpdate;
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.error.ErrorCode;
+import de.gematik.pki.gemlibpki.commons.exception.GemPkiException;
+import de.gematik.pki.gemlibpki.commons.exception.GemPkiRuntimeException;
+import de.gematik.pki.gemlibpki.commons.ocsp.OcspRespCache;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.tsl.TslInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.tsl.TslUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TspInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TspService;
+import de.gematik.pki.gemlibpki.commons.tsl.TucPki001Verifier;
+import de.gematik.pki.gemlibpki.commons.tsl.TucPki001Verifier.TrustAnchorUpdate;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.sut.server.sim.PkiSutServerSimApplication;
 import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
 import de.gematik.pki.pkits.sut.server.sim.configs.TslConfig;
@@ -335,7 +335,7 @@ public class TslProcurer {
               .getServiceInformation()
               .getServiceDigitalIdentity()
               .getDigitalId()
-              .get(0)
+              .getFirst()
               .getX509Certificate();
 
       final X509Certificate cert = CertReader.readX509(certBytes);

@@ -20,7 +20,7 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation;
 
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import lombok.NonNull;
 import org.w3c.dom.Document;

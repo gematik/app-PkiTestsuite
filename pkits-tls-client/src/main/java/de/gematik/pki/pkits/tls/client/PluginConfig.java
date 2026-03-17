@@ -20,7 +20,7 @@
 
 package de.gematik.pki.pkits.tls.client;
 
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import de.gematik.pki.pkits.common.PkiCommonException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

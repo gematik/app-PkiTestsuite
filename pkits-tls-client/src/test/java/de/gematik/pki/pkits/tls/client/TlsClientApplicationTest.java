@@ -23,7 +23,7 @@ package de.gematik.pki.pkits.tls.client;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class TlsClientApplicationTest {
   static void setUp() {
     clientKeystorePath =
         ResourceReader.getFilePathFromResources(
-            "certificates/rsa/valid/ee_default.p12", TlsClientApplicationTest.class);
+            "certificates/ecc/valid/ee_default.p12", TlsClientApplicationTest.class);
   }
 
   @Test

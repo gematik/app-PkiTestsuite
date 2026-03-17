@@ -20,8 +20,8 @@
 
 package de.gematik.pki.pkits.common;
 
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

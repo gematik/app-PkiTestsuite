@@ -23,13 +23,12 @@ package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_KEY_USAGE_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGenerationConstants.SIGNER_VALIDITY_CHECK_ENABLED;
 import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_ECC_ONLY_TSL;
-import static de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.CreateTslTemplate.ARVATO_TU_TSL;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.gemlibpki.tsl.TslConstants;
-import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TslReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.commons.tsl.TslInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.StandardTslOperation.StandardTslOperationConfig;
@@ -44,17 +43,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 class StandardTslOperationTest {
-  @Test
-  void createRSATslFromFile() throws IOException {
-    createTslFromFile(ARVATO_TU_TSL, false);
-  }
 
   @Test
   void createECCTslFromFile() throws IOException {
-    createTslFromFile(ARVATO_TU_ECC_ONLY_TSL, true);
+    createTslFromFile(ARVATO_TU_ECC_ONLY_TSL);
   }
 
-  private void createTslFromFile(Path path, boolean eccOnly) throws IOException {
+  private void createTslFromFile(final Path path) throws IOException {
     final Path destFilePath = Path.of("pkits-tsl-generator/target/unittest_createTslFromFile.xml");
     final String newSsp = "http://my.new-cool-service-supply-point:5544/ocsp";
 
@@ -88,8 +83,7 @@ class StandardTslOperationTest {
     final TslOperation aggregateTslOperation =
         new AggregateTslOperation(standardTslOperation, signTslOperation);
 
-    final TslContainer tslContainer =
-        aggregateTslOperation.apply(CreateTslTemplate.defaultTsl(eccOnly));
+    final TslContainer tslContainer = aggregateTslOperation.apply(CreateTslTemplate.defaultTsl());
 
     final byte[] tslBytes = tslContainer.getAsTslUnsignedBytes();
     Files.write(destFilePath, tslBytes);

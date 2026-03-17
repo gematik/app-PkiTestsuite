@@ -20,13 +20,11 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
-import static de.gematik.pki.pkits.common.PkitsTestDataConstants.OCSP_SIGNER_RSA;
-
-import de.gematik.pki.gemlibpki.certificate.CertificateType;
-import de.gematik.pki.gemlibpki.tsl.TslConstants;
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.certificate.CertificateType;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.exeptions.TslGenerationException;
 import eu.europa.esig.trustedlist.jaxb.tsl.AttributedNonEmptyURIType;
@@ -239,18 +237,9 @@ public class TspServiceGenerator {
     return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63));
   }
 
-  public static TSPServiceType getTspServiceKompCaRsa() {
-    return getTspServiceKomp(CertReader.readX509(PkitsTestDataConstants.DEFAULT_KOMP_CA_RSA));
-  }
-
   // OCSPSimulator-Signer-ecc.xml
   public static TSPServiceType getTspServiceOcspSigner() {
     return getTspServiceOcspSigner(PkitsTestDataConstants.DEFAULT_OCSP_SIGNER.getCertificate());
-  }
-
-  // OCSPSimulator-Signer.xml
-  public static TSPServiceType getTspServiceOcspSignerRsa() {
-    return getTspServiceOcspSigner(OCSP_SIGNER_RSA.getCertificate());
   }
 
   public static TSPServiceType getTspServiceSmcbCa() {
@@ -261,20 +250,12 @@ public class TspServiceGenerator {
     return getTspServiceSmcb(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_SMCB_CA));
   }
 
-  public static TSPServiceType getTspServiceSmcbCaRsa() {
-    return getTspServiceSmcb(CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA_RSA));
-  }
-
   public static TSPServiceType getTspServiceEgkCa() {
     return getTspServiceEgk(CertReader.readX509(PkitsTestDataConstants.DEFAULT_EGK_CA));
   }
 
   public static TSPServiceType getTspServiceEgkCaAlt() {
     return getTspServiceEgk(CertReader.readX509(PkitsTestDataConstants.ALTERNATIVE_EGK_CA));
-  }
-
-  public static TSPServiceType getTspServiceEgkCaRsa() {
-    return getTspServiceEgk(CertReader.readX509(PkitsTestDataConstants.DEFAULT_EGK_CA_RSA));
   }
 
   public static TSPServiceType getTspServiceTslTrustAnchorCa() {

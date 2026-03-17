@@ -22,7 +22,7 @@ package de.gematik.pki.pkits.tsl.provider.data;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.calculateSha256Hex;
 
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
 import eu.europa.esig.trustedlist.jaxb.tsl.TrustStatusListType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

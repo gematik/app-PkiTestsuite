@@ -20,10 +20,10 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
-import de.gematik.pki.gemlibpki.tsl.TslInformationProvider;
-import de.gematik.pki.gemlibpki.tsl.TslReader;
-import de.gematik.pki.gemlibpki.tsl.TspService;
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.tsl.TslInformationProvider;
+import de.gematik.pki.gemlibpki.commons.tsl.TslReader;
+import de.gematik.pki.gemlibpki.commons.tsl.TspService;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import eu.europa.esig.trustedlist.jaxb.tsl.TSPServiceType;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +65,7 @@ public class TslGenerationTestUtils {
                             .getServiceInformation()
                             .getServiceName()
                             .getName()
-                            .get(0)
+                            .getFirst()
                             .getValue(),
                     Collectors.counting()));
 

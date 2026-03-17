@@ -22,13 +22,12 @@ package de.gematik.pki.pkits.ocsp.responder.data;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
-import de.gematik.pki.gemlibpki.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.ocsp.responder.controllers.OcspResponderTestUtils;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -43,23 +42,25 @@ import tools.jackson.databind.json.JsonMapper;
 class OcspResponderConfigTest {
 
   void assertGood(final OcspResponderConfig config) {
-    assertThat(config.getCertificateDtos().get(0).getOcspCertificateStatus())
+    assertThat(config.getCertificateDtos().getFirst().getOcspCertificateStatus())
         .isEqualTo(CertificateStatus.GOOD);
-    assertThat(config.getCertificateDtos().get(0).getCertificateStatusDto().isGood()).isTrue();
+    assertThat(config.getCertificateDtos().getFirst().getCertificateStatusDto().isGood()).isTrue();
   }
 
   void assertUnknown(final OcspResponderConfig config) {
-    assertThat(config.getCertificateDtos().get(0).getOcspCertificateStatus())
+    assertThat(config.getCertificateDtos().getFirst().getOcspCertificateStatus())
         .isInstanceOf(UnknownStatus.class);
-    assertThat(config.getCertificateDtos().get(0).getCertificateStatusDto().isUnknown()).isTrue();
+    assertThat(config.getCertificateDtos().getFirst().getCertificateStatusDto().isUnknown())
+        .isTrue();
   }
 
   void assertRevoked(final OcspResponderConfig config, final ZonedDateTime revokedDate) {
 
     final CertificateStatus certificateStatus =
-        config.getCertificateDtos().get(0).getOcspCertificateStatus();
+        config.getCertificateDtos().getFirst().getOcspCertificateStatus();
     assertThat(certificateStatus).isInstanceOf(RevokedStatus.class);
-    assertThat(config.getCertificateDtos().get(0).getCertificateStatusDto().isRevoked()).isTrue();
+    assertThat(config.getCertificateDtos().getFirst().getCertificateStatusDto().isRevoked())
+        .isTrue();
 
     final RevokedStatus revokedStatus = (RevokedStatus) certificateStatus;
     assertThat(revokedStatus.getRevocationReason()).isEqualTo(1);
@@ -131,7 +132,7 @@ class OcspResponderConfigTest {
   }
 
   @Test
-  void serializeAndDeserializeOcspConfigReqDto() throws IOException {
+  void serializeAndDeserializeOcspConfigReqDto() {
 
     final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
 
@@ -172,7 +173,7 @@ class OcspResponderConfigTest {
   }
 
   @Test
-  void serializeAndDeserializeOcspConfigReqDto_delayMilliseconds() throws IOException {
+  void serializeAndDeserializeOcspConfigReqDto_delayMilliseconds() {
 
     final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
 

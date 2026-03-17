@@ -23,10 +23,10 @@ package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import de.gematik.pki.gemlibpki.certificate.CertificateType;
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.certificate.CertificateType;
+import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.exeptions.TslGenerationException;
 import eu.europa.esig.trustedlist.jaxb.tsl.ExtensionType;
@@ -104,13 +104,13 @@ class TspServiceGeneratorTest {
             .getServiceInformation()
             .getServiceDigitalIdentity()
             .getDigitalId()
-            .get(0)
+            .getFirst()
             .getX509Certificate();
 
     Assertions.assertThat(certBytes).isEqualTo(certificate.getEncoded());
 
     Assertions.assertThat(
-            tspService.getServiceInformation().getServiceName().getName().get(0).getValue())
+            tspService.getServiceInformation().getServiceName().getName().getFirst().getValue())
         .isEqualTo(serviceName);
 
     Assertions.assertThat(tspService.getServiceInformation().getServiceStatus())
@@ -127,7 +127,7 @@ class TspServiceGeneratorTest {
                 .getServiceInformation()
                 .getServiceInformationExtensions()
                 .getExtension()
-                .get(0)
+                .getFirst()
                 .isCritical())
         .isFalse();
 
@@ -173,7 +173,7 @@ class TspServiceGeneratorTest {
                 .getServiceInformation()
                 .getServiceDigitalIdentity()
                 .getDigitalId()
-                .get(0)
+                .getFirst()
                 .getX509Certificate())
         .isEqualTo(certBytes);
   }
@@ -198,7 +198,7 @@ class TspServiceGeneratorTest {
     final TSPServiceType tspService = tspServiceGenerator.certificate(certificate).generate();
 
     Assertions.assertThat(
-            tspService.getServiceInformation().getServiceName().getName().get(0).getValue())
+            tspService.getServiceInformation().getServiceName().getName().getFirst().getValue())
         .isEqualTo(certificate.getSubjectX500Principal().getName());
   }
 }

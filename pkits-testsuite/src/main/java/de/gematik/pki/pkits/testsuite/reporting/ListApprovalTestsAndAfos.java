@@ -69,7 +69,8 @@ public class ListApprovalTestsAndAfos {
   private static final Set<String> testsOrClassesToSkipPerDefault = new TreeSet<>();
 
   static {
-    testsOrClassesToSkipPerDefault.add("verifyUseCaseRsaCertValid");
+    // add here test method names or class names to skip them by default, example:
+    // testsOrClassesToSkipPerDefault.add("verifyUseCaseRsaCertValid");
   }
 
   public static final Predicate<CustomTestInfo> relevantCustomTestInfoPredicate =

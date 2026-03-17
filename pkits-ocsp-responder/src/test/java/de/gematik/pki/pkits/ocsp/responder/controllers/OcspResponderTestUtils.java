@@ -20,10 +20,10 @@
 
 package de.gematik.pki.pkits.ocsp.responder.controllers;
 
-import de.gematik.pki.gemlibpki.utils.CertReader;
-import de.gematik.pki.gemlibpki.utils.P12Container;
-import de.gematik.pki.gemlibpki.utils.P12Reader;
-import de.gematik.pki.gemlibpki.utils.ResourceReader;
+import de.gematik.pki.gemlibpki.commons.utils.CertReader;
+import de.gematik.pki.gemlibpki.commons.utils.P12Container;
+import de.gematik.pki.gemlibpki.commons.utils.P12Reader;
+import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.ocsp.responder.data.CertificateDto;

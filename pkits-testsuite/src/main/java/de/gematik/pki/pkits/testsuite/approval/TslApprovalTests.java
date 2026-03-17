@@ -38,14 +38,14 @@ import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_INVA
 import static de.gematik.pki.pkits.testsuite.usecases.UseCaseResult.USECASE_VALID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import de.gematik.pki.gemlibpki.tsl.TslConstants;
-import de.gematik.pki.gemlibpki.tsl.TslConverter;
-import de.gematik.pki.gemlibpki.tsl.TslConverter.DocToBytesOption;
-import de.gematik.pki.gemlibpki.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.tsl.TslSigner;
-import de.gematik.pki.gemlibpki.tsl.TslUtils;
-import de.gematik.pki.gemlibpki.tsl.TslValidator;
-import de.gematik.pki.gemlibpki.utils.GemLibPkiUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
+import de.gematik.pki.gemlibpki.commons.tsl.TslConverter.DocToBytesOption;
+import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
+import de.gematik.pki.gemlibpki.commons.tsl.TslSigner;
+import de.gematik.pki.gemlibpki.commons.tsl.TslUtils;
+import de.gematik.pki.gemlibpki.commons.tsl.TslValidator;
+import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.common.PkitsConstants;
 import de.gematik.pki.pkits.ocsp.responder.api.OcspResponderManager;
 import de.gematik.pki.pkits.testsuite.common.PkitsTestSuiteUtils;
@@ -122,14 +122,14 @@ class TslApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "case 1 - AlternativeCaPrettyPrint.",
         newTslDownloadGenerator("prettyPrintedTslPart", formatTsl(DocToBytesOption.PRETTY_PRINT))
-            .getStandardTslDownload(alternativeTsl(eccOnly)),
+            .getStandardTslDownload(alternativeTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_VALID, OCSP_REQUEST_EXPECT));
 
     updateTrustStore(
         "case 2 - AlternativeCaNoLineBreaks.",
         newTslDownloadGenerator("noLineBreaksInTslPart", formatTsl(DocToBytesOption.NO_LINE_BREAKS))
-            .getStandardTslDownload(alternativeTsl(eccOnly)),
+            .getStandardTslDownload(alternativeTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_VALID, OCSP_REQUEST_EXPECT));
 
@@ -209,7 +209,7 @@ class TslApprovalTests extends ApprovalTestsBase {
               newTslDownloadGenerator(tslName)
                   .getTslDownloadWithTemplateAndSigner(
                       offeredTslSeqNr,
-                      alternativeTsl(eccOnly),
+                      alternativeTsl(),
                       DEFAULT_TSL_SIGNER,
                       DEFAULT_TRUST_ANCHOR,
                       SIGNER_KEY_USAGE_CHECK_ENABLED,
@@ -252,7 +252,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with the same tslId, but new (incremented) tslSeqNr.",
         newTslDownloadGenerator("sameTslId", rewriteTslIdToInitial)
-            .getStandardTslDownload(alternativeTsl(eccOnly)),
+            .getStandardTslDownload(alternativeTsl()),
         OCSP_REQUEST_IGNORE,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_DO_NOT_EXPECT));
   }
@@ -270,7 +270,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with alternative CAs whose ASN1 structure is invalid.",
         newTslDownloadGenerator("altCaWithBrokenAsn1")
-            .getStandardTslDownload(CreateTslTemplate.defectAlternativeCaBrokenTsl(eccOnly)),
+            .getStandardTslDownload(CreateTslTemplate.defectAlternativeCaBrokenTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 
@@ -293,8 +293,7 @@ class TslApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs whose ServiceInformationExtension elements are"
             + " wrong.",
         newTslDownloadGenerator("altCaWithBadServiceInformationExtensions")
-            .getStandardTslDownload(
-                CreateTslTemplate.defectAlternativeCaWrongSrvInfoExtTsl(eccOnly)),
+            .getStandardTslDownload(CreateTslTemplate.defectAlternativeCaWrongSrvInfoExtTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_IGNORE));
 
@@ -313,7 +312,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Import TSL with ServiceTypeIdentifier \"unspecified\".",
         newTslDownloadGenerator("altCaUnspecifiedServiceTypeIdentifier")
-            .getStandardTslDownload(CreateTslTemplate.alternativeCaUnspecifiedStiTsl(eccOnly)),
+            .getStandardTslDownload(CreateTslTemplate.alternativeCaUnspecifiedStiTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_VALID));
 
@@ -333,7 +332,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with alternative CAs with ServiceStatus REVOKED.",
         newTslDownloadGenerator("altCaRevoked")
-            .getStandardTslDownload(CreateTslTemplate.alternativeCaRevokedTsl(eccOnly)),
+            .getStandardTslDownload(CreateTslTemplate.alternativeCaRevokedTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID));
 
@@ -370,7 +369,7 @@ class TslApprovalTests extends ApprovalTestsBase {
         "Offer a TSL with alternative CAs, ServiceStatus REVOKED, StatusStartingTime one day in the"
             + " future.",
         newTslDownloadGenerator("altCaRevokedInFuture", rewriteStatusStartingTimeToNowPlusOneDay)
-            .getStandardTslDownload(CreateTslTemplate.alternativeCaRevokedLaterTsl(eccOnly)),
+            .getStandardTslDownload(CreateTslTemplate.alternativeCaRevokedLaterTsl()),
         OCSP_REQUEST_EXPECT,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_VALID, OCSP_REQUEST_EXPECT));
 
@@ -408,7 +407,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     updateTrustStore(
         "Offer a TSL with alternative CAs. The signature of the TSL is invalid.",
         newTslDownloadGenerator("brokenSignatureByChangedEmail", rewriteMailToInvalidateSignature)
-            .getStandardTslDownload(alternativeTsl(eccOnly)),
+            .getStandardTslDownload(alternativeTsl()),
         OCSP_REQUEST_IGNORE,
         withUseCase(ALTERNATIVE_CLIENT_CERTS_CONFIG, USECASE_INVALID, OCSP_REQUEST_IGNORE));
 
@@ -422,7 +421,7 @@ class TslApprovalTests extends ApprovalTestsBase {
         .getSchemeOperatorAddress()
         .getElectronicAddress()
         .getURI()
-        .get(0)
+        .getFirst()
         .getValue();
   }
 
@@ -501,7 +500,7 @@ class TslApprovalTests extends ApprovalTestsBase {
         newTslDownloadGenerator("initialStateWithoutCleanUp")
             .getTslDownloadWithTemplateAndSigner(
                 offeredTslSeqNr,
-                CreateTslTemplate.defaultTsl(eccOnly),
+                CreateTslTemplate.defaultTsl(),
                 DEFAULT_TSL_SIGNER,
                 DEFAULT_TRUST_ANCHOR,
                 SIGNER_KEY_USAGE_CHECK_ENABLED,
@@ -542,7 +541,7 @@ class TslApprovalTests extends ApprovalTestsBase {
 
     final TslDownload tslDownload =
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_ALTERNATIVE)
-            .getStandardTslDownload(alternativeTsl(eccOnly));
+            .getStandardTslDownload(alternativeTsl());
 
     updateTrustStoreAndWaitWithCount(
         tslDownload,
@@ -581,7 +580,7 @@ class TslApprovalTests extends ApprovalTestsBase {
 
     final TslDownload tslDownload =
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_ALTERNATIVE)
-            .getStandardTslDownload(alternativeTsl(eccOnly));
+            .getStandardTslDownload(alternativeTsl());
 
     updateTrustStoreAndWaitWithCount(
         tslDownload,
@@ -625,7 +624,7 @@ class TslApprovalTests extends ApprovalTestsBase {
             tslProviderUri, tslSequenceNrToQuery, TslDownloadEndpointType.HASH_ENDPOINTS);
 
     assertThat(historyEntryDtos).as("No TSL download requests received").isNotEmpty();
-    assertThat(historyEntryDtos.get(0).getTslDownloadEndpoint())
+    assertThat(historyEntryDtos.getFirst().getTslDownloadEndpoint())
         .isIn(TslDownloadEndpointType.HASH_ENDPOINTS.getEndpoints());
 
     establishDefaultTrustStoreAndExecuteUseCase();
@@ -659,7 +658,7 @@ class TslApprovalTests extends ApprovalTestsBase {
                       .orElseThrow()
                       .getAdditionalInformation()
                       .getTextualInformationOrOtherInformation()
-                      .get(0);
+                      .getFirst();
 
           final String dummyOid = "1.2.276.0.76.4.10";
           textualInformation.setValue(dummyOid);
@@ -676,7 +675,7 @@ class TslApprovalTests extends ApprovalTestsBase {
             .chained(newTslDownloadGenerator().signTslOperation(DEFAULT_TSL_SIGNER))
             .build();
 
-    final TslContainer tslContainer = aggregate.apply(CreateTslTemplate.defaultTsl(eccOnly));
+    final TslContainer tslContainer = aggregate.apply(CreateTslTemplate.defaultTsl());
 
     final byte[] tslBytes = tslContainer.getAsTslUnsignedBytes();
     final Path tslFilename =
@@ -702,7 +701,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     log.info(OFFERING_TSL_WITH_SEQNR_MESSAGE, offeredTslSeqNr);
     final TslDownload tslDownload =
         newTslDownloadGenerator(TslDownloadGenerator.TSL_NAME_DEFAULT)
-            .getStandardTslDownload(CreateTslTemplate.defaultTsl(eccOnly));
+            .getStandardTslDownload(CreateTslTemplate.defaultTsl());
     updateTrustStoreAndWaitWithCount(
         tslDownload, TslProviderEndpointsConfig.PRIMARY_200_BACKUP_200, 0, 1);
 
@@ -741,7 +740,7 @@ class TslApprovalTests extends ApprovalTestsBase {
     final TslContainer tslToGenerateFilename =
         tslDownloadGenerator
             .getStandardTslOperation(tslDownloadGenerator.getTslSeqNr())
-            .apply(alternativeTsl(eccOnly));
+            .apply(alternativeTsl());
 
     final Path tslUnsignedOutputFile =
         PersistTslUtils.generateTslFilename(
@@ -751,7 +750,7 @@ class TslApprovalTests extends ApprovalTestsBase {
         tslDownloadGenerator.getTslDownloadWithTemplateAndSigner(
             tslUnsignedOutputFile,
             tslDownloadGenerator.getTslSeqNr(),
-            alternativeTsl(eccOnly),
+            alternativeTsl(),
             DEFAULT_TSL_SIGNER,
             DEFAULT_TRUST_ANCHOR,
             SIGNER_KEY_USAGE_CHECK_ENABLED,
@@ -843,7 +842,7 @@ class TslApprovalTests extends ApprovalTestsBase {
       final TslContainer tslToGenerateFilename =
           tslDownloadGenerator
               .getStandardTslOperation(tslDownloadGenerator.getTslSeqNr())
-              .apply(alternativeTsl(eccOnly));
+              .apply(alternativeTsl());
 
       final Path tslOutputFile =
           PersistTslUtils.generateTslFilename(
@@ -853,7 +852,7 @@ class TslApprovalTests extends ApprovalTestsBase {
           tslDownloadGenerator.getTslDownloadWithTemplateAndSigner(
               tslOutputFile,
               tslDownloadGenerator.getTslSeqNr(),
-              alternativeTsl(eccOnly),
+              alternativeTsl(),
               DEFAULT_TSL_SIGNER,
               DEFAULT_TRUST_ANCHOR,
               SIGNER_KEY_USAGE_CHECK_ENABLED,

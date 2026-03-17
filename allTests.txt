@@ -2,7 +2,6 @@
 	verifyUseCaseCertsInvalid   Test use case with invalid certificates (multiple data variants)
 	verifyUseCaseCertsNotInTsl  Test use case with valid certificates with issuer not in trust store (multiple data variants)
 	verifyUseCaseCertsValid     Test use case with valid certificates (multiple data variants)
--	verifyUseCaseRsaCertValid   Test use case with valid RSA certificate (multiple data variants)
 
 +	de.gematik.pki.pkits.testsuite.approval.OcspApprovalTests
 	verifyForCaCertificateWithoutServiceSupplyPoint    CA certificate in TSL without ServiceSupplyPoint
