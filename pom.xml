@@ -4,7 +4,7 @@
 
   <groupId>de.gematik.pki.pkits</groupId>
   <artifactId>pki-testsuite</artifactId>
-  <version>8.0.0</version>
+  <version>8.1.0</version>
   <packaging>pom</packaging>
   <name>PKI Testsuite</name>
   <description>PKI Testsuite to test products of the telematic infrastructure to fulfill the
@@ -74,26 +74,26 @@
 
     <!-- dependencies -->
     <version.assertj-core>3.27.7</version.assertj-core>
-    <version.bouncycastle>1.83</version.bouncycastle>
+    <version.bouncycastle>1.84</version.bouncycastle>
     <version.commons-compress>1.28.0</version.commons-compress>
-    <version.commons-io>2.21.0</version.commons-io>
+    <version.commons-io>2.22.0</version.commons-io>
     <version.commons-text>1.15.0</version.commons-text>
     <version.gemLibPki>4.0.2</version.gemLibPki>
     <version.httpcore5>5.4.2</version.httpcore5>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.junit-jupiter>6.0.3</version.junit-jupiter>
-    <version.log4j2>2.25.3</version.log4j2>
-    <version.lombok>1.18.44</version.lombok>
-    <version.openapi>3.0.2</version.openapi>
-    <version.spring-boot>4.0.3</version.spring-boot>
-    <version.spring-boot-maven-plugin>4.0.3</version.spring-boot-maven-plugin>
-    <version.unirest-java>4.7.4</version.unirest-java>
+    <version.log4j2>2.25.4</version.log4j2>
+    <version.lombok>1.18.46</version.lombok>
+    <version.openapi>3.0.3</version.openapi>
+    <version.spring-boot>4.0.6</version.spring-boot>
+    <version.spring-boot-maven-plugin>4.0.6</version.spring-boot-maven-plugin>
+    <version.unirest-java>4.8.1</version.unirest-java>
     <version.xmlunit>2.11.0</version.xmlunit>
 
     <!--  plugins -->
     <version.dependency-check-maven>7.2.1</version.dependency-check-maven>
     <version.docker-maven-plugin>0.48.1</version.docker-maven-plugin>
-    <version.git-commit-id-maven-plugin>9.0.2</version.git-commit-id-maven-plugin>
+    <version.git-commit-id-maven-plugin>10.0.0</version.git-commit-id-maven-plugin>
     <version.jacoco-maven-plugin>0.8.14</version.jacoco-maven-plugin>
     <version.maven-compiler-plugin>3.15.0</version.maven-compiler-plugin>
     <version.maven-enforcer-plugin>3.6.2</version.maven-enforcer-plugin>
@@ -101,8 +101,8 @@
     <version.maven-resources-plugin>3.3.0</version.maven-resources-plugin>
     <version.maven-site-plugin>3.21.0</version.maven-site-plugin>
     <version.maven-source-plugin>3.4.0</version.maven-source-plugin>
-    <version.sonar-maven-plugin>5.5.0.6356</version.sonar-maven-plugin>
-    <version.spotless-maven-plugin>3.3.0</version.spotless-maven-plugin>
+    <version.sonar-maven-plugin>5.6.0.6792</version.sonar-maven-plugin>
+    <version.spotless-maven-plugin>3.4.0</version.spotless-maven-plugin>
     <version.spotless.google-java-format>1.17.0</version.spotless.google-java-format>
 
     <!-- settings for upload to sonar server -->
@@ -135,7 +135,7 @@
       <dependency>
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.2</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -145,12 +145,12 @@
       <dependency>
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.2</version>
       </dependency>
       <dependency>
         <groupId>tools.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.2</version>
       </dependency>
 
       <dependency>
@@ -161,12 +161,12 @@
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
-        <artifactId>bcpkix-jdk18on</artifactId>
+        <artifactId>bcprov-jdk18on</artifactId>
         <version>${version.bouncycastle}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk18on</artifactId>
+        <artifactId>bcpkix-jdk18on</artifactId>
         <version>${version.bouncycastle}</version>
       </dependency>
       <dependency>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>8.0.0</version>
+    <version>8.1.0</version>
   </parent>
 
   <artifactId>pkits-tsl-generator</artifactId>
@@ -17,6 +17,30 @@
     <dependency>
       <groupId>de.gematik.pki</groupId>
       <artifactId>gemLibPki</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk18on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk18on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcutil-jdk18on</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk18on</artifactId>
     </dependency>
 
     <dependency>
@@ -50,6 +74,19 @@
       <artifactId>junit-jupiter</artifactId>
       <version>${version.junit-jupiter}</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- Ergänzung: bcutil-jdk18on für Utility-Klassen wie SpiUtil -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcutil-jdk18on</artifactId>
+      <version>${version.bouncycastle}</version>
+    </dependency>
+
+    <!-- Ergänzung: bctls-jdk18on für TLS/JSSE-Support (org.bouncycastle.jsse.provider.*, org.bouncycastle.tls.*) -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bctls-jdk18on</artifactId>
     </dependency>
   </dependencies>
 

@@ -70,7 +70,8 @@ class OcspResponderConfigTest {
 
   @Test
   void getCustomCertificateStatusDto() {
-    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
+    final X509Certificate eeCert =
+        OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_1);
 
     final X509Certificate issuerCert = CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
 
@@ -134,7 +135,8 @@ class OcspResponderConfigTest {
   @Test
   void serializeAndDeserializeOcspConfigReqDto() {
 
-    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
+    final X509Certificate eeCert =
+        OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_1);
 
     final X509Certificate issuerCert = CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
 
@@ -175,7 +177,8 @@ class OcspResponderConfigTest {
   @Test
   void serializeAndDeserializeOcspConfigReqDto_delayMilliseconds() {
 
-    final X509Certificate eeCert = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
+    final X509Certificate eeCert =
+        OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_1);
 
     final X509Certificate issuerCert = CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
 

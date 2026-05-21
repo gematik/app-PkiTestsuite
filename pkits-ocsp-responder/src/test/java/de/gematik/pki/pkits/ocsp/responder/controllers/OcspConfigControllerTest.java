@@ -70,8 +70,8 @@ class OcspConfigControllerTest {
   private P12Container signer;
   private final List<X509Certificate> eeCerts =
       List.of(
-          OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem"),
-          OcspResponderTestUtils.getValidEeCert("SigurdBeutlinStadtApotheke.pem"));
+          OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_1),
+          OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_2));
   private final X509Certificate issuerCert =
       CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);
 

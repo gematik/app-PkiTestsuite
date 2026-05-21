@@ -85,7 +85,7 @@ class OcspRequestControllerTest {
 
   @BeforeAll
   public static void setup() {
-    VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
+    VALID_X509_EE_CERT = OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_1);
     VALID_X509_ISSUER_CERT = OcspResponderTestUtils.getValidIssuerCert();
     signer = OcspResponderTestUtils.getSigner();
     signerCaCert = OcspResponderTestUtils.getSignerCaCert();

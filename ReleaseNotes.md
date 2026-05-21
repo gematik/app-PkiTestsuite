@@ -2,6 +2,15 @@
 
 # Release notes PKI Test Suite
 
+## Release 8.1.0
+
+- check TLS certificate of testobject (server) for expiration
+- update test certificates
+- refactor: centralize EE cert filenames in OcspResponderTestUtils constants
+- set version of bouncy castle, ignore transitives, debugging of testsuite from IDE is possible again
+- update dependencies
+
+
 ## Release 8.0.0
 
 - remove RSA support
