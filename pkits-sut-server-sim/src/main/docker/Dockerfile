@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM gematik1/osadl-alpine-openjdk21-jre:1.0.11@sha256:d4495f442e5798e4d07ac149b79ef7b34128be5d01570861ffc9c5e7b22c0f7e
 
 ARG COMMIT_HASH
 ARG VERSION

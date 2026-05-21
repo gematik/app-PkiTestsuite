@@ -68,7 +68,7 @@ class OcspInfoControllerTest {
   private final int tslSeqNrFromOcspRequest = 420000;
 
   private final X509Certificate VALID_X509_EE_CERT =
-      OcspResponderTestUtils.getValidEeCert("DrMedGunther.pem");
+      OcspResponderTestUtils.getValidEeCert(OcspResponderTestUtils.EE_CERT_1);
 
   private final X509Certificate VALID_X509_ISSUER_CERT =
       CertReader.readX509(PkitsTestDataConstants.DEFAULT_SMCB_CA);

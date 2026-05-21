@@ -1,7 +1,7 @@
 server:
   port: 8443
   ssl:
-    key-store: classpath:certificates/steak-ecc/ee_default.p12
+    key-store: classpath:certificates/tls/pkits-sut-server-sim-KOMP58.p12
     key-store-password: "00"
     enabled: true
     protocol: TLS

@@ -21,7 +21,10 @@
 package de.gematik.pki.pkits.tls.client;
 
 import java.security.cert.X509Certificate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import javax.net.ssl.X509TrustManager;
+import lombok.SneakyThrows;
 
 public class BlindTrustManager implements X509TrustManager {
 
@@ -36,9 +39,19 @@ public class BlindTrustManager implements X509TrustManager {
     // we trust all
   }
 
-  @SuppressWarnings("java:S4830")
+  @SneakyThrows
   @Override
   public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
-    // we trust all
+    // we trust all, but check if certificate is expired
+    if (chain != null && chain.length > 0) {
+      final X509Certificate serverCert = chain[0];
+      final ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
+      final ZonedDateTime notAfter =
+          serverCert.getNotAfter().toInstant().atZone(ZoneId.systemDefault());
+      if (now.isAfter(notAfter)) {
+        throw new TlsClientException(
+            "TLS-Certificate of test object is expired: NotAfter=" + notAfter);
+      }
+    }
   }
 }

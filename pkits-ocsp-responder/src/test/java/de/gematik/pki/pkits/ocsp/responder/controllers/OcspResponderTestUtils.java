@@ -38,16 +38,19 @@ import lombok.NonNull;
 
 public class OcspResponderTestUtils {
 
+  public static final String EE_CERT_1 = "KKHErsteHilfe-SMCB57.pem";
+  public static final String EE_CERT_2 = "NordApotheke-SMCB57.pem";
+
   public static X509Certificate getValidEeCert(final String filename) {
     return CertReader.readX509(
         ResourceReader.getFileFromResourceAsBytes(
-            "certificates/GEM.SMCB-CA10/valid/" + filename, OcspResponderTestUtils.class));
+            "certificates/GEM.SMCB-CA57-TEST-ONLY/" + filename, OcspResponderTestUtils.class));
   }
 
   public static X509Certificate getValidIssuerCert() {
     return CertReader.readX509(
         ResourceReader.getFileFromResourceAsBytes(
-            "certificates/GEM.SMCB-CA10/GEM.SMCB-CA10_TEST-ONLY.pem",
+            "certificates/GEM.SMCB-CA57-TEST-ONLY/GEM.SMCB-CA57-TEST-ONLY.pem",
             OcspResponderTestUtils.class));
   }
 
