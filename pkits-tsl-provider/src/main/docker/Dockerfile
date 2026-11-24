@@ -1,4 +1,4 @@
-FROM gematik1/osadl-alpine-openjdk21-jre:1.0.11@sha256:d4495f442e5798e4d07ac149b79ef7b34128be5d01570861ffc9c5e7b22c0f7e
+FROM gematik1/osadl-alpine-openjdk25-jre:1.1.2@sha256:32f18664b9f0966a20952e3e1261130a9c79e93a1e455e9069a3513819f61d20
 
 ARG COMMIT_HASH
 ARG VERSION

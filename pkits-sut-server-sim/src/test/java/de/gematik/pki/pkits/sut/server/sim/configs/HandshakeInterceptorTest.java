@@ -22,7 +22,7 @@ package de.gematik.pki.pkits.sut.server.sim.configs;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import de.gematik.pki.pkits.sut.server.sim.webserverconfigs.HandshakeInterceptor;
+import de.gematik.pki.pkits.sut.server.core.webserverconfigs.HandshakeInterceptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

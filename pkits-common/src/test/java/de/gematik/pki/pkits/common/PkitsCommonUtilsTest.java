@@ -25,7 +25,6 @@ import static de.gematik.pki.pkits.common.PkitsCommonUtils.getFirstSubStringByPa
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.gematik.pki.pkits.common.PkitsCommonUtils.GitProperties;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +37,22 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 class PkitsCommonUtilsTest {
+
+  @Test
+  void getBannerStrShouldContainResolvedBuildVersion() {
+    final String version = PkitsCommonUtils.readBuildVersion(PkitsCommonUtilsTest.class);
+    final String banner =
+        PkitsCommonUtils.getBannerStr(PkitsCommonUtilsTest.class, "bannerFormatTest.txt");
+
+    assertThat(banner).doesNotContain("null");
+    assertThat(version).isNotBlank();
+    assertThat(banner).contains(version);
+  }
+
+  @Test
+  void readBuildVersionShouldReturnNonBlankValue() {
+    assertThat(PkitsCommonUtils.readBuildVersion(PkitsCommonUtilsTest.class)).isNotBlank();
+  }
 
   @Test
   void verifyGetUrl() {
@@ -54,13 +69,6 @@ class PkitsCommonUtilsTest {
   void verifyCalculateSha256HexValid() {
     assertThat(calculateSha256Hex("Das ist ein Teststring!".getBytes(StandardCharsets.UTF_8)))
         .isEqualTo("66057df8c7aa189868be072ba859ed629f627b341afc5611982c316376011869");
-  }
-
-  @Test
-  void testReadGitProperties() {
-    final GitProperties gitProperties = PkitsCommonUtils.readGitProperties(PkitsCommonUtils.class);
-    assertThat(gitProperties.getCommitIdShort()).isEqualTo("not-defined");
-    assertThat(gitProperties.getCommitIdFull()).isEqualTo("not-defined");
   }
 
   @Test

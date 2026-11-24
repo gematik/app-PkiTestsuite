@@ -20,6 +20,7 @@
 
 package de.gematik.pki.pkits.ocsp.responder.data;
 
+import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -42,7 +43,12 @@ public class OcspRequestHistoryEntryDto {
 
   @Override
   public String toString() {
-    return "OcspRequestHistoryEntryDto{tslSeqNr=%d, certSerialNr=%s, timeStamp='%s', ocspReqBytes size: %s}"
-        .formatted(tslSeqNr, certSerialNr, timeStamp, ocspReqBytes.length);
+    return "OcspRequestHistoryEntryDto{tslSeqNr=%d, certSerialNr=%s, certSerialNr hex=%s, timeStamp='%s', ocspReqBytes size: %s}"
+        .formatted(
+            tslSeqNr,
+            certSerialNr,
+            PkitsCommonUtils.toUpperHex(certSerialNr),
+            timeStamp,
+            ocspReqBytes.length);
   }
 }

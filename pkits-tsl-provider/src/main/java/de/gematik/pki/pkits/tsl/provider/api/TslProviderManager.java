@@ -33,7 +33,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -74,7 +74,7 @@ public final class TslProviderManager {
     return historyEntryDtos.stream()
         .filter(
             entry ->
-                StringUtils.endsWithAny(
+                Strings.CS.endsWithAny(
                     entry.getTslDownloadEndpoint(), tslDownloadEndpointType.getEndpoints()))
         .toList();
   }

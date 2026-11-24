@@ -4,6 +4,7 @@ testObject:
   ipAddressOrFqdn: "testObject.ipAddressOrFqdn"
   port: -99
   tslDownloadIntervalSeconds: -100
+  tslSignerDir: "./testDataTemplates/certificates/ecc/tsl-signer"
   tslGracePeriodDays: -150
   tslProcessingTimeSeconds: -200
   ocspProcessingTimeSeconds: -250

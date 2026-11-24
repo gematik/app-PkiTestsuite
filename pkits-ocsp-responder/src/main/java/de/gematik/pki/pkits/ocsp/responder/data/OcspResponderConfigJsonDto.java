@@ -42,7 +42,7 @@ public class OcspResponderConfigJsonDto extends OcspResponderConfig {
     super(config.toBuilder());
 
     this.certificateJsonDtos = new ArrayList<>();
-    for (CertificateDto certificateDto : config.getCertificateDtos()) {
+    for (final CertificateDto certificateDto : config.getCertificateDtos()) {
       certificateJsonDtos.add(new CertificateJsonDto(certificateDto));
     }
   }
@@ -50,7 +50,7 @@ public class OcspResponderConfigJsonDto extends OcspResponderConfig {
   public OcspResponderConfig toConfig() {
 
     this.certificateDtos = new ArrayList<>();
-    for (CertificateJsonDto certificateJsonDto : certificateJsonDtos) {
+    for (final CertificateJsonDto certificateJsonDto : certificateJsonDtos) {
       certificateDtos.add(certificateJsonDto.toCertificateDto());
     }
     return this;

@@ -38,64 +38,72 @@ public enum TestObjectType {
       "fachmodulClient",
       UseCaseConnectionType.SCRIPT,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
-      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA),
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+      "ecc"),
 
   IDP_EGK_FACHDIENST(
       "IdpEgkFachdienst",
       "egkClient",
       UseCaseConnectionType.SCRIPT,
       PkitsTestDataConstants.DEFAULT_EGK_CA,
-      PkitsTestDataConstants.ALTERNATIVE_EGK_CA),
+      PkitsTestDataConstants.ALTERNATIVE_EGK_CA,
+      "ecc"),
 
   INTERMEDIAER_SERVER(
       "IntermediaerServer",
       "fachmodulClientIntermediaer",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
-      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA),
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+      "ecc"),
+
+  INTERMEDIAER_SERVER_INTERNET(
+      "IntermediaerServerInternet",
+      "smcbClient",
+      UseCaseConnectionType.TLS_SERVER,
+      PkitsTestDataConstants.DEFAULT_SMCB_CA,
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+      "ecc-internet"),
 
   KIM_FACHDIENST(
       "KimFachdienst",
       "kimClientModul",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_KOMP_CA58,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
+      "ecc"),
 
   KIM_FACHDIENST_NIST(
       "KimFachdienstNist",
       "kimClientModulNist",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_KOMP_CA62,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA63,
+      "ecc"),
 
   VSDM_FACHDIENST(
       "VsdmFachdienst",
       "intermediaerClient",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_KOMP_CA,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA,
+      "ecc"),
 
   VPN_KONZENTRATOR(
       "VpnKonzentrator",
       "netzkonnektorClient",
       UseCaseConnectionType.SCRIPT_OVER_SSH,
       PkitsTestDataConstants.DEFAULT_KOMP_CA58,
-      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59),
+      PkitsTestDataConstants.ALTERNATIVE_KOMP_CA59,
+      "ecc"),
 
   VPN_REG_SERVER(
       "VpnRegServer",
       "fachmodulClient",
       UseCaseConnectionType.TLS_SERVER,
       PkitsTestDataConstants.DEFAULT_SMCB_CA,
-      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA);
-
-  private static final Map<String, TestObjectType> typeNamesMap = new TreeMap<>();
-
-  static {
-    for (final TestObjectType testObjectType : TestObjectType.values()) {
-      typeNamesMap.put(testObjectType.typeName, testObjectType);
-    }
-  }
+      PkitsTestDataConstants.ALTERNATIVE_SMCB_CA,
+      "ecc");
 
   final String typeName;
 
@@ -108,6 +116,16 @@ public enum TestObjectType {
 
   /** path to alternative issuer certificate */
   final Path clientAlternativeIssuerCertPath;
+
+  final String certificatesRootDir;
+
+  private static final Map<String, TestObjectType> typeNamesMap = new TreeMap<>();
+
+  static {
+    for (final TestObjectType testObjectType : TestObjectType.values()) {
+      typeNamesMap.put(testObjectType.typeName, testObjectType);
+    }
+  }
 
   @JsonCreator
   public static TestObjectType forValue(final String value) {
@@ -125,11 +143,16 @@ public enum TestObjectType {
     return typeName;
   }
 
+  public Path getDefaultTslSignerDir() {
+    return Path.of("./testDataTemplates/certificates/%s/tsl-signer".formatted(certificatesRootDir));
+  }
+
   /**
    * @return path to valid key store end-entity files in p12 format for the tests
    */
   public Path getClientKeystorePathValidCerts() {
-    return Path.of("./testDataTemplates/certificates/ecc/%s/valid".formatted(directory));
+    return Path.of(
+        "./testDataTemplates/certificates/%s/%s/valid".formatted(certificatesRootDir, directory));
   }
 
   /**
@@ -137,13 +160,15 @@ public enum TestObjectType {
    */
   public Path getClientKeystorePathAlternativeCerts() {
     return Path.of(
-        "./testDataTemplates/certificates/ecc/%s/valid-alternative".formatted(directory));
+        "./testDataTemplates/certificates/%s/%s/valid-alternative"
+            .formatted(certificatesRootDir, directory));
   }
 
   /**
    * @return path to invalid key store end-entity files in p12 format for the tests
    */
   public Path getClientKeystorePathInvalidCerts() {
-    return Path.of("./testDataTemplates/certificates/ecc/%s/invalid".formatted(directory));
+    return Path.of(
+        "./testDataTemplates/certificates/%s/%s/invalid".formatted(certificatesRootDir, directory));
   }
 }

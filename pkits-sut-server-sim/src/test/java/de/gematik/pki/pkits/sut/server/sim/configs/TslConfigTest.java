@@ -20,11 +20,11 @@
 
 package de.gematik.pki.pkits.sut.server.sim.configs;
 
-import static de.gematik.pki.pkits.sut.server.sim.configs.TslConfig.buildTslDownloadUrl;
+import static de.gematik.pki.pkits.sut.server.core.configs.TslConfig.buildTslDownloadUrl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import org.junit.jupiter.api.Test;
 
 class TslConfigTest {
@@ -33,7 +33,7 @@ class TslConfigTest {
   void verifyBuildTslDownloadUrl() throws MalformedURLException {
     System.clearProperty("TSL_PROVIDER_PORT");
     final String str = "http://das/ist/ein/test.xml";
-    assertThat(buildTslDownloadUrl(new URL(str))).isEqualTo(str);
+    assertThat(buildTslDownloadUrl(URI.create(str).toURL())).isEqualTo(str);
   }
 
   @Test
@@ -42,6 +42,6 @@ class TslConfigTest {
     System.setProperty("TSL_PROVIDER_PORT", String.valueOf(port));
     final String inStr = "http://das/ist/ein/test.xml?blub=bla";
     final String outStr = "http://das:" + port + "/ist/ein/test.xml?blub=bla";
-    assertThat(buildTslDownloadUrl(new URL(inStr))).isEqualTo(outStr);
+    assertThat(buildTslDownloadUrl(URI.create(inStr).toURL())).isEqualTo(outStr);
   }
 }

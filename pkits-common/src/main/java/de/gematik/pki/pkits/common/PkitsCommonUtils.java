@@ -24,18 +24,19 @@ import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.commons.utils.ResourceReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
-import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,9 +44,7 @@ import kong.unirest.core.HttpResponse;
 import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.HttpStatus;
 import org.bouncycastle.util.encoders.Hex;
@@ -57,6 +56,9 @@ import tools.jackson.databind.type.CollectionType;
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PkitsCommonUtils {
+
+  private static final String BUILD_INFO_RESOURCE = "/META-INF/build-info.properties";
+  private static final String DEFAULT_IMPLEMENTATION_VERSION = "unknown";
 
   private static final DateTimeFormatter dateTimeFormatter =
       DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -144,35 +146,6 @@ public final class PkitsCommonUtils {
     return ret;
   }
 
-  @Getter
-  @ToString
-  public static class GitProperties {
-
-    private String commitIdShort = "not-defined";
-    private String commitIdFull = "not-defined";
-
-    public GitProperties() {}
-
-    public GitProperties(final Properties prop) {
-      commitIdShort = prop.getProperty("git.commit.id.abbrev");
-      commitIdFull = prop.getProperty("git.commit.id.full");
-    }
-  }
-
-  public static GitProperties readGitProperties(final Class<?> clazz) {
-    final Properties props = new Properties();
-    final String gitPropsFilename = "git.properties";
-    try (final InputStream propFileResource =
-        clazz.getClassLoader().getResourceAsStream(gitPropsFilename)) {
-      // load a properties file from class path, inside static method
-      props.load(propFileResource);
-      return new GitProperties(props);
-    } catch (final NullPointerException | IOException e) {
-      log.warn("continue: cannot read {} - {}", gitPropsFilename, e.getMessage());
-      return new GitProperties();
-    }
-  }
-
   public static Attributes readManifestAttributes(final Class<?> clazz) {
     final ClassLoader classLoader = clazz.getClassLoader();
     final String manifestFilename = "META-INF/MANIFEST.MF";
@@ -190,16 +163,39 @@ public final class PkitsCommonUtils {
   }
 
   public static String getBannerStr(final Class<?> clazz, final String filename) {
-    final Attributes attributes = PkitsCommonUtils.readManifestAttributes(clazz);
-
     final String bannerFormat = ResourceReader.getFileFromResourceAsString(filename, clazz);
-    final String title = attributes.getValue(Name.IMPLEMENTATION_TITLE);
-    final String version = attributes.getValue(Name.IMPLEMENTATION_VERSION);
-    final String springBootVersion = attributes.getValue("Spring-Boot-Version");
+    final String version = readBuildVersion(clazz);
 
-    final GitProperties gitProperties = PkitsCommonUtils.readGitProperties(clazz);
+    return bannerFormat.formatted(version);
+  }
 
-    return bannerFormat.formatted(
-        title, version, gitProperties.getCommitIdShort(), springBootVersion);
+  static String readBuildVersion(final Class<?> clazz) {
+    final Properties properties = new Properties();
+    try (final InputStream inputStream = clazz.getResourceAsStream(BUILD_INFO_RESOURCE)) {
+      if (inputStream != null) {
+        properties.load(inputStream);
+      }
+    } catch (final IOException e) {
+      log.debug("Unable to read {}", BUILD_INFO_RESOURCE, e);
+    }
+
+    final String value = properties.getProperty("build.version");
+    if (value == null) {
+      return DEFAULT_IMPLEMENTATION_VERSION;
+    }
+
+    final String trimmedValue = value.trim();
+    return trimmedValue.isEmpty() ? DEFAULT_IMPLEMENTATION_VERSION : trimmedValue;
+  }
+
+  public static String toUpperHex(final BigInteger value) {
+    if (value == null) {
+      return "null";
+    }
+    String hex = value.toString(16).toUpperCase(Locale.ROOT);
+    if ((hex.length() & 1) == 1) {
+      hex = "0" + hex;
+    }
+    return hex;
   }
 }

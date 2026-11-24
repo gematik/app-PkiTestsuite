@@ -1,4 +1,4 @@
-<img align="right" width="200" height="37" src="docs/img/Gematik_Logo_Flag.png"/> <br />
+<img align="right" width="250" src="https://raw.githubusercontent.com/gematik/gematik.github.io/master/Gematik_Logo_Flag_With_Background.png"/> <br/> 
 
 # PKI Test Suite
 
@@ -221,6 +221,21 @@ testObject:
 Furthermore, the test object must be able to reach the TSL- and OCSP-simulators provided by this
 test suite.
 
+For the SUT server's own TSL procurement, the source can be configured explicitly:
+
+```yaml
+tsl-procurer:
+  source: local
+  initialTslDownloadUrl: "http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=0"
+```
+
+Supported values for `tsl-procurer.source` are:
+
+* `local` (default): use the locally configured PKITS TSL Provider. In this mode,
+  `initialTslDownloadUrl` is used for the first download.
+* `internet`: use the productive gematik download endpoints for the initial and follow-up TSL
+  downloads. In this mode, `initialTslDownloadUrl` is used as the fixed current TSL URL.
+
 Paths in the `pkits.yml` are relative to the base directory. Absolute paths can be used as well.
 All available parameters including a short description can be found
 in [all_pkits_parameters.yml](./docs/all_pkits_parameters.yml). As this is a YAML file remember to
@@ -286,6 +301,8 @@ Furthermore, the [OCSP responder](./README.md#3-ocsp-responder)
 and [TSL provider](./README.md#2-tsl-provider) communicate at the configured sockets (if they are
 not deactivated). Logs are written to the `./out/logs` directory. Afterward a test report is
 generated in the `./out/testreport` directory.
+The PDF report is rendered from HTML in A3 landscape using OpenHTMLtoPDF (LGPL 2.1 or later)
+with Apache PDFBox.
 
 ### Smoke Test
 

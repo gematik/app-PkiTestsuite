@@ -92,6 +92,7 @@ class TestSuiteConfigTest {
     final int testObject_ocspProcessingTimeSeconds = 1;
     final int testObject_tslGracePeriodDays = 0;
     final int testObject_ocspTimeoutSeconds = 10;
+    final String testObject_tslSignerDir = "";
 
     final boolean testObject_scriptUseCase_sendReceiveApplicationData = true;
 
@@ -107,6 +108,7 @@ class TestSuiteConfigTest {
 
     ca.assertEquals(
         testObject_scriptPath, testSuiteConfig.getTestObject().getScriptUseCase().getScriptPath());
+    ca.assertEquals(testObject_tslSignerDir, testSuiteConfig.getTestObject().getTslSignerDir());
     ca.assertEquals(
         testObject_tslProcessingTimeSeconds,
         testSuiteConfig.getTestObject().getTslProcessingTimeSeconds());
@@ -256,7 +258,6 @@ class TestSuiteConfigTest {
     ca.assertEquals(
         testObject_tslDownloadIntervalSeconds,
         testSuiteConfig.getTestObject().getTslDownloadIntervalSeconds());
-
     ca.assertEquals(
         ocspResponder_ipAddressOrFqdn, testSuiteConfig.getOcspResponder().getIpAddressOrFqdn());
     ca.assertEquals(ocspResponder_port, testSuiteConfig.getOcspResponder().getPort());
@@ -330,6 +331,7 @@ class TestSuiteConfigTest {
     final String ipAddressOrFqdn = "testObject.ipAddressOrFqdn";
     final int port = -99;
     final int tslDownloadIntervalSeconds = -100;
+    final String tslSignerDir = "./testDataTemplates/certificates/ecc/tsl-signer";
     final int tslGracePeriodDays = -150;
     final int tslProcessingTimeSeconds = -200;
     final int ocspProcessingTimeSeconds = -250;
@@ -347,7 +349,9 @@ class TestSuiteConfigTest {
     ca.assertEquals(testObjectType, testObject.getTestObjectType());
     ca.assertEquals(ipAddressOrFqdn, testObject.getIpAddressOrFqdn());
     ca.assertEquals(port, testObject.getPort());
+    ca.assertEquals(tslSignerDir, testObject.getTslSignerDir());
     ca.assertEquals(scriptUseCase_scriptPath, testObject.getScriptUseCase().getScriptPath());
+
     ca.assertEquals(tslDownloadIntervalSeconds, testObject.getTslDownloadIntervalSeconds());
     ca.assertEquals(tslGracePeriodDays, testObject.getTslGracePeriodDays());
     ca.assertEquals(tslProcessingTimeSeconds, testObject.getTslProcessingTimeSeconds());

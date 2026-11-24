@@ -22,9 +22,11 @@ package de.gematik.pki.pkits.sut.server.sim.tsl;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import de.gematik.pki.pkits.sut.server.sim.configs.OcspConfig;
-import de.gematik.pki.pkits.sut.server.sim.configs.TslProcurerConfig;
-import de.gematik.pki.pkits.sut.server.sim.exceptions.TosException;
+import de.gematik.pki.pkits.sut.server.core.configs.OcspProperties;
+import de.gematik.pki.pkits.sut.server.core.configs.TslProcurerProperties;
+import de.gematik.pki.pkits.sut.server.core.exceptions.TosException;
+import de.gematik.pki.pkits.sut.server.core.tsl.TslProcurer;
+import de.gematik.pki.pkits.sut.server.core.tsl.TslSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,15 +36,17 @@ import org.springframework.stereotype.Service;
 @Service
 class TslProcurerTest {
 
-  @Autowired private TslProcurerConfig tslProcurerConfig;
-  @Autowired private OcspConfig ocspConfig;
+  @Autowired private TslProcurerProperties tslProcurerProperties;
+  @Autowired private OcspProperties ocspProperties;
+  @Autowired private TslSource tslSource;
 
   /* NOTE: we do not test this extensively at the moment.
    To do so, for example, implement TSL Download Server Mock, change test to "not throwing", .hasSize(n)...
   */
   @Test
   void getTslInfoProv() {
-    final TslProcurer tslProcurer = new TslProcurer(tslProcurerConfig, ocspConfig);
+    final TslProcurer tslProcurer =
+        new TslProcurer(tslProcurerProperties, ocspProperties, tslSource);
     assertThatThrownBy(tslProcurer::getTslInfoProv)
         .isInstanceOf(TosException.class)
         .hasMessageContaining("(yet)");

@@ -20,7 +20,7 @@
 
 package de.gematik.pki.pkits.testsuite.common.tsl.generation.operation;
 
-import de.gematik.pki.gemlibpki.commons.tsl.TslSigner;
+import de.gematik.pki.gemlibpki.commons.tsl.TslSignerNonQes;
 import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.TslContainer;
 import lombok.NonNull;
@@ -46,8 +46,8 @@ public class SignTslOperation implements TslOperation {
 
     final Document tslUnsignedDoc = tslContainer.getAsTslUnsignedDoc();
 
-    final TslSigner tslSigner =
-        TslSigner.builder()
+    final TslSignerNonQes tslSigner =
+        TslSignerNonQes.builder()
             .tslToSign(tslUnsignedDoc)
             .tslSignerP12(tslSignerP12)
             .checkSignerKeyUsage(signerKeyUsageCheck)

@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.gematik.pki.pkits</groupId>
     <artifactId>pki-testsuite</artifactId>
-    <version>8.1.0</version>
+    <version>8.1.1</version>
   </parent>
 
   <artifactId>pkits-tls-client</artifactId>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>tools.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>3.1.2</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>

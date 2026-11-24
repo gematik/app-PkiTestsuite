@@ -31,16 +31,21 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.support.AnnotationConsumer;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 
+@NullMarked
 public class CertificateProvider implements ArgumentsProvider, AnnotationConsumer<VariableSource> {
 
-  private Path eeCertsDir;
-  private Path issuerCert;
+  private @Nullable Path eeCertsDir;
+  private @Nullable Path issuerCert;
 
   public static Stream<Path> getFilesFromDir(final Path directory) {
     final List<Path> fileList = new ArrayList<>();
@@ -64,9 +69,14 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
   }
 
   @Override
-  public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
-    final Stream<Path> eeCertFiles = getFilesFromDir(eeCertsDir);
-    return eeCertFiles.map(eeCertFile -> Arguments.arguments(eeCertFile, issuerCert));
+  public Stream<? extends Arguments> provideArguments(
+      final ParameterDeclarations parameterDeclarations, final ExtensionContext extensionContext) {
+    final Path currentEeCertsDir =
+        Objects.requireNonNull(eeCertsDir, "eeCertsDir must be initialized via accept(...)");
+    final Path currentIssuerCert =
+        Objects.requireNonNull(issuerCert, "issuerCert must be initialized via accept(...)");
+    final Stream<Path> eeCertFiles = getFilesFromDir(currentEeCertsDir);
+    return eeCertFiles.map(eeCertFile -> Arguments.arguments(eeCertFile, currentIssuerCert));
   }
 
   @Override
@@ -90,6 +100,8 @@ public class CertificateProvider implements ArgumentsProvider, AnnotationConsume
       }
     }
     eeCertsDir = PkitsTestSuiteUtils.buildAbsolutePathForDir(eeCertsDir);
-    issuerCert = PkitsTestSuiteUtils.buildAbsolutePath(issuerCert);
+    issuerCert =
+        PkitsTestSuiteUtils.buildAbsolutePath(
+            Objects.requireNonNull(issuerCert, "issuerCert must be initialized"));
   }
 }

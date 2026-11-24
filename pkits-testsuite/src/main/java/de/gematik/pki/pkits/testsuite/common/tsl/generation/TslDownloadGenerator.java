@@ -32,6 +32,7 @@ import static de.gematik.pki.pkits.testsuite.common.tsl.generation.TslGeneration
 import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
 import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.gemlibpki.commons.utils.P12Container;
+import de.gematik.pki.pkits.common.PkitsTestDataConstants;
 import de.gematik.pki.pkits.testsuite.common.tsl.TslDownload;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.AggregateTslOperation;
 import de.gematik.pki.pkits.testsuite.common.tsl.generation.operation.AggregateTslOperation.AggregateTslOperationBuilder;
@@ -58,36 +59,54 @@ public class TslDownloadGenerator {
   public static final String TSL_NAME_DEFAULT = "defaultTsl";
   public static final String TSL_NAME_ALTERNATIVE = "alternativeTsl";
 
-  public static final String TRUST_ANCHOR_TEMPLATES_DIRNAME =
-      "./testDataTemplates/certificates/ecc/trustAnchor/";
+  /**
+   * Configured default signer source for the current test object. This is the single source of
+   * truth for resolving the default TSL signer when no explicit signer override is supplied.
+   */
+  protected Path tslSignerDir;
+
+  /**
+   * Explicit signer override. If set, it takes precedence over the default signer resolved from
+   * {@link #tslSignerDir}.
+   */
+  protected P12Container tslSigner;
+
+  protected X509Certificate trustAnchor;
+
+  protected P12Container ocspSigner;
+
+  public P12Container getEffectiveTslSigner() {
+    if (tslSigner != null) {
+      return tslSigner;
+    }
+    if (tslSignerDir != null) {
+      return PkitsTestDataConstants.getDefaultTslSigner(tslSignerDir);
+    }
+    throw new IllegalStateException(
+        "Either tslSigner or tslSignerDir must be configured for TslDownloadGenerator.");
+  }
 
   public static final Path invalideSignatureSignerPath =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_invalid-signature.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit_ee-invalid-signature.p12");
   public static final Path tslSignerFromNotYetValidTrustAnchorP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_not-yet-valid_ta.p12");
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("valid_tsl_signer_from_not-yet-valid_ta.p12");
   public static final Path tslSignerExpired =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_expired.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit_ee-expired.p12");
   public static final Path tslSignerNotYetValid =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_not-yet-valid.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit_ee-not-yet-valid.p12");
   public static final Path tslSignerInvalidKeyusage =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_invalid-keyusage.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit_ee-invalid-keyusage.p12");
   public static final Path tslSignerInvalidExtendedKeyusage =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "ee_invalid-ext-keyusage.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit_ee-invalid-ext-keyusage.p12");
   public static final Path alternativeTslSignerP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-52-TEST-ONLY.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit-52-TEST-ONLY.p12");
   public static final Path alternativeSecondTslSignerP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "TSL-Signing-Unit-53-TEST-ONLY.p12");
-
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("TSL-Signing-Unit-53-TEST-ONLY.p12");
   public static final Path tslSignerFromExpiredTrustAnchorP12Path =
-      Path.of(TRUST_ANCHOR_TEMPLATES_DIRNAME, "valid_tsl_signer_from_expired_ta.p12");
+      PkitsTestDataConstants.TSL_SIGNER_DIR.resolve("valid_tsl_signer_from_expired_ta.p12");
 
   public static final TslOperation NO_TSL_MODIFICATIONS = null;
+
   private static final int WEB_SERVER_START_TIMEOUT_SECS = 30;
 
   protected final CurrentTestInfo currentTestInfo;
@@ -99,11 +118,6 @@ public class TslDownloadGenerator {
 
   protected String ocspResponderUri;
   protected String tslProviderUri;
-
-  protected P12Container tslSigner;
-  protected X509Certificate trustAnchor;
-
-  protected P12Container ocspSigner;
 
   @Getter @Setter protected int tslDaysUntilNextupdate = TSL_DEFAULT_TTL_DAYS;
 
@@ -170,7 +184,7 @@ public class TslDownloadGenerator {
   }
 
   public TslDownload getStandardTslDownload(final TrustStatusListType tsl) {
-    return getStandardTslDownload(tsl, tslSigner, trustAnchor);
+    return getStandardTslDownload(tsl, getEffectiveTslSigner(), trustAnchor);
   }
 
   public TslDownload getStandardTslDownload(

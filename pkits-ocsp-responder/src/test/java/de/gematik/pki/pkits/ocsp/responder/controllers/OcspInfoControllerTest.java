@@ -125,12 +125,12 @@ class OcspInfoControllerTest {
   void getEmptyOcspRequestHistoryForImaginaryCertAsJson2() {
     final String requestBodyAsJson =
         """
-            {
-                "tslSeqNr": -1,
-                "certSerialNr": 420000,
-                "historyDeleteOption": "DELETE_NOTHING"
-            }
-            """;
+        {
+            "tslSeqNr": -1,
+            "certSerialNr": 420000,
+            "historyDeleteOption": "DELETE_NOTHING"
+        }
+        """;
     final String responseBodyAsJson =
         JsonTransceiver.txRxJsonViaHttp(ocspInfoUrl, requestBodyAsJson);
 
@@ -369,12 +369,12 @@ class OcspInfoControllerTest {
 
     final String requestBodyAsJson =
         """
-            {
-                "tslSeqNr": %s,
-                "certSerialNr": %s,
-                "historyDeleteOption": "%s"
-            }
-            """
+        {
+            "tslSeqNr": %s,
+            "certSerialNr": %s,
+            "historyDeleteOption": "%s"
+        }
+        """
             .formatted(tslSeqNr, certSerialNr, historyDeleteOption);
 
     final String responseBodyAsJson =

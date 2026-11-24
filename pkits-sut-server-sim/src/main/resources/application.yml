@@ -25,8 +25,9 @@ ocsp:
   tolerate-ocsp-failure: false
 
 tsl-procurer:
+  source: local
   # use constant TSL_SEQNR_PARAM_ENDPOINT for activeTslSeqNr in source code
-  initialTslPrimaryDownloadUrl: "http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=0"
+  initialTslDownloadUrl: "http://localhost:8084/tsl/tsl.xml?activeTslSeqNr=0"
   downloadInterval: 2
   repetitions: 4
   tslGracePeriodDays: 0

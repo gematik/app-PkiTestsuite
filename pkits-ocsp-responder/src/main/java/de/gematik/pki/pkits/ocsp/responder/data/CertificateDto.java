@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.gematik.pki.gemlibpki.commons.ocsp.OcspResponseGenerator;
 import de.gematik.pki.gemlibpki.commons.utils.P12Container;
 import de.gematik.pki.pkits.common.PkiCommonException;
+import de.gematik.pki.pkits.common.PkitsCommonUtils;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPRespStatus;
 import java.security.cert.X509Certificate;
 import lombok.AllArgsConstructor;
@@ -95,14 +96,15 @@ public class CertificateDto {
 
   @Override
   public String toString() {
-    return ("CertificateDto{eeCertSerialNr=%s, issuerSubjectCN=%s, signerCN=%s, signerCaCertCN=%s, "
-            + " validCertHash=%s, withCertHash=%s, validSignature=%s,"
-            + " certificateIdGeneration=%s, certificateStatus=%s, respStatus=%s,"
-            + " withResponseBytes=%s, attachIssuerCert=%s, thisUpdateDeltaMilliseconds=%s,"
-            + " producedAtDeltaMilliseconds=%s, nextUpdateDeltaMilliseconds=%s,"
-            + " withNullParameterHashAlgoOfCertId=%s}")
+    return ("CertificateDto{eeCertSerialNr=%s, eeCertSerialNr hex=%s, issuerSubjectCN=%s,"
+            + " signerCN=%s, signerCaCertCN=%s,  validCertHash=%s, withCertHash=%s,"
+            + " validSignature=%s, certificateIdGeneration=%s, certificateStatus=%s,"
+            + " respStatus=%s, withResponseBytes=%s, attachIssuerCert=%s,"
+            + " thisUpdateDeltaMilliseconds=%s, producedAtDeltaMilliseconds=%s,"
+            + " nextUpdateDeltaMilliseconds=%s, withNullParameterHashAlgoOfCertId=%s}")
         .formatted(
             eeCert.getSerialNumber(),
+            PkitsCommonUtils.toUpperHex(eeCert.getSerialNumber()),
             issuerCert.getSubjectX500Principal().getName(),
             signer.getCertificate().getSubjectX500Principal().getName(),
             signerCaCert != null ? signerCaCert.getSubjectX500Principal().getName() : "null",

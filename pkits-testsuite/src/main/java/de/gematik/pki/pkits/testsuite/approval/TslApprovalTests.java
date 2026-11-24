@@ -42,7 +42,7 @@ import de.gematik.pki.gemlibpki.commons.tsl.TslConstants;
 import de.gematik.pki.gemlibpki.commons.tsl.TslConverter;
 import de.gematik.pki.gemlibpki.commons.tsl.TslConverter.DocToBytesOption;
 import de.gematik.pki.gemlibpki.commons.tsl.TslModifier;
-import de.gematik.pki.gemlibpki.commons.tsl.TslSigner;
+import de.gematik.pki.gemlibpki.commons.tsl.TslSignerNonQes;
 import de.gematik.pki.gemlibpki.commons.tsl.TslUtils;
 import de.gematik.pki.gemlibpki.commons.tsl.TslValidator;
 import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
@@ -101,7 +101,7 @@ class TslApprovalTests extends ApprovalTestsBase {
 
       final Document tslUnsignedDocFormatted = TslConverter.bytesToDoc(tslUnsignedByteFormatted);
 
-      TslSigner.builder()
+      TslSignerNonQes.builder()
           .tslToSign(tslUnsignedDocFormatted)
           .tslSignerP12(DEFAULT_TSL_SIGNER)
           .build()
@@ -388,7 +388,10 @@ class TslApprovalTests extends ApprovalTestsBase {
     final TslOperation rewriteMailToInvalidateSignature =
         tslContainer -> {
           final byte[] tslUnsignedBytes = tslContainer.getAsTslUnsignedBytes();
-          assertThat(TslValidator.checkSignature(tslUnsignedBytes, DEFAULT_TRUST_ANCHOR)).isTrue();
+          assertThat(
+                  TslValidator.checkNonQesTslSignatureWithTrustAnchor(
+                      tslUnsignedBytes, DEFAULT_TRUST_ANCHOR))
+              .isTrue();
 
           // break integrity of TSL and verify signature again
           final String mailToStrOld = getFirstSchemeOperatorMailAddressOfTsl(tslUnsignedBytes);
@@ -398,7 +401,9 @@ class TslApprovalTests extends ApprovalTestsBase {
               tslUnsignedStr.replace(mailToStrOld, mailToStrNew).getBytes(StandardCharsets.UTF_8);
 
           log.info("Verify test tsl has wrong signature.");
-          assertThat(TslValidator.checkSignature(brokenTslUnsignedBytes, DEFAULT_TRUST_ANCHOR))
+          assertThat(
+                  TslValidator.checkNonQesTslSignatureWithTrustAnchor(
+                      brokenTslUnsignedBytes, DEFAULT_TRUST_ANCHOR))
               .isFalse();
 
           return new TslContainer(brokenTslUnsignedBytes);

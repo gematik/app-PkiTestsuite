@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.jupiter.api.Disabled;
@@ -89,7 +90,7 @@ public class CustomTestInfo implements Comparable<CustomTestInfo> {
   }
 
   boolean sameClassName(final String className) {
-    return StringUtils.equalsAny(className, getSimpleClassName(), getClassName());
+    return Strings.CS.equalsAny(className, getSimpleClassName(), getClassName());
   }
 
   boolean sameMethodName(final String methodName) {
