@@ -8,6 +8,7 @@ testObject:
   ocspToleranceProducedAtPastSeconds: 5                                                    # OCSP tolerance for producedAt in the past, in seconds configured in the test object.
   ocspToleranceProducedAtFutureSeconds: 3                                                  # OCSP tolerance for producedAt in the future, in seconds configured in the test object.
   tslDownloadIntervalSeconds: HasToBeDefined_tslDownloadIntervalSeconds                    # TSL download interval in seconds configured in the test object.
+  tslSignerDir: ""                                                                         # Optional override for the TSL signer directory. Defaults to the directory for testObjectType.
   tslGracePeriodDays: 0                                                                    # Duration in days after expiration of the TSL during which the TSL is still regarded as valid.
   tslProcessingTimeSeconds: 3                                                              # Amount of seconds to wait after a TSL update for processing inside the test object.
   ocspProcessingTimeSeconds: 1                                                             # Amount of seconds to wait for OCSP requests to be processed by the test object and corresponding network.

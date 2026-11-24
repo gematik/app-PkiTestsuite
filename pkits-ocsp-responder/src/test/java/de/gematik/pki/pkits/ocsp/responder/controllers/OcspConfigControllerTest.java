@@ -201,34 +201,34 @@ class OcspConfigControllerTest {
     // funktioniert
     final String jsonContent =
         """
-              {
-                "certificateJsonDtos":
-                [{
-                  "validCertHash": false,
-                  "withCertHash": false,
-                  "validSignature": false,
-                  "certificateIdGeneration": "%s",
-                  "delayMilliseconds": 11,
-                  "respStatus": "%s",
-                  "withResponseBytes": false,
-                  "responderIdType": "%s",
-                  "thisUpdateDeltaMilliseconds": 22,
-                  "producedAtDeltaMilliseconds": 33,
-                  "nextUpdateDeltaMilliseconds": 44,
-                  "withNullParameterHashAlgoOfCertId": true,
-                  "responseAlgoBehavior": "%s",
-                  "certificateStatus": {
-                    "type": "REVOKED",
-                    "revokedDate": "2028-08-08T08:08:08.2665079Z",
-                    "revokedReason": 55
-                  },
-                  "eeCertEncoded": "%s",
-                  "issuerCertEncoded": "%s",
-                  "signerCertificateEncoded": "%s",
-                  "signerPrivateKeyEncoded": "%s"
-                }]
-              }
-              """
+        {
+          "certificateJsonDtos":
+          [{
+            "validCertHash": false,
+            "withCertHash": false,
+            "validSignature": false,
+            "certificateIdGeneration": "%s",
+            "delayMilliseconds": 11,
+            "respStatus": "%s",
+            "withResponseBytes": false,
+            "responderIdType": "%s",
+            "thisUpdateDeltaMilliseconds": 22,
+            "producedAtDeltaMilliseconds": 33,
+            "nextUpdateDeltaMilliseconds": 44,
+            "withNullParameterHashAlgoOfCertId": true,
+            "responseAlgoBehavior": "%s",
+            "certificateStatus": {
+              "type": "REVOKED",
+              "revokedDate": "2028-08-08T08:08:08.2665079Z",
+              "revokedReason": 55
+            },
+            "eeCertEncoded": "%s",
+            "issuerCertEncoded": "%s",
+            "signerCertificateEncoded": "%s",
+            "signerPrivateKeyEncoded": "%s"
+          }]
+        }
+        """
             .formatted(
                 CertificateIdGeneration.INVALID_CERTID_HASH_ALGO,
                 OCSPRespStatus.TRY_LATER,
@@ -285,34 +285,34 @@ class OcspConfigControllerTest {
   void ocspConfigCheckCertificateIdGeneration() {
     final String jsonContent =
         """
-              {
-                "certificateJsonDtos":
-                [{
-                  "validCertHash": false,
-                  "withCertHash": false,
-                  "validSignature": false,
-                  "certificateIdGeneration": "%s",
-                  "delayMilliseconds": 11,
-                  "respStatus": "%s",
-                  "withResponseBytes": false,
-                  "responderIdType": "%s",
-                  "thisUpdateDeltaMilliseconds": 22,
-                  "producedAtDeltaMilliseconds": 33,
-                  "nextUpdateDeltaMilliseconds": 44,
-                  "withNullParameterHashAlgoOfCertId": true,
-                  "responseAlgoBehavior": "%s",
-                  "certificateStatus": {
-                    "type": "REVOKED",
-                    "revokedDate": "2028-08-08T08:08:08.2665079Z",
-                    "revokedReason": 55
-                  },
-                  "eeCertEncoded": "%s",
-                  "issuerCertEncoded": "%s",
-                  "signerCertificateEncoded": "%s",
-                  "signerPrivateKeyEncoded": "%s"
-                }]
-              }
-              """
+        {
+          "certificateJsonDtos":
+          [{
+            "validCertHash": false,
+            "withCertHash": false,
+            "validSignature": false,
+            "certificateIdGeneration": "%s",
+            "delayMilliseconds": 11,
+            "respStatus": "%s",
+            "withResponseBytes": false,
+            "responderIdType": "%s",
+            "thisUpdateDeltaMilliseconds": 22,
+            "producedAtDeltaMilliseconds": 33,
+            "nextUpdateDeltaMilliseconds": 44,
+            "withNullParameterHashAlgoOfCertId": true,
+            "responseAlgoBehavior": "%s",
+            "certificateStatus": {
+              "type": "REVOKED",
+              "revokedDate": "2028-08-08T08:08:08.2665079Z",
+              "revokedReason": 55
+            },
+            "eeCertEncoded": "%s",
+            "issuerCertEncoded": "%s",
+            "signerCertificateEncoded": "%s",
+            "signerPrivateKeyEncoded": "%s"
+          }]
+        }
+        """
             .formatted(
                 CertificateIdGeneration.INVALID_CERTID_HASH_ALGO,
                 OCSPRespStatus.TRY_LATER,

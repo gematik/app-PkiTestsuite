@@ -22,9 +22,15 @@ package de.gematik.pki.pkits.testsuite.reporting;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.List;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class GeneratePdfTest {
 
@@ -38,5 +44,27 @@ class GeneratePdfTest {
     final Path path =
         Path.of(GeneratePdfTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
     assertDoesNotThrow(() -> GeneratePdf.saveHtmlAndPdf("test", path.resolve("test"), true));
+  }
+
+  @Test
+  void testCreatePdfFromReportHtml(@TempDir final Path directory) throws IOException {
+    final Path output = directory.resolve("report.pdf");
+    final String html =
+        GeneratePdf.htmlDocPrefix()
+            + "<p>Erste&nbsp;Zeile<br>Zweite Zeile: &auml; &amp; &lt;</p>"
+            + GeneratePdf.htmlDocPostfix();
+
+    GeneratePdf.createPdf(html, output);
+
+    try (final PDDocument pdf = Loader.loadPDF(output.toFile())) {
+      assertEquals(1, pdf.getNumberOfPages());
+      final var page = pdf.getPage(0).getMediaBox();
+      assertEquals(420 * 72 / 25.4, page.getWidth(), 1);
+      assertEquals(297 * 72 / 25.4, page.getHeight(), 1);
+      final String text = new PDFTextStripper().getText(pdf).replace('\u00a0', ' ');
+      assertEquals(
+          List.of("Erste Zeile", "Zweite Zeile: \u00e4 & <"),
+          text.lines().map(String::stripTrailing).toList());
+    }
   }
 }

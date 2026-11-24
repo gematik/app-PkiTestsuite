@@ -23,6 +23,7 @@ package de.gematik.pki.pkits.testsuite.reporting;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.junit.jupiter.api.TestInfo;
 
 @Getter
@@ -48,7 +49,7 @@ public class CurrentTestInfo {
 
     final String displayName = testInfo.getDisplayName();
 
-    if (!StringUtils.startsWith(displayName, "[")) {
+    if (!Strings.CS.startsWith(displayName, "[")) {
       return null;
     }
 

@@ -40,6 +40,13 @@ public final class PkitsTestDataConstants {
       Path.of("./testDataTemplates/certificates/ecc/ocspKeystore/");
   public static final Path trustAnchorCertsDir =
       Path.of("./testDataTemplates/certificates/ecc/trustAnchor/");
+  public static final Path TSL_SIGNER_DIR =
+      Path.of("./testDataTemplates/certificates/ecc/tsl-signer");
+
+  public static P12Container getDefaultTslSigner(final Path tslSignerDir) {
+    return P12Reader.getContentFromP12(
+        tslSignerDir.resolve("TSL-Signing-Unit-51-TEST-ONLY.p12"), KEYSTORE_PASSWORD);
+  }
 
   public static final P12Container DEFAULT_OCSP_SIGNER =
       P12Reader.getContentFromP12(
@@ -77,9 +84,7 @@ public final class PkitsTestDataConstants {
       CertReader.readX509(trustAnchorCertsDir.resolve("GEM.TSL-CA51-TEST-ONLY.pem"));
 
   /** Absolute or relative path to key store in p12 format to sign TSLs with. */
-  public static final P12Container DEFAULT_TSL_SIGNER =
-      P12Reader.getContentFromP12(
-          trustAnchorCertsDir.resolve("TSL-Signing-Unit-51-TEST-ONLY.p12"), KEYSTORE_PASSWORD);
+  public static final P12Container DEFAULT_TSL_SIGNER = getDefaultTslSigner(TSL_SIGNER_DIR);
 
   public static final int TSL_DEFAULT_TTL_DAYS = 30;
   public static final X509Certificate ALTERNATIVE_FIRST_TRUST_ANCHOR =

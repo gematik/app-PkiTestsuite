@@ -100,11 +100,11 @@ class TslConfigControllerTest {
     final String tslEncoded = GemLibPkiUtils.toMimeBase64NoLineBreaks(tslBytes);
     final String jsonContent =
         """
-            {
-              "tslBytes": "%s",
-              "tslProviderEndpointsConfig": "%s"
-            }
-            """
+        {
+          "tslBytes": "%s",
+          "tslProviderEndpointsConfig": "%s"
+        }
+        """
             .formatted(tslEncoded, TslProviderEndpointsConfig.PRIMARY_404_BACKUP_200);
 
     final HttpResponse<String> response =

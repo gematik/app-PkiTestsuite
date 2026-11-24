@@ -43,12 +43,13 @@ public final class UseCase {
     final TestObjectConfig testObjectConfig = testSuiteConfig.getTestObject();
 
     return switch (testObjectConfig.getTestObjectType().getConnectionType()) {
-      case TLS_SERVER -> TlsClientApplication.connectTls(
-          testObjectConfig.getIpAddressOrFqdn(),
-          testObjectConfig.getPort(),
-          eeCertPath,
-          PkitsTestDataConstants.KEYSTORE_PASSWORD,
-          testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
+      case TLS_SERVER ->
+          TlsClientApplication.connectTls(
+              testObjectConfig.getIpAddressOrFqdn(),
+              testObjectConfig.getPort(),
+              eeCertPath,
+              PkitsTestDataConstants.KEYSTORE_PASSWORD,
+              testSuiteConfig.getTestObject().getOcspTimeoutSeconds());
       case SCRIPT -> connectScript(eeCertPath, testSuiteConfig);
       case SCRIPT_OVER_SSH -> new SshUseCaseApplication(eeCertPath, testSuiteConfig).execute();
     };

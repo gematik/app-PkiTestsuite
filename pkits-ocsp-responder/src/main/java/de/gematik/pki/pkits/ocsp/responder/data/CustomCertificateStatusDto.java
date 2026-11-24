@@ -77,7 +77,7 @@ public final class CustomCertificateStatusDto {
       case UNKNOWN -> createUnknown();
       case REVOKED -> createRevoked(ZonedDateTime.now(), CRLReason.aACompromise);
 
-        // CustomCertificateStatusType.GOOD
+      // CustomCertificateStatusType.GOOD
       default -> createGood();
     };
   }

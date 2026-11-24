@@ -33,6 +33,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -55,7 +56,7 @@ public final class PersistTslUtils {
 
       final String issuerCn = IETFUtils.valueToString(cnRdn.getFirst().getValue());
 
-      return "_" + StringUtils.replace(issuerCn, " ", "_");
+      return "_" + Strings.CS.replace(issuerCn, " ", "_");
 
     } catch (final Exception e) {
       return "";

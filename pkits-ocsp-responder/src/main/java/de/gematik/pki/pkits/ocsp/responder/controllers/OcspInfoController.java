@@ -93,7 +93,7 @@ public class OcspInfoController {
             ocspInfoRequestDto.getCertSerialNr());
       }
 
-        // HistoryDeleteOption.DELETE_NOTHING
+      // HistoryDeleteOption.DELETE_NOTHING
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }
   }

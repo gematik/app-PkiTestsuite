@@ -20,10 +20,6 @@
 
 package de.gematik.pki.pkits.testsuite.reporting;
 
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.kernel.geom.PageSize;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
 import de.gematik.pki.gemlibpki.commons.utils.GemLibPkiUtils;
 import de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase;
 import java.io.IOException;
@@ -37,7 +33,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringEscapeUtils;
 
 @Slf4j
@@ -49,19 +45,19 @@ public class GeneratePdf {
     return noHtml
         ? ""
         : """
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-          p {
-            display:block;
-            margin-left:40px;
-            text-indent: -1em;
-          }
-              </style>
-            </head>
-          <body>
-          """;
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+        p {
+          display:block;
+          margin-left:40px;
+          text-indent: -1em;
+        }
+            </style>
+          </head>
+        <body>
+        """;
   }
 
   public static String htmlDocPostfix() {
@@ -71,11 +67,11 @@ public class GeneratePdf {
   public static String toHtml(String text) {
     if (!noHtml) {
       text = StringEscapeUtils.escapeHtml4(text);
-      text = StringUtils.replace(text, "\n", "<br>\n");
-      text = StringUtils.replace(text, "\r", "");
-      text = StringUtils.replace(text, "\t", "    ");
-      text = StringUtils.replace(text, "  ", " &nbsp;");
-      text = StringUtils.replace(text, "\n ", "\n&nbsp;");
+      text = Strings.CS.replace(text, "\n", "<br>\n");
+      text = Strings.CS.replace(text, "\r", "");
+      text = Strings.CS.replace(text, "\t", "    ");
+      text = Strings.CS.replace(text, "  ", " &nbsp;");
+      text = Strings.CS.replace(text, "\n ", "\n&nbsp;");
     }
     return text;
   }
@@ -123,10 +119,7 @@ public class GeneratePdf {
 
   public static void createPdf(final String html, final Path outputPdfFile) throws IOException {
     log.info("create pdf file: {}", outputPdfFile);
-    final PdfDocument pdfDocument = new PdfDocument(new PdfWriter(outputPdfFile.toFile()));
-
-    pdfDocument.setDefaultPageSize(PageSize.A3.rotate());
-    HtmlConverter.convertToPdf(html, pdfDocument, null);
+    HtmlToPdfRenderer.render(html, outputPdfFile);
   }
 
   public static Path prepareReportDirAndGetBaseFilename(final Path logFile) throws IOException {

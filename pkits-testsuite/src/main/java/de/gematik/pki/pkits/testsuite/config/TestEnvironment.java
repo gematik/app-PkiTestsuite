@@ -73,6 +73,8 @@ public final class TestEnvironment {
                 .map(
                     cert ->
                         cert.getEeCert().getSerialNumber().toString()
+                            + " hex: "
+                            + PkitsCommonUtils.toUpperHex(cert.getEeCert().getSerialNumber())
                             + " ProducedAtDeltaMilliseconds: "
                             + cert.getProducedAtDeltaMilliseconds())
                 .toList()),

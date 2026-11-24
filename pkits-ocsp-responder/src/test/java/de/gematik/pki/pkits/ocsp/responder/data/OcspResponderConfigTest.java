@@ -123,7 +123,6 @@ class OcspResponderConfigTest {
     // serialize
     final String jsonContent = PkitsCommonUtils.createJsonContent(jsonDto);
 
-    System.out.println("JSON Content: " + jsonContent);
     // deserialize
     final OcspResponderConfigJsonDto jsonDtoBack =
         JsonMapper.builder().build().readValue(jsonContent, OcspResponderConfigJsonDto.class);
@@ -222,8 +221,6 @@ class OcspResponderConfigTest {
             .build();
 
     final CertificateJsonDto dto = mapper.readValue(json, CertificateJsonDto.class);
-
-    System.out.println("Deserialized delayMilliseconds: " + dto.getDelayMilliseconds());
 
     assertThat(dto.getDelayMilliseconds()).isEqualTo(4242);
   }

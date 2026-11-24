@@ -1,6 +1,14 @@
-<img align="right" width="200" height="37" src="docs/img/Gematik_Logo_Flag.png"/> <br />
-
 # Release notes PKI Test Suite
+
+## Release 8.1.1
+
+- ready for Java 25
+- exchange deprecated pdf library
+- log certificate serial number in hex as well
+- introduce new testobject type IntermediaerServerInternet (WIP)
+- refactor common code of SUT server simulator into new Maven module pkits-sut-server-core
+- prepare for certificate tests in internet (WIP)
+- update dependencies
 
 ## Release 8.1.0
 

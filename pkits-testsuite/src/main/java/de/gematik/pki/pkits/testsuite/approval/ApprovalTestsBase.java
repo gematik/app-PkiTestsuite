@@ -22,7 +22,6 @@ package de.gematik.pki.pkits.testsuite.approval;
 
 import static de.gematik.pki.pkits.common.PkitsCommonUtils.waitSeconds;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_OCSP_SIGNER;
-import static de.gematik.pki.pkits.common.PkitsTestDataConstants.DEFAULT_TSL_SIGNER;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.KEYSTORE_PASSWORD;
 import static de.gematik.pki.pkits.common.PkitsTestDataConstants.TSL_DEFAULT_TTL_DAYS;
 import static de.gematik.pki.pkits.testsuite.approval.ApprovalTestsBase.ClientCertsConfig.ALTERNATIVE_CLIENT_CERTS_CONFIG;
@@ -198,7 +197,7 @@ public abstract class ApprovalTestsBase {
   void tearDownAfterEach() {
 
     log.info(
-        """
+"""
 
 =======================================================================================
 =  End of test case - {}
@@ -244,7 +243,7 @@ public abstract class ApprovalTestsBase {
 
   protected void testCaseMessage() {
     log.info(
-        """
+"""
 
 
 
@@ -363,7 +362,7 @@ public abstract class ApprovalTestsBase {
     return TslDownloadGenerator.builder()
         .currentTestInfo(currentTestInfo)
         .tslName(tslName)
-        .tslSigner(DEFAULT_TSL_SIGNER)
+        .tslSignerDir(testSuiteConfig.getTestObject().getResolvedTslSignerDir())
         .trustAnchor(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
         .ocspSigner(DEFAULT_OCSP_SIGNER)
         .tslDownloadIntervalSeconds(getTslDownloadIntervalWithExtraTimeSeconds())
@@ -515,11 +514,11 @@ public abstract class ApprovalTestsBase {
     final OcspRequestExpectationBehaviour ocspRequestExpectation;
     if (useCaseConfig.useCaseResult == USECASE_VALID) {
       ocspRequestExpectation =
-          ObjectUtils.defaultIfNull(
+          ObjectUtils.getIfNull(
               useCaseConfig.ocspRequestExpectationBehaviourForUseCase, OCSP_REQUEST_EXPECT);
     } else {
       ocspRequestExpectation =
-          ObjectUtils.defaultIfNull(
+          ObjectUtils.getIfNull(
               useCaseConfig.ocspRequestExpectationBehaviourForUseCase, OCSP_REQUEST_DO_NOT_EXPECT);
     }
 

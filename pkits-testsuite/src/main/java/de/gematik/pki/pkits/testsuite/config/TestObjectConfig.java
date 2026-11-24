@@ -20,6 +20,8 @@
 
 package de.gematik.pki.pkits.testsuite.config;
 
+import java.nio.file.Path;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -68,6 +70,13 @@ public class TestObjectConfig {
   @ParameterDescription(
       withDefault = true,
       description =
+          "Optional override for the TSL signer directory. Defaults to the directory for"
+              + " testObjectType.")
+  String tslSignerDir = "";
+
+  @ParameterDescription(
+      withDefault = true,
+      description =
           "Duration in days after expiration of the TSL during which the TSL is still regarded as"
               + " valid.")
   int tslGracePeriodDays = 0;
@@ -92,4 +101,11 @@ public class TestObjectConfig {
   int ocspTimeoutSeconds = 10;
 
   ScriptUseCase scriptUseCase = new ScriptUseCase();
+
+  public Path getResolvedTslSignerDir() {
+    return Optional.ofNullable(tslSignerDir)
+        .filter(dir -> !dir.isBlank())
+        .map(Path::of)
+        .orElseGet(() -> testObjectType.getDefaultTslSignerDir());
+  }
 }

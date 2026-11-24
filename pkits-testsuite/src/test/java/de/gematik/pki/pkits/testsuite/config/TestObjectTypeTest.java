@@ -76,8 +76,9 @@ class TestObjectTypeTest {
         .hasMessageStartingWith(
             "Cannot construct instance of `de.gematik.pki.pkits.testsuite.config.TestObjectType`,"
                 + " problem: unknown value <dummyValue> for TestObjectType. Allowed values:"
-                + " IdpEgkFachdienst, IdpFachdienst, IntermediaerServer, KimFachdienst,"
-                + " KimFachdienstNist, VpnKonzentrator, VpnRegServer, VsdmFachdienst.");
+                + " IdpEgkFachdienst, IdpFachdienst, IntermediaerServer,"
+                + " IntermediaerServerInternet, KimFachdienst, KimFachdienstNist, VpnKonzentrator,"
+                + " VpnRegServer, VsdmFachdienst.");
   }
 
   @Test
@@ -88,5 +89,26 @@ class TestObjectTypeTest {
     final TestObjectConfig testObjectConfig =
         mapper.readValue(testObjectConfigJsonStr, TestObjectConfig.class);
     assertThat(testObjectConfig.getTestObjectType()).isEqualTo(TestObjectType.VSDM_FACHDIENST);
+  }
+
+  @Test
+  void defaultTslSignerDirMatchesTestObjectType() {
+    assertThat(TestObjectType.INTERMEDIAER_SERVER.getDefaultTslSignerDir())
+        .isEqualTo(Path.of("./testDataTemplates/certificates/ecc/tsl-signer"));
+    assertThat(TestObjectType.INTERMEDIAER_SERVER_INTERNET.getDefaultTslSignerDir())
+        .isEqualTo(Path.of("./testDataTemplates/certificates/ecc-internet/tsl-signer"));
+  }
+
+  @Test
+  void resolvedTslSignerDirUsesTypeDefaultOrConfiguredOverride() {
+    final TestObjectConfig testObjectConfig = new TestObjectConfig();
+    testObjectConfig.setTestObjectType(TestObjectType.INTERMEDIAER_SERVER_INTERNET);
+
+    assertThat(testObjectConfig.getResolvedTslSignerDir())
+        .isEqualTo(Path.of("./testDataTemplates/certificates/ecc-internet/tsl-signer"));
+
+    testObjectConfig.setTslSignerDir("./custom/tsl-signer");
+    assertThat(testObjectConfig.getResolvedTslSignerDir())
+        .isEqualTo(Path.of("./custom/tsl-signer"));
   }
 }

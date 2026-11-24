@@ -67,7 +67,7 @@ public class TslInfoController {
         tslRequestHistory.deleteEntries(tslInfoRequestDto.getTslSeqNr());
         log.debug("TSLProvider history: cleared tslSeqNr {}", tslInfoRequestDto.getTslSeqNr());
       }
-        // HistoryDeleteOption.DELETE_NOTHING
+      // HistoryDeleteOption.DELETE_NOTHING
       default -> log.debug("deleteHistoryOnDemand called without delete option.");
     }
   }

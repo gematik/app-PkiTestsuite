@@ -57,7 +57,7 @@ public class InitialTestDataTest {
             .tslSeqNr(tslSeqNr)
             .tslDaysUntilNextupdate(tslDaysUntilNextupdate)
             .tslName("initialTsl")
-            .tslSigner(PkitsTestDataConstants.DEFAULT_TSL_SIGNER)
+            .tslSignerDir(PkitsTestDataConstants.TSL_SIGNER_DIR)
             .trustAnchor(PkitsTestDataConstants.DEFAULT_TRUST_ANCHOR)
             .tslProviderUri(
                 getHttpAddressString(tslProvider.getIpAddressOrFqdn(), tslProvider.getPort()))

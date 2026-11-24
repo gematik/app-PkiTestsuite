@@ -29,7 +29,6 @@ import static de.gematik.pki.pkits.testsuite.reporting.GeneratePdf.toHtml;
 import com.github.dtmo.jfiglet.FigFontResources;
 import com.github.dtmo.jfiglet.FigletRenderer;
 import de.gematik.pki.pkits.common.PkitsCommonUtils;
-import de.gematik.pki.pkits.common.PkitsCommonUtils.GitProperties;
 import de.gematik.pki.pkits.testsuite.common.TestSuiteConstants;
 import de.gematik.pki.pkits.testsuite.exceptions.TestSuiteException;
 import de.gematik.pki.pkits.testsuite.reporting.CustomTestExecutionListener;
@@ -52,6 +51,7 @@ import java.util.jar.Attributes.Name;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -74,6 +74,9 @@ import picocli.CommandLine.Help.Ansi;
 
 @Slf4j
 public class PkitsTestsuiteRunner {
+
+  static final String DEFAULT_BANNER_TITLE = "PKI Test Suite";
+  static final String DEFAULT_BANNER_VERSION = "unknown";
 
   private static final DateTimeFormatter dateTimeFormatter =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -202,7 +205,7 @@ public class PkitsTestsuiteRunner {
               if (!testExecutionOutcome.getTestIdentifier().isTest()) {
                 return false;
               }
-              return StringUtils.equalsAny(testExecutionOutcome.getStatus(), "FAILED", "ABORTED");
+              return Strings.CS.equalsAny(testExecutionOutcome.getStatus(), "FAILED", "ABORTED");
             })
         .toList();
   }
@@ -334,18 +337,39 @@ public class PkitsTestsuiteRunner {
 
   static String getPkiTestsuiteBanner() {
 
-    final Attributes attributes =
-        PkitsCommonUtils.readManifestAttributes(PkitsTestsuiteRunner.class);
-    final String title = attributes.getValue(Name.IMPLEMENTATION_TITLE);
-    final String version = attributes.getValue(Name.IMPLEMENTATION_VERSION);
+    Attributes attributes = null;
+    try {
+      attributes = PkitsCommonUtils.readManifestAttributes(PkitsTestsuiteRunner.class);
+    } catch (final RuntimeException e) {
+      log.debug("Unable to read manifest attributes for banner output", e);
+    }
 
-    final GitProperties gitProperties =
-        PkitsCommonUtils.readGitProperties(PkitsTestsuiteRunner.class);
+    final String title =
+        StringUtils.defaultIfBlank(
+            getManifestAttribute(attributes, Name.IMPLEMENTATION_TITLE), DEFAULT_BANNER_TITLE);
+    final String version =
+        StringUtils.firstNonBlank(
+            getManifestAttribute(attributes, Name.IMPLEMENTATION_VERSION),
+            getPackageImplementationVersion(),
+            DEFAULT_BANNER_VERSION);
 
-    final String versionAndCommitId =
-        "Version: " + version + " (Commit Id: " + gitProperties.getCommitIdShort() + ")";
+    return String.join("\n", toBanner(DEFAULT_BANNER_TITLE), title, version);
+  }
 
-    return String.join("\n", toBanner("PKI Test Suite"), title, versionAndCommitId);
+  static String getManifestAttribute(
+      final Attributes attributes, final Attributes.Name attributeName) {
+    if (attributes == null) {
+      return null;
+    }
+    return StringUtils.trimToNull(attributes.getValue(attributeName));
+  }
+
+  static String getPackageImplementationVersion() {
+    final Package runnerPackage = PkitsTestsuiteRunner.class.getPackage();
+    if (runnerPackage == null) {
+      return null;
+    }
+    return StringUtils.trimToNull(runnerPackage.getImplementationVersion());
   }
 
   static String getSummaryForFailedOrAborted() {

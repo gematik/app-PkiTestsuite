@@ -126,9 +126,10 @@ public class OcspRequestController {
         new OcspRequestHistoryEntryDto(
             tslSeqNr, certSerialNr, ZonedDateTime.now().toString(), ocspReqBytes));
     log.info(
-        "Build OCSP Response for tslSeqNr {} and certSerialNr {} and send to {}:{}",
+        "Build OCSP Response for tslSeqNr {} and certSerialNr {} hex: {} and send to {}:{}",
         tslSeqNr,
         certSerialNr,
+        PkitsCommonUtils.toUpperHex(certSerialNr),
         request.getRemoteHost(),
         request.getRemotePort());
 
@@ -221,7 +222,10 @@ public class OcspRequestController {
     if (certSerialNr == null) {
       throw new OcspResponderException("Could not extract certSerialNr from OcspRequest.");
     }
-    log.info("RX OCSP Request for certSerialNr: {}", certSerialNr);
+    log.info(
+        "RX OCSP Request for certSerialNr: {} hex: {}",
+        certSerialNr,
+        PkitsCommonUtils.toUpperHex(certSerialNr));
     return certSerialNr;
   }
 }

@@ -39,7 +39,7 @@ class PkitsTestsuiteRunnerUtilsTest {
   void testGetTestsToRunFromTestsFile() throws IOException {
 
     final String content =
-        """
+"""
 +	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
 	verifyUseCaseCertsInvalid   Test use case with invalid certificates
 	verifyUseCaseCertsValid     Test use case with valid certificates
@@ -120,7 +120,7 @@ class PkitsTestsuiteRunnerUtilsTest {
   void testGetTestsToRunFromTestsFileZero() throws IOException {
 
     final String content =
-        """
+"""
 	de.gematik.pki.pkits.testsuite.approval.CertificateApprovalTests
 	verifyUseCaseCertsInvalid   Test use case with invalid certificates
 	verifyUseCaseCertsValid     Test use case with valid certificates
